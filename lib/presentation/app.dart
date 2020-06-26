@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/application/authentication/authentication_bloc.dart';
 import 'package:wpa_app/presentation/common/splash/splash_page.dart';
+import 'package:wpa_app/presentation/phone/home/home_page.dart';
 import 'package:wpa_app/presentation/phone/sign_in/sign_in_page.dart';
 
 class App extends StatelessWidget {
@@ -11,7 +12,7 @@ class App extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => AuthenticationBloc(),
+          create: (context) => AuthenticationBloc()..add(AuthenticationStateRequested()),
           //TODO: try adding auth check immediately using ..add(blah)
         ),
       ],
@@ -25,15 +26,25 @@ class App extends StatelessWidget {
 }
 
 Route routes(RouteSettings settings) {
-  // TODO: Use switch case here
   if (settings.name == '/') {
     return MaterialPageRoute(
       builder: (BuildContext context) {
         return SplashPage();
       },
     );
+  } else if (settings.name == '/sign_in') {
+    return MaterialPageRoute(
+      builder: (BuildContext context) {
+        return SignInPage();
+      },
+    );
+  } else if (settings.name == '/home') {
+    return MaterialPageRoute(
+      builder: (BuildContext context) {
+        return HomePage();
+      },
+    );
   }
-
   return MaterialPageRoute(
     builder: (BuildContext context) {
       return SignInPage();

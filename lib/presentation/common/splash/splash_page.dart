@@ -6,7 +6,13 @@ class SplashPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocListener<AuthenticationBloc, AuthenticationState>(
-      listener: (context, state) {},
+      listener: (context, state) {
+        if (state is Authenticated) {
+          Navigator.pushNamed(context, '/home');
+        } else if (state is Unauthenticated) {
+          Navigator.pushNamed(context, '/sign_in');
+        }
+      },
       child: _PageWidget(),
     );
   }
