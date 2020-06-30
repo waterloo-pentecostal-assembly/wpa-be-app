@@ -8,6 +8,7 @@ class SignInState extends Equatable {
   final String passwordError;
   final bool submitting;
   final bool signInSuccess;
+  final String signInError;
 
   bool get isSignInFormValid {
     bool emailAddressValid = !_toBoolean(emailAddressError);
@@ -27,6 +28,7 @@ class SignInState extends Equatable {
     @required this.passwordError,
     @required this.submitting,
     @required this.signInSuccess,
+    @required this.signInError,
   });
 
   factory SignInState.initial() {
@@ -37,6 +39,7 @@ class SignInState extends Equatable {
       passwordError: '',
       submitting: false,
       signInSuccess: false,
+      signInError: '',
     );
   }
 
@@ -47,6 +50,7 @@ class SignInState extends Equatable {
     String passwordError,
     bool submitting,
     bool signInSuccess,
+    String signInError,
   }) {
     return SignInState(
       emailAddress: emailAddress ?? this.emailAddress,
@@ -55,6 +59,7 @@ class SignInState extends Equatable {
       passwordError: passwordError ?? this.passwordError,
       submitting: submitting ?? this.submitting,
       signInSuccess: signInSuccess ?? this.signInSuccess,
+      signInError: signInError ?? this.signInError,
     );
   }
 
@@ -73,6 +78,7 @@ class SignInState extends Equatable {
         passwordError,
         submitting,
         signInSuccess,
+        signInError,
       ];
 
   @override
@@ -84,6 +90,7 @@ class SignInState extends Equatable {
       passwordError: $passwordError,
       submitting: $submitting,
       signInSuccess: $signInSuccess,
+      signInError: $signInError,
     }''';
   }
 }

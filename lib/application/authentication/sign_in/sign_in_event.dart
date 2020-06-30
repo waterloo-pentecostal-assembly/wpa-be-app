@@ -28,5 +28,25 @@ class PasswordChanged extends SignInEvent {
   String toString() => 'PasswordChanged { password :$password }';
 }
 
-// TODO: event for signin button clicked
-// TODO: event for sign in with google/facebook
+class SignInWithEmailAndPassword extends SignInEvent {
+  const SignInWithEmailAndPassword();
+
+  @override
+  List<Object> get props => [];
+
+  @override
+  String toString() => 'SignInWithEmailAndPassword Event';
+}
+
+class SignInWithGoogle extends SignInEvent {
+// TODO: SignInWithGoogle may need updating when domain and infrastructure is implemented
+  const SignInWithGoogle();
+
+  @override
+  List<Object> get props => [];
+
+  @override
+  String toString() => 'SignInWithGoogle Event';
+}
+
+// TODO: event for sign in with facebook

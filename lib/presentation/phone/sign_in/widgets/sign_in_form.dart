@@ -9,8 +9,22 @@ class SignInForm extends StatelessWidget {
     return BlocConsumer<SignInBloc, SignInState>(
       listener: (BuildContext context, state) {
         // do stuff herer based on bloc's state. like navigation
-        print('-----------------------');
+        // print('---------> LISTENER STATE $state');
+        //  ----------- FORM VALID ${state.isSignInFormValid}');
+
+        if (state.signInSuccess) {
+          Navigator.pushNamed(context, '/home');
+        }
       },
+      // buildWhen: (previous, current) {
+        // Use to rebuild builder in a specific case, return true to rebuild or false otherwise
+        // if (current.emailAddressError != previous.emailAddressError) {
+        //   // print('errrrrrrrrrrrrrrrrrrrror changed');
+        //   return true;
+        // }
+        // // print('no change');
+        // return false;
+      // },
       builder: (context, state) {
         return Form(
           autovalidate: true,
@@ -23,9 +37,9 @@ class SignInForm extends StatelessWidget {
                 ),
                 autocorrect: false,
                 validator: (_) {
-                  print('!!!checking $state ${state.isSignInFormValid}');
-                  return state.emailAddressError != ''
-                      ? state.emailAddressError
+                  String emailAddressError = context.bloc<SignInBloc>().state.emailAddressError;
+                  return emailAddressError != ''
+                      ? emailAddressError
                       : null;
                 },
                 onChanged: (value) {
@@ -36,20 +50,33 @@ class SignInForm extends StatelessWidget {
                 decoration: InputDecoration(
                   prefixIcon: Icon(Icons.lock),
                   labelText: 'Password',
-                  // errorText: 'error :(!',
                 ),
                 autocorrect: false,
                 obscureText: true,
                 validator: (_) {
-                  print('!!!checking $state ${state.isSignInFormValid}');
-                  return state.passwordError != ''
-                      ? state.passwordError
+                  String passwordError = context.bloc<SignInBloc>().state.passwordError;
+                  return passwordError != ''
+                      ? passwordError
                       : null;
                 },
                 onChanged: (value) {
-                  context.bloc<SignInBloc>().add(PasswordChanged(password: value));
+                  context
+                      .bloc<SignInBloc>()
+                      .add(PasswordChanged(password: value));
                 },
               ),
+              RaisedButton(
+                child: Text('SIGN IN'),
+                onPressed: state.submitting || !state.isSignInFormValid ? null : () => context.bloc<SignInBloc>().add(SignInWithEmailAndPassword()),
+              ),
+              RaisedButton(
+                child: Text('SIGN IN WITH GOOGLE'),
+                onPressed: state.submitting ? null : () => context.bloc<SignInBloc>().add(SignInWithGoogle()),
+              ),
+              if (state.submitting) ...[
+                const SizedBox(height: 8),
+                const LinearProgressIndicator(value: null),
+              ]
             ],
           ),
         );

@@ -19,8 +19,9 @@ class AuthenticationBloc
   ) async* {
     if (event is AuthenticationStateRequested) {
       await fakeFuture();
-      User fakeUser = User('100');
-      yield Authenticated(fakeUser);
+      // User fakeUser = User('100');
+      // yield Authenticated(fakeUser);
+      yield Unauthenticated();
     } else if (event is SignedOut) {
       await fakeFuture();
       yield Unauthenticated();

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../application/authentication/authentication_bloc.dart';
+
+import '../../../../application/authentication/authentication_bloc.dart';
 
 class SplashPage extends StatelessWidget {
   @override

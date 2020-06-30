@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wpa_app/domain/authentication/value_objects.dart';
 
-abstract class IAuthFacade {
+abstract class IAuthenticationFacade {
   Future getSignedInUser();
   Future registerWithEmailAndPassword({
     @required FirstName firstName,
@@ -10,9 +10,10 @@ abstract class IAuthFacade {
     @required Password password,
   });
   Future signInWithEmailAndPassword({
-    @required EmailAddress emailAddress,
-    @required Password password,
+    @required String emailAddress,
+    @required String password,
   });
   Future signInWithGoogle();
+  Future registerWithGoogle();
   Future signOut();
 }

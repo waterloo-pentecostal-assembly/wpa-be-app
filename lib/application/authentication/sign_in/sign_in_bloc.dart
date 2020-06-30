@@ -3,13 +3,20 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:wpa_app/domain/authentication/exceptions.dart';
-import 'package:wpa_app/domain/authentication/value_objects.dart';
+
+import '../../../domain/authentication/entities.dart';
+import '../../../domain/authentication/exceptions.dart';
+import '../../../domain/authentication/interfaces.dart';
+import '../../../domain/authentication/value_objects.dart';
 
 part 'sign_in_event.dart';
 part 'sign_in_state.dart';
 
 class SignInBloc extends Bloc<SignInEvent, SignInState> {
+  final IAuthenticationFacade _iAuthenticationFacade;
+
+  SignInBloc(this._iAuthenticationFacade);
+
   @override
   SignInState get initialState => SignInState.initial();
 
@@ -21,6 +28,12 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
       yield* _mapEmailChangedToState(event, state);
     } else if (event is PasswordChanged) {
       yield* _mapPasswordChangedToState(event, state);
+    } else if (event is SignInWithEmailAndPassword) {
+      yield* _mapSignInWithEmailAndPasswordToState(
+        event,
+        state,
+        _iAuthenticationFacade.signInWithEmailAndPassword,
+      );
     }
   }
 }
@@ -69,4 +82,46 @@ Stream<SignInState> _mapPasswordChangedToState(
       passwordError: 'Unknown Error',
     );
   }
+}
+
+Stream<SignInState> _mapSignInWithEmailAndPasswordToState(
+  SignInWithEmailAndPassword event,
+  SignInState state,
+  Future Function({@required String emailAddress, @required String password})
+      signInFunction,
+) async* {
+  yield state.copyWith(
+    submitting: true,
+  );
+
+  // await fakeFuture();
+
+  //TODO wire up to actual implementation
+  try {
+    User user = await signInFunction(
+      emailAddress: state.emailAddress.trim(),
+      password: state.password.trim(),
+    );
+    print('!!!!!!!!!! $user');
+    yield state.copyWith(
+      submitting: false,
+      signInSuccess: true,
+      signInError: '',
+    );
+  } catch (e) {
+    //TODO Catch all possible errors here
+    yield state.copyWith(
+      submitting: false,
+      signInSuccess: false,
+      signInError: e.toString(),
+    );
+  }
+}
+
+Future fakeFuture() {
+  return Future.delayed(
+    const Duration(
+      seconds: 2,
+    ),
+  );
 }

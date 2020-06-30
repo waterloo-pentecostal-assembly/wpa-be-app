@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wpa_app/application/authentication/authentication_bloc.dart';
-import 'package:wpa_app/presentation/common/splash/splash_page.dart';
-import 'package:wpa_app/presentation/phone/home/home_page.dart';
-import 'package:wpa_app/presentation/phone/sign_in/sign_in_page.dart';
+
+import '../application/authentication/authentication_bloc.dart';
+import 'phone/common/splash/splash_page.dart';
+import 'phone/home/home_page.dart';
+import 'phone/sign_in/sign_in_page.dart';
 
 class App extends StatelessWidget {
   @override
