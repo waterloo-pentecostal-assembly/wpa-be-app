@@ -7,6 +7,7 @@ class EmailAddress extends ValueObject{
   final String value;
 
   factory EmailAddress(String emailAddress) {
+    emailAddress = emailAddress.trim();
     return EmailAddress._(
       validateEmailAddress(emailAddress)
     );
@@ -20,6 +21,7 @@ class Password extends ValueObject{
   final value;
 
   factory Password(String password) {
+    password = password.trim();
     return Password._(
       validatePassword(password)
     );

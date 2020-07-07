@@ -1,13 +1,18 @@
 class User {
   final String id;
-  final String name;
-  //TODO other useful parameters: email, photoUrl
+  final String firstName;
+  final String lastName;
+  final String email;
 
-  User({this.id, this.name});
+  User({
+    this.id,
+    this.firstName,
+    this.lastName,
+    this.email,
+  });
 
   @override
   String toString() {
-    return "User ID: $id, Name: $name";
+    return "User ID: $id, Name: $firstName $lastName";
   }
 }
-

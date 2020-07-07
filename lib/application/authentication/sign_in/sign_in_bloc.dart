@@ -8,6 +8,7 @@ import '../../../domain/authentication/entities.dart';
 import '../../../domain/authentication/exceptions.dart';
 import '../../../domain/authentication/interfaces.dart';
 import '../../../domain/authentication/value_objects.dart';
+import '../../../domain/common/exceptions.dart';
 
 part 'sign_in_event.dart';
 part 'sign_in_state.dart';
@@ -48,7 +49,7 @@ Stream<SignInState> _mapEmailChangedToState(
       emailAddress: email.value,
       emailAddressError: '',
     );
-  } on AuthenticationException catch (e) {
+  } on ValueObjectException catch (e) {
     yield state.copyWith(
       emailAddress: event.email,
       emailAddressError: e.message,
@@ -71,7 +72,7 @@ Stream<SignInState> _mapPasswordChangedToState(
       password: password.value,
       passwordError: '',
     );
-  } on AuthenticationException catch (e) {
+  } on ValueObjectException catch (e) {
     yield state.copyWith(
       password: event.password,
       passwordError: e.message,
@@ -87,41 +88,62 @@ Stream<SignInState> _mapPasswordChangedToState(
 Stream<SignInState> _mapSignInWithEmailAndPasswordToState(
   SignInWithEmailAndPassword event,
   SignInState state,
-  Future Function({@required String emailAddress, @required String password})
+  Future Function({
+    @required EmailAddress emailAddress,
+    @required Password password,
+  })
       signInFunction,
 ) async* {
   yield state.copyWith(
     submitting: true,
   );
 
-  // await fakeFuture();
-
-  //TODO wire up to actual implementation
   try {
+    // TODO register user with GetIt to be access throughout the app
     User user = await signInFunction(
-      emailAddress: state.emailAddress.trim(),
-      password: state.password.trim(),
+      emailAddress: EmailAddress(state.emailAddress),
+      password: Password(state.password),
     );
-    print('!!!!!!!!!! $user');
     yield state.copyWith(
       submitting: false,
       signInSuccess: true,
-      signInError: '',
+      signInError: null,
     );
-  } catch (e) {
-    //TODO Catch all possible errors here
+  } on InvalidEmailOrPassword {
     yield state.copyWith(
       submitting: false,
       signInSuccess: false,
-      signInError: e.toString(),
+      signInError: 'Invalid email or password',
+    );
+  } on UserNotFound {
+    yield state.copyWith(
+      submitting: false,
+      signInSuccess: false,
+      signInError: 'User not found, please sign up',
+    );
+  } on UserDisabled {
+    yield state.copyWith(
+      submitting: false,
+      signInSuccess: false,
+      signInError: 'User disabled',
+    );
+  } on AuthenticationServerError {
+    yield state.copyWith(
+      submitting: false,
+      signInSuccess: false,
+      signInError: 'Authentication error. Please try again later',
+    );
+  } on ValueObjectException catch (e) {
+    yield state.copyWith(
+      submitting: false,
+      signInSuccess: false,
+      signInError: e.message,
+    );
+  } catch (e) {
+    yield state.copyWith(
+      submitting: false,
+      signInSuccess: false,
+      signInError: 'Unknown error occured',
     );
   }
-}
-
-Future fakeFuture() {
-  return Future.delayed(
-    const Duration(
-      seconds: 2,
-    ),
-  );
 }

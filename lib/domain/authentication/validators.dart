@@ -1,4 +1,4 @@
-import 'package:wpa_app/domain/authentication/exceptions.dart';
+import '../common/exceptions.dart';
 
 validateEmailAddress(String emailAddress) {
   const emailRegex =
@@ -6,7 +6,7 @@ validateEmailAddress(String emailAddress) {
   if (RegExp(emailRegex).hasMatch(emailAddress)) {
     return emailAddress;
   } else {
-    throw AuthenticationException('Invalid email address');
+    throw ValueObjectException('Invalid email address');
   }
 }
 
@@ -14,7 +14,7 @@ validatePassword(String password) {
   if (password.length >= 8) {
     return password;
   } else {
-    throw AuthenticationException('Password must be at least 8 characters');
+    throw ValueObjectException('Password must be at least 8 characters');
   }
 }
 
@@ -22,6 +22,6 @@ validateName(String name) {
   if (name.length > 0) {
     return name;
   } else {
-    throw AuthenticationException('Name must be at least one letter');
+    throw ValueObjectException('Name must be at least one letter');
   }
 }

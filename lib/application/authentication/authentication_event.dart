@@ -4,12 +4,12 @@ abstract class AuthenticationEvent extends Equatable {
   const AuthenticationEvent();
 }
 
-class AuthenticationStateRequested extends AuthenticationEvent {
+class RequestAuthenticationState extends AuthenticationEvent {
   @override
   List<Object> get props => [];
 }
 
-class SignedOut extends AuthenticationEvent {
+class SignOut extends AuthenticationEvent {
   @override
   List<Object> get props => [];
 }

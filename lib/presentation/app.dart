@@ -2,9 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../application/authentication/authentication_bloc.dart';
-import 'phone/common/splash/splash_page.dart';
+import '../injection.dart';
+import 'phone/audio_player/audio_player_page.dart';
+import 'phone/engage/engage_page.dart';
 import 'phone/home/home_page.dart';
 import 'phone/sign_in/sign_in_page.dart';
+import 'phone/splash/splash_page.dart';
+
+// TODO !!! implement navigation bar the proper way. See: https://stackoverflow.com/questions/49681415/flutter-persistent-navigation-bar-with-named-routes
 
 class App extends StatelessWidget {
   @override
@@ -13,11 +18,11 @@ class App extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => AuthenticationBloc()..add(AuthenticationStateRequested()),
-          //TODO: try adding auth check immediately using ..add(blah)
+          create: (context) => getIt<AuthenticationBloc>()..add(RequestAuthenticationState()),
         ),
       ],
       child: MaterialApp(
+        theme: ThemeData(fontFamily: 'Montserrat'),
         debugShowCheckedModeBanner: false,
         title: 'WPA Bible Engagement',
         onGenerateRoute: routes,
@@ -43,6 +48,18 @@ Route routes(RouteSettings settings) {
     return MaterialPageRoute(
       builder: (BuildContext context) {
         return HomePage();
+      },
+    );
+  } else if (settings.name == '/audio_player') {
+    return MaterialPageRoute(
+      builder: (BuildContext context) {
+        return AudioPlayer();
+      },
+    );
+  } else if (settings.name == '/engage') {
+    return MaterialPageRoute(
+      builder: (BuildContext context) {
+        return EngagePage();
       },
     );
   }
