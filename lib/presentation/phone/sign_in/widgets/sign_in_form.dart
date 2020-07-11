@@ -11,7 +11,7 @@ class SignInForm extends StatelessWidget {
       listener: (BuildContext context, SignInState state) {
         print('$state');
         if (state.signInSuccess) {
-          Navigator.pushNamed(context, '/home');
+          Navigator.pushNamed(context, '/index');
         }
       },
       builder: (BuildContext context, SignInState state) {

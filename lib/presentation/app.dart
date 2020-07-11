@@ -2,14 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../application/authentication/authentication_bloc.dart';
+import '../application/navigation_bar/navigation_bar_bloc.dart';
 import '../injection.dart';
-import 'phone/audio_player/audio_player_page.dart';
-import 'phone/engage/engage_page.dart';
-import 'phone/home/home_page.dart';
+import 'phone/index.dart';
 import 'phone/sign_in/sign_in_page.dart';
 import 'phone/splash/splash_page.dart';
-
-// TODO !!! implement navigation bar the proper way. See: https://stackoverflow.com/questions/49681415/flutter-persistent-navigation-bar-with-named-routes
 
 class App extends StatelessWidget {
   @override
@@ -18,7 +15,18 @@ class App extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (context) => getIt<AuthenticationBloc>()..add(RequestAuthenticationState()),
+          create: (context) => getIt<AuthenticationBloc>()
+            ..add(
+              RequestAuthenticationState(),
+            ),
+        ),
+        BlocProvider(
+          create: (context) => getIt<NavigationBarBloc>()
+            ..add(
+              NavigationBarEvent(
+                tab: NavigationTabEnum.home,
+              ),
+            ),
         ),
       ],
       child: MaterialApp(
@@ -38,34 +46,23 @@ Route routes(RouteSettings settings) {
         return SplashPage();
       },
     );
+  } else if (settings.name == '/index') {
+    return MaterialPageRoute(
+      builder: (BuildContext context) {
+        return IndexPage();
+      },
+    );
   } else if (settings.name == '/sign_in') {
     return MaterialPageRoute(
       builder: (BuildContext context) {
         return SignInPage();
       },
     );
-  } else if (settings.name == '/home') {
-    return MaterialPageRoute(
-      builder: (BuildContext context) {
-        return HomePage();
-      },
-    );
-  } else if (settings.name == '/audio_player') {
-    return MaterialPageRoute(
-      builder: (BuildContext context) {
-        return AudioPlayer();
-      },
-    );
-  } else if (settings.name == '/engage') {
-    return MaterialPageRoute(
-      builder: (BuildContext context) {
-        return EngagePage();
-      },
-    );
   }
+  // default
   return MaterialPageRoute(
     builder: (BuildContext context) {
-      return SignInPage();
+      return SplashPage();
     },
   );
 }

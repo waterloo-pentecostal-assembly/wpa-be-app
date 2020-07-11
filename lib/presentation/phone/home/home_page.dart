@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wpa_app/presentation/common/widgets/bottom_navigation_bar.dart';
 
-import '../../../application/authentication/authentication_bloc.dart';
 import '../../../application/bible_series/bible_series_bloc.dart';
+import '../../../application/navigation_bar/navigation_bar_bloc.dart';
 import '../../../injection.dart';
+import '../common/interfaces.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends IIndexedPage {
+  final GlobalKey<NavigatorState> navigatorKey;
+
+  const HomePage({Key key, this.navigatorKey}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -16,46 +20,61 @@ class HomePage extends StatelessWidget {
           // e.g. Use to get current study for home page
         ),
       ],
-      child: TestWidget(),
+      // child: TestWidget(),
+      child: Scaffold(
+        body: Navigator(
+          key: navigatorKey,
+          onGenerateRoute: (RouteSettings settings) {
+            return MaterialPageRoute(
+              settings: settings,
+              builder: (BuildContext context) {
+                switch (settings.name) {
+                  case '/':
+                    return HomeIndex();
+                }
+              },
+            );
+          },
+        ),
+      ),
     );
   }
 }
 
-class TestWidget extends StatelessWidget {
+class HomeIndex extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MultiBlocListener(
-      listeners: [
-        BlocListener<AuthenticationBloc, AuthenticationState>(
-          listener: (BuildContext context, AuthenticationState state) {
-            if (state is Unauthenticated) {
-              Navigator.pushNamed(context, '/sign_in');
-            }
-          },
-        ),
-      ],
-      child: SafeArea(
-        child: Scaffold(
-          // bottomNavigationBar: BottomNavigation(currentIndex: 0,),
-          body: Column(
-            children: <Widget>[
-              Container(
-                child: Text('HOME!'),
-              ),
-              RaisedButton(
-                child: Text('Engage'),
-                onPressed: () {
-                  Navigator.pushNamed(context, '/engage');
-                },
-              ),
-              RaisedButton(
-                child: Text('Sign Out'),
-                onPressed: () {
-                  context.bloc<AuthenticationBloc>().add(SignOut());
-                },
-              ),
-            ],
-          ),
+    return SafeArea(
+      child: Scaffold(
+        // bottomNavigationBar: BottomNavigation(currentIndex: 0,),
+        body: Column(
+          children: <Widget>[
+            Container(
+              child: Text('HOME!'),
+            ),
+            RaisedButton(
+              child: Text('Engage'),
+              onPressed: () {
+                getIt<NavigationBarBloc>()
+                  ..add(
+                    NavigationBarEvent(
+                      tab: NavigationTabEnum.engage,
+                    ),
+                  );
+              },
+            ),
+            RaisedButton(
+              child: Text('Example Notification Detail'),
+              onPressed: () {
+                getIt<NavigationBarBloc>()
+                  ..add(
+                    NavigationBarEvent(
+                        tab: NavigationTabEnum.notifications,
+                        route: '/notification_detail'),
+                  );
+              },
+            ),
+          ],
         ),
       ),
     );

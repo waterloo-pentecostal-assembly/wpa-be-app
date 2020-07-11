@@ -16,10 +16,10 @@ part 'sign_in_state.dart';
 class SignInBloc extends Bloc<SignInEvent, SignInState> {
   final IAuthenticationFacade _iAuthenticationFacade;
 
-  SignInBloc(this._iAuthenticationFacade);
+  SignInBloc(this._iAuthenticationFacade) : super(SignInState.initial());
 
-  @override
-  SignInState get initialState => SignInState.initial();
+  // @override
+  // SignInState get initialState => SignInState.initial();
 
   @override
   Stream<SignInState> mapEventToState(

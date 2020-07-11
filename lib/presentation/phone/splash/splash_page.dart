@@ -8,10 +8,25 @@ class SplashPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<AuthenticationBloc, AuthenticationState>(
       listener: (context, state) {
+        print('SPLASH LISTEN INVOKED');
         if (state is Authenticated) {
-          Navigator.pushNamed(context, '/home');
+          // Navigator.pushNamed(context, '/home');
+          // NOTE: pushNamedAndRemoveUntil - Push the route with
+          // the given name onto the navigator that most tightly 
+          // encloses the given context, and then remove all the 
+          // previous routes until the predicate returns true.
+
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/index',
+            (Route<dynamic> route) => false,
+          );
         } else if (state is Unauthenticated) {
-          Navigator.pushNamed(context, '/sign_in');
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/sign_in',
+            (Route<dynamic> route) => false,
+          );
         }
       },
       child: _PageWidget(),

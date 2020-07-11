@@ -14,10 +14,12 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
 
   final IAuthenticationFacade _iAuthenticationFacade;
 
-  AuthenticationBloc(this._iAuthenticationFacade);
+  AuthenticationBloc(this._iAuthenticationFacade) : super(AuthenticationInitial());
+
+  // AuthenticationBloc(this._iAuthenticationFacade);
   
-  @override
-  AuthenticationState get initialState => AuthenticationInitial();
+  // @override
+  // AuthenticationState get initialState => AuthenticationInitial();
 
   @override
   Stream<AuthenticationState> mapEventToState(

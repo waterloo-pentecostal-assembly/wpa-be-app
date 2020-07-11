@@ -10,12 +10,15 @@ part 'bible_series_event.dart';
 part 'bible_series_state.dart';
 
 class BibleSeriesBloc extends Bloc<BibleSeriesEvent, BibleSeriesState> {
+  
   final IBibleSeriesRepository _iBibleSeriesRepository;
 
-  BibleSeriesBloc(this._iBibleSeriesRepository);
+  BibleSeriesBloc(this._iBibleSeriesRepository) : super(BibleSeriesInitial());
 
-  @override
-  BibleSeriesState get initialState => BibleSeriesInitial();
+  // BibleSeriesBloc(this._iBibleSeriesRepository) : super(null);
+
+  // @override
+  // BibleSeriesState get initialState => BibleSeriesInitial();
 
   @override
   Stream<BibleSeriesState> mapEventToState(

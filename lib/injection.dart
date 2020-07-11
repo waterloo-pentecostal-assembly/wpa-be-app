@@ -6,6 +6,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'application/authentication/authentication_bloc.dart';
 import 'application/authentication/sign_in/sign_in_bloc.dart';
 import 'application/bible_series/bible_series_bloc.dart';
+import 'application/navigation_bar/navigation_bar_bloc.dart';
 import 'domain/authentication/interfaces.dart';
 import 'domain/bible_series/interfaces.dart';
 import 'infrastructure/authentication/firebase_authentication_facade.dart';
@@ -41,6 +42,11 @@ void init() {
 
   getIt.registerFactory<BibleSeriesBloc>(
     () => BibleSeriesBloc(getIt<IBibleSeriesRepository>()),
+  );
+
+  getIt.registerLazySingleton<NavigationBarBloc>(
+  // getIt.registerFactory<NavigationBarBloc>(
+    () => NavigationBarBloc(),
   );
 
   // Implementations
