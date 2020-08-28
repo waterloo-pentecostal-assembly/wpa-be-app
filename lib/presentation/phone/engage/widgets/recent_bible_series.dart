@@ -11,10 +11,8 @@ class RecentBibleSeriesWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocConsumer<BibleSeriesBloc, BibleSeriesState>(
       listener: (BuildContext context, state) {
-        print('1----------------------- $state'); // TODO remove
       },
       builder: (BuildContext context, state) {
-        print('2----------------------- $state'); // TODO remove
         if (state is RecentBibleSeries) {
           return RecentBibleSeriesList(
             bibleSeriesList: state.bibleSeriesList,

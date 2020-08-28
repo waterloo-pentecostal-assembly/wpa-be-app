@@ -1,10 +1,10 @@
-class User {
+class LocalUser {
   final String id;
   final String firstName;
   final String lastName;
   final String email;
 
-  User({
+  LocalUser({
     this.id,
     this.firstName,
     this.lastName,
