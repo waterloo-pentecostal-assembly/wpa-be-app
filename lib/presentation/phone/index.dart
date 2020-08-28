@@ -9,29 +9,28 @@ import 'home/home_page.dart';
 import 'notifications/notifications_page.dart';
 import 'profile/profile_page.dart';
 
-List<IIndexedPage> _indexedPages = [
-  HomePage(navigatorKey: GlobalKey()),
-  EngagePage(navigatorKey: GlobalKey()),
-  NotificationsPage(navigatorKey: GlobalKey()),
-  ProfilePage(navigatorKey: GlobalKey()),
-];
-
 class IndexPage extends StatelessWidget {
+  final List<IIndexedPage> indexedPages = [
+    HomePage(navigatorKey: GlobalKey()),
+    EngagePage(navigatorKey: GlobalKey()),
+    NotificationsPage(navigatorKey: GlobalKey()),
+    ProfilePage(navigatorKey: GlobalKey()),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<NavigationBarBloc, NavigationBarState>(
       builder: (BuildContext context, NavigationBarState state) {
         if (state.route != null) {
           NavigatorState routeNavigatorState =
-              _indexedPages[state.tab.index].navigatorKey.currentState;
+              indexedPages[state.tab.index].navigatorKey.currentState;
 
           if (routeNavigatorState.canPop()) {
             // clear navigation stack before going to new route
-            routeNavigatorState
-                .popUntil((route) => route.isFirst);
+            routeNavigatorState.popUntil((route) => route.isFirst);
           }
 
-          _indexedPages[state.tab.index]
+          indexedPages[state.tab.index]
               .navigatorKey
               .currentState
               .pushNamed(state.route);
@@ -39,6 +38,7 @@ class IndexPage extends StatelessWidget {
 
         return _IndexPage(
           tabIndex: state.tab.index,
+          indexedPages: indexedPages,
         );
       },
     );
@@ -47,15 +47,17 @@ class IndexPage extends StatelessWidget {
 
 class _IndexPage extends StatelessWidget {
   final int tabIndex;
+  final List<IIndexedPage> indexedPages;
 
-  const _IndexPage({Key key, this.tabIndex}) : super(key: key);
+  const _IndexPage({Key key, this.tabIndex, this.indexedPages})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
         NavigatorState currentNavigatorState =
-            _indexedPages[tabIndex].navigatorKey.currentState;
+            indexedPages[tabIndex].navigatorKey.currentState;
 
         if (currentNavigatorState.canPop()) {
           !await currentNavigatorState.maybePop();
@@ -70,10 +72,10 @@ class _IndexPage extends StatelessWidget {
           child: IndexedStack(
             index: tabIndex,
             children: <Widget>[
-              _indexedPages[0],
-              _indexedPages[1],
-              _indexedPages[2],
-              _indexedPages[3],
+              indexedPages[0],
+              indexedPages[1],
+              indexedPages[2],
+              indexedPages[3],
             ],
           ),
         ),
@@ -93,7 +95,7 @@ class _IndexPage extends StatelessWidget {
             } else {
               // If the user is re-selecting the tab, the common
               // behavior is to empty the stack.
-              _indexedPages[index]
+              indexedPages[index]
                   .navigatorKey
                   .currentState
                   .popUntil((route) => route.isFirst);

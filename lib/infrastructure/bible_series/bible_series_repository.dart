@@ -1,14 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/services.dart';
 
 import '../../domain/bible_series/entities.dart';
-import '../../domain/bible_series/exceptions.dart';
 import '../../domain/bible_series/interfaces.dart';
 import '../../domain/common/exceptions.dart';
 import 'bible_series_dtos.dart';
 
 class BibleSeriesRepository implements IBibleSeriesRepository {
-  final Firestore _firestore;
+  final FirebaseFirestore _firestore;
 
   BibleSeriesRepository(this._firestore);
 
@@ -18,9 +16,9 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
 
     try {
       QuerySnapshot snapshot =
-          await _firestore.collection("bible_series").getDocuments();
+          await _firestore.collection("bible_series").get();
 
-      snapshot.documents.forEach(
+      snapshot.docs.forEach(
         (document) {
           // Handle exceptions separately for each document conversion
           // This will ensure that corrupted documents do not affect the others

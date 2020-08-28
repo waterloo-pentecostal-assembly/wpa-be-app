@@ -10,7 +10,6 @@ part 'bible_series_event.dart';
 part 'bible_series_state.dart';
 
 class BibleSeriesBloc extends Bloc<BibleSeriesEvent, BibleSeriesState> {
-  
   final IBibleSeriesRepository _iBibleSeriesRepository;
 
   BibleSeriesBloc(this._iBibleSeriesRepository) : super(BibleSeriesInitial());
@@ -34,7 +33,7 @@ class BibleSeriesBloc extends Bloc<BibleSeriesEvent, BibleSeriesState> {
   }
 }
 
-//TODO handle errors
+//TODO: handle errors
 Stream<BibleSeriesState> _mapGetRecentBibleSeriesEventToState(
   BibleSeriesEvent event,
   BibleSeriesState state,
@@ -42,6 +41,5 @@ Stream<BibleSeriesState> _mapGetRecentBibleSeriesEventToState(
 ) async* {
   yield FetchingRecentBibleSeries();
   List<BibleSeries> bibleSeriesList = await getRecentBibleSeriesFunction();
-  print('!!!!!!!!!!!!!! $bibleSeriesList');
   yield RecentBibleSeries(bibleSeriesList);
 }

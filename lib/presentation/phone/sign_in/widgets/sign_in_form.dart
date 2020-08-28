@@ -2,19 +2,31 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../application/authentication/sign_in/sign_in_bloc.dart';
+import '../../../../application/navigation_bar/navigation_bar_bloc.dart';
+import '../../../../injection.dart';
 import '../../../common/constants/colour_constants.dart';
+import '../../../common/constants/loader.dart';
 
 class SignInForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<SignInBloc, SignInState>(
       listener: (BuildContext context, SignInState state) {
-        print('$state');
         if (state.signInSuccess) {
+          // Navigate to HOME tab upon login
+          getIt<NavigationBarBloc>()
+            ..add(
+              NavigationBarEvent(
+                tab: NavigationTabEnum.home,
+              ),
+            );
           Navigator.pushNamed(context, '/index');
         }
       },
       builder: (BuildContext context, SignInState state) {
+        if (state.submitting) {
+          return Loader();
+        }
         return Scaffold(
           backgroundColor: Colors.white,
           body: SingleChildScrollView(
@@ -45,7 +57,8 @@ class SignInForm extends StatelessWidget {
                           Text(
                             context.bloc<SignInBloc>().state.signInError,
                             style: TextStyle(
-                              color: Colors.red, //TODO create constant for error color
+                              color: Colors
+                                  .red, //TODO: create constant for error color
                             ),
                           ),
                         },

@@ -38,8 +38,8 @@ class BibleSeriesDto {
   }
 
   factory BibleSeriesDto.fromFirestore(DocumentSnapshot document) {
-    return BibleSeriesDto.fromJson(document.data)
-        .copyWith(id: document.documentID);
+    return BibleSeriesDto.fromJson(document.data())
+        .copyWith(id: document.id);
   }
 
   BibleSeriesDto copyWith({

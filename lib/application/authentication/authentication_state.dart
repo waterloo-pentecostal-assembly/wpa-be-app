@@ -11,7 +11,7 @@ class AuthenticationInitial extends AuthenticationState {
 }
 
 class Authenticated extends AuthenticationState {
-  final User user;
+  final LocalUser user;
 
   Authenticated(this.user);
 

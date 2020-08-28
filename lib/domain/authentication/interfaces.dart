@@ -4,7 +4,7 @@ import 'entities.dart';
 import 'value_objects.dart';
 
 abstract class IAuthenticationFacade {
-  Future<User> getSignedInUser();
+  Future<LocalUser> getSignedInUser();
   Future registerWithEmailAndPassword({
     @required FirstName firstName,
     @required LastName lastName,

@@ -18,9 +18,6 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
 
   SignInBloc(this._iAuthenticationFacade) : super(SignInState.initial());
 
-  // @override
-  // SignInState get initialState => SignInState.initial();
-
   @override
   Stream<SignInState> mapEventToState(
     SignInEvent event,
@@ -99,8 +96,8 @@ Stream<SignInState> _mapSignInWithEmailAndPasswordToState(
   );
 
   try {
-    // TODO register user with GetIt to be access throughout the app
-    User user = await signInFunction(
+    // TODO: register user with GetIt to be access throughout the app
+    LocalUser user = await signInFunction(
       emailAddress: EmailAddress(state.emailAddress),
       password: Password(state.password),
     );

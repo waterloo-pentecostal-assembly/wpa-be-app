@@ -17,7 +17,7 @@ import 'presentation/phone/common/factories/text_factory.dart';
 GetIt getIt = GetIt.instance;
 
 void init() {
-  // Dependency Injection Configuration 
+  // Dependency Injection Configuration
 
   // NOTE Different settings for different environments (PROD, TEST, etc) can be configured here as well
 
@@ -29,7 +29,8 @@ void init() {
   getIt.registerLazySingleton<GoogleSignIn>(() => GoogleSignIn());
   getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
   getIt.registerLazySingleton<FirebaseUserMapper>(() => FirebaseUserMapper());
-  getIt.registerLazySingleton<Firestore>(() => Firestore.instance);
+  getIt.registerLazySingleton<FirebaseFirestore>(
+      () => FirebaseFirestore.instance);
 
   // Blocs
   getIt.registerFactory<SignInBloc>(
@@ -45,7 +46,6 @@ void init() {
   );
 
   getIt.registerLazySingleton<NavigationBarBloc>(
-  // getIt.registerFactory<NavigationBarBloc>(
     () => NavigationBarBloc(),
   );
 
@@ -55,13 +55,13 @@ void init() {
       getIt<FirebaseAuth>(),
       getIt<GoogleSignIn>(),
       getIt<FirebaseUserMapper>(),
-      getIt<Firestore>(),
+      getIt<FirebaseFirestore>(),
     ),
   );
 
   getIt.registerLazySingleton<IBibleSeriesRepository>(
     () => BibleSeriesRepository(
-      getIt<Firestore>(),
+      getIt<FirebaseFirestore>(),
     ),
   );
 
