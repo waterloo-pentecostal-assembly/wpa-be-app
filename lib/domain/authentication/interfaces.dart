@@ -15,7 +15,5 @@ abstract class IAuthenticationFacade {
     @required EmailAddress emailAddress,
     @required Password password,
   });
-  Future signInWithGoogle();
-  Future registerWithGoogle();
   Future signOut();
 }
