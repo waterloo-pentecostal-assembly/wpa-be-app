@@ -14,11 +14,6 @@ class BibleSeriesBloc extends Bloc<BibleSeriesEvent, BibleSeriesState> {
 
   BibleSeriesBloc(this._iBibleSeriesRepository) : super(BibleSeriesInitial());
 
-  // BibleSeriesBloc(this._iBibleSeriesRepository) : super(null);
-
-  // @override
-  // BibleSeriesState get initialState => BibleSeriesInitial();
-
   @override
   Stream<BibleSeriesState> mapEventToState(
     BibleSeriesEvent event,
