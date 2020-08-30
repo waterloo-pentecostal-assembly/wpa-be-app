@@ -13,6 +13,6 @@ class LocalUser {
 
   @override
   String toString() {
-    return "User ID: $id, Name: $firstName $lastName";
+    return "User ID: $id, Name: $firstName $lastName, Email: $email";
   }
 }

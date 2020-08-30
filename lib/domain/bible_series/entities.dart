@@ -57,7 +57,7 @@ class BibleSeries {
 // }
 
 // entity for scriptures
-// TODO restructure how data is represented in firestore
+// TODO: restructure how data is represented in firestore
 class ScriptureEngagement {}
 
 // entity for audio

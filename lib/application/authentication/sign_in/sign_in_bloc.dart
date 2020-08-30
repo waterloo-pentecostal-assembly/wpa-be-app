@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:wpa_app/injection.dart';
 
 import '../../../domain/authentication/entities.dart';
 import '../../../domain/authentication/exceptions.dart';
@@ -49,7 +50,7 @@ Stream<SignInState> _mapEmailChangedToState(
   } on ValueObjectException catch (e) {
     yield state.copyWith(
       emailAddress: event.email,
-      emailAddressError: e.message,
+      emailAddressError: e.displayMessage,
     );
   } catch (e) {
     yield state.copyWith(
@@ -72,7 +73,7 @@ Stream<SignInState> _mapPasswordChangedToState(
   } on ValueObjectException catch (e) {
     yield state.copyWith(
       password: event.password,
-      passwordError: e.message,
+      passwordError: e.displayMessage,
     );
   } catch (e) {
     yield state.copyWith(
@@ -96,51 +97,36 @@ Stream<SignInState> _mapSignInWithEmailAndPasswordToState(
   );
 
   try {
-    // TODO: register user with GetIt to be access throughout the app
-    LocalUser user = await signInFunction(
+    LocalUser localUser = await signInFunction(
       emailAddress: EmailAddress(state.emailAddress),
       password: Password(state.password),
     );
+
+    // Register user infomation with getIt to have access to it throughout the application
+    getIt.registerFactory(() => localUser);
+
     yield state.copyWith(
       submitting: false,
       signInSuccess: true,
       signInError: null,
     );
-  } on InvalidEmailOrPassword {
-    yield state.copyWith(
-      submitting: false,
-      signInSuccess: false,
-      signInError: 'Invalid email or password',
-    );
-  } on UserNotFound {
-    yield state.copyWith(
-      submitting: false,
-      signInSuccess: false,
-      signInError: 'User not found, please sign up',
-    );
-  } on UserDisabled {
-    yield state.copyWith(
-      submitting: false,
-      signInSuccess: false,
-      signInError: 'User disabled',
-    );
-  } on AuthenticationServerError {
-    yield state.copyWith(
-      submitting: false,
-      signInSuccess: false,
-      signInError: 'Authentication error. Please try again later',
-    );
-  } on ValueObjectException catch (e) {
-    yield state.copyWith(
-      submitting: false,
-      signInSuccess: false,
-      signInError: e.message,
-    );
   } catch (e) {
-    yield state.copyWith(
-      submitting: false,
-      signInSuccess: false,
-      signInError: 'Unknown error occured',
-    );
+    if (e is InvalidEmailOrPassword ||
+        e is UserNotFound ||
+        e is UserDisabled ||
+        e is AuthenticationServerError ||
+        e is ValueObjectException) {
+      yield state.copyWith(
+        submitting: false,
+        signInSuccess: false,
+        signInError: e.displayMessage,
+      );
+    } else {
+      yield state.copyWith(
+        submitting: false,
+        signInSuccess: false,
+        signInError: 'An unknown error occured.',
+      );
+    }
   }
 }

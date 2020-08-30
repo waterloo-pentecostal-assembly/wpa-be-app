@@ -2,12 +2,10 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:wpa_app/application/navigation_bar/navigation_bar_bloc.dart';
-import 'package:wpa_app/domain/authentication/exceptions.dart';
-import 'package:wpa_app/injection.dart';
 
 import '../../domain/authentication/entities.dart';
 import '../../domain/authentication/interfaces.dart';
+import '../../injection.dart';
 
 part 'authentication_event.dart';
 part 'authentication_state.dart';
@@ -19,19 +17,18 @@ class AuthenticationBloc
   AuthenticationBloc(this._iAuthenticationFacade)
       : super(AuthenticationInitial());
 
-  // AuthenticationBloc(this._iAuthenticationFacade);
-
-  // @override
-  // AuthenticationState get initialState => AuthenticationInitial();
-
   @override
   Stream<AuthenticationState> mapEventToState(
     AuthenticationEvent event,
   ) async* {
     if (event is RequestAuthenticationState) {
       try {
-        LocalUser user = await _iAuthenticationFacade.getSignedInUser();
-        yield Authenticated(user);
+        LocalUser localUser = await _iAuthenticationFacade.getSignedInUser();
+        
+        // Register user infomation with getIt to have access to it throughout the application
+        getIt.registerFactory(() => localUser);
+
+        yield Authenticated(localUser);
       } catch (_) {
         yield Unauthenticated();
       }
@@ -42,7 +39,7 @@ class AuthenticationBloc
   }
 }
 
-// TODO Remove
+// TODO: Remove
 Future fakeFuture() {
   return Future.delayed(
     const Duration(

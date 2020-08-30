@@ -1,13 +1,35 @@
+import 'package:flutter/material.dart';
+
 class BibleSeriesException implements Exception {
   final String message;
+  String displayMessage;
 
-  BibleSeriesException(this.message);
+  BibleSeriesException({@required this.message, this.displayMessage}) {
+    if (displayMessage == null) {
+      this.displayMessage = this.message;
+    }
+  }
+
+  @override
+  String toString() {
+    return '${this.runtimeType}: ${this.message}';
+  }
 }
 
 class MissingKeyException implements Exception {
   final String message;
+  String displayMessage;
 
-  MissingKeyException(this.message);
+  MissingKeyException({@required this.message, this.displayMessage}) {
+    if (displayMessage == null) {
+      this.displayMessage = this.message;
+    }
+  }
+
+  @override
+  String toString() {
+    return '${this.runtimeType}: ${this.message}';
+  }
 }
 
 
