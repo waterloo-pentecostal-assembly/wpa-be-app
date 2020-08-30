@@ -19,12 +19,12 @@ class BibleSeriesDto {
       'sub_title',
       'image_url',
       'start_date',
-      'end_date'
+      'end_date',
     ];
 
     for (final key in expectedKeys) {
       if (json[key] == null) {
-        throw MissingKeyException('$key expected in bible_series document');
+        throw MissingKeyException(message: '$key expected in bible_series document');
       }
     }
 
@@ -38,8 +38,7 @@ class BibleSeriesDto {
   }
 
   factory BibleSeriesDto.fromFirestore(DocumentSnapshot document) {
-    return BibleSeriesDto.fromJson(document.data())
-        .copyWith(id: document.id);
+    return BibleSeriesDto.fromJson(document.data()).copyWith(id: document.id);
   }
 
   BibleSeriesDto copyWith({
