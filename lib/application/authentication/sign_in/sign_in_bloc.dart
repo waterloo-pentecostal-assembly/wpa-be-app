@@ -103,7 +103,9 @@ Stream<SignInState> _mapSignInWithEmailAndPasswordToState(
     );
 
     // Register user infomation with getIt to have access to it throughout the application
-    getIt.unregister<LocalUser>();
+    if (getIt.isRegistered<LocalUser>()) {
+      getIt.unregister<LocalUser>();
+    }
     getIt.registerFactory(() => localUser);
 
     yield state.copyWith(

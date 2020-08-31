@@ -26,7 +26,7 @@ class AuthenticationBloc
         LocalUser localUser = await _iAuthenticationFacade.getSignedInUser();
 
         // Register user infomation with getIt to have access to it throughout the application
-        if (getIt<LocalUser>() == null) {
+        if (!getIt.isRegistered<LocalUser>()) {
           getIt.registerFactory(() => localUser);
         }
 
