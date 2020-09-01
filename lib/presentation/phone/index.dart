@@ -5,6 +5,7 @@ import '../../application/navigation_bar/navigation_bar_bloc.dart';
 import '../../injection.dart';
 import 'common/interfaces.dart';
 import 'engage/engage_page.dart';
+import 'give/give_page.dart';
 import 'home/home_page.dart';
 import 'notifications/notifications_page.dart';
 import 'profile/profile_page.dart';
@@ -13,6 +14,7 @@ class IndexPage extends StatelessWidget {
   final List<IIndexedPage> indexedPages = [
     HomePage(navigatorKey: GlobalKey()),
     EngagePage(navigatorKey: GlobalKey()),
+    GivePage(navigatorKey: GlobalKey()),
     NotificationsPage(navigatorKey: GlobalKey()),
     ProfilePage(navigatorKey: GlobalKey()),
   ];
@@ -76,6 +78,7 @@ class _IndexPage extends StatelessWidget {
               indexedPages[1],
               indexedPages[2],
               indexedPages[3],
+              indexedPages[4],
             ],
           ),
         ),
@@ -121,6 +124,15 @@ class _IndexPage extends StatelessWidget {
               ),
             ),
             BottomNavigationBarItem(
+              icon: Icon(Icons.favorite),
+              title: Text(
+                "GIVE",
+                style: TextStyle(
+                  fontSize: 10,
+                ),
+              ),
+            ),
+            BottomNavigationBarItem(
               icon: Icon(Icons.notifications),
               title: Text(
                 "NOTIFICATIONS",
@@ -130,7 +142,7 @@ class _IndexPage extends StatelessWidget {
               ),
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.perm_identity),
+              icon: Icon(Icons.account_box),
               title: Text(
                 "PROFILE",
                 style: TextStyle(

@@ -10,6 +10,7 @@ part 'navigation_bar_state.dart';
 enum NavigationTabEnum {
   home,
   engage,
+  give,
   notifications,
   profile,
 }
@@ -22,6 +23,7 @@ class NavigationBarBloc extends Bloc<NavigationBarEvent, NavigationBarState> {
   Stream<NavigationBarState> mapEventToState(
     NavigationBarEvent event,
   ) async* {
+    print("${event.tab}, ${event.route}");
     yield NavigationBarState(tab: event.tab, route: event.route);
   }
 }
