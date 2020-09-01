@@ -142,7 +142,7 @@ class _IndexPage extends StatelessWidget {
               ),
             ),
             BottomNavigationBarItem(
-              icon: Icon(Icons.account_box),
+              icon: Icon(Icons.person),
               title: Text(
                 "PROFILE",
                 style: TextStyle(
