@@ -10,7 +10,7 @@
       "client_info": {
         "mobilesdk_app_id": "1:91621505653:android:48de89a6906eb857a2d63c",
         "android_client_info": {
-          "package_name": "com.example.wpa_app"
+          "package_name": "app.be.wpa"
         }
       },
       "oauth_client": [
@@ -18,7 +18,7 @@
           "client_id": "91621505653-pja70osl6ushmh6vo1bj08ucb2flmo7b.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
-            "package_name": "com.example.wpa_app",
+            "package_name": "app.be.wpa",
             "certificate_hash": "1509c62f1f2fd0fef6813e0c2c33a5aa8b8e689a"
           }
         },

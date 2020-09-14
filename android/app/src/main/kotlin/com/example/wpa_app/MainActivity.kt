@@ -1,4 +1,4 @@
-package com.example.wpa_app
+package app.be.wpa
 
 import io.flutter.embedding.android.FlutterActivity
 
