@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>91621505653-anhdsrv03domhgmgq481ci15jetr0kmi.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.91621505653-anhdsrv03domhgmgq481ci15jetr0kmi</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>91621505653-pja70osl6ushmh6vo1bj08ucb2flmo7b.apps.googleusercontent.com</string>
+	<key>API_KEY</key>
+	<string>AIzaSyD6trKXVq9ZHyQPxpajM_5wmeECZf-3YTI</string>
+	<key>GCM_SENDER_ID</key>
+	<string>91621505653</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>wpa.wpa-be-app</string>
+	<key>PROJECT_ID</key>
+	<string>wpa-app-test</string>
+	<key>STORAGE_BUCKET</key>
+	<string>wpa-app-test.appspot.com</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:91621505653:ios:6525e3d512d46f16a2d63c</string>
+	<key>DATABASE_URL</key>
+	<string>https://wpa-app-test.firebaseio.com</string>
+</dict>
+</plist>
