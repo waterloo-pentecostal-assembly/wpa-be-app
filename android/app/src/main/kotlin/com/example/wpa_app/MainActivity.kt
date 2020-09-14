@@ -1,4 +1,4 @@
-package app.be.wpa
+package church.wpa.be
 
 import io.flutter.embedding.android.FlutterActivity
 
