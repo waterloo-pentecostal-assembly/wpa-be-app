@@ -3,9 +3,9 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>91621505653-anhdsrv03domhgmgq481ci15jetr0kmi.apps.googleusercontent.com</string>
+	<string>91621505653-aid4o04psoufrvgtdr71542kti67o568.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.91621505653-anhdsrv03domhgmgq481ci15jetr0kmi</string>
+	<string>com.googleusercontent.apps.91621505653-aid4o04psoufrvgtdr71542kti67o568</string>
 	<key>ANDROID_CLIENT_ID</key>
 	<string>91621505653-pja70osl6ushmh6vo1bj08ucb2flmo7b.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
@@ -15,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>wpa.wpa-be-app</string>
+	<string>church.wpa.be</string>
 	<key>PROJECT_ID</key>
 	<string>wpa-app-test</string>
 	<key>STORAGE_BUCKET</key>
@@ -31,7 +31,7 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:91621505653:ios:6525e3d512d46f16a2d63c</string>
+	<string>1:91621505653:ios:0304d825588ac8d2a2d63c</string>
 	<key>DATABASE_URL</key>
 	<string>https://wpa-app-test.firebaseio.com</string>
 </dict>
