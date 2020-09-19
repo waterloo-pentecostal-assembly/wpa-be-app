@@ -16,11 +16,12 @@ class BibleSeriesException implements Exception {
   }
 }
 
-class MissingKeyException implements Exception {
+
+class InvalidContentBodyType implements Exception {
   final String message;
   String displayMessage;
 
-  MissingKeyException({@required this.message, this.displayMessage}) {
+  InvalidContentBodyType({@required this.message, this.displayMessage}) {
     if (displayMessage == null) {
       this.displayMessage = this.message;
     }
