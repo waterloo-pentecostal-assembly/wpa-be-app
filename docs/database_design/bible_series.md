@@ -10,8 +10,12 @@ Each `bible_series` collection has the following fields:
 |`sub_title` *(string)*   |A sub-title for the series   |
 |`start_date` *(timestamp)*  |The date that the series will begin   |
 |`end_date` *(timestamp)*    |The date that the series will end   |
+|`is_active` *(boolean)*    |Defines whether or not the bible series is active on the application    |
+|`image_url` *(boolean)*    |URL for bible series image   |
 |`series_content_snippet` *(array)*   |This field holds a snippet of content of each day in the series. Each element in the `array` is a `map` with fields `content_types` and `date`. `content_types` itself is a `map` with the keys as the content type and the vlaue as the `series_content` document ID in the sub-collection. The `date` field holds a timestamp for assocaited date. The data is structured this way to avoid having to query every sub-collection in the series to get the content types that exist for each day to present to the user. This way, a single query of the `bible_series` collection for a particular series will return all the information needed to present to the user.    |
 
+
+## Sub-collection: `series_content`
 
 The `series_content` sub-collection holds data for each day in the sereis. The `body` of each content is based on the content type. The available content types are:
 
