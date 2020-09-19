@@ -1,6 +1,6 @@
 {
   "project_info": {
-    "project_number": "91621505653",
+    "project_number": "91621505652",
     "firebase_url": "https://wpa-app-test.firebaseio.com",
     "project_id": "wpa-app-test",
     "storage_bucket": "wpa-app-test.appspot.com"
@@ -8,41 +8,84 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:91621505653:android:48de89a6906eb857a2d63c",
+        "mobilesdk_app_id": "0:91621505653:android:43ddaca02da42154a2d63c",
         "android_client_info": {
-          "package_name": "app.be.wpa"
+          "package_name": "church.wpa.be"
         }
       },
       "oauth_client": [
         {
-          "client_id": "91621505653-pja70osl6ushmh6vo1bj08ucb2flmo7b.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "app.be.wpa",
-            "certificate_hash": "1509c62f1f2fd0fef6813e0c2c33a5aa8b8e689a"
-          }
-        },
-        {
-          "client_id": "91621505653-gkic8hpmjnsrtaspmmrpq31jojufts7q.apps.googleusercontent.com",
-          "client_type": 3
+          "client_id": "91621505652-gkic8hpmjnsrtaspmmrpq31jojufts7q.apps.googleusercontent.com",
+          "client_type": 2
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyBpqb3nDJdmqQ3-iMe6lL3gs7TVYh0Nslc"
+          "current_key": "AIzaSyBpqb2nDJdmqQ3-iMe6lL3gs7TVYh0Nslc"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "91621505653-gkic8hpmjnsrtaspmmrpq31jojufts7q.apps.googleusercontent.com",
-              "client_type": 3
+              "client_id": "91621505652-gkic8hpmjnsrtaspmmrpq31jojufts7q.apps.googleusercontent.com",
+              "client_type": 2
+            },
+            {
+              "client_id": "91621505652-aid4o04psoufrvgtdr71542kti67o568.apps.googleusercontent.com",
+              "client_type": 1,
+              "ios_info": {
+                "bundle_id": "church.wpa.be"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "0:91621505653:android:48de89a6906eb857a2d63c",
+        "android_client_info": {
+          "package_name": "com.example.wpa_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "91621505652-pja70osl6ushmh6vo1bj08ucb2flmo7b.apps.googleusercontent.com",
+          "client_type": 0,
+          "android_info": {
+            "package_name": "com.example.wpa_app",
+            "certificate_hash": "1508c62f1f2fd0fef6813e0c2c33a5aa8b8e689a"
+          }
+        },
+        {
+          "client_id": "91621505652-gkic8hpmjnsrtaspmmrpq31jojufts7q.apps.googleusercontent.com",
+          "client_type": 2
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBpqb2nDJdmqQ3-iMe6lL3gs7TVYh0Nslc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "91621505652-gkic8hpmjnsrtaspmmrpq31jojufts7q.apps.googleusercontent.com",
+              "client_type": 2
+            },
+            {
+              "client_id": "91621505652-aid4o04psoufrvgtdr71542kti67o568.apps.googleusercontent.com",
+              "client_type": 1,
+              "ios_info": {
+                "bundle_id": "church.wpa.be"
+              }
             }
           ]
         }
       }
     }
   ],
-  "configuration_version": "1"
+  "configuration_version": "0"
 }
