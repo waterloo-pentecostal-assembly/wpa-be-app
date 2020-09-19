@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
+import 'package:wpa_app/domain/common/value_objects.dart';
 
 import '../../domain/bible_series/entities.dart';
 import '../../domain/bible_series/interfaces.dart';
@@ -18,11 +20,15 @@ class BibleSeriesBloc extends Bloc<BibleSeriesEvent, BibleSeriesState> {
   Stream<BibleSeriesState> mapEventToState(
     BibleSeriesEvent event,
   ) async* {
-    if (event is RequestRecentBibleSeries) {
+    if (event is RecentBibleSeriesRequested) {
       yield* _mapGetRecentBibleSeriesEventToState(
         event,
-        state,
         _iBibleSeriesRepository.getRecentBibleSeries,
+      );
+    } else if (event is BibleSeriesInformationRequested) {
+      yield* _mapBibleSeriesInformationRequestedEventToState(
+        event,
+        _iBibleSeriesRepository.getBibleSeriesInformation,
       );
     }
   }
@@ -30,11 +36,20 @@ class BibleSeriesBloc extends Bloc<BibleSeriesEvent, BibleSeriesState> {
 
 //TODO: handle errors
 Stream<BibleSeriesState> _mapGetRecentBibleSeriesEventToState(
-  BibleSeriesEvent event,
-  BibleSeriesState state,
+  RecentBibleSeriesRequested event,
   Future Function() getRecentBibleSeriesFunction,
 ) async* {
-  yield FetchingRecentBibleSeries();
+  yield Fetching();
   List<BibleSeries> bibleSeriesList = await getRecentBibleSeriesFunction();
   yield RecentBibleSeries(bibleSeriesList);
+}
+
+//TODO: handle errors
+Stream<BibleSeriesState> _mapBibleSeriesInformationRequestedEventToState(
+  BibleSeriesInformationRequested event,
+  Future<BibleSeries> Function({@required String bibleSeriesId}) getBibleSeriesFunction,
+) async* {
+  yield Fetching();
+  BibleSeries bibleSeries = await getBibleSeriesFunction(bibleSeriesId: event.bibleSeriesId.toString());
+  yield BibleSeriesInformation(bibleSeries);
 }

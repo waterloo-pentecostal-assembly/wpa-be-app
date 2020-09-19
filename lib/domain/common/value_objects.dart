@@ -23,4 +23,9 @@ class UniqueId extends ValueObject<String> {
   }
 
   const UniqueId._(this.value);
+
+  @override
+  String toString() {
+    return this.value;
+  }
 }
