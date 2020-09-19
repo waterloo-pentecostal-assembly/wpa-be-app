@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wpa_app/domain/authentication/entities.dart';
 
 import '../../../application/bible_series/bible_series_bloc.dart';
 import '../../../application/navigation_bar/navigation_bar_bloc.dart';
+import '../../../domain/authentication/entities.dart';
 import '../../../injection.dart';
 import '../common/interfaces.dart';
 
@@ -59,6 +59,7 @@ class HomeIndex extends StatelessWidget {
             RaisedButton(
               child: Text('Engage'),
               onPressed: () {
+                // getIt<BibleSeriesBloc>()..add(BibleSeriesInformationRequested(bibleSeriesId: UniqueId.fromUniqueString('EJypQsJ8LXsT4zEnpMLp')));
                 getIt<NavigationBarBloc>()
                   ..add(
                     NavigationBarEvent(

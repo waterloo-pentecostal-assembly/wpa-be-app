@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:bloc/bloc.dart';
-import 'package:equatable/equatable.dart';
 import 'package:flutter/foundation.dart';
 
 part 'navigation_bar_event.dart';
@@ -23,7 +22,6 @@ class NavigationBarBloc extends Bloc<NavigationBarEvent, NavigationBarState> {
   Stream<NavigationBarState> mapEventToState(
     NavigationBarEvent event,
   ) async* {
-    print("${event.tab}, ${event.route}");
     yield NavigationBarState(tab: event.tab, route: event.route);
   }
 }

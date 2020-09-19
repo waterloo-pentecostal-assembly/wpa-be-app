@@ -32,7 +32,6 @@ class AuthenticationBloc
 
         yield Authenticated(localUser);
       } catch (_) {
-        print(_.toString());
         yield Unauthenticated();
       }
     } else if (event is SignOut) {

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../application/authentication/authentication_bloc.dart';
 import '../common/interfaces.dart';
+import 'privacy_policy_page.dart';
 
 class ProfilePage extends IIndexedPage {
   final GlobalKey<NavigatorState> navigatorKey;
@@ -65,38 +66,3 @@ class ProfilePageRoot extends StatelessWidget {
     );
   }
 }
-
-class PrivacyPolicyPage extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Container(
-        child: Column(
-          children: <Widget>[
-            Text('Privacy Policy'),
-            RaisedButton(
-              child: Text('Back'),
-              onPressed: () {
-                Navigator.pop(context);
-              },
-            )
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-/*
-MultiBlocListener(
-      listeners: [
-        BlocListener<AuthenticationBloc, AuthenticationState>(
-          listener: (BuildContext context, AuthenticationState state) {
-            if (state is Unauthenticated) {
-              Navigator.pushNamed(context, '/sign_in');
-            }
-          },
-        ),
-      ],
-      child: 
-*/
