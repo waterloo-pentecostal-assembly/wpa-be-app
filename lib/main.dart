@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'injection.dart';
 import 'presentation/app.dart';
 
-void main() {
+void main() async {
   init();
   runApp(App());
 }
