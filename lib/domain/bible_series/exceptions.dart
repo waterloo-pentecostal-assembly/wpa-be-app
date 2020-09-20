@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 
+enum BibleSeriesExceptionTypes {
+  GENERIC,
+  INVALID_CONTENT_BODY_TYPE
+}
 class BibleSeriesException implements Exception {
   final String message;
+  // final BibleSeriesExceptionType errorType;
   String displayMessage;
 
   BibleSeriesException({@required this.message, this.displayMessage}) {

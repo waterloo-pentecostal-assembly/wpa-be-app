@@ -6,12 +6,12 @@ import 'value_objects.dart';
 abstract class IAuthenticationFacade {
   Future<LocalUser> getSignedInUser();
   Future registerWithEmailAndPassword({
-    @required FirstName firstName,
-    @required LastName lastName,
+    @required Name firstName,
+    @required Name lastName,
     @required EmailAddress emailAddress,
     @required Password password,
   });
-  Future signInWithEmailAndPassword({
+  Future<LocalUser> signInWithEmailAndPassword({
     @required EmailAddress emailAddress,
     @required Password password,
   });

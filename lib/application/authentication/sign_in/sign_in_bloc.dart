@@ -113,23 +113,17 @@ Stream<SignInState> _mapSignInWithEmailAndPasswordToState(
       signInSuccess: true,
       signInError: null,
     );
+  } on AuthenticationException catch (e) {
+    yield state.copyWith(
+      submitting: false,
+      signInSuccess: false,
+      signInError: e.displayMessage,
+    );
   } catch (e) {
-    if (e is InvalidEmailOrPassword ||
-        e is UserNotFound ||
-        e is UserDisabled ||
-        e is AuthenticationServerError ||
-        e is ValueObjectException) {
-      yield state.copyWith(
-        submitting: false,
-        signInSuccess: false,
-        signInError: e.displayMessage,
-      );
-    } else {
-      yield state.copyWith(
-        submitting: false,
-        signInSuccess: false,
-        signInError: 'An unknown error occured.',
-      );
-    }
+    yield state.copyWith(
+      submitting: false,
+      signInSuccess: false,
+      signInError: 'An unknown error occured.',
+    );
   }
 }

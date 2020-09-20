@@ -9,7 +9,6 @@ import 'application/navigation_bar/navigation_bar_bloc.dart';
 import 'domain/authentication/interfaces.dart';
 import 'domain/bible_series/interfaces.dart';
 import 'infrastructure/authentication/firebase_authentication_facade.dart';
-import 'infrastructure/authentication/firebase_user_mapper.dart';
 import 'infrastructure/bible_series/bible_series_repository.dart';
 import 'presentation/phone/common/factories/text_factory.dart';
 
@@ -28,7 +27,6 @@ void init() {
   */
 
   getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
-  getIt.registerLazySingleton<FirebaseUserMapper>(() => FirebaseUserMapper());
   getIt.registerLazySingleton<FirebaseFirestore>(
       () => FirebaseFirestore.instance);
 
@@ -53,7 +51,6 @@ void init() {
   getIt.registerLazySingleton<IAuthenticationFacade>(
     () => FirebaseAuthenticationFacade(
       getIt<FirebaseAuth>(),
-      getIt<FirebaseUserMapper>(),
       getIt<FirebaseFirestore>(),
     ),
   );

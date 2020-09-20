@@ -107,7 +107,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
   }
 
   /// Returns a [SeriesContent] object containing series content information by [bibleSeriesId] and [seriesContentId]
-  /// This is informaion from the [series_content] sub-collection. 
+  /// This is informaion from the [series_content] sub-collection.
   @override
   Future<SeriesContent> getBibleSeriesContent(
       {@required String bibleSeriesId, @required String seriesContentId}) async {
@@ -131,8 +131,9 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
         );
       } else {
         throw UnexpectedError(
-            message:
-                'Unexpected error occured while fething content (ID: $seriesContentId) in series (ID: $bibleSeriesId). Error: $e',);
+          message:
+              'Unexpected error occured while fething content (ID: $seriesContentId) in series (ID: $bibleSeriesId). Error: $e',
+        );
       }
     }
   }
