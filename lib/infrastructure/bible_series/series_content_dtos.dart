@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:wpa_app/domain/bible_series/exceptions.dart';
 
 import '../../domain/bible_series/entities.dart';
-import '../../domain/bible_series/exceptions.dart';
 import '../../domain/common/value_objects.dart';
 import '../common/helpers.dart';
 import 'helpers.dart';
@@ -17,7 +17,7 @@ class SeriesContentDto {
   final List<SeriesContentBodyDto> body;
 
   factory SeriesContentDto.fromJson(Map<String, dynamic> json) {
-    List<dynamic> _bodyFirebase = findOrThrowMissingKeyException(json, 'body');
+    List<dynamic> _bodyFirebase = findOrThrowException(json, 'body');
     List<SeriesContentBodyDto> _body = [];
 
     _bodyFirebase.forEach((element) {
@@ -25,10 +25,10 @@ class SeriesContentDto {
     });
 
     return SeriesContentDto._(
-      title: findOrThrowMissingKeyException(json, 'title'),
+      title: findOrThrowException(json, 'title'),
       subTitle: json['sub_title'] ?? '',
-      contentType: findOrThrowMissingKeyException(json, 'content_type'),
-      date: findOrThrowMissingKeyException(json, 'date'),
+      contentType: findOrThrowException(json, 'content_type'),
+      date: findOrThrowException(json, 'date'),
       body: _body,
     );
   }
@@ -92,17 +92,20 @@ class SeriesContentBodyDto {
     Map<String, dynamic> _properties = {};
 
     if (_bodyType == 'audio') {
-      _properties['audio_file_url'] = findOrThrowMissingKeyException(json, 'audio_file_url');
+      _properties['audio_file_url'] = findOrThrowException(json, 'audio_file_url');
     } else if (_bodyType == 'text') {
-      _properties['paragraphs'] = findOrThrowMissingKeyException(json, 'paragraphs');
+      _properties['paragraphs'] = findOrThrowException(json, 'paragraphs');
     } else if (_bodyType == 'question') {
-      _properties['questions'] = findOrThrowMissingKeyException(json, 'questions');
+      _properties['questions'] = findOrThrowException(json, 'questions');
     } else if (_bodyType == 'scripture') {
-      _properties['bibleVersion'] = findOrThrowMissingKeyException(json, 'bible_version');
-      _properties['attribution'] = findOrThrowMissingKeyException(json, 'attribution');
-      _properties['scriptures'] = findOrThrowMissingKeyException(json, 'scriptures');
+      _properties['bibleVersion'] = findOrThrowException(json, 'bible_version');
+      _properties['attribution'] = findOrThrowException(json, 'attribution');
+      _properties['scriptures'] = findOrThrowException(json, 'scriptures');
     } else {
-      throw InvalidContentBodyType(message: 'Invalid body_type: $_bodyType');
+      throw BibleSeriesException(
+        message: 'Invalid body_type: $_bodyType',
+        errorType: BibleSeriesExceptionType.INVALID_CONTENT_BODY,
+      );
     }
 
     return SeriesContentBodyDto._(
@@ -154,7 +157,7 @@ extension SeriesContentBodyDtoX on SeriesContentBodyDto {
       List<dynamic> _scriptures = this.properties['scriptures'];
       _scriptures.forEach((element) {
         Map<String, String> _verses = {};
-        Map<String, dynamic> _versesFirebase = findOrThrowMissingKeyException(element, 'verses');
+        Map<String, dynamic> _versesFirebase = findOrThrowException(element, 'verses');
 
         _versesFirebase.forEach((key, value) {
           _verses[key] = value;
@@ -163,8 +166,8 @@ extension SeriesContentBodyDtoX on SeriesContentBodyDto {
         bodyProperties.scriptures.add(
           Scripture(
             title: element['title'] ?? null,
-            book: findOrThrowMissingKeyException(element, 'book'),
-            chapter: findOrThrowMissingKeyException(element, 'chapter'),
+            book: findOrThrowException(element, 'book'),
+            chapter: findOrThrowException(element, 'chapter'),
             verses: _verses,
           ),
         );

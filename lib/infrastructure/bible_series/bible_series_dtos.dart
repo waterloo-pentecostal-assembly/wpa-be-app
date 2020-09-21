@@ -26,11 +26,11 @@ class BibleSeriesDto {
     });
 
     return BibleSeriesDto._(
-      title: findOrThrowMissingKeyException(json, 'title'),
-      subTitle: findOrThrowMissingKeyException(json, 'sub_title'),
-      imageUrl: findOrThrowMissingKeyException(json, 'image_url'),
-      startDate: findOrThrowMissingKeyException(json, 'start_date'),
-      endDate: findOrThrowMissingKeyException(json, 'end_date'),
+      title: findOrThrowException(json, 'title'),
+      subTitle: findOrThrowException(json, 'sub_title'),
+      imageUrl: findOrThrowException(json, 'image_url'),
+      startDate: findOrThrowException(json, 'start_date'),
+      endDate: findOrThrowException(json, 'end_date'),
       isActive: json['is_active'] ?? false,
       seriesContentSnippet: _seriesContentSnippet,
     );
@@ -80,7 +80,7 @@ extension BibleSeriesDtoX on BibleSeriesDto {
     this.seriesContentSnippet.forEach((element) {
       _seriesContentSnippet.add(element.toDomain());
     });
-    
+
     return BibleSeries(
       id: UniqueId.fromUniqueString(this.id),
       title: this.title,
@@ -129,7 +129,7 @@ extension SeriesContentSnippetDtoX on SeriesContentSnippetDto {
         contentTypes[newKey] = UniqueId.fromUniqueString(value);
       }
     });
-    
+
     return SeriesContentSnippet(
       contentTypes: contentTypes,
       date: this.date,
