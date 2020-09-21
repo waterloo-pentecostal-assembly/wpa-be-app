@@ -22,7 +22,7 @@ void main() {
     // arrange
     final String invalidEmail = 'mail.com';
     final String expectedErrorMessage = 'Invalid email address';
-    ValueObjectException error;
+    ApplicationException error;
 
     // act
     try {

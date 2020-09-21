@@ -1,12 +1,6 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
-import 'package:wpa_app/domain/common/exceptions.dart';
 
-extension CollectionReferenceX on CollectionReference {
-  String test123() {
-    return 'hello';
-  }
-}
+import '../../domain/common/exceptions.dart';
 
 void handlePlatformException(PlatformException e) {
   if (e.message.contains('PERMISSION_DENIED')) {

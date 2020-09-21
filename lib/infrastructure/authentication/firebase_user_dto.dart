@@ -10,16 +10,14 @@ class FirebaseUserDto {
   final String firstName;
   final String lastName;
   final String email;
-  final bool isActive;
   final int reports;
 
   factory FirebaseUserDto.fromJson(Map<String, dynamic> json) {
     return FirebaseUserDto._(
-      firstName: findOrThrowMissingKeyException(json, 'first_name'),
-      lastName: findOrThrowMissingKeyException(json, 'last_name'),
-      email: findOrThrowMissingKeyException(json, 'email'),
-      isActive: findOrThrowMissingKeyException(json, 'is_active'),
-      reports: findOrThrowMissingKeyException(json, 'reports'),
+      firstName: findOrThrowException(json, 'first_name'),
+      lastName: findOrThrowException(json, 'last_name'),
+      email: findOrThrowException(json, 'email'),
+      reports: findOrThrowException(json, 'reports'),
     );
   }
 
@@ -41,7 +39,6 @@ class FirebaseUserDto {
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
       email: email ?? this.email,
-      isActive: isActive ?? this.isActive,
       reports: reports ?? this.reports,
     );
   }
@@ -51,7 +48,6 @@ class FirebaseUserDto {
     @required this.firstName,
     @required this.lastName,
     @required this.email,
-    @required this.isActive,
     @required this.reports,
   });
 }
@@ -63,7 +59,6 @@ extension FirebaseUserDtoX on FirebaseUserDto {
       firstName: this.firstName,
       lastName: this.lastName,
       email: this.email,
-      isActive: this.isActive,
       reports: this.reports,
     );
   }

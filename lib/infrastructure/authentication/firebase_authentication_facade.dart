@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import '../../domain/common/exceptions.dart';
-import '../common/firebase_helpers.dart';
+import 'package:wpa_app/domain/common/exceptions.dart';
 
 import '../../domain/authentication/entities.dart';
 import '../../domain/authentication/exceptions.dart';
@@ -28,9 +27,11 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
         message: 'User not authenticated',
       );
     } else if (!user.emailVerified) {
+      user.sendEmailVerification(); // Fire and forget
       throw AuthenticationException(
         errorType: AuthenticationExceptionType.EMAIL_NOT_VERIFIED,
         message: 'Email not verified',
+        displayMessage: 'Please click link in email to verify account then sign in again.',
       );
     }
 
@@ -47,13 +48,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
     Password password,
   }) async {
     // TODO: implement registerWithEmailAndPassword
-    // Create User in Firebase
-    UserCredential newUser =
-        await _firebaseAuth.createUserWithEmailAndPassword(email: emailAddress.value, password: password.value);
-
-    // Add entry to Firestore user collection
-
-    // return true
+    throw UnimplementedError();
   }
 
   @override
@@ -70,7 +65,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
       );
       return getSignedInUser();
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'invalid-email' || e.code == 'AuthenticationException') {
+      if (e.code == 'invalid-email' || e.code == 'wrong-password') {
         throw AuthenticationException(
           errorType: AuthenticationExceptionType.INVALID_EMAIL_OR_PASSWORD,
           message: 'Invalid Email or Password.',
@@ -86,15 +81,16 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
             message: 'User not found',
             displayMessage: 'User not found. Please sign up.');
       } else {
-        throw UnexpectedError(
-          message: 'Unexpected error occured: $e',
-          displayMessage: 'An unexpected error occured.',
-        );
+        throw ApplicationException(
+            message: 'Unexpected error occured: $e',
+            displayMessage: 'An unexpected error occured.',
+            errorType: ApplicationExceptionType.UNKNOWN);
       }
     } catch (e) {
-      throw UnexpectedError(
+      throw ApplicationException(
         message: 'Unexpected error occured: $e',
         displayMessage: 'An unexpected error occured.',
+        errorType: ApplicationExceptionType.UNKNOWN,
       );
     }
   }

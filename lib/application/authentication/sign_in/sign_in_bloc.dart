@@ -47,7 +47,10 @@ Stream<SignInState> _mapEmailChangedToState(
       emailAddress: email.value,
       emailAddressError: '',
     );
-  } on ValueObjectException catch (e) {
+  } on ApplicationException catch (e) {
+    if (e.errorType != ApplicationExceptionType.VALUE_OBJECT) {
+      rethrow;
+    }
     yield state.copyWith(
       emailAddress: event.email,
       emailAddressError: e.displayMessage,
@@ -70,7 +73,10 @@ Stream<SignInState> _mapPasswordChangedToState(
       password: password.value,
       passwordError: '',
     );
-  } on ValueObjectException catch (e) {
+  } on ApplicationException catch (e) {
+    if (e.errorType != ApplicationExceptionType.VALUE_OBJECT) {
+      rethrow;
+    }
     yield state.copyWith(
       password: event.password,
       passwordError: e.displayMessage,
