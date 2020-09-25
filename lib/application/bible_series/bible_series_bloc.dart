@@ -39,7 +39,7 @@ Stream<BibleSeriesState> _mapGetRecentBibleSeriesEventToState(
   RecentBibleSeriesRequested event,
   Future Function() getRecentBibleSeriesFunction,
 ) async* {
-  yield Fetching();
+  yield FetchingBibleSeries();
   List<BibleSeries> bibleSeriesList = await getRecentBibleSeriesFunction();
   yield RecentBibleSeries(bibleSeriesList);
 }
@@ -49,7 +49,7 @@ Stream<BibleSeriesState> _mapBibleSeriesInformationRequestedEventToState(
   BibleSeriesInformationRequested event,
   Future<BibleSeries> Function({@required String bibleSeriesId}) getBibleSeriesFunction,
 ) async* {
-  yield Fetching();
+  yield FetchingBibleSeries();
   BibleSeries bibleSeries = await getBibleSeriesFunction(bibleSeriesId: event.bibleSeriesId.toString());
   yield BibleSeriesInformation(bibleSeries);
 }

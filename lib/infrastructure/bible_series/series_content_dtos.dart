@@ -165,7 +165,7 @@ extension SeriesContentBodyDtoX on SeriesContentBodyDto {
 
         bodyProperties.scriptures.add(
           Scripture(
-            title: element['title'] ?? null,
+            title: element['title'] ?? '',
             book: findOrThrowException(element, 'book'),
             chapter: findOrThrowException(element, 'chapter'),
             verses: _verses,

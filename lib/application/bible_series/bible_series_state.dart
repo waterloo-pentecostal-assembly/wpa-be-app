@@ -9,7 +9,7 @@ class BibleSeriesInitial extends BibleSeriesState {
   List<Object> get props => [];
 }
 
-class Fetching extends BibleSeriesState {
+class FetchingBibleSeries extends BibleSeriesState {
   @override
   List<Object> get props => [];
 }
