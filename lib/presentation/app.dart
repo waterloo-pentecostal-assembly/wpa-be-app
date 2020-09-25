@@ -30,7 +30,7 @@ class App extends StatelessWidget {
                 create: (context) => getIt<NavigationBarBloc>()
                   ..add(
                     NavigationBarEvent(
-                      tab: NavigationTabEnum.home,
+                      tab: NavigationTabEnum.HOME,
                     ),
                   ),
               ),

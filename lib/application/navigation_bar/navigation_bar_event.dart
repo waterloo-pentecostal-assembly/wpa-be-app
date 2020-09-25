@@ -1,9 +1,12 @@
 part of 'navigation_bar_bloc.dart';
 
-class NavigationBarEvent {
+class NavigationBarEvent extends Equatable {
 
   final NavigationTabEnum tab;
   final String route;
 
-  NavigationBarEvent({this.tab, this.route});
+  NavigationBarEvent({@required this.tab, this.route});
+
+  @override
+  List<Object> get props => [tab, route];
 }
