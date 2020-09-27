@@ -1,29 +1,18 @@
 import 'package:flutter/material.dart';
 
-class UnexpectedError implements Exception {
-  String message;
-  String displayMessage;
-
-  UnexpectedError({this.message, this.displayMessage}) {
-    if (displayMessage == null) {
-      this.displayMessage = 'An unexpected error occured.';
-    }
-    if (message == null) {
-      this.message = this.displayMessage;
-    }
-  }
-
-  @override
-  String toString() {
-    return '${this.runtimeType}: ${this.message}';
-  }
+enum ApplicationExceptionType {
+  PERMISSION_DENIED,
+  MISSING_KEY,
+  VALUE_OBJECT,
+  UNKNOWN,
 }
 
-class ValueObjectException implements Exception {
+class ApplicationException implements Exception {
   final String message;
+  final ApplicationExceptionType errorType;
   String displayMessage;
 
-  ValueObjectException({@required this.message, this.displayMessage}) {
+  ApplicationException({@required this.message, @required this.errorType, this.displayMessage}) {
     if (displayMessage == null) {
       this.displayMessage = this.message;
     }
@@ -31,6 +20,6 @@ class ValueObjectException implements Exception {
 
   @override
   String toString() {
-    return '${this.runtimeType}: ${this.message}';
+    return '${this.runtimeType}: [${this.errorType}] ${this.message}';
   }
 }

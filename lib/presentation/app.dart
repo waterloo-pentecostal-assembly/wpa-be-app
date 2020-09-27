@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../application/authentication/authentication_bloc.dart';
 import '../application/navigation_bar/navigation_bar_bloc.dart';
 import '../injection.dart';
-import 'common/constants/loader.dart';
+import 'common/loader.dart';
 import 'phone/index.dart';
 import 'phone/sign_in/sign_in_page.dart';
 import 'phone/splash/splash_page.dart';

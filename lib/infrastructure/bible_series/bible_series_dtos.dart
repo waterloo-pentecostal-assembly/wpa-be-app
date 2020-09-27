@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../domain/bible_series/entities.dart';
-import '../../domain/bible_series/exceptions.dart';
 import '../../domain/common/value_objects.dart';
+import '../common/helpers.dart';
+import 'helpers.dart';
 
 class BibleSeriesDto {
   final String id;
@@ -12,33 +14,30 @@ class BibleSeriesDto {
   final String imageUrl;
   final Timestamp startDate;
   final Timestamp endDate;
+  final bool isActive;
+  final List<SeriesContentSnippetDto> seriesContentSnippet;
 
   factory BibleSeriesDto.fromJson(Map<String, dynamic> json) {
-    List<String> expectedKeys = [
-      'title',
-      'sub_title',
-      'image_url',
-      'start_date',
-      'end_date',
-    ];
+    List<dynamic> _seriesContentSnippetFirebase = json['series_content_snippet'] ?? [];
+    List<SeriesContentSnippetDto> _seriesContentSnippet = [];
 
-    for (final key in expectedKeys) {
-      if (json[key] == null) {
-        throw MissingKeyException(message: '$key expected in bible_series document');
-      }
-    }
+    _seriesContentSnippetFirebase.forEach((element) {
+      _seriesContentSnippet.add(SeriesContentSnippetDto.fromFirestore(element));
+    });
 
     return BibleSeriesDto._(
-      title: json['title'],
-      subTitle: json['sub_title'],
-      imageUrl: json['image_url'],
-      startDate: json['start_date'],
-      endDate: json['end_date'],
+      title: findOrThrowException(json, 'title'),
+      subTitle: findOrThrowException(json, 'sub_title'),
+      imageUrl: findOrThrowException(json, 'image_url'),
+      startDate: findOrThrowException(json, 'start_date'),
+      endDate: findOrThrowException(json, 'end_date'),
+      isActive: json['is_active'] ?? false,
+      seriesContentSnippet: _seriesContentSnippet,
     );
   }
 
-  factory BibleSeriesDto.fromFirestore(DocumentSnapshot document) {
-    return BibleSeriesDto.fromJson(document.data()).copyWith(id: document.id);
+  factory BibleSeriesDto.fromFirestore(DocumentSnapshot doc) {
+    return BibleSeriesDto.fromJson(doc.data()).copyWith(id: doc.id);
   }
 
   BibleSeriesDto copyWith({
@@ -48,6 +47,8 @@ class BibleSeriesDto {
     String imageUrl,
     Timestamp startDate,
     Timestamp endDate,
+    bool isActive,
+    List<SeriesContentSnippetDto> seriesContentSnippet,
   }) {
     return BibleSeriesDto._(
       id: id ?? this.id,
@@ -56,6 +57,8 @@ class BibleSeriesDto {
       imageUrl: imageUrl ?? this.imageUrl,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
+      isActive: isActive ?? this.isActive,
+      seriesContentSnippet: seriesContentSnippet ?? this.seriesContentSnippet,
     );
   }
 
@@ -66,11 +69,18 @@ class BibleSeriesDto {
     @required this.imageUrl,
     @required this.startDate,
     @required this.endDate,
+    @required this.isActive,
+    @required this.seriesContentSnippet,
   });
 }
 
 extension BibleSeriesDtoX on BibleSeriesDto {
   BibleSeries toDomain() {
+    List<SeriesContentSnippet> _seriesContentSnippet = [];
+    this.seriesContentSnippet.forEach((element) {
+      _seriesContentSnippet.add(element.toDomain());
+    });
+
     return BibleSeries(
       id: UniqueId.fromUniqueString(this.id),
       title: this.title,
@@ -78,6 +88,51 @@ extension BibleSeriesDtoX on BibleSeriesDto {
       imageUrl: this.imageUrl,
       startDate: this.startDate,
       endDate: this.endDate,
+      isActive: this.isActive,
+      seriesContentSnippet: _seriesContentSnippet,
+    );
+  }
+}
+
+class SeriesContentSnippetDto {
+  final Map<String, dynamic> contentTypes;
+  final Timestamp date;
+
+  factory SeriesContentSnippetDto.fromJson(Map<String, dynamic> json) {
+    return SeriesContentSnippetDto._(
+      contentTypes: json['content_types'],
+      date: json['date'],
+    );
+  }
+
+  factory SeriesContentSnippetDto.fromFirestore(dynamic seriesSnippet) {
+    return SeriesContentSnippetDto.fromJson(seriesSnippet);
+  }
+
+  const SeriesContentSnippetDto._({
+    @required this.contentTypes,
+    @required this.date,
+  });
+
+  @override
+  String toString() {
+    return 'contentTypes: $contentTypes, date: $date';
+  }
+}
+
+extension SeriesContentSnippetDtoX on SeriesContentSnippetDto {
+  SeriesContentSnippet toDomain() {
+    Map<SeriesContentType, UniqueId> contentTypes = {};
+    this.contentTypes.forEach((key, value) {
+      final SeriesContentType newKey = contentTypeMapper(key);
+      if (newKey != null) {
+        contentTypes[newKey] = UniqueId.fromUniqueString(value);
+      }
+    });
+
+    return SeriesContentSnippet(
+      contentTypes: contentTypes,
+      date: this.date,
     );
   }
 }

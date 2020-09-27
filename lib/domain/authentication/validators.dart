@@ -6,7 +6,7 @@ validateEmailAddress(String emailAddress) {
   if (RegExp(emailRegex).hasMatch(emailAddress)) {
     return emailAddress;
   } else {
-    throw ValueObjectException(message: 'Invalid email address.');
+    throw ApplicationException(message: 'Invalid email address.', errorType: ApplicationExceptionType.VALUE_OBJECT);
   }
 }
 
@@ -14,7 +14,7 @@ validatePassword(String password) {
   if (password.length >= 8) {
     return password;
   } else {
-    throw ValueObjectException(message: 'Password must be at least 8 characters.');
+    throw ApplicationException(message: 'Password must be at least 8 characters.', errorType: ApplicationExceptionType.VALUE_OBJECT);
   }
 }
 
@@ -22,6 +22,6 @@ validateName(String name) {
   if (name.length > 0) {
     return name;
   } else {
-    throw ValueObjectException(message: 'Name must be at least one letter.');
+    throw ApplicationException(message: 'Name must be at least one letter.', errorType: ApplicationExceptionType.VALUE_OBJECT);
   }
 }

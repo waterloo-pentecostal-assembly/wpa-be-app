@@ -9,12 +9,12 @@ class BibleSeriesInitial extends BibleSeriesState {
   List<Object> get props => [];
 }
 
-class FetchingRecentBibleSeries extends BibleSeriesState {
+class FetchingBibleSeries extends BibleSeriesState {
   @override
   List<Object> get props => [];
 }
 
-class RecentBibleSeries extends BibleSeriesState {  
+class RecentBibleSeries extends BibleSeriesState {
   final List<BibleSeries> _bibleSeriesList;
 
   RecentBibleSeries(this._bibleSeriesList);
@@ -31,4 +31,13 @@ class RecentBibleSeries extends BibleSeriesState {
   }
 }
 
+class BibleSeriesInformation extends BibleSeriesState {
+  final BibleSeries _bibleSeriesInformation;
 
+  BibleSeriesInformation(this._bibleSeriesInformation);
+
+  BibleSeries get bibleSeriesInformation => _bibleSeriesInformation;
+
+  @override
+  List<Object> get props => [_bibleSeriesInformation];
+}

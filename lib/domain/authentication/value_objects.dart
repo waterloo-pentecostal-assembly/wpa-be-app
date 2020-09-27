@@ -30,28 +30,15 @@ class Password extends ValueObject{
   const Password._(this.value);
 }
 
-class FirstName extends ValueObject{
+class Name extends ValueObject{
   @override
   final value;
 
-  factory FirstName(String firstName) {
-    return FirstName._(
-      validateName(firstName)
+  factory Name(String name) {
+    return Name._(
+      validateName(name)
     );
   }
 
-  const FirstName._(this.value);
-}
-
-class LastName extends ValueObject{
-  @override
-  final value;
-
-  factory LastName(String lastName) {
-    return LastName._(
-      validateName(lastName)
-    );
-  }
-
-  const LastName._(this.value);
+  const Name._(this.value);
 }

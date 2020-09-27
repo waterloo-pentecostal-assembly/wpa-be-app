@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wpa_app/presentation/common/constants/loader.dart';
 
 import '../../../application/authentication/authentication_bloc.dart';
+import '../../common/loader.dart';
 
 class SplashPage extends StatelessWidget {
   @override

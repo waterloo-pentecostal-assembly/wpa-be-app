@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../application/navigation_bar/navigation_bar_bloc.dart';
 import '../../injection.dart';
 import 'common/interfaces.dart';
-import 'engage/engage_page.dart';
+import 'engage/pages/engage_page.dart';
 import 'give/give_page.dart';
 import 'home/home_page.dart';
 import 'notifications/notifications_page.dart';
@@ -65,7 +65,7 @@ class _IndexPage extends StatelessWidget {
           !await currentNavigatorState.maybePop();
         } else {
           // return true;
-          // TODO return true to exit the app. Return false for testing
+          // TODO: return true to exit the app. Return false for testing
           return false;
         }
       },

@@ -10,8 +10,7 @@ class RecentBibleSeriesWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<BibleSeriesBloc, BibleSeriesState>(
-      listener: (BuildContext context, state) {
-      },
+      listener: (BuildContext context, state) {},
       builder: (BuildContext context, state) {
         if (state is RecentBibleSeries) {
           return RecentBibleSeriesList(
@@ -36,8 +35,7 @@ class RecentBibleSeriesLoading extends StatelessWidget {
 class RecentBibleSeriesList extends StatelessWidget {
   final List<BibleSeries> bibleSeriesList;
 
-  const RecentBibleSeriesList({Key key, @required this.bibleSeriesList})
-      : super(key: key);
+  const RecentBibleSeriesList({Key key, @required this.bibleSeriesList}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -80,33 +78,38 @@ class RecentBibleSeriesList extends StatelessWidget {
 class BibleSeriesCard extends StatelessWidget {
   final BibleSeries bibleSeries;
 
-  const BibleSeriesCard({Key key, @required this.bibleSeries})
-      : super(key: key);
+  const BibleSeriesCard({Key key, @required this.bibleSeries}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: EdgeInsets.only(
-        right: 16,
-        top: 8,
-        bottom: 8,
-      ),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(15.0),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 3,
-            blurRadius: 5,
-            offset: Offset(0, 1), // changes position of shadow
+    return GestureDetector(
+      onTap: () {
+        getIt<BibleSeriesBloc>()..add(BibleSeriesInformationRequested(bibleSeriesId: bibleSeries.id));
+        Navigator.pushNamed(context, '/bible_series', arguments: {'bibleSeriesId': bibleSeries.id});
+      },
+      child: Container(
+        margin: EdgeInsets.only(
+          right: 16,
+          top: 8,
+          bottom: 8,
+        ),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(15.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 3,
+              blurRadius: 5,
+              offset: Offset(0, 1), // changes position of shadow
+            ),
+          ],
+        ),
+        // NOTE consider using cached_network_image package here
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(15.0),
+          child: Image.network(
+            bibleSeries.imageUrl,
           ),
-        ],
-      ),
-      // NOTE consider using cached_network_image package here
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(15.0),
-        child: Image.network(
-          bibleSeries.imageUrl,
         ),
       ),
     );

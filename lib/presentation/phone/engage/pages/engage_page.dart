@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../application/bible_series/bible_series_bloc.dart';
-import '../../../injection.dart';
-import '../common/factories/text_factory.dart';
-import '../common/interfaces.dart';
-import 'widgets/recent_bible_series.dart';
+import '../../../../application/bible_series/bible_series_bloc.dart';
+import '../../../../injection.dart';
+import '../../common/factories/text_factory.dart';
+import '../../common/interfaces.dart';
+import '../widgets/recent_bible_series.dart';
+import 'bible_series_page.dart';
 
 class EngagePage extends IIndexedPage {
   final GlobalKey<NavigatorState> navigatorKey;
@@ -19,7 +20,7 @@ class EngagePage extends IIndexedPage {
         BlocProvider<BibleSeriesBloc>(
           create: (BuildContext context) => getIt<BibleSeriesBloc>()
             ..add(
-              RequestRecentBibleSeries(),
+              RecentBibleSeriesRequested(),
             ),
         )
       ],
@@ -33,6 +34,11 @@ class EngagePage extends IIndexedPage {
                 switch (settings.name) {
                   case '/':
                     return EngageIndex();
+                  case '/bible_series':
+                    Map args = settings.arguments;
+                    return BibleSeriesPage(
+                      bibleSeriesId: args['bibleSeriesId'],
+                    );
                 }
               },
             );

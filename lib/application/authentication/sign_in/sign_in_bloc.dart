@@ -47,7 +47,10 @@ Stream<SignInState> _mapEmailChangedToState(
       emailAddress: email.value,
       emailAddressError: '',
     );
-  } on ValueObjectException catch (e) {
+  } on ApplicationException catch (e) {
+    if (e.errorType != ApplicationExceptionType.VALUE_OBJECT) {
+      rethrow;
+    }
     yield state.copyWith(
       emailAddress: event.email,
       emailAddressError: e.displayMessage,
@@ -70,7 +73,10 @@ Stream<SignInState> _mapPasswordChangedToState(
       password: password.value,
       passwordError: '',
     );
-  } on ValueObjectException catch (e) {
+  } on ApplicationException catch (e) {
+    if (e.errorType != ApplicationExceptionType.VALUE_OBJECT) {
+      rethrow;
+    }
     yield state.copyWith(
       password: event.password,
       passwordError: e.displayMessage,
@@ -113,23 +119,17 @@ Stream<SignInState> _mapSignInWithEmailAndPasswordToState(
       signInSuccess: true,
       signInError: null,
     );
+  } on AuthenticationException catch (e) {
+    yield state.copyWith(
+      submitting: false,
+      signInSuccess: false,
+      signInError: e.displayMessage,
+    );
   } catch (e) {
-    if (e is InvalidEmailOrPassword ||
-        e is UserNotFound ||
-        e is UserDisabled ||
-        e is AuthenticationServerError ||
-        e is ValueObjectException) {
-      yield state.copyWith(
-        submitting: false,
-        signInSuccess: false,
-        signInError: e.displayMessage,
-      );
-    } else {
-      yield state.copyWith(
-        submitting: false,
-        signInSuccess: false,
-        signInError: 'An unknown error occured.',
-      );
-    }
+    yield state.copyWith(
+      submitting: false,
+      signInSuccess: false,
+      signInError: 'An unknown error occured.',
+    );
   }
 }
