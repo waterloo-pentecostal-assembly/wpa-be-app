@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:wpa_app/domain/common/exceptions.dart';
 
 import '../../domain/authentication/entities.dart';
 import '../../domain/authentication/exceptions.dart';
 import '../../domain/authentication/interfaces.dart';
 import '../../domain/authentication/value_objects.dart';
+import '../../domain/common/exceptions.dart';
 import 'firebase_user_dto.dart';
 
 class FirebaseAuthenticationFacade implements IAuthenticationFacade {
@@ -51,6 +51,9 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
     throw UnimplementedError();
   }
 
+  /// Authenticates user with Firebase using [EmailAddress] and [Password].
+  /// Returns a [LocalUser] once authentication is successful
+  /// Throws [AuthenticationException] or [ApplicationException]
   @override
   Future<LocalUser> signInWithEmailAndPassword({
     EmailAddress emailAddress,
@@ -82,9 +85,10 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
             displayMessage: 'User not found. Please sign up.');
       } else {
         throw ApplicationException(
-            message: 'Unexpected error occured: $e',
-            displayMessage: 'An unexpected error occured.',
-            errorType: ApplicationExceptionType.UNKNOWN);
+          message: 'Unexpected error occured: $e',
+          displayMessage: 'An unexpected error occured.',
+          errorType: ApplicationExceptionType.UNKNOWN,
+        );
       }
     } catch (e) {
       throw ApplicationException(

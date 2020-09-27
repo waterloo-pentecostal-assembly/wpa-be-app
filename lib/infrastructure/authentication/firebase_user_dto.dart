@@ -30,8 +30,6 @@ class FirebaseUserDto {
     String firstName,
     String lastName,
     String email,
-    bool isActive,
-    bool isVerified,
     int reports,
   }) {
     return FirebaseUserDto._(
