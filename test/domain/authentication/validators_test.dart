@@ -1,6 +1,3 @@
-import 'dart:js_util';
-import 'dart:math';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wpa_app/domain/authentication/validators.dart';
 import 'package:wpa_app/domain/common/exceptions.dart';
@@ -21,7 +18,7 @@ void main() {
   test('validateEmailAddress should raise ValueObjectException once invalid', () {
     // arrange
     final String invalidEmail = 'mail.com';
-    final String expectedErrorMessage = 'Invalid email address';
+    final String expectedErrorMessage = 'Invalid email address.';
     ApplicationException error;
 
     // act

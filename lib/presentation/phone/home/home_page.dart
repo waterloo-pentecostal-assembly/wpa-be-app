@@ -63,7 +63,7 @@ class HomeIndex extends StatelessWidget {
                 getIt<NavigationBarBloc>()
                   ..add(
                     NavigationBarEvent(
-                      tab: NavigationTabEnum.engage,
+                      tab: NavigationTabEnum.ENGAGE,
                     ),
                   );
               },
@@ -74,7 +74,7 @@ class HomeIndex extends StatelessWidget {
                 getIt<NavigationBarBloc>()
                   ..add(
                     NavigationBarEvent(
-                        tab: NavigationTabEnum.notifications,
+                        tab: NavigationTabEnum.NOTIFICATIONS,
                         route: '/notification_detail'),
                   );
               },
