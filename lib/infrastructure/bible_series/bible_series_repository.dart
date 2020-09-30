@@ -56,10 +56,7 @@ extension BibleSeriesRepositoryX on BibleSeriesRepository {
         }
       },
     );
-
-    if (bibleSeriesList.length == 0) {
-      throw BibleSeriesException(message: 'No Bible Series Available', errorType: BibleSeriesExceptionType.NO_BIBLE_SERIES);
-    }
+    
     return bibleSeriesList;
   }
 }
@@ -136,7 +133,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
         errorType: ApplicationExceptionType.UNKNOWN,
       );
     }
-    
+
     final SeriesContent seriesContent = SeriesContentDto.fromFirestore(document).toDomain();
     return seriesContent;
   }
