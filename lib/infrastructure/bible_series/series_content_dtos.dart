@@ -104,7 +104,7 @@ class SeriesContentBodyDto {
     } else {
       throw BibleSeriesException(
         message: 'Invalid body_type: $_bodyType',
-        errorType: BibleSeriesExceptionType.INVALID_CONTENT_BODY,
+        code: BibleSeriesExceptionCode.INVALID_CONTENT_BODY,
       );
     }
 
