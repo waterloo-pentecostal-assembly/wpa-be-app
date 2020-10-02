@@ -23,15 +23,14 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
 
     if (user == null) {
       throw AuthenticationException(
-        errorType: AuthenticationExceptionType.NOT_AUTHENTICATED,
+        code: AuthenticationExceptionCode.NOT_AUTHENTICATED,
         message: 'User not authenticated',
       );
     } else if (!user.emailVerified) {
       user.sendEmailVerification(); // Fire and forget
       throw AuthenticationException(
-        errorType: AuthenticationExceptionType.EMAIL_NOT_VERIFIED,
+        code: AuthenticationExceptionCode.EMAIL_NOT_VERIFIED,
         message: 'Email not verified',
-        displayMessage: 'Please click link in email to verify account then sign in again.',
       );
     }
 
@@ -70,31 +69,31 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
     } on FirebaseAuthException catch (e) {
       if (e.code == 'invalid-email' || e.code == 'wrong-password') {
         throw AuthenticationException(
-          errorType: AuthenticationExceptionType.INVALID_EMAIL_OR_PASSWORD,
+          code: AuthenticationExceptionCode.INVALID_EMAIL_OR_PASSWORD,
           message: 'Invalid Email or Password.',
         );
       } else if (e.code == 'user-disabled') {
         throw AuthenticationException(
-          errorType: AuthenticationExceptionType.USER_DISABLED,
+          code: AuthenticationExceptionCode.USER_DISABLED,
           message: 'User disabled.',
         );
       } else if (e.code == 'user-not-found') {
         throw AuthenticationException(
-            errorType: AuthenticationExceptionType.USER_NOT_FOUND,
-            message: 'User not found',
-            displayMessage: 'User not found. Please sign up.');
+          code: AuthenticationExceptionCode.USER_NOT_FOUND,
+          message: 'User not found.',
+        );
       } else {
         throw ApplicationException(
-          message: 'Unexpected error occured: $e',
-          displayMessage: 'An unexpected error occured.',
-          errorType: ApplicationExceptionType.UNKNOWN,
+          code: ApplicationExceptionCode.UNKNOWN,
+          message: 'An unknown error occured.',
+          details: e,
         );
       }
     } catch (e) {
       throw ApplicationException(
-        message: 'Unexpected error occured: $e',
-        displayMessage: 'An unexpected error occured.',
-        errorType: ApplicationExceptionType.UNKNOWN,
+        code: ApplicationExceptionCode.UNKNOWN,
+        message: 'An unknown error occured.',
+        details: e,
       );
     }
   }
