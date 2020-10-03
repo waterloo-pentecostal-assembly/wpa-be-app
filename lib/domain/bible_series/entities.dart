@@ -19,6 +19,7 @@ enum SeriesContentBodyType {
   TEXT,
   SCRIPTURE,
   QUESTION,
+  IMAGE_INPUT,
 }
 
 class BibleSeries {
@@ -170,4 +171,15 @@ class QuestionBody implements ISeriesContentBody {
 
 class QuestionBodyProperties {
   List<String> questions;
+}
+
+class ImageInputBody implements ISeriesContentBody {
+  final SeriesContentBodyType type;
+
+  ImageInputBody({
+    @required this.type,
+  });
+
+  @override
+  get properties => {};
 }

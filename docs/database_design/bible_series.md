@@ -40,14 +40,15 @@ Each `series_content` collection has the following fields:
 
 Each `map` in the `body` has a `body_type` key with a value that is one of:
  
- - `audio`
- - `text`
+ - `audio`  
+ - `text` 
  - `scripture`
- - `question` 
+ - `question`
+ - `image_input`
 
-For each `body_type` there are different keys in `map`. These are described below:
+For each `body_type` there are different keys in the `map`. These are described below:
 
-|`body_type`   |Other keys in `map`   |Description   |
+|`body_type`   |Other keys in the `map`   |Description   |
 |---|---|---|
 |`audio`   |`audio_file_url` *(string)*   |URL for the location of the    |
 |`text`   |`paragraphs` *(array)*   |This is an `array` of `strings`. Each `string` item is a paragraph of the text   |
@@ -55,4 +56,5 @@ For each `body_type` there are different keys in `map`. These are described belo
 |              |`attribution` *(string)*   |Statement crediting copyright holder   |
 |              |`scriptures` *(array)*   |Each element in the `array` is a `map` with keys: `book` *(string)*, `chapter` *(string)*, [optional] `title` *(string)* and `verses` *(map)*. In the `verses` map, the key corresponds to the verse number and the value is the verse itself.   |
 |`question`   |`questions` *(array)*   | An `array` of `strings`, each one being a question. The `questions` type is the only one that allows for a typed response from the user. The responses are stored in the `completions` collections.    |
+|`image_input`   |N/A   |N/A    |
 

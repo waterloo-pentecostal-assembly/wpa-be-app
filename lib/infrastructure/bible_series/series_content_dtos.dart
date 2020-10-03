@@ -92,7 +92,8 @@ class SeriesContentBodyDto {
     Map<String, dynamic> _properties = {};
 
     if (_bodyType == 'audio') {
-      _properties['audio_file_url'] = findOrThrowException(json, 'audio_file_url');
+      _properties['audioFileUrl'] =
+          findOrThrowException(json, 'audio_file_url');
     } else if (_bodyType == 'text') {
       _properties['paragraphs'] = findOrThrowException(json, 'paragraphs');
     } else if (_bodyType == 'question') {
@@ -101,6 +102,7 @@ class SeriesContentBodyDto {
       _properties['bibleVersion'] = findOrThrowException(json, 'bible_version');
       _properties['attribution'] = findOrThrowException(json, 'attribution');
       _properties['scriptures'] = findOrThrowException(json, 'scriptures');
+    } else if (_bodyType == 'image_input') {
     } else {
       throw BibleSeriesException(
         message: 'Invalid body_type: $_bodyType',
@@ -129,7 +131,7 @@ extension SeriesContentBodyDtoX on SeriesContentBodyDto {
   ISeriesContentBody toDomain() {
     if (this.bodyType == 'audio') {
       AudioBodyProperties bodyProperties = AudioBodyProperties();
-      bodyProperties.audioFileUrl = this.properties['audio_file_url'];
+      bodyProperties.audioFileUrl = this.properties['audioFileUrl'];
 
       return AudioBody(
         type: SeriesContentBodyType.AUDIO,
@@ -150,14 +152,15 @@ extension SeriesContentBodyDtoX on SeriesContentBodyDto {
       );
     } else if (this.bodyType == 'scripture') {
       ScriptureBodyProperties bodyProperties = ScriptureBodyProperties();
-      bodyProperties.bibleVersion = this.properties['bible_version'];
+      bodyProperties.bibleVersion = this.properties['bibleVersion'];
       bodyProperties.attribution = this.properties['attribution'];
       bodyProperties.scriptures = [];
 
       List<dynamic> _scriptures = this.properties['scriptures'];
       _scriptures.forEach((element) {
         Map<String, String> _verses = {};
-        Map<String, dynamic> _versesFirebase = findOrThrowException(element, 'verses');
+        Map<String, dynamic> _versesFirebase =
+            findOrThrowException(element, 'verses');
 
         _versesFirebase.forEach((key, value) {
           _verses[key] = value;
@@ -190,6 +193,8 @@ extension SeriesContentBodyDtoX on SeriesContentBodyDto {
         type: SeriesContentBodyType.QUESTION,
         properties: bodyProperties,
       );
+    } else if (this.bodyType == 'image_input') {
+      return ImageInputBody(type: SeriesContentBodyType.IMAGE_INPUT);
     }
   }
 }
