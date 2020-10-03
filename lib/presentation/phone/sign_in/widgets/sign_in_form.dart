@@ -52,13 +52,11 @@ class SignInForm extends StatelessWidget {
                     ),
                     child: Column(
                       children: <Widget>[
-                        if (context.bloc<SignInBloc>().state.signInError !=
-                            null) ...{
+                        if (context.bloc<SignInBloc>().state.signInError != null) ...{
                           Text(
                             context.bloc<SignInBloc>().state.signInError,
                             style: TextStyle(
-                              color: Colors
-                                  .red, //TODO: create constant for error color
+                              color: Colors.red, //TODO: create constant for error color
                             ),
                           ),
                         },
@@ -92,19 +90,17 @@ class SignInForm extends StatelessWidget {
                                         ),
                                       ),
                                       child: TextFormField(
-                                        // validator: (_) {
-                                        //   String emailAddressError = context
-                                        //       .bloc<SignInBloc>()
-                                        //       .state
-                                        //       .emailAddressError;
-                                        //   return emailAddressError != ''
-                                        //       ? emailAddressError
-                                        //       : null;
-                                        // },
-                                        onChanged: (value) {
-                                          context
+                                        validator: (_) {
+                                          String emailAddressError = context
                                               .bloc<SignInBloc>()
-                                              .add(EmailChanged(email: value));
+                                              .state
+                                              .emailAddressError;
+                                          return emailAddressError != ''
+                                              ? emailAddressError
+                                              : null;
+                                        },
+                                        onChanged: (value) {
+                                          context.bloc<SignInBloc>().add(EmailChanged(email: value));
                                         },
                                         autocorrect: false,
                                         decoration: InputDecoration(
@@ -119,18 +115,17 @@ class SignInForm extends StatelessWidget {
                                     Container(
                                       padding: EdgeInsets.all(4.0),
                                       child: TextFormField(
-                                        // validator: (_) {
-                                        //   String passwordError = context
-                                        //       .bloc<SignInBloc>()
-                                        //       .state
-                                        //       .passwordError;
-                                        //   return passwordError != ''
-                                        //       ? passwordError
-                                        //       : null;
-                                        // },
+                                        validator: (_) {
+                                          String passwordError = context
+                                              .bloc<SignInBloc>()
+                                              .state
+                                              .passwordError;
+                                          return passwordError != ''
+                                              ? passwordError
+                                              : null;
+                                        },
                                         onChanged: (value) {
-                                          context.bloc<SignInBloc>().add(
-                                              PasswordChanged(password: value));
+                                          context.bloc<SignInBloc>().add(PasswordChanged(password: value));
                                         },
                                         obscureText: true,
                                         autocorrect: false,
@@ -168,28 +163,20 @@ class SignInForm extends StatelessWidget {
                                   height: 50,
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
-                                      colors: [
-                                        Color.fromRGBO(0, 146, 214, 1),
-                                        Color.fromRGBO(0, 146, 214, 0.7)
-                                      ],
+                                      colors: [Color.fromRGBO(0, 146, 214, 1), Color.fromRGBO(0, 146, 214, 0.7)],
                                     ),
                                   ),
                                   child: FlatButton(
                                     disabledColor: Colors.grey[400],
-                                    onPressed: () => context
-                                        .bloc<SignInBloc>()
-                                        .add(SignInWithEmailAndPassword()),
-                                    // onPressed:
-                                    //     state.submitting || !state.isSignInFormValid
-                                    //         ? null
-                                    //         : () => context.bloc<SignInBloc>().add(
-                                    //               SignInWithEmailAndPassword(),
-                                    //             ),
+                                    onPressed: state.submitting || !state.isSignInFormValid
+                                        ? null
+                                        : () => context.bloc<SignInBloc>().add(
+                                              SignInWithEmailAndPassword(),
+                                            ),
                                     child: Center(
                                       child: Text(
                                         "LOGIN",
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 16),
+                                        style: TextStyle(color: Colors.white, fontSize: 16),
                                       ),
                                     ),
                                   ),
