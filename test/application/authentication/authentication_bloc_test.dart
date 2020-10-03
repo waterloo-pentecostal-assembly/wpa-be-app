@@ -33,8 +33,8 @@ void main() {
       build: () {
         when(mockIAuthenticationFacade.getSignedInUser()).thenThrow(
           (_) async => AuthenticationException(
-            errorType: AuthenticationExceptionType.NOT_AUTHENTICATED,
-            message: 'User not authenticated',
+            code: AuthenticationExceptionCode.NOT_AUTHENTICATED,
+            message: 'User not authenticated.',
           ),
         );
         return AuthenticationBloc(mockIAuthenticationFacade);

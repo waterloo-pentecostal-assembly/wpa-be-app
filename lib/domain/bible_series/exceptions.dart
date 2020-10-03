@@ -8,25 +8,8 @@ enum BibleSeriesExceptionCode {
   INVALID_CONTENT_BODY,
 }
 
-// class BibleSeriesException implements Exception {
-//   final String message;
-//   final BibleSeriesExceptionType errorType;
-//   String displayMessage;
-
-//   BibleSeriesException({@required this.message, @required this.errorType, this.displayMessage}) {
-//     if (displayMessage == null) {
-//       this.displayMessage = this.message;
-//     }
-//   }
-
-//   @override
-//   String toString() {
-//     return '${this.runtimeType}: [${this.errorType}] ${this.message}';
-//   }
-// }
-
 /// Implements [BaseException] to provide an exception type specific to Bible Series.
-class BibleSeriesException implements BaseException {
+class BibleSeriesException implements BaseApplicationException {
   /// Creates an [BibleSeriesException] with the specified error [type],
   /// [message], and optional error [details].
   BibleSeriesException({

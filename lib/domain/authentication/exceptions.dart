@@ -11,7 +11,7 @@ enum AuthenticationExceptionCode {
 }
 
 /// Implements [BaseException] to provide an exception type specific to Authentication.
-class AuthenticationException implements BaseException {
+class AuthenticationException implements BaseApplicationException {
   /// Creates an [AuthenticationException] with the specified error [type],
   /// [message], and optional error [details].
   AuthenticationException({

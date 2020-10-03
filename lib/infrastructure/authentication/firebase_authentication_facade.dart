@@ -24,13 +24,13 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
     if (user == null) {
       throw AuthenticationException(
         code: AuthenticationExceptionCode.NOT_AUTHENTICATED,
-        message: 'User not authenticated',
+        message: 'User not authenticated.',
       );
     } else if (!user.emailVerified) {
       user.sendEmailVerification(); // Fire and forget
       throw AuthenticationException(
         code: AuthenticationExceptionCode.EMAIL_NOT_VERIFIED,
-        message: 'Email not verified',
+        message: 'Email not verified.',
       );
     }
 

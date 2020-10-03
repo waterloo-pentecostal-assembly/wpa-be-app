@@ -1,9 +1,10 @@
 import '../../domain/common/exceptions.dart';
 
-dynamic findOrThrowException(Map map, dynamic key, {String errorMessage}) {
+dynamic findOrThrowException(Map map, dynamic key, {String message}) {
   if (map[key] == null) {
     throw ApplicationException(
-      message: errorMessage ?? '$key missing from ${map.runtimeType}',
+      message: message ?? 'Missing key ',
+      details: '$key missing from ${map.runtimeType}',
       code: ApplicationExceptionCode.MISSING_KEY,
     );
   }
