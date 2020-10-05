@@ -28,7 +28,7 @@ class BibleSeriesBloc extends Bloc<BibleSeriesEvent, BibleSeriesState> {
     } else if (event is BibleSeriesInformationRequested) {
       yield* _mapBibleSeriesInformationRequestedEventToState(
         event,
-        _iBibleSeriesRepository.getBibleSeriesInformation,
+        _iBibleSeriesRepository.getBibleSeriesDetails,
       );
     }
   }
