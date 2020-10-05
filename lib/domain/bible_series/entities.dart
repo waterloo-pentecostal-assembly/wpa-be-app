@@ -74,6 +74,16 @@ class SeriesContent {
   final String subTitle;
   final List<ISeriesContentBody> body;
 
+  /// Checks if it possible to have a response for this [SeriesContent]
+  bool get isResponsePossible {
+    this.body.forEach((element) {
+      if (element.type == SeriesContentBodyType.QUESTION || element.type == SeriesContentBodyType.IMAGE_INPUT) {
+        return true;
+      }
+    });
+    return false;
+  }
+
   SeriesContent({
     @required this.id,
     @required this.contentType,
@@ -170,7 +180,17 @@ class QuestionBody implements ISeriesContentBody {
 }
 
 class QuestionBodyProperties {
-  List<String> questions;
+  List<Question> questions;
+}
+
+class Question {
+  final String question;
+  final List location;
+
+  Question({
+    @required this.question,
+    @required this.location,
+  });
 }
 
 class ImageInputBody implements ISeriesContentBody {
@@ -182,4 +202,22 @@ class ImageInputBody implements ISeriesContentBody {
 
   @override
   get properties => {};
+}
+
+class ContentCompletionDetails {
+  final UniqueId id;
+  final UniqueId seriesId;
+  final UniqueId contentId;
+  final bool isOnTime;
+  final bool isCompleted;
+  final Map<int, Map<int, String>> responses;
+
+  ContentCompletionDetails({
+    this.id,
+    this.seriesId,
+    this.contentId,
+    this.isOnTime,
+    @required this.isCompleted,
+    this.responses,
+  });
 }

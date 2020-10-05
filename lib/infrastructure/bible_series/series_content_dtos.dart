@@ -69,7 +69,7 @@ extension SeriesContentDtoX on SeriesContentDto {
   SeriesContent toDomain() {
     List<ISeriesContentBody> _body = [];
     this.body.forEach((element) {
-      _body.add(element.toDomain());
+      _body.add(element.toDomain(body.indexOf(element)));
     });
 
     return SeriesContent(
@@ -128,7 +128,7 @@ class SeriesContentBodyDto {
 
 extension SeriesContentBodyDtoX on SeriesContentBodyDto {
   // ignore: missing_return
-  ISeriesContentBody toDomain() {
+  ISeriesContentBody toDomain(int index) {
     if (this.bodyType == 'audio') {
       AudioBodyProperties bodyProperties = AudioBodyProperties();
       bodyProperties.audioFileUrl = this.properties['audioFileUrl'];
@@ -182,11 +182,13 @@ extension SeriesContentBodyDtoX on SeriesContentBodyDto {
       );
     } else if (this.bodyType == 'question') {
       QuestionBodyProperties bodyProperties = QuestionBodyProperties();
-      List<String> _questions = [];
+      List<Question> _questions = [];
+      dynamic questions = this.properties['questions'];
 
-      this.properties['questions'].forEach((element) {
-        _questions.add(element);
+      questions.forEach((question) {
+        _questions.add(Question(location: [index, questions.indexOf(question)], question: question));
       });
+
       bodyProperties.questions = _questions;
 
       return QuestionBody(
