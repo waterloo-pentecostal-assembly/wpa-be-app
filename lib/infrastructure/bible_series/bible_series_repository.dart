@@ -56,7 +56,7 @@ extension BibleSeriesRepositoryX on BibleSeriesRepository {
         }
       },
     );
-    
+
     return bibleSeriesList;
   }
 }
@@ -84,7 +84,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
   /// This is information from the [bible_series] collection.
   /// Throws [ApplicationException] or [BibleSeriesException].
   @override
-  Future<BibleSeries> getBibleSeriesInformation({@required String bibleSeriesId}) async {
+  Future<BibleSeries> getBibleSeriesDetails({@required String bibleSeriesId}) async {
     DocumentSnapshot document;
     try {
       document = await _firestore.collection("bible_series").doc(bibleSeriesId).get();
