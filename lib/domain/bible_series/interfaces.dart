@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'entities.dart';
 
 abstract class IBibleSeriesRepository {
-  Future<BibleSeries> getBibleSeriesInformation({
+  Future<BibleSeries> getBibleSeriesDetails({
     @required String bibleSeriesId,
   });
 

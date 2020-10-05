@@ -91,7 +91,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
   /// This is information from the [bible_series] collection.
   /// Throws [ApplicationException] or [BibleSeriesException].
   @override
-  Future<BibleSeries> getBibleSeriesInformation({
+  Future<BibleSeries> getBibleSeriesDetails({
     @required String bibleSeriesId,
   }) async {
     DocumentSnapshot document;
