@@ -5,15 +5,15 @@ import '../../domain/common/exceptions.dart';
 void handlePlatformException(PlatformException e) {
   if (e.message.contains('PERMISSION_DENIED')) {
     throw ApplicationException(
-      message: '${e.message}',
-      displayMessage: 'Permission Denied',
-      errorType: ApplicationExceptionType.PERMISSION_DENIED,
+      message: 'Permission Denied.',
+      code: ApplicationExceptionCode.PERMISSION_DENIED,
+      details: e,
     );
   } else {
     throw ApplicationException(
-      message: "${e.message}",
-      displayMessage: 'Unknown error occured',
-      errorType: ApplicationExceptionType.UNKNOWN,
+      message: 'Unknown error occurred.',
+      code: ApplicationExceptionCode.UNKNOWN,
+      details: e,
     );
   }
 }

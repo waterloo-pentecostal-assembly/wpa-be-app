@@ -38,9 +38,9 @@ extension BibleSeriesRepositoryX on BibleSeriesRepository {
       handlePlatformException(e);
     } catch (e) {
       throw ApplicationException(
-        message: "${e.message}",
-        displayMessage: 'Unknown error occured',
-        errorType: ApplicationExceptionType.UNKNOWN,
+        code: ApplicationExceptionCode.UNKNOWN,
+        message: 'An unknown error occured.',
+        details: e,
       );
     }
 
@@ -92,17 +92,17 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
       handlePlatformException(e);
     } catch (e) {
       throw ApplicationException(
-        message: "${e.message}",
-        displayMessage: 'Unknown error occured',
-        errorType: ApplicationExceptionType.UNKNOWN,
+        code: ApplicationExceptionCode.UNKNOWN,
+        message: 'An unknown error occured.',
+        details: e,
       );
     }
 
     if (bibleSeriesId == null) {
       throw BibleSeriesException(
-        message: 'Bible series $bibleSeriesId not found',
-        errorType: BibleSeriesExceptionType.NO_SERIES_CONTENT,
-        displayMessage: 'Unable to find requested Bible Series',
+        code: BibleSeriesExceptionCode.NO_SERIES_CONTENT,
+        message: 'Unable to find requested Bible Series',
+        details: 'Bible series $bibleSeriesId not found',
       );
     }
 
@@ -128,9 +128,9 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
       handlePlatformException(e);
     } catch (e) {
       throw ApplicationException(
-        message: "${e.message}",
-        displayMessage: 'Unknown error occured',
-        errorType: ApplicationExceptionType.UNKNOWN,
+        code: ApplicationExceptionCode.UNKNOWN,
+        message: 'An unknown error occured.',
+        details: e,
       );
     }
 

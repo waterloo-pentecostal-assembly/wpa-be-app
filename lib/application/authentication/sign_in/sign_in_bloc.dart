@@ -47,18 +47,15 @@ Stream<SignInState> _mapEmailChangedToState(
       emailAddress: email.value,
       emailAddressError: '',
     );
-  } on ApplicationException catch (e) {
-    if (e.errorType != ApplicationExceptionType.VALUE_OBJECT) {
-      rethrow;
-    }
+  } on ValueObjectException catch (e) {
     yield state.copyWith(
       emailAddress: event.email,
-      emailAddressError: e.displayMessage,
+      emailAddressError: e.message,
     );
   } catch (e) {
     yield state.copyWith(
       emailAddress: event.email,
-      emailAddressError: 'Unknown Error',
+      emailAddressError: 'An unknown error occured.',
     );
   }
 }
@@ -73,18 +70,15 @@ Stream<SignInState> _mapPasswordChangedToState(
       password: password.value,
       passwordError: '',
     );
-  } on ApplicationException catch (e) {
-    if (e.errorType != ApplicationExceptionType.VALUE_OBJECT) {
-      rethrow;
-    }
+  } on ValueObjectException catch (e) {
     yield state.copyWith(
       password: event.password,
-      passwordError: e.displayMessage,
+      passwordError: e.message,
     );
   } catch (e) {
     yield state.copyWith(
       password: event.password,
-      passwordError: 'Unknown Error',
+      passwordError: 'An unknown error occured.',
     );
   }
 }
@@ -123,7 +117,16 @@ Stream<SignInState> _mapSignInWithEmailAndPasswordToState(
     yield state.copyWith(
       submitting: false,
       signInSuccess: false,
-      signInError: e.displayMessage,
+      signInError: e.message,
+    );
+  } on ValueObjectException catch (e) {
+    // NOTE: We do not need to catch this here is the user is not
+    // allowed to click sign-in if there are value object error.
+    // Leaving in here for now until we finalalize the sing-in flow.  
+    yield state.copyWith(
+      submitting: false,
+      signInSuccess: false,
+      signInError: e.message,
     );
   } catch (e) {
     yield state.copyWith(
