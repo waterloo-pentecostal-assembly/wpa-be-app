@@ -1,13 +1,14 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:uuid/uuid.dart';
 
 @immutable
-abstract class ValueObject<T> {
+abstract class ValueObject<T> extends Equatable{
   const ValueObject();
   get value;
 }
 
-class UniqueId extends ValueObject<String> {
+class UniqueId extends ValueObject<String>{
   @override
   final String value;
 
@@ -28,4 +29,7 @@ class UniqueId extends ValueObject<String> {
   String toString() {
     return this.value;
   }
+
+  @override
+  List<Object> get props => [this.value];
 }

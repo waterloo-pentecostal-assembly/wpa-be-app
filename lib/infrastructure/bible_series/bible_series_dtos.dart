@@ -122,16 +122,19 @@ class SeriesContentSnippetDto {
 
 extension SeriesContentSnippetDtoX on SeriesContentSnippetDto {
   SeriesContentSnippet toDomain() {
-    Map<SeriesContentType, UniqueId> contentTypes = {};
+    List<AvailableContentType> availableContentTypes = [];
     this.contentTypes.forEach((key, value) {
       final SeriesContentType newKey = contentTypeMapper(key);
       if (newKey != null) {
-        contentTypes[newKey] = UniqueId.fromUniqueString(value);
+        availableContentTypes.add(AvailableContentType(
+          seriesContentType: newKey,
+          contentId: UniqueId.fromUniqueString(value),
+        ));
       }
     });
 
     return SeriesContentSnippet(
-      contentTypes: contentTypes,
+      availableContentTypes: availableContentTypes,
       date: this.date,
     );
   }

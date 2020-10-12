@@ -2,13 +2,18 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:wpa_app/domain/common/value_objects.dart';
+import 'package:wpa_app/infrastructure/common/helpers.dart';
 
+import '../../domain/authentication/entities.dart';
+import '../../domain/authentication/interfaces.dart';
 import '../../domain/bible_series/entities.dart';
 import '../../domain/bible_series/exceptions.dart';
 import '../../domain/bible_series/interfaces.dart';
 import '../../domain/common/exceptions.dart';
 import '../../infrastructure/common/firebase_helpers.dart';
+import '../../injection.dart';
 import 'bible_series_dtos.dart';
+import 'content_completion_dto.dart';
 import 'series_content_dtos.dart';
 
 extension BibleSeriesRepositoryX on BibleSeriesRepository {
@@ -123,7 +128,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
   /// This is informaion from the [series_content] sub-collection.
   /// Throws [ApplicationException] or [BibleSeriesException].
   @override
-  Future<SeriesContent> getBibleSeriesContent({
+  Future<SeriesContent> getContentDetails({
     @required String bibleSeriesId,
     @required String seriesContentId,
   }) async {
@@ -145,21 +150,28 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
       );
     }
 
-    final SeriesContent seriesContent = SeriesContentDto.fromFirestore(document).toDomain();
-    return seriesContent;
+    if (document.data() != null) {
+      final SeriesContent seriesContent = SeriesContentDto.fromFirestore(document).toDomain();
+      return seriesContent;
+    }
+
+    throw BibleSeriesException(
+      code: BibleSeriesExceptionCode.NO_CONTENT_INFO,
+      message: 'Cannot find content details',
+    );
   }
 
   @override
   Future<ContentCompletionDetails> getContentCompletionDetails({
-    String userId,
     String seriesContentId,
   }) async {
     QuerySnapshot snapshot;
+    final LocalUser user = await getIt<IAuthenticationFacade>().getSignedInUser();
 
     try {
       snapshot = await _firestore
           .collection("series_content_completions")
-          .where("user_id", isEqualTo: userId)
+          .where("user_id", isEqualTo: user.id.toString())
           .where("content_id", isEqualTo: seriesContentId)
           .get();
     } on PlatformException catch (e) {
@@ -173,28 +185,106 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
     }
 
     if (snapshot.docs.length > 0) {
-      Map<String, dynamic> completionDetails = snapshot.docs[0].data();
+      DocumentSnapshot document = snapshot.docs[0];
+      final ContentCompletionDetails seriesContent = ContentCompletionDto.fromFirestore(document).toDomain();
+      return seriesContent;
     }
-    return ContentCompletionDetails(
-      isCompleted: false,
+
+    throw BibleSeriesException(
+      code: BibleSeriesExceptionCode.NO_COMPLETION_INFO,
+      message: 'Cannot find completion details',
     );
   }
 
   @override
-  Future<bool> markContentAsComplete() {
-    // TODO: implement markContentAsComplete
-    throw UnimplementedError();
+  Future<void> markContentAsComplete({
+    ContentCompletionDetails contentCompletionDetails,
+  }) async {
+    ContentCompletionDto contentCompletionDto = ContentCompletionDto.fromDomain(contentCompletionDetails);
+    final LocalUser user = await getIt<IAuthenticationFacade>().getSignedInUser();
+
+    try {
+      await _firestore.collection("series_content_completions").add({
+        "content_id": contentCompletionDto.contentId,
+        "is_on_time": contentCompletionDto.isOnTime,
+        "responses": contentCompletionDto.responses,
+        "series_id": contentCompletionDto.seriesId,
+        "user_id": user.id.toString(),
+      });
+    } on PlatformException catch (e) {
+      handlePlatformException(e);
+    } catch (e) {
+      throw ApplicationException(
+        code: ApplicationExceptionCode.UNKNOWN,
+        message: 'An unknown error occured.',
+        details: e,
+      );
+    }
   }
 
   @override
-  Future<bool> markContentAsIncomplete() {
-    // TODO: implement markContentAsIncomplete
-    throw UnimplementedError();
+  Future<void> markContentAsIncomplete({
+    String contentCompletionId,
+  }) async {
+    try {
+      await _firestore.collection("series_content_completions").doc(contentCompletionId).delete();
+    } on PlatformException catch (e) {
+      handlePlatformException(e);
+    } catch (e) {
+      throw ApplicationException(
+        code: ApplicationExceptionCode.UNKNOWN,
+        message: 'An unknown error occured.',
+        details: e,
+      );
+    }
   }
 
   @override
-  Future<bool> updateContentResponse() {
-    // TODO: implement updateContentResponse
-    throw UnimplementedError();
+  Future<void> updateContentResponse({
+    ContentCompletionDetails contentCompletionDetails,
+  }) async {
+    ContentCompletionDto contentCompletionDto = ContentCompletionDto.fromDomain(contentCompletionDetails);
+
+    try {
+      await _firestore.collection("series_content_completions").doc(contentCompletionDto.id).set({
+        "responses": contentCompletionDto.responses,
+      });
+    } on PlatformException catch (e) {
+      handlePlatformException(e);
+    } catch (e) {
+      throw ApplicationException(
+        code: ApplicationExceptionCode.UNKNOWN,
+        message: 'An unknown error occured.',
+        details: e,
+      );
+    }
+  }
+
+  @override
+  Future<Map<UniqueId, ContentCompletionDetails>> getAllContentCompletionDetails({String bibleSeriesId}) async {
+    QuerySnapshot snapshot;
+    final LocalUser user = await getIt<IAuthenticationFacade>().getSignedInUser();
+    try {
+      snapshot = await _firestore
+          .collection("series_content_completions")
+          .where("user_id", isEqualTo: user.id.toString())
+          .where("series_id", isEqualTo: bibleSeriesId)
+          .get();
+    } on PlatformException catch (e) {
+      handlePlatformException(e);
+    } catch (e) {
+      throw ApplicationException(
+        code: ApplicationExceptionCode.UNKNOWN,
+        message: 'An unknown error occured.',
+        details: e,
+      );
+    }
+    Map<UniqueId, ContentCompletionDetails> contentCompletionDetails = {};
+    snapshot.docs.forEach((element) {
+      final ContentCompletionDetails _contentCompletionDetails = ContentCompletionDto.fromFirestore(element).toDomain();
+      String id = findOrThrowException(element.data(), "content_id");
+      contentCompletionDetails[UniqueId.fromUniqueString(id)] = _contentCompletionDetails;
+    });
+    return contentCompletionDetails;
   }
 }

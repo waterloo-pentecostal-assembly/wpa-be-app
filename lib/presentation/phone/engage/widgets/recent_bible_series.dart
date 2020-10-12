@@ -84,7 +84,8 @@ class BibleSeriesCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        getIt<BibleSeriesBloc>()..add(BibleSeriesInformationRequested(bibleSeriesId: bibleSeries.id));
+        // TODO: determine if to request the bible series info here or in the page
+        // getIt<BibleSeriesBloc>()..add(BibleSeriesInformationRequested(bibleSeriesId: bibleSeries.id));
         Navigator.pushNamed(context, '/bible_series', arguments: {'bibleSeriesId': bibleSeries.id});
       },
       child: Container(

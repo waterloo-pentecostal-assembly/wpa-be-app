@@ -30,12 +30,21 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
       user.sendEmailVerification(); // Fire and forget
       throw AuthenticationException(
         code: AuthenticationExceptionCode.EMAIL_NOT_VERIFIED,
-        message: 'Email not verified.',
+        message:
+            'Email not verified. A verification email has been sent, please verify your account before signing in.',
       );
     }
 
     String userId = user.uid;
     DocumentSnapshot userInfo = await _firestore.collection("users").doc(userId).get();
+
+    if (userInfo == null) {
+      throw AuthenticationException(
+        code: AuthenticationExceptionCode.USER_COLLECTION_NOT_FOUND,
+        message: 'User details not found.',
+      );
+    }
+
     return FirebaseUserDto.fromFirestore(userInfo).toDomain();
   }
 
