@@ -19,16 +19,10 @@ class RecentBibleSeries extends BibleSeriesState {
 
   RecentBibleSeries(this._bibleSeriesList);
 
-  @override
-  List<Object> get props => [bibleSeriesList];
-
   List<BibleSeries> get bibleSeriesList => _bibleSeriesList;
 
   @override
-  String toString() {
-    // TODO: implement toString
-    return super.toString();
-  }
+  List<Object> get props => [bibleSeriesList];
 }
 
 class BibleSeriesInformation extends BibleSeriesState {
@@ -40,4 +34,15 @@ class BibleSeriesInformation extends BibleSeriesState {
 
   @override
   List<Object> get props => [_bibleSeriesInformation];
+}
+
+class ContentDetail extends BibleSeriesState {
+  final SeriesContent _contentDetail;
+
+  ContentDetail(this._contentDetail);
+
+  SeriesContent get contentDetail => _contentDetail;
+
+  @override
+  List<Object> get props => [_contentDetail];
 }

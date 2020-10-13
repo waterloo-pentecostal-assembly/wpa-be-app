@@ -7,6 +7,7 @@ import '../../common/factories/text_factory.dart';
 import '../../common/interfaces.dart';
 import '../widgets/recent_bible_series.dart';
 import 'bible_series_page.dart';
+import 'content_detail_page.dart';
 
 class EngagePage extends IIndexedPage {
   final GlobalKey<NavigatorState> navigatorKey;
@@ -38,6 +39,13 @@ class EngagePage extends IIndexedPage {
                     Map args = settings.arguments;
                     return BibleSeriesPage(
                       bibleSeriesId: args['bibleSeriesId'],
+                    );
+                  case '/content_detail':
+                    Map args = settings.arguments;
+                    return ContentDetailPage(
+                      seriesContentId: args['seriesContentId'],
+                      bibleSeriesId: args['bibleSeriesId'],
+                      getCompletionDetails: args['getCompletionDetails'],
                     );
                 }
               },

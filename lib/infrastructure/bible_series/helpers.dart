@@ -1,3 +1,5 @@
+import '../../domain/bible_series/exceptions.dart';
+
 import '../../domain/bible_series/entities.dart';
 
 SeriesContentType contentTypeMapper(type) {
@@ -18,5 +20,9 @@ SeriesContentType contentTypeMapper(type) {
   } else if (type == 'memorize') {
     return SeriesContentType.MEMORIZE;
   }
-  return null;
+  throw BibleSeriesException(
+    code: BibleSeriesExceptionCode.UNSUPPORTED_CONTENT_TYPE,
+    message: 'Unsupported content type',
+    details: 'Unsupported content type: $type',
+  );
 }

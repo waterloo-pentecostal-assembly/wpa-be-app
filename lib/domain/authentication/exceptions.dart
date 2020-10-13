@@ -4,10 +4,13 @@ import 'package:wpa_app/domain/common/exceptions.dart';
 enum AuthenticationExceptionCode {
   INVALID_EMAIL_OR_PASSWORD,
   USER_NOT_FOUND,
+  USER_COLLECTION_NOT_FOUND,
   USER_DISABLED,
   EMAIL_NOT_VERIFIED,
   AUTHENTICATION_SERVER_ERROR,
   NOT_AUTHENTICATED,
+  EMAIL_IN_USE,
+  REQUIRES_RECENT_LOGIN,
 }
 
 /// Implements [BaseException] to provide an exception type specific to Authentication.

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:wpa_app/domain/bible_series/value_objects.dart';
 
 import '../common/value_objects.dart';
 
@@ -52,17 +53,74 @@ class BibleSeries {
 }
 
 class SeriesContentSnippet {
-  final Map<SeriesContentType, UniqueId> contentTypes;
+  final List<AvailableContentType> availableContentTypes;
   final Timestamp date;
+  bool _isCompleted;
+  bool _isOnTime;
+  bool _isDraft;
+
+  set isCompleted(bool isCompleted) {
+    this._isCompleted = isCompleted;
+  }
+
+  get isCompleted => _isCompleted;
+
+  set isOnTime(bool isOnTime) {
+    this._isOnTime = isOnTime;
+  }
+
+  get isOnTime => _isOnTime;
+
+  set isDraft(bool isDraft) {
+    this._isDraft = isDraft;
+  }
+
+  get isDraft => _isDraft;
 
   SeriesContentSnippet({
-    @required this.contentTypes,
+    @required this.availableContentTypes,
     @required this.date,
   });
 
   @override
   String toString() {
-    return 'contentTypes: $contentTypes, date: $date';
+    return 'availableContentTypes: $availableContentTypes, date: $date, isCompleted: $isCompleted, isOnTime: $isOnTime';
+  }
+}
+
+class AvailableContentType {
+  final SeriesContentType seriesContentType;
+  final UniqueId contentId;
+  bool _isCompleted;
+  bool _isOnTime;
+  bool _isDraft;
+
+  set isCompleted(bool isCompleted) {
+    this._isCompleted = isCompleted;
+  }
+
+  get isCompleted => _isCompleted;
+
+  set isOnTime(bool isOnTime) {
+    this._isOnTime = isOnTime;
+  }
+
+  get isOnTime => _isOnTime;
+
+  set isDraft(bool isDraft) {
+    this._isDraft = isDraft;
+  }
+
+  get isDraft => _isDraft;
+
+  AvailableContentType({
+    @required this.seriesContentType,
+    @required this.contentId,
+  });
+
+  @override
+  String toString() {
+    return 'seriesContentType: $seriesContentType, contentId: $contentId, isCompleted: $isCompleted, isOnTime: $isOnTime';
   }
 }
 
@@ -73,6 +131,16 @@ class SeriesContent {
   final String title;
   final String subTitle;
   final List<ISeriesContentBody> body;
+
+  /// Checks if it possible to have a response for this [SeriesContent]
+  bool get isResponsePossible {
+    this.body.forEach((element) {
+      if (element.type == SeriesContentBodyType.QUESTION || element.type == SeriesContentBodyType.IMAGE_INPUT) {
+        return true;
+      }
+    });
+    return false;
+  }
 
   SeriesContent({
     @required this.id,
@@ -170,7 +238,17 @@ class QuestionBody implements ISeriesContentBody {
 }
 
 class QuestionBodyProperties {
-  List<String> questions;
+  List<Question> questions;
+}
+
+class Question {
+  final String question;
+  final List location;
+
+  Question({
+    @required this.question,
+    @required this.location,
+  });
 }
 
 class ImageInputBody implements ISeriesContentBody {
@@ -182,4 +260,22 @@ class ImageInputBody implements ISeriesContentBody {
 
   @override
   get properties => {};
+}
+
+class ContentCompletionDetails {
+  final UniqueId id;
+  final UniqueId seriesId;
+  final UniqueId contentId;
+  final bool isOnTime;
+  final bool isDraft;
+  final Map<String, Map<String, ResponseBody>> responses;
+
+  ContentCompletionDetails({
+    this.id,
+    this.seriesId,
+    this.contentId,
+    this.isOnTime,
+    this.isDraft,
+    this.responses,
+  });
 }

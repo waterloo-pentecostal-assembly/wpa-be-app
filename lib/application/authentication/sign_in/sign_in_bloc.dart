@@ -113,26 +113,19 @@ Stream<SignInState> _mapSignInWithEmailAndPasswordToState(
       signInSuccess: true,
       signInError: null,
     );
-  } on AuthenticationException catch (e) {
-    yield state.copyWith(
-      submitting: false,
-      signInSuccess: false,
-      signInError: e.message,
-    );
-  } on ValueObjectException catch (e) {
-    // NOTE: We do not need to catch this here is the user is not
-    // allowed to click sign-in if there are value object error.
-    // Leaving in here for now until we finalalize the sing-in flow.  
+  } on BaseApplicationException catch (e) {
     yield state.copyWith(
       submitting: false,
       signInSuccess: false,
       signInError: e.message,
     );
   } catch (e) {
+    print(e.toString());
+    print('^^^^');
     yield state.copyWith(
       submitting: false,
       signInSuccess: false,
-      signInError: 'An unknown error occured.',
+      signInError: 'An unknown error occured. 3',
     );
   }
 }
