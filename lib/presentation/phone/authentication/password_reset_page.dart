@@ -10,7 +10,7 @@ class PasswordResetPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlocProvider(
-        create: (context) => getIt<PasswordResetBloc>(), //SignInBloc(FirebaseAuthenticationFacade),
+        create: (context) => getIt<PasswordResetBloc>(),
         child: PasswordResetForm(),
       ),
     );

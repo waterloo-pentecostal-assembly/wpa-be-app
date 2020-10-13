@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wpa_app/domain/bible_series/entities.dart';
 
 import '../../../../application/bible_series/bible_series_bloc.dart';
+import '../../../../domain/bible_series/entities.dart';
 import '../../../../domain/common/value_objects.dart';
 import '../../../../injection.dart';
 import '../../../common/loader.dart';
@@ -40,7 +40,6 @@ class _BibleSeriesState extends State<BibleSeriesWidget> with SingleTickerProvid
   @override
   void initState() {
     super.initState();
-    // _tabController = new TabController(length: tabLength, vsync: this);
   }
 
   @override
@@ -122,95 +121,13 @@ class _BibleSeriesState extends State<BibleSeriesWidget> with SingleTickerProvid
   }
 }
 
-// class BibleSeriesWidget2 extends StatelessWidget {
-// @override
-// Widget build(BuildContext context) {
-//   return BlocConsumer<BibleSeriesBloc, BibleSeriesState>(
-//     listener: (context, state) {
-//       // TODO: implement listener
-//     },
-//     builder: (BuildContext context, BibleSeriesState state) {
-//       if (state is BibleSeriesInformation) {
-//         return Scaffold(
-//           body: Column(
-//             children: [
-//               Stack(
-//                 children: [
-//                   Container(
-//                     height: 0.8 * MediaQuery.of(context).size.width,
-//                     width: MediaQuery.of(context).size.width,
-//                     decoration: BoxDecoration(borderRadius: BorderRadius.circular(30.0), boxShadow: [
-//                       BoxShadow(
-//                         color: Colors.black26,
-//                         offset: Offset(0.0, 2.0),
-//                         blurRadius: 6.0,
-//                       )
-//                     ]),
-//                     child: ClipRRect(
-//                       borderRadius: BorderRadius.circular(30.0),
-//                       child: Image.network(
-//                         state.bibleSeriesInformation.imageUrl,
-//                         fit: BoxFit.cover,
-//                       ),
-//                     ),
-//                   ),
-//                   Padding(
-//                     padding: const EdgeInsets.symmetric(
-//                       horizontal: 10.0,
-//                       vertical: 40.0,
-//                     ),
-//                     child: Row(
-//                       children: [
-//                         IconButton(
-//                           icon: Icon(Icons.arrow_back),
-//                           onPressed: () => Navigator.pop(context),
-//                           color: Colors.white,
-//                         )
-//                       ],
-//                     ),
-//                   )
-//                 ],
-//               ),
-//               Expanded(
-//                 child: DefaultTabController(
-//                   length: state.bibleSeriesInformation.seriesContentSnippet.length,
-//                   child: Scaffold(
-//                     appBar: PreferredSize(
-//                       preferredSize: Size.fromHeight(60.0),
-//                       child: Container(
-//                         child: AppBar(
-//                           leading: new Container(),
-//                           bottom: TabBar(
-//                             tabs: _buildContentTabs(state.bibleSeriesInformation.seriesContentSnippet),
-//                             isScrollable: true,
-//                           ),
-//                           // title: Text('Tabs Demo'),
-//                         ),
-//                       ),
-//                     ),
-//                     body: TabBarView(
-//                       children: _buildContentChildren(state.bibleSeriesInformation.seriesContentSnippet),
-//                     ),
-//                   ),
-//                 ),
-//               ),
-//             ],
-//           ),
-//         );
-//       }
-//       return Loader();
-//     },
-//   );
-// }
-// }
-
 List<Tab> _buildContentTabs(List<SeriesContentSnippet> seriesContentSnippets) {
   List<Tab> tabs = [];
   seriesContentSnippets.forEach((element) {
     tabs.add(
       Tab(
-        text:
-            '${element.date.toDate().toString().substring(0, 10)} - c: ${element.isCompleted} - d: ${element.isDraft} - ot: ${element.isOnTime}',
+        text: '''${element.date.toDate().toString().substring(0, 10)} 
+            - c: ${element.isCompleted} - d: ${element.isDraft} - ot: ${element.isOnTime}''',
       ),
     );
   });

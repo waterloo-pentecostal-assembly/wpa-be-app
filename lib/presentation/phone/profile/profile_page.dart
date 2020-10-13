@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../application/authentication/authentication_bloc.dart';
+import '../../../injection.dart';
 import '../common/interfaces.dart';
 import 'privacy_policy_page.dart';
 
@@ -12,13 +13,13 @@ class ProfilePage extends IIndexedPage {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AuthenticationBloc, AuthenticationState>(
-      listener: (BuildContext context, AuthenticationState state) {
-        print('>>>> STATE CHANGE');
-        if (state is Unauthenticated) {
-          Navigator.of(context, rootNavigator: true).pushNamed('/sign_in');
-        }
-      },
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<AuthenticationBloc>(
+          create: (BuildContext context) => getIt<AuthenticationBloc>(),
+        ),
+      ],
+      // child: TestWidget(),
       child: Scaffold(
         body: Navigator(
           key: navigatorKey,
@@ -44,25 +45,34 @@ class ProfilePage extends IIndexedPage {
 class ProfilePageRoot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Container(
-        child: Column(
-          children: <Widget>[
-            RaisedButton(
-              child: Text('Privacy Policy'),
-              onPressed: () {
-                Navigator.pushNamed(context, '/privacy_policy');
-              },
+    return BlocConsumer<AuthenticationBloc, AuthenticationState>(
+      listener: (BuildContext context, AuthenticationState state) {
+        if (state is Unauthenticated) {
+          Navigator.of(context, rootNavigator: true).pushNamed('/sign_in');
+        }
+      },
+      builder: (BuildContext context, AuthenticationState state) {
+        return SafeArea(
+          child: Container(
+            child: Column(
+              children: <Widget>[
+                RaisedButton(
+                  child: Text('Privacy Policy'),
+                  onPressed: () {
+                    Navigator.pushNamed(context, '/privacy_policy');
+                  },
+                ),
+                RaisedButton(
+                  child: Text('Sign Out'),
+                  onPressed: () {
+                    context.bloc<AuthenticationBloc>().add(SignOut());
+                  },
+                ),
+              ],
             ),
-            RaisedButton(
-              child: Text('Sign Out'),
-              onPressed: () {
-                context.bloc<AuthenticationBloc>().add(SignOut());
-              },
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 }

@@ -21,6 +21,22 @@ class IndexPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (BuildContext context) => getIt<NavigationBarBloc>(),
+      child: _IndexPage(
+        indexedPages: indexedPages,
+      ),
+    );
+  }
+}
+
+class _IndexPage extends StatelessWidget {
+  final List<IIndexedPage> indexedPages;
+
+  const _IndexPage({Key key, this.indexedPages}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
     return BlocBuilder<NavigationBarBloc, NavigationBarState>(
       builder: (BuildContext context, NavigationBarState state) {
         if (state.route != null) {
@@ -34,7 +50,7 @@ class IndexPage extends StatelessWidget {
           indexedPages[state.tab.index].navigatorKey.currentState.pushNamed(state.route);
         }
 
-        return _IndexPage(
+        return NavigationBar(
           tabIndex: state.tab.index,
           indexedPages: indexedPages,
         );
@@ -43,11 +59,11 @@ class IndexPage extends StatelessWidget {
   }
 }
 
-class _IndexPage extends StatelessWidget {
+class NavigationBar extends StatelessWidget {
   final int tabIndex;
   final List<IIndexedPage> indexedPages;
 
-  const _IndexPage({Key key, this.tabIndex, this.indexedPages}) : super(key: key);
+  const NavigationBar({Key key, this.tabIndex, this.indexedPages}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -81,7 +97,7 @@ class _IndexPage extends StatelessWidget {
           currentIndex: tabIndex,
           onTap: (int index) {
             if (tabIndex != index) {
-              getIt<NavigationBarBloc>()
+              context.bloc<NavigationBarBloc>()
                 ..add(
                   NavigationBarEvent(
                     tab: NavigationTabEnum.values[index],

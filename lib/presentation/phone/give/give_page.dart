@@ -9,9 +9,11 @@ class GivePage extends IIndexedPage {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        child: Text('GIVE PAGE'),
+    return SafeArea(
+      child: Scaffold(
+        body: Container(
+          child: Text('GIVE PAGE'),
+        ),
       ),
     );
   }

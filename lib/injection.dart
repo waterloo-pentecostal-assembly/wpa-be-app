@@ -52,7 +52,7 @@ void init() {
     () => BibleSeriesBloc(getIt<IBibleSeriesRepository>()),
   );
 
-  getIt.registerLazySingleton<NavigationBarBloc>(
+  getIt.registerFactory<NavigationBarBloc>(
     () => NavigationBarBloc(),
   );
 
