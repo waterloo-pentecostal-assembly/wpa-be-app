@@ -37,6 +37,7 @@ class BibleSeriesBloc extends Bloc<BibleSeriesEvent, BibleSeriesState> {
       yield* _mapContentDetailRequestedEventToState(
         event,
         _iBibleSeriesRepository.getContentDetails,
+        _iBibleSeriesRepository.getContentCompletionDetails,
       );
     }
   }
@@ -49,6 +50,10 @@ Stream<BibleSeriesState> _mapContentDetailRequestedEventToState(
     @required String bibleSeriesId,
   })
       getContentDetails,
+  Future<ContentCompletionDetails> Function({
+    @required String seriesContentId,
+  })
+      getContentCompletionDetails,
 ) async* {
   yield FetchingBibleSeries();
   try {
@@ -56,7 +61,15 @@ Stream<BibleSeriesState> _mapContentDetailRequestedEventToState(
       seriesContentId: event.seriesContentId.toString(),
       bibleSeriesId: event.bibleSeriesId.toString(),
     );
-    yield SeriesContentDetail(seriesContentDetail);
+
+    if (event.getCompletionDetails) {
+      ContentCompletionDetails contentCompletionDetails = await getContentCompletionDetails(
+        seriesContentId: event.seriesContentId.toString(),
+      );
+      yield SeriesContentDetail(seriesContentDetail, contentCompletionDetails);
+    } else {
+      yield SeriesContentDetail(seriesContentDetail, null);
+    }
   } on BaseApplicationException catch (e) {
     yield BibleSeriesError(
       message: e.message,
