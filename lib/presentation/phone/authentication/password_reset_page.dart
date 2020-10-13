@@ -8,12 +8,10 @@ import 'widgets/password_reset_form.dart';
 class PasswordResetPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: BlocProvider(
-          create: (context) => getIt<PasswordResetBloc>(), //SignInBloc(FirebaseAuthenticationFacade),
-          child: PasswordResetForm(),
-        ),
+    return Scaffold(
+      body: BlocProvider(
+        create: (context) => getIt<PasswordResetBloc>(), //SignInBloc(FirebaseAuthenticationFacade),
+        child: PasswordResetForm(),
       ),
     );
   }

@@ -8,13 +8,10 @@ import 'widgets/sign_in_form.dart';
 class SignInPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: BlocProvider(
-          create: (context) =>
-              getIt<SignInBloc>(), //SignInBloc(FirebaseAuthenticationFacade),
-          child: SignInForm(),
-        ),
+    return Scaffold(
+      body: BlocProvider(
+        create: (context) => getIt<SignInBloc>(), //SignInBloc(FirebaseAuthenticationFacade),
+        child: SignInForm(),
       ),
     );
   }

@@ -14,6 +14,7 @@ class ProfilePage extends IIndexedPage {
   Widget build(BuildContext context) {
     return BlocListener<AuthenticationBloc, AuthenticationState>(
       listener: (BuildContext context, AuthenticationState state) {
+        print('>>>> STATE CHANGE');
         if (state is Unauthenticated) {
           Navigator.of(context, rootNavigator: true).pushNamed('/sign_in');
         }
