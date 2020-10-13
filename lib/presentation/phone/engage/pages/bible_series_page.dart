@@ -19,7 +19,7 @@ class BibleSeriesPage extends StatelessWidget {
         BlocProvider<BibleSeriesBloc>(
           create: (BuildContext context) => getIt<BibleSeriesBloc>()
             ..add(
-              BibleSeriesInformationRequested(bibleSeriesId: this.bibleSeriesId),
+              BibleSeriesDetailRequested(bibleSeriesId: this.bibleSeriesId),
             ),
         )
       ],
@@ -47,8 +47,8 @@ class _BibleSeriesState extends State<BibleSeriesWidget> with SingleTickerProvid
     return BlocConsumer<BibleSeriesBloc, BibleSeriesState>(
       listener: (context, state) {},
       builder: (BuildContext context, BibleSeriesState state) {
-        if (state is BibleSeriesInformation) {
-          tabLength = state.bibleSeriesInformation.seriesContentSnippet.length;
+        if (state is BibleSeriesDetail) {
+          tabLength = state.bibleSeriesDetail.seriesContentSnippet.length;
           _tabController = new TabController(length: tabLength, vsync: this);
 
           return Scaffold(
@@ -69,7 +69,7 @@ class _BibleSeriesState extends State<BibleSeriesWidget> with SingleTickerProvid
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(30.0),
                         child: Image.network(
-                          state.bibleSeriesInformation.imageUrl,
+                          state.bibleSeriesDetail.imageUrl,
                           fit: BoxFit.cover,
                         ),
                       ),
@@ -96,7 +96,7 @@ class _BibleSeriesState extends State<BibleSeriesWidget> with SingleTickerProvid
                   child: TabBar(
                     controller: _tabController,
                     isScrollable: true,
-                    tabs: _buildContentTabs(state.bibleSeriesInformation.seriesContentSnippet),
+                    tabs: _buildContentTabs(state.bibleSeriesDetail.seriesContentSnippet),
                   ),
                 ),
                 Expanded(
@@ -105,8 +105,8 @@ class _BibleSeriesState extends State<BibleSeriesWidget> with SingleTickerProvid
                       controller: _tabController,
                       children: _buildContentChildren(
                         context,
-                        state.bibleSeriesInformation.seriesContentSnippet,
-                        state.bibleSeriesInformation.id,
+                        state.bibleSeriesDetail.seriesContentSnippet,
+                        state.bibleSeriesDetail.id,
                       ),
                     ),
                   ),
@@ -126,8 +126,8 @@ List<Tab> _buildContentTabs(List<SeriesContentSnippet> seriesContentSnippets) {
   seriesContentSnippets.forEach((element) {
     tabs.add(
       Tab(
-        text: '''${element.date.toDate().toString().substring(0, 10)} 
-            - c: ${element.isCompleted} - d: ${element.isDraft} - ot: ${element.isOnTime}''',
+        text:
+            '''${element.date.toDate().toString().substring(0, 10)} - c: ${element.isCompleted} - d: ${element.isDraft} - ot: ${element.isOnTime}''',
       ),
     );
   });

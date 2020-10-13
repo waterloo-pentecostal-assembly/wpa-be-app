@@ -9,6 +9,16 @@ class BibleSeriesInitial extends BibleSeriesState {
   List<Object> get props => [];
 }
 
+class BibleSeriesError extends BibleSeriesState {
+  final String message;
+  final dynamic code;
+
+  BibleSeriesError({@required this.message, @required this.code});
+
+  @override
+  List<Object> get props => [message, code];
+}
+
 class FetchingBibleSeries extends BibleSeriesState {
   @override
   List<Object> get props => [];
@@ -25,24 +35,24 @@ class RecentBibleSeries extends BibleSeriesState {
   List<Object> get props => [bibleSeriesList];
 }
 
-class BibleSeriesInformation extends BibleSeriesState {
-  final BibleSeries _bibleSeriesInformation;
+class BibleSeriesDetail extends BibleSeriesState {
+  final BibleSeries _bibleSeriesDetail;
 
-  BibleSeriesInformation(this._bibleSeriesInformation);
+  BibleSeriesDetail(this._bibleSeriesDetail);
 
-  BibleSeries get bibleSeriesInformation => _bibleSeriesInformation;
+  BibleSeries get bibleSeriesDetail => _bibleSeriesDetail;
 
   @override
-  List<Object> get props => [_bibleSeriesInformation];
+  List<Object> get props => [_bibleSeriesDetail];
 }
 
-class ContentDetail extends BibleSeriesState {
-  final SeriesContent _contentDetail;
+class SeriesContentDetail extends BibleSeriesState {
+  final SeriesContent _seriesContentDetail;
 
-  ContentDetail(this._contentDetail);
+  SeriesContentDetail(this._seriesContentDetail);
 
-  SeriesContent get contentDetail => _contentDetail;
+  SeriesContent get seriesContentDetail => _seriesContentDetail;
 
   @override
-  List<Object> get props => [_contentDetail];
+  List<Object> get props => [_seriesContentDetail];
 }

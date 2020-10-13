@@ -9,10 +9,10 @@ class RecentBibleSeriesRequested extends BibleSeriesEvent {
   List<Object> get props => [];
 }
 
-class BibleSeriesInformationRequested extends BibleSeriesEvent {
+class BibleSeriesDetailRequested extends BibleSeriesEvent {
   final UniqueId bibleSeriesId;
 
-  BibleSeriesInformationRequested({@required this.bibleSeriesId});
+  BibleSeriesDetailRequested({@required this.bibleSeriesId});
 
   @override
   List<Object> get props => [bibleSeriesId];

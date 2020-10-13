@@ -6,7 +6,9 @@ import 'package:flutter/material.dart';
 
 import '../../domain/bible_series/entities.dart';
 import '../../domain/bible_series/interfaces.dart';
+import '../../domain/common/exceptions.dart';
 import '../../domain/common/value_objects.dart';
+import 'helpers.dart';
 
 part 'bible_series_event.dart';
 part 'bible_series_state.dart';
@@ -25,8 +27,8 @@ class BibleSeriesBloc extends Bloc<BibleSeriesEvent, BibleSeriesState> {
         event,
         _iBibleSeriesRepository.getRecentBibleSeries,
       );
-    } else if (event is BibleSeriesInformationRequested) {
-      yield* _mapBibleSeriesInformationRequestedEventToState(
+    } else if (event is BibleSeriesDetailRequested) {
+      yield* _mapBibleSeriesDetailRequestedEventToState(
         event,
         _iBibleSeriesRepository.getBibleSeriesDetails,
         _iBibleSeriesRepository.getAllContentCompletionDetails,
@@ -40,7 +42,6 @@ class BibleSeriesBloc extends Bloc<BibleSeriesEvent, BibleSeriesState> {
   }
 }
 
-//TODO: handle errors
 Stream<BibleSeriesState> _mapContentDetailRequestedEventToState(
   ContentDetailRequested event,
   Future<SeriesContent> Function({
@@ -50,92 +51,77 @@ Stream<BibleSeriesState> _mapContentDetailRequestedEventToState(
       getContentDetails,
 ) async* {
   yield FetchingBibleSeries();
-
-  SeriesContent seriesContentDetails = await getContentDetails(
-    seriesContentId: event.seriesContentId.toString(),
-    bibleSeriesId: event.bibleSeriesId.toString(),
-  );
+  try {
+    SeriesContent seriesContentDetail = await getContentDetails(
+      seriesContentId: event.seriesContentId.toString(),
+      bibleSeriesId: event.bibleSeriesId.toString(),
+    );
+    yield SeriesContentDetail(seriesContentDetail);
+  } on BaseApplicationException catch (e) {
+    yield BibleSeriesError(
+      message: e.message,
+      code: e.code,
+    );
+  } catch (e) {
+    yield BibleSeriesError(
+      message: 'An unknown error occured.',
+      code: e.code,
+    );
+  }
 }
 
-//TODO: handle errors
 Stream<BibleSeriesState> _mapGetRecentBibleSeriesEventToState(
   RecentBibleSeriesRequested event,
   Future Function() getRecentBibleSeriesFunction,
 ) async* {
   yield FetchingBibleSeries();
-  List<BibleSeries> bibleSeriesList = await getRecentBibleSeriesFunction();
-  yield RecentBibleSeries(bibleSeriesList);
+  try {
+    List<BibleSeries> bibleSeriesList = await getRecentBibleSeriesFunction();
+    yield RecentBibleSeries(bibleSeriesList);
+  } on BaseApplicationException catch (e) {
+    yield BibleSeriesError(
+      message: e.message,
+      code: e.code,
+    );
+  } catch (e) {
+    yield BibleSeriesError(
+      message: 'An unknown error occured.',
+      code: e.code,
+    );
+  }
 }
 
-//TODO: handle errors
-Stream<BibleSeriesState> _mapBibleSeriesInformationRequestedEventToState(
-  BibleSeriesInformationRequested event,
+Stream<BibleSeriesState> _mapBibleSeriesDetailRequestedEventToState(
+  BibleSeriesDetailRequested event,
   Future<BibleSeries> Function({@required String bibleSeriesId}) getBibleSeriesDetailsFunction,
   Future<Map<UniqueId, ContentCompletionDetails>> Function({@required String bibleSeriesId})
       getAllContentCompletionDetailsFunction,
 ) async* {
   yield FetchingBibleSeries();
 
-  BibleSeries bibleSeries = await getBibleSeriesDetailsFunction(
-    bibleSeriesId: event.bibleSeriesId.toString(),
-  );
+  try {
+    BibleSeries bibleSeries = await getBibleSeriesDetailsFunction(
+      bibleSeriesId: event.bibleSeriesId.toString(),
+    );
 
-  Map<UniqueId, ContentCompletionDetails> completionDetails = await getAllContentCompletionDetailsFunction(
-    bibleSeriesId: event.bibleSeriesId.toString(),
-  );
+    Map<UniqueId, ContentCompletionDetails> completionDetails = await getAllContentCompletionDetailsFunction(
+      bibleSeriesId: event.bibleSeriesId.toString(),
+    );
 
-  BibleSeries bibleSeriesWithCompletions = _addCompletionInformation(
-    bibleSeries,
-    completionDetails,
-  );
-
-  yield BibleSeriesInformation(bibleSeriesWithCompletions);
-}
-
-BibleSeries _addCompletionInformation(
-  BibleSeries bibleSeries,
-  Map<UniqueId, ContentCompletionDetails> completionDetails,
-) {
-  bibleSeries.seriesContentSnippet.forEach((date) {
-    int isCompletedCount = 0;
-    int isOnTimeCount = 0;
-    int isDraftCount = 0;
-
-    date.isDraft = false;
-    date.isCompleted = false;
-    date.isOnTime = false;
-
-    date.availableContentTypes.forEach((contentType) {
-      contentType.isDraft = false;
-      contentType.isCompleted = false;
-      contentType.isOnTime = false;
-
-      if (completionDetails.containsKey(contentType.contentId)) {
-        ContentCompletionDetails currentCompletionDetails = completionDetails[contentType.contentId];
-
-        if (currentCompletionDetails.isDraft) {
-          contentType.isDraft = true;
-          isDraftCount++;
-        } else {
-          contentType.isCompleted = true;
-          isCompletedCount++;
-          if (currentCompletionDetails.isOnTime) {
-            contentType.isOnTime = true;
-            isOnTimeCount++;
-          }
-        }
-      }
-    });
-
-    if (isCompletedCount >= 1) {
-      date.isCompleted = true;
-      if (isOnTimeCount >= 1) {
-        date.isOnTime = true;
-      }
-    } else if (isDraftCount >= 1) {
-      date.isDraft = true;
-    }
-  });
-
-  return bibleSeries;
+    BibleSeries bibleSeriesWithCompletions = addCompletionDetailsToSeries(
+      bibleSeries,
+      completionDetails,
+    );
+    yield BibleSeriesDetail(bibleSeriesWithCompletions);
+  } on BaseApplicationException catch (e) {
+    yield BibleSeriesError(
+      message: e.message,
+      code: e.code,
+    );
+  } catch (e) {
+    yield BibleSeriesError(
+      message: 'An unknown error occured.',
+      code: e.code,
+    );
+  }
 }

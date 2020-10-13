@@ -1,6 +1,5 @@
-import '../../domain/bible_series/exceptions.dart';
-
 import '../../domain/bible_series/entities.dart';
+import '../../domain/bible_series/exceptions.dart';
 
 SeriesContentType contentTypeMapper(type) {
   if (type == 'reflect') {
