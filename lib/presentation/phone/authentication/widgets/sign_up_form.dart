@@ -1,29 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
-import '../../../../application/authentication/sign_in/sign_in_bloc.dart';
-import '../../../../application/navigation_bar/navigation_bar_bloc.dart';
-import '../../../../injection.dart';
-import '../../../common/constants/colour_constants.dart';
+import '../../../../application/authentication/sign_up/sign_up_bloc.dart';
+import '../../../common/constants.dart';
 import '../../../common/loader.dart';
 
-class SignInForm extends StatelessWidget {
+class SignUpForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<SignInBloc, SignInState>(
-      listener: (BuildContext context, SignInState state) {
-        if (state.signInSuccess) {
-          // Navigate to HOME tab upon login
-          getIt<NavigationBarBloc>()
-            ..add(
-              NavigationBarEvent(
-                tab: NavigationTabEnum.HOME,
-              ),
-            );
-          Navigator.pushNamed(context, '/index');
+    return BlocConsumer<SignUpBloc, SignUpState>(
+      listener: (BuildContext context, SignUpState state) {
+        if (state.signUpSuccess) {
+          _signUpSuccessAlert(context, state.emailAddress);
         }
       },
-      builder: (BuildContext context, SignInState state) {
+      builder: (BuildContext context, SignUpState state) {
         if (state.submitting) {
           return Loader();
         }
@@ -40,9 +32,9 @@ class SignInForm extends StatelessWidget {
                       bottom: 60,
                     ),
                     child: Container(
-                      height: 200,
+                      height: 100,
                       width: double.infinity,
-                      child: Image.asset('assets/images/wpa-logo.png'),
+                      child: Image.asset(kWpaLogoLoc),
                     ),
                   ),
                   Padding(
@@ -52,17 +44,17 @@ class SignInForm extends StatelessWidget {
                     ),
                     child: Column(
                       children: <Widget>[
-                        if (context.bloc<SignInBloc>().state.signInError != null) ...{
+                        if (context.bloc<SignUpBloc>().state.signUpError != null) ...{
                           Text(
-                            context.bloc<SignInBloc>().state.signInError,
+                            context.bloc<SignUpBloc>().state.signUpError,
                             style: TextStyle(
-                              color: Colors.red, //TODO: create constant for error color
+                              color: kErrorTextColor,
                             ),
                           ),
                         },
                         SizedBox(height: 5),
                         Form(
-                          autovalidate: true,
+                          autovalidateMode: AutovalidateMode.always,
                           child: Column(
                             children: <Widget>[
                               Container(
@@ -91,21 +83,16 @@ class SignInForm extends StatelessWidget {
                                       ),
                                       child: TextFormField(
                                         validator: (_) {
-                                          String emailAddressError = context
-                                              .bloc<SignInBloc>()
-                                              .state
-                                              .emailAddressError;
-                                          return emailAddressError != ''
-                                              ? emailAddressError
-                                              : null;
+                                          String firstNameError = context.bloc<SignUpBloc>().state.firstNameError;
+                                          return firstNameError != '' ? firstNameError : null;
                                         },
                                         onChanged: (value) {
-                                          context.bloc<SignInBloc>().add(EmailChanged(email: value));
+                                          context.bloc<SignUpBloc>().add(FirstNameChanged(firstName: value));
                                         },
                                         autocorrect: false,
                                         decoration: InputDecoration(
                                           border: InputBorder.none,
-                                          hintText: "Email Address",
+                                          hintText: "First Name",
                                           hintStyle: TextStyle(
                                             color: Colors.grey[400],
                                           ),
@@ -116,16 +103,65 @@ class SignInForm extends StatelessWidget {
                                       padding: EdgeInsets.all(4.0),
                                       child: TextFormField(
                                         validator: (_) {
-                                          String passwordError = context
-                                              .bloc<SignInBloc>()
-                                              .state
-                                              .passwordError;
-                                          return passwordError != ''
-                                              ? passwordError
-                                              : null;
+                                          String lastNameError = context.bloc<SignUpBloc>().state.lastNameError;
+                                          return lastNameError != '' ? lastNameError : null;
                                         },
                                         onChanged: (value) {
-                                          context.bloc<SignInBloc>().add(PasswordChanged(password: value));
+                                          context.bloc<SignUpBloc>().add(LastNameChanged(lastName: value));
+                                        },
+                                        autocorrect: false,
+                                        decoration: InputDecoration(
+                                          border: InputBorder.none,
+                                          hintText: "Last Name",
+                                          hintStyle: TextStyle(
+                                            color: Colors.grey[400],
+                                          ),
+                                        ),
+                                      ),
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                          bottom: BorderSide(
+                                            color: Colors.grey[200],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: EdgeInsets.all(4.0),
+                                      child: TextFormField(
+                                        validator: (_) {
+                                          String emailAddressError = context.bloc<SignUpBloc>().state.emailAddressError;
+                                          return emailAddressError != '' ? emailAddressError : null;
+                                        },
+                                        onChanged: (value) {
+                                          context.bloc<SignUpBloc>().add(EmailChanged(email: value));
+                                        },
+                                        autocorrect: false,
+                                        decoration: InputDecoration(
+                                          border: InputBorder.none,
+                                          hintText: "Email Address",
+                                          hintStyle: TextStyle(
+                                            color: Colors.grey[400],
+                                          ),
+                                        ),
+                                      ),
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                          bottom: BorderSide(
+                                            color: Colors.grey[200],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: EdgeInsets.all(4.0),
+                                      child: TextFormField(
+                                        validator: (_) {
+                                          String passwordError = context.bloc<SignUpBloc>().state.passwordError;
+                                          return passwordError != '' ? passwordError : null;
+                                        },
+                                        onChanged: (value) {
+                                          context.bloc<SignUpBloc>().add(PasswordChanged(password: value));
                                         },
                                         obscureText: true,
                                         autocorrect: false,
@@ -142,19 +178,7 @@ class SignInForm extends StatelessWidget {
                                 ),
                               ),
                               SizedBox(
-                                height: 10.0,
-                              ),
-                              Align(
-                                alignment: Alignment.topRight,
-                                child: Text(
-                                  "Forgot Password?",
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                              ),
-                              SizedBox(
-                                height: 30.0,
+                                height: 50.0,
                               ),
                               ClipRRect(
                                 borderRadius: BorderRadius.circular(10),
@@ -168,42 +192,19 @@ class SignInForm extends StatelessWidget {
                                   ),
                                   child: FlatButton(
                                     disabledColor: Colors.grey[400],
-                                    onPressed: state.submitting || !state.isSignInFormValid
+                                    onPressed: state.submitting || !state.isSignUpFormValid
                                         ? null
-                                        : () => context.bloc<SignInBloc>().add(
-                                              SignInWithEmailAndPassword(),
+                                        : () => context.bloc<SignUpBloc>().add(
+                                              SignUpWithEmailAndPassword(),
                                             ),
                                     child: Center(
                                       child: Text(
-                                        "LOGIN",
+                                        "SIGN UP",
                                         style: TextStyle(color: Colors.white, fontSize: 16),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(
-                                height: 30.0,
-                              ),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: <Widget>[
-                                  Text(
-                                    'Don\'t have an account?',
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 3,
-                                  ),
-                                  Text(
-                                    'Sign Up',
-                                    style: TextStyle(
-                                      color: kWpaBlue,
-                                    ),
-                                  ),
-                                ],
                               ),
                             ],
                           ),
@@ -219,4 +220,24 @@ class SignInForm extends StatelessWidget {
       },
     );
   }
+}
+
+_signUpSuccessAlert(BuildContext context, String emailAddress) {
+  Alert(
+    context: context,
+    title: "Registration Successful!",
+    desc: "Please follow steps sent to $emailAddress to verify your account before signing in.",
+    buttons: [
+      DialogButton(
+        child: Text(
+          "OK",
+          style: TextStyle(color: Colors.white, fontSize: 20),
+        ),
+        onPressed: () {
+          Navigator.pushNamed(context, '/sign_in');
+        },
+        width: 120,
+      )
+    ],
+  ).show();
 }

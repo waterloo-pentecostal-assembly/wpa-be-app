@@ -6,6 +6,7 @@ class LocalUser {
   final String lastName;
   final String email;
   final int reports;
+  String profilePhotoUrl;
 
   LocalUser({
     this.id,
@@ -13,10 +14,11 @@ class LocalUser {
     this.lastName,
     this.email,
     this.reports,
+    this.profilePhotoUrl,
   });
 
   @override
   String toString() {
-    return "User ID: $id, Name: $firstName $lastName, Email: $email, Reports: $reports";
+    return "User ID: $id, Name: $firstName $lastName, Email: $email, Reports: $reports, Photo URL: $profilePhotoUrl";
   }
 }

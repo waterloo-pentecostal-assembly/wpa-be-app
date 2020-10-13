@@ -9,6 +9,8 @@ enum AuthenticationExceptionCode {
   EMAIL_NOT_VERIFIED,
   AUTHENTICATION_SERVER_ERROR,
   NOT_AUTHENTICATED,
+  EMAIL_IN_USE,
+  REQUIRES_RECENT_LOGIN,
 }
 
 /// Implements [BaseException] to provide an exception type specific to Authentication.
