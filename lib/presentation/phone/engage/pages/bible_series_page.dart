@@ -230,8 +230,6 @@ List<Widget> _buildContentChildren(
       listChildren.add(
         FlatButton(
           onPressed: () {
-            print(element.contentId.toString());
-            print(bibleSeriesId);
             Navigator.pushNamed(context, '/content_detail', arguments: {
               'bibleSeriesId': bibleSeriesId,
               'seriesContentId': element.contentId,

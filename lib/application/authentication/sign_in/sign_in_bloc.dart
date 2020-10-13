@@ -120,8 +120,6 @@ Stream<SignInState> _mapSignInWithEmailAndPasswordToState(
       signInError: e.message,
     );
   } catch (e) {
-    print(e.toString());
-    print('^^^^');
     yield state.copyWith(
       submitting: false,
       signInSuccess: false,

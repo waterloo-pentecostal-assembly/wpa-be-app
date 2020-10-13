@@ -55,9 +55,6 @@ Stream<BibleSeriesState> _mapContentDetailRequestedEventToState(
     seriesContentId: event.seriesContentId.toString(),
     bibleSeriesId: event.bibleSeriesId.toString(),
   );
-
-  print('>>>>>>>>>');
-  print(seriesContentDetails);
 }
 
 //TODO: handle errors
