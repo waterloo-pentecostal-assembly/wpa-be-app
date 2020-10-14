@@ -1,35 +1,46 @@
 import 'package:flutter/material.dart';
+import 'package:wpa_app/domain/bible_series/entities.dart';
 
-class TextContentBody extends StatelessWidget {
+class TextContentBodyWidget extends StatelessWidget {
+  final TextBody textContentBody;
+
+  const TextContentBodyWidget({Key key, this.textContentBody}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Container();
   }
 }
 
-class ScriptureContentBody extends StatelessWidget {
+class ScriptureContentBodyWidget extends StatelessWidget {
+  final ScriptureBody scriptureContentBody;
+
+  const ScriptureContentBodyWidget({Key key, this.scriptureContentBody}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      
-    );
+    return Container();
   }
 }
 
-class QuestionContentBody extends StatelessWidget {
+class QuestionContentBodyWidget extends StatelessWidget {
+  final QuestionBody questionContentBody;
+
+  const QuestionContentBodyWidget({Key key, this.questionContentBody}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      
-    );
+    return Container();
   }
 }
 
-class AudioContentBody extends StatelessWidget {
+class AudioContentBodyWidget extends StatelessWidget {
+  final AudioBody audioContentBody;
+
+  const AudioContentBodyWidget({Key key, this.audioContentBody}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      
-    );
+    return Container();
   }
 }

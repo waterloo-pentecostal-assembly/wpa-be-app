@@ -243,7 +243,7 @@ class QuestionBodyProperties {
 
 class Question {
   final String question;
-  final List location;
+  final List<int> location;
 
   Question({
     @required this.question,

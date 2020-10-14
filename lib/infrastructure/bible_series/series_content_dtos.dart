@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:wpa_app/domain/bible_series/exceptions.dart';
 
 import '../../domain/bible_series/entities.dart';
+import '../../domain/bible_series/exceptions.dart';
 import '../../domain/common/value_objects.dart';
 import '../common/helpers.dart';
 import 'helpers.dart';
