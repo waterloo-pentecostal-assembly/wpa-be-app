@@ -38,7 +38,11 @@ class App extends StatelessWidget {
               ),
             ],
             child: MaterialApp(
-              theme: ThemeData(fontFamily: 'Montserrat'),
+              theme: ThemeData(
+                fontFamily: 'Montserrat',
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+              ),
               debugShowCheckedModeBanner: false,
               title: 'WPA Bible Engagement',
               onGenerateRoute: routes,
