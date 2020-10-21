@@ -3,12 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../application/bible_series/bible_series_bloc.dart';
 import '../../../../domain/bible_series/entities.dart';
-import '../../../../domain/common/value_objects.dart';
 import '../../../../injection.dart';
 import '../../../common/loader.dart';
 
 class BibleSeriesPage extends StatelessWidget {
-  final UniqueId bibleSeriesId;
+  final String bibleSeriesId;
 
   const BibleSeriesPage({Key key, @required this.bibleSeriesId}) : super(key: key);
 
@@ -137,7 +136,7 @@ List<Tab> _buildContentTabs(List<SeriesContentSnippet> seriesContentSnippets) {
 List<Widget> _buildContentChildren(
   BuildContext context,
   List<SeriesContentSnippet> seriesContentSnippets,
-  UniqueId bibleSeriesId,
+  String bibleSeriesId,
 ) {
   List<Widget> contentChildren = [];
   seriesContentSnippets.forEach((element) {

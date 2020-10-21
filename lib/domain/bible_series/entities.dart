@@ -1,8 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:wpa_app/domain/bible_series/value_objects.dart';
 
-import '../common/value_objects.dart';
+import 'value_objects.dart';
 
 enum SeriesContentType {
   REFLECT,
@@ -23,8 +22,13 @@ enum SeriesContentBodyType {
   IMAGE_INPUT,
 }
 
+enum ResponseType {
+  IMAGE,
+  TEXT,
+}
+
 class BibleSeries {
-  final UniqueId id;
+  final String id;
   final String title;
   final String subTitle;
   final String imageUrl;
@@ -46,7 +50,7 @@ class BibleSeries {
 
   @override
   String toString() {
-    return '''id: ${id.value}, title: $title, subtitle: $subTitle, imageUrl: $imageUrl, 
+    return '''id: ${id}, title: $title, subtitle: $subTitle, imageUrl: $imageUrl, 
               startDate: $startDate, endDate: $endDate, isActive: $isActive, 
               seriesContentSnippet: $seriesContentSnippet''';
   }
@@ -90,7 +94,7 @@ class SeriesContentSnippet {
 
 class AvailableContentType {
   final SeriesContentType seriesContentType;
-  final UniqueId contentId;
+  final String contentId;
   bool _isCompleted;
   bool _isOnTime;
   bool _isDraft;
@@ -125,7 +129,7 @@ class AvailableContentType {
 }
 
 class SeriesContent {
-  final UniqueId id;
+  final String id;
   final SeriesContentType contentType;
   final Timestamp date;
   final String title;
@@ -262,20 +266,56 @@ class ImageInputBody implements ISeriesContentBody {
   get properties => {};
 }
 
-class ContentCompletionDetails {
-  final UniqueId id;
-  final UniqueId seriesId;
-  final UniqueId contentId;
+// class ContentCompletionDetails {
+//   final String id;
+//   final String seriesId;
+//   final String contentId;
+//   final bool isOnTime;
+//   final bool isDraft;
+//   final Map<String, Map<String, ResponseBody>> responses;
+
+//   ContentCompletionDetails({
+//     this.id,
+//     this.seriesId,
+//     this.contentId,
+//     this.isOnTime,
+//     this.isDraft,
+//     this.responses,
+//   });
+// }
+
+class CompletionDetails {
+  final String id;
+  final String seriesId;
+  final String contentId;
   final bool isOnTime;
   final bool isDraft;
-  final Map<String, Map<String, ResponseBody>> responses;
 
-  ContentCompletionDetails({
+  CompletionDetails({
     this.id,
     this.seriesId,
     this.contentId,
     this.isOnTime,
     this.isDraft,
+  });
+}
+
+class Responses {
+  final String id;
+  final Map<String, Map<String, ResponseDetails>> responses;
+
+  Responses({
+    this.id,
     this.responses,
+  });
+}
+
+class ResponseDetails {
+  final ResponseType type;
+  final String response;
+
+  ResponseDetails({
+    this.type,
+    this.response,
   });
 }

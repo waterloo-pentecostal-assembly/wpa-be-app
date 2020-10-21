@@ -9,6 +9,8 @@ enum BibleSeriesExceptionCode {
   NO_COMPLETION_INFO,
   UNSUPPORTED_CONTENT_TYPE,
   NO_CONTENT_INFO,
+  NO_RESPONSES,
+  UNSUPPORTED_RESPONSE_TYPE
 }
 
 /// Implements [BaseException] to provide an exception type specific to Bible Series.

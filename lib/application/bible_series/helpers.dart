@@ -1,9 +1,8 @@
 import '../../domain/bible_series/entities.dart';
-import '../../domain/common/value_objects.dart';
 
 BibleSeries addCompletionDetailsToSeries(
   BibleSeries bibleSeries,
-  Map<UniqueId, ContentCompletionDetails> completionDetails,
+  Map<String, CompletionDetails> completionDetails,
 ) {
   bibleSeries.seriesContentSnippet.forEach((date) {
     int isCompletedCount = 0;
@@ -20,7 +19,7 @@ BibleSeries addCompletionDetailsToSeries(
       contentType.isOnTime = false;
 
       if (completionDetails.containsKey(contentType.contentId)) {
-        ContentCompletionDetails currentCompletionDetails = completionDetails[contentType.contentId];
+        CompletionDetails currentCompletionDetails = completionDetails[contentType.contentId];
 
         if (currentCompletionDetails.isDraft) {
           contentType.isDraft = true;

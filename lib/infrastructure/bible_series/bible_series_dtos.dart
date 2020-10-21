@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../domain/bible_series/entities.dart';
-import '../../domain/common/value_objects.dart';
 import '../common/helpers.dart';
 import 'helpers.dart';
 
@@ -82,7 +81,7 @@ extension BibleSeriesDtoX on BibleSeriesDto {
     });
 
     return BibleSeries(
-      id: UniqueId.fromUniqueString(this.id),
+      id: this.id,
       title: this.title,
       subTitle: this.subTitle,
       imageUrl: this.imageUrl,
@@ -128,7 +127,7 @@ extension SeriesContentSnippetDtoX on SeriesContentSnippetDto {
       if (newKey != null) {
         availableContentTypes.add(AvailableContentType(
           seriesContentType: newKey,
-          contentId: UniqueId.fromUniqueString(value),
+          contentId: value,
         ));
       }
     });

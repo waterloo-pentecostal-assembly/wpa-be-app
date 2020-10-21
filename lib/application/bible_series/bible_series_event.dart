@@ -10,7 +10,7 @@ class RecentBibleSeriesRequested extends BibleSeriesEvent {
 }
 
 class BibleSeriesDetailRequested extends BibleSeriesEvent {
-  final UniqueId bibleSeriesId;
+  final String bibleSeriesId;
 
   BibleSeriesDetailRequested({@required this.bibleSeriesId});
 
@@ -19,8 +19,8 @@ class BibleSeriesDetailRequested extends BibleSeriesEvent {
 }
 
 class ContentDetailRequested extends BibleSeriesEvent {
-  final UniqueId bibleSeriesId;
-  final UniqueId seriesContentId;
+  final String bibleSeriesId;
+  final String seriesContentId;
   final bool getCompletionDetails;
 
   ContentDetailRequested({
