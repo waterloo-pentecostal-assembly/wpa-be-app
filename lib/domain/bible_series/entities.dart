@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-import 'value_objects.dart';
-
 enum SeriesContentType {
   REFLECT,
   LISTEN,
@@ -265,24 +263,6 @@ class ImageInputBody implements ISeriesContentBody {
   @override
   get properties => {};
 }
-
-// class ContentCompletionDetails {
-//   final String id;
-//   final String seriesId;
-//   final String contentId;
-//   final bool isOnTime;
-//   final bool isDraft;
-//   final Map<String, Map<String, ResponseBody>> responses;
-
-//   ContentCompletionDetails({
-//     this.id,
-//     this.seriesId,
-//     this.contentId,
-//     this.isOnTime,
-//     this.isDraft,
-//     this.responses,
-//   });
-// }
 
 class CompletionDetails {
   final String id;
