@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../application/bible_series/bible_series_bloc.dart';
-import '../../../../domain/common/value_objects.dart';
 import '../../../../injection.dart';
 
 class ContentDetailPage extends StatelessWidget {
-  final UniqueId seriesContentId;
-  final UniqueId bibleSeriesId;
+  final String seriesContentId;
+  final String bibleSeriesId;
   final bool getCompletionDetails;
 
   const ContentDetailPage({

@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import '../../domain/bible_series/entities.dart';
 import '../../domain/bible_series/interfaces.dart';
 import '../../domain/common/exceptions.dart';
-import '../../domain/common/value_objects.dart';
 import 'helpers.dart';
 
 part 'bible_series_event.dart';
@@ -31,13 +30,13 @@ class BibleSeriesBloc extends Bloc<BibleSeriesEvent, BibleSeriesState> {
       yield* _mapBibleSeriesDetailRequestedEventToState(
         event,
         _iBibleSeriesRepository.getBibleSeriesDetails,
-        _iBibleSeriesRepository.getAllContentCompletionDetails,
+        _iBibleSeriesRepository.getAllCompletions,
       );
     } else if (event is ContentDetailRequested) {
       yield* _mapContentDetailRequestedEventToState(
         event,
         _iBibleSeriesRepository.getContentDetails,
-        _iBibleSeriesRepository.getContentCompletionDetails,
+        _iBibleSeriesRepository.getCompletion,
       );
     }
   }
@@ -50,10 +49,10 @@ Stream<BibleSeriesState> _mapContentDetailRequestedEventToState(
     @required String bibleSeriesId,
   })
       getContentDetails,
-  Future<ContentCompletionDetails> Function({
+  Future<CompletionDetails> Function({
     @required String seriesContentId,
   })
-      getContentCompletionDetails,
+      getCompletionDetails,
 ) async* {
   yield FetchingBibleSeries();
   try {
@@ -63,10 +62,10 @@ Stream<BibleSeriesState> _mapContentDetailRequestedEventToState(
     );
 
     if (event.getCompletionDetails) {
-      ContentCompletionDetails contentCompletionDetails = await getContentCompletionDetails(
+      CompletionDetails completionDetails = await getCompletionDetails(
         seriesContentId: event.seriesContentId.toString(),
       );
-      yield SeriesContentDetail(seriesContentDetail, contentCompletionDetails);
+      yield SeriesContentDetail(seriesContentDetail, completionDetails);
     } else {
       yield SeriesContentDetail(seriesContentDetail, null);
     }
@@ -107,8 +106,8 @@ Stream<BibleSeriesState> _mapGetRecentBibleSeriesEventToState(
 Stream<BibleSeriesState> _mapBibleSeriesDetailRequestedEventToState(
   BibleSeriesDetailRequested event,
   Future<BibleSeries> Function({@required String bibleSeriesId}) getBibleSeriesDetailsFunction,
-  Future<Map<UniqueId, ContentCompletionDetails>> Function({@required String bibleSeriesId})
-      getAllContentCompletionDetailsFunction,
+  Future<Map<String, CompletionDetails>> Function({@required String bibleSeriesId})
+      getAllCompletionDetailsFunction,
 ) async* {
   yield FetchingBibleSeries();
 
@@ -117,7 +116,7 @@ Stream<BibleSeriesState> _mapBibleSeriesDetailRequestedEventToState(
       bibleSeriesId: event.bibleSeriesId.toString(),
     );
 
-    Map<UniqueId, ContentCompletionDetails> completionDetails = await getAllContentCompletionDetailsFunction(
+    Map<String, CompletionDetails> completionDetails = await getAllCompletionDetailsFunction(
       bibleSeriesId: event.bibleSeriesId.toString(),
     );
 

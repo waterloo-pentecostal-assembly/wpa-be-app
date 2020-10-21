@@ -4,7 +4,6 @@ import 'package:mockito/mockito.dart';
 import 'package:wpa_app/application/authentication/sign_in/sign_in_bloc.dart';
 import 'package:wpa_app/domain/authentication/entities.dart';
 import 'package:wpa_app/domain/authentication/interfaces.dart';
-import 'package:wpa_app/domain/common/value_objects.dart';
 
 SignInState signInStateBuilder({
   String emailAddress,
@@ -154,7 +153,7 @@ void main() {
     test('Should emit state with signInSuccess true if Firebase sign in was successful', () {
       // arrange
       final SignInBloc bloc = SignInBloc(mockIAuthenticationFacade);
-      LocalUser user = LocalUser(id: UniqueId.fromUniqueString('184243aa-a087-4947-9be8-1c2dcaed941b'));
+      LocalUser user = LocalUser(id: '184243aa-a087-4947-9be8-1c2dcaed941b');
       when(mockIAuthenticationFacade.signInWithEmailAndPassword(
         emailAddress: anyNamed('emailAddress'),
         password: anyNamed('password'),

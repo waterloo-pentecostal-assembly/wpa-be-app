@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:wpa_app/domain/common/value_objects.dart';
 
 import 'entities.dart';
 
@@ -23,23 +22,28 @@ abstract class IBibleSeriesRepository {
     @required DocumentSnapshot startAtDocument,
   });
 
-  Future<Map<UniqueId, ContentCompletionDetails>> getAllContentCompletionDetails({
+  Future<Map<String, CompletionDetails>> getAllCompletions({
     @required String bibleSeriesId,
   });
 
-  Future<ContentCompletionDetails> getContentCompletionDetails({
+  Future<CompletionDetails> getCompletion({
     @required String seriesContentId,
   });
 
-  Future<void> markContentAsComplete({
-    @required ContentCompletionDetails contentCompletionDetails,
+  Future<Responses> getResponses({
+    @required String completionId,
   });
 
-  Future<void> markContentAsIncomplete({
-    @required String contentCompletionId,
+  Future<void> putResponses({
+    @required String completionId,
+    @required Responses responses,
   });
 
-  Future<void> updateContentResponse({
-    @required ContentCompletionDetails contentCompletionDetails,
+  Future<void> markAsComplete({
+    @required CompletionDetails completionDetails,
+  });
+
+  Future<void> markAsIncomplete({
+    @required String completionId,
   });
 }

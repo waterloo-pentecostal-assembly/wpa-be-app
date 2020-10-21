@@ -58,12 +58,11 @@ class FirebaseUserDto {
 extension FirebaseUserDtoX on FirebaseUserDto {
   LocalUser toDomain() {
     return LocalUser(
-      id: UniqueId.fromUniqueString(this.id),
-      firstName: this.firstName,
-      lastName: this.lastName,
-      email: this.email,
-      reports: this.reports,
-      profilePhotoUrl: this.profilePhotoUrl
-    );
+        id: this.id,
+        firstName: this.firstName,
+        lastName: this.lastName,
+        email: this.email,
+        reports: this.reports,
+        profilePhotoUrl: this.profilePhotoUrl);
   }
 }

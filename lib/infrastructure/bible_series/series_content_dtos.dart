@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import '../../domain/bible_series/entities.dart';
 import '../../domain/bible_series/exceptions.dart';
-import '../../domain/common/value_objects.dart';
 import '../common/helpers.dart';
 import 'helpers.dart';
 
@@ -73,7 +72,7 @@ extension SeriesContentDtoX on SeriesContentDto {
     });
 
     return SeriesContent(
-      id: UniqueId.fromUniqueString(this.id),
+      id: this.id,
       title: this.title,
       subTitle: this.subTitle,
       contentType: contentTypeMapper(this.contentType),
@@ -92,8 +91,7 @@ class SeriesContentBodyDto {
     Map<String, dynamic> _properties = {};
 
     if (_bodyType == 'audio') {
-      _properties['audioFileUrl'] =
-          findOrThrowException(json, 'audio_file_url');
+      _properties['audioFileUrl'] = findOrThrowException(json, 'audio_file_url');
     } else if (_bodyType == 'text') {
       _properties['paragraphs'] = findOrThrowException(json, 'paragraphs');
     } else if (_bodyType == 'question') {
@@ -159,8 +157,7 @@ extension SeriesContentBodyDtoX on SeriesContentBodyDto {
       List<dynamic> _scriptures = this.properties['scriptures'];
       _scriptures.forEach((element) {
         Map<String, String> _verses = {};
-        Map<String, dynamic> _versesFirebase =
-            findOrThrowException(element, 'verses');
+        Map<String, dynamic> _versesFirebase = findOrThrowException(element, 'verses');
 
         _versesFirebase.forEach((key, value) {
           _verses[key] = value;
