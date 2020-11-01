@@ -1,17 +1,25 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
-import 'package:wpa_app/application/authentication/password_reset/password_reset_bloc.dart';
 
+import 'application/achievements/achievements_bloc.dart';
 import 'application/authentication/authentication_bloc.dart';
+import 'application/authentication/password_reset/password_reset_bloc.dart';
 import 'application/authentication/sign_in/sign_in_bloc.dart';
 import 'application/authentication/sign_up/sign_up_bloc.dart';
 import 'application/bible_series/bible_series_bloc.dart';
 import 'application/navigation_bar/navigation_bar_bloc.dart';
+import 'application/prayer_requests/prayer_requests_bloc.dart';
+import 'domain/achievements/interfaces.dart';
 import 'domain/authentication/interfaces.dart';
 import 'domain/bible_series/interfaces.dart';
+import 'domain/completions/interfaces.dart';
+import 'domain/prayer_requests/interfaces.dart';
+import 'infrastructure/achievements/achievements_repository.dart';
 import 'infrastructure/authentication/firebase_authentication_facade.dart';
 import 'infrastructure/bible_series/bible_series_repository.dart';
+import 'infrastructure/completions/completions_repository.dart';
+import 'infrastructure/prayer_requests/prayer_requests_repository.dart';
 import 'presentation/phone/common/factories/text_factory.dart';
 
 // Global ServiceLocator
@@ -49,7 +57,18 @@ void init() {
   );
 
   getIt.registerFactory<BibleSeriesBloc>(
-    () => BibleSeriesBloc(getIt<IBibleSeriesRepository>()),
+    () => BibleSeriesBloc(
+      getIt<IBibleSeriesRepository>(),
+      getIt<ICompletionsRepository>(),
+    ),
+  );
+
+  getIt.registerFactory<AchievementsBloc>(
+    () => AchievementsBloc(getIt<IAchievementsRepository>()),
+  );
+
+  getIt.registerFactory<PrayerRequestsBloc>(
+    () => PrayerRequestsBloc(getIt<IPrayerRequestsRepository>()),
   );
 
   getIt.registerFactory<NavigationBarBloc>(
@@ -70,6 +89,24 @@ void init() {
     ),
   );
 
+  getIt.registerLazySingleton<ICompletionsRepository>(
+    () => CompletionsRepository(
+      getIt<FirebaseFirestore>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<IAchievementsRepository>(
+    () => AchievementsRepository(
+      getIt<FirebaseFirestore>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<IPrayerRequestsRepository>(
+    () => PrayerRequestsRepository(
+      getIt<FirebaseFirestore>(),
+    ),
+  );
+
   // Factories
-  getIt.registerFactory<TextFactory>(() => TextFactory('Montserrat'));
+  getIt.registerLazySingleton<TextFactory>(() => TextFactory('Montserrat'));
 }

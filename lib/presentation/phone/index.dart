@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/constants.dart';
 
 import '../../application/navigation_bar/navigation_bar_bloc.dart';
 import '../../injection.dart';
 import 'common/interfaces.dart';
-import 'engage/pages/engage_page.dart';
+import 'engage/main/engage.dart';
 import 'give/give_page.dart';
 import 'home/home_page.dart';
 import 'notifications/notifications_page.dart';
@@ -91,7 +92,7 @@ class NavigationBar extends StatelessWidget {
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(
-          selectedItemColor: Theme.of(context).primaryColor,
+          selectedItemColor: kWpaBlue.withOpacity(0.6),
           unselectedItemColor: Colors.grey[500],
           type: BottomNavigationBarType.fixed,
           currentIndex: tabIndex,
@@ -106,7 +107,9 @@ class NavigationBar extends StatelessWidget {
             } else {
               // If the user is re-selecting the tab, the common
               // behavior is to empty the stack.
-              indexedPages[index].navigatorKey.currentState.popUntil((route) => route.isFirst);
+              if (indexedPages[index].navigatorKey.currentState != null) {
+                indexedPages[index].navigatorKey.currentState.popUntil((route) => route.isFirst);
+              }
             }
           },
           items: [

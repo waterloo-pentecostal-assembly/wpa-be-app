@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 import '../../../../application/authentication/password_reset/password_reset_bloc.dart';
-import '../../../common/constants.dart';
+import '../../../../constants.dart';
 import '../../../common/loader.dart';
 
 class PasswordResetForm extends StatelessWidget {

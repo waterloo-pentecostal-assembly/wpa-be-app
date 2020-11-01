@@ -1,9 +1,8 @@
-import 'package:wpa_app/constants.dart';
-
+import '../../constants.dart';
 import '../common/exceptions.dart';
 
 validateEmailAddress(String emailAddress) {
-  if (RegExp(AppConstants.emailRegex).hasMatch(emailAddress)) {
+  if (RegExp(kEmailRegex).hasMatch(emailAddress)) {
     return emailAddress;
   } else {
     throw ValueObjectException(message: 'Invalid email address.');

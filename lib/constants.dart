@@ -1,14 +1,34 @@
-/// File that hold all constant values used by the app. Equivalent to environment variables.abstract
+import 'package:flutter/material.dart';
 
-class _AppConstants {
-  // Minimum eight characters, at least one letter and one number:
-  String get passwordRegex => r"""^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$""";
+// Color Constants
+const Color kWpaBlue = Color(0xff0092d6);
+const Color kSuccessColor = Color(0xff4BB543);
+const Color kLateColor = Color(0xffffc107);
+const Color kDraftColor = Color(0xff007bff);
+const Color kBlackColor = Color(0xff212121);
+const Color kDarkGreyColor = Color(0x50212121);
+const Color kErrorTextColor = Colors.red;
+Color kCardGrey = Colors.grey.shade300;
+Color kCardOverlayGrey = Colors.grey.shade100;
 
-  String get emailRegex => r"""^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+""";
+// Size Constants
+const kRecentBibleSeriesTileWidth = 250.0;
+const kRecentBibleSeriesTileHeight = 150.0;
+const kAllPrayerRequestsCardHeight = 100.0;
 
-  // In number of characters
-  int get maxResponseBody => 4000;
-}
+// Limits
+const kPrayerRequestsReportsLimit = 2;
+const kPrayerRequestPerUserLimit = 10;
 
-// ignore: non_constant_identifier_names
-_AppConstants AppConstants = _AppConstants();
+// Images
+const kWpaLogoLoc = 'assets/images/wpa-logo.png';
+const kProfilePhotoPlaceholder = 'assets/images/person-placeholder-image.png';
+
+// Regex
+const kPasswordRegex = r"""^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$""";
+const kEmailRegex = r"""^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+""";
+
+// Restrictions
+const kMaxResponseBody = 4000;
+const kMaxPrayerRequestBody = 500;
+const kMaxActivePrayerRequests = 10;

@@ -3,13 +3,12 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:wpa_app/injection.dart';
 
 import '../../../domain/authentication/entities.dart';
-import '../../../domain/authentication/exceptions.dart';
 import '../../../domain/authentication/interfaces.dart';
 import '../../../domain/authentication/value_objects.dart';
 import '../../../domain/common/exceptions.dart';
+import '../../../injection.dart';
 
 part 'sign_in_event.dart';
 part 'sign_in_state.dart';
@@ -123,7 +122,7 @@ Stream<SignInState> _mapSignInWithEmailAndPasswordToState(
     yield state.copyWith(
       submitting: false,
       signInSuccess: false,
-      signInError: 'An unknown error occured. 3',
+      signInError: 'An unknown error occured.',
     );
   }
 }

@@ -1,51 +1,38 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:wpa_app/infrastructure/bible_series/responses_dto.dart';
 
-import '../../domain/authentication/entities.dart';
-import '../../domain/authentication/interfaces.dart';
 import '../../domain/bible_series/entities.dart';
 import '../../domain/bible_series/exceptions.dart';
 import '../../domain/bible_series/interfaces.dart';
 import '../../domain/common/exceptions.dart';
 import '../../infrastructure/common/firebase_helpers.dart';
-import '../../injection.dart';
-import '../common/helpers.dart';
 import 'bible_series_dtos.dart';
-import 'completions_dto.dart';
 import 'series_content_dtos.dart';
 
-extension BibleSeriesRepositoryX on BibleSeriesRepository {
-  Query buildBibleSeriesQuery({
-    @required int limit,
-    DocumentSnapshot startAtDocument,
-  }) {
-    if (startAtDocument == null) {
-      return _firestore
-          .collection("bible_series")
-          .orderBy("start_date", descending: true)
-          .where("is_active", isEqualTo: true)
-          .limit(limit);
-    } else {
-      return _firestore
-          .collection("bible_series")
-          .orderBy("start_date", descending: true)
-          .where("is_active", isEqualTo: true)
-          .startAfterDocument(startAtDocument)
-          .limit(limit);
-    }
+class BibleSeriesRepository implements IBibleSeriesRepository {
+  final FirebaseFirestore _firestore;
+  CollectionReference _bibleSeriesCollection;
+  DocumentSnapshot _lastBibleSeriesDocument;
+
+  BibleSeriesRepository(this._firestore) {
+    _bibleSeriesCollection = _firestore.collection("bible_series");
   }
 
+  /// Returns a [List] of the three most recent [BibleSeries].
+  /// Throws [ApplicationException] or [BibleSeriesException].
+  @override
   Future<List<BibleSeries>> getBibleSeries({
-    @required int limit,
-    DocumentSnapshot startAtDocument,
+    int limit,
   }) async {
-    List<BibleSeries> bibleSeriesList = [];
-    Query query = buildBibleSeriesQuery(limit: limit, startAtDocument: startAtDocument);
-    QuerySnapshot snapshot;
+    QuerySnapshot querySnapshot;
+
     try {
-      snapshot = await query.get();
+      querySnapshot = await _bibleSeriesCollection
+          .orderBy("start_date", descending: true)
+          .where("is_active", isEqualTo: true)
+          .limit(limit)
+          .get();
     } on PlatformException catch (e) {
       handlePlatformException(e);
     } catch (e) {
@@ -56,40 +43,80 @@ extension BibleSeriesRepositoryX on BibleSeriesRepository {
       );
     }
 
-    snapshot.docs.forEach(
-      (document) {
+    List<BibleSeries> bibleSeriesList = [];
+
+    if (querySnapshot.docs.length > 0) {
+      querySnapshot.docs.forEach((element) {
         // Handle exceptions separately for each document conversion.
         // This will ensure that corrupted documents do not affect the others.
         try {
-          final BibleSeries bibleSeriesDto = BibleSeriesDto.fromFirestore(document).toDomain();
+          final BibleSeries bibleSeriesDto = BibleSeriesDto.fromFirestore(element).toDomain();
+          bibleSeriesList.add(bibleSeriesDto);
+        } catch (e) {
+          // print(e.toString());
+        }
+      });
+
+      /// save last element to be used by [getMoreBibleSeries] function
+      _lastBibleSeriesDocument = querySnapshot.docs.last;
+    }
+
+    return bibleSeriesList;
+  }
+
+  /// Returns a [List] of the [BibleSeries] starting after last retrieved document and limited by [limit].
+  /// Throws [ApplicationException] or [BibleSeriesException].
+  @override
+  Future<List<BibleSeries>> getMoreBibleSeries({
+    @required int limit,
+  }) async {
+    if (_lastBibleSeriesDocument == null) {
+      throw BibleSeriesException(
+          code: BibleSeriesExceptionCode.NO_STARTING_DOCUMENT,
+          message: 'No starting document defined',
+          details: 'No starting document defined. Call [getBibleSeries] first.');
+    }
+
+    QuerySnapshot querySnapshot;
+
+    try {
+      querySnapshot = await _bibleSeriesCollection
+          .orderBy("start_date", descending: true)
+          .where("is_active", isEqualTo: true)
+          .startAfterDocument(_lastBibleSeriesDocument)
+          .limit(limit)
+          .get();
+    } on PlatformException catch (e) {
+      handlePlatformException(e);
+    } catch (e) {
+      throw ApplicationException(
+        code: ApplicationExceptionCode.UNKNOWN,
+        message: 'An unknown error occured.',
+        details: e,
+      );
+    }
+
+    List<BibleSeries> bibleSeriesList = [];
+
+    if (querySnapshot.docs.length > 0) {
+      querySnapshot.docs.forEach((element) {
+        // Handle exceptions separately for each document conversion.
+        // This will ensure that corrupted documents do not affect the others.
+        try {
+          final BibleSeries bibleSeriesDto = BibleSeriesDto.fromFirestore(element).toDomain();
           bibleSeriesList.add(bibleSeriesDto);
         } catch (e) {
           // TODO: Report this error in the backend. User does not have to see this error but we should be aware of it.
         }
-      },
-    );
+      });
+
+      _lastBibleSeriesDocument = querySnapshot.docs.last;
+    } else {
+      // Reset _lastBibleSeriesDocument if no more documents exist
+      _lastBibleSeriesDocument = null;
+    }
 
     return bibleSeriesList;
-  }
-}
-
-class BibleSeriesRepository implements IBibleSeriesRepository {
-  final FirebaseFirestore _firestore;
-
-  BibleSeriesRepository(this._firestore);
-
-  /// Returns a [List] of the three most recent [BibleSeries].
-  /// Throws [ApplicationException] or [BibleSeriesException].
-  @override
-  Future<List<BibleSeries>> getRecentBibleSeries() async {
-    return getBibleSeries(limit: 3);
-  }
-
-  /// Returns a [List] of the [BibleSeries] starting with the document after [startAtDocument] amd limited by [limit].
-  /// Throws [ApplicationException] or [BibleSeriesException].
-  @override
-  Future<List<BibleSeries>> getPaginatedBibleSeries({@required int limit, @required DocumentSnapshot startAtDocument}) {
-    return getBibleSeries(limit: limit, startAtDocument: startAtDocument);
   }
 
   /// Returns a [BibleSeries] object with information about the series by [bibleSeriesId].
@@ -101,7 +128,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
   }) async {
     DocumentSnapshot document;
     try {
-      document = await _firestore.collection("bible_series").doc(bibleSeriesId).get();
+      document = await _bibleSeriesCollection.doc(bibleSeriesId).get();
     } on PlatformException catch (e) {
       handlePlatformException(e);
     } catch (e) {
@@ -134,12 +161,8 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
   }) async {
     DocumentSnapshot document;
     try {
-      document = await _firestore
-          .collection("bible_series")
-          .doc(bibleSeriesId)
-          .collection('series_content')
-          .doc(seriesContentId)
-          .get();
+      document =
+          await _bibleSeriesCollection.doc(bibleSeriesId).collection("series_content").doc(seriesContentId).get();
     } on PlatformException catch (e) {
       handlePlatformException(e);
     } catch (e) {
@@ -158,168 +181,6 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
     throw BibleSeriesException(
       code: BibleSeriesExceptionCode.NO_CONTENT_INFO,
       message: 'Cannot find content details',
-    );
-  }
-
-  @override
-  Future<void> markAsComplete({
-    CompletionDetails completionDetails,
-  }) async {
-    CompletionsDto completionsDto = CompletionsDto.fromDomain(completionDetails);
-    final LocalUser user = await getIt<IAuthenticationFacade>().getSignedInUser();
-
-    try {
-      await _firestore.collection("completions").add({
-        "content_id": completionsDto.contentId,
-        "is_on_time": completionsDto.isOnTime,
-        "series_id": completionsDto.seriesId,
-        "user_id": user.id,
-      });
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
-    } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
-        details: e,
-      );
-    }
-  }
-
-  @override
-  Future<void> markAsIncomplete({
-    String completionId,
-  }) async {
-    try {
-      await _firestore.collection("completions").doc(completionId).delete();
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
-    } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
-        details: e,
-      );
-    }
-  }
-
-  @override
-  Future<void> putResponses({
-    String completionId,
-    Responses responses,
-  }) async {
-    ResponsesDto responsesDto = ResponsesDto.fromDomain(responses.responses);
-
-    try {
-      CollectionReference responseCollection =
-          _firestore.collection("completions").doc(completionId).collection('responses');
-      if (responses.id != null) {
-        await responseCollection.doc(responsesDto.id).set(responsesDto.responses);
-      } else {
-        await responseCollection.add(responsesDto.responses);
-      }
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
-    } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
-        details: e,
-      );
-    }
-  }
-
-  @override
-  Future<Map<String, CompletionDetails>> getAllCompletions({
-    String bibleSeriesId,
-  }) async {
-    QuerySnapshot snapshot;
-    final LocalUser user = await getIt<IAuthenticationFacade>().getSignedInUser();
-    try {
-      snapshot = await _firestore
-          .collection("completions")
-          .where("user_id", isEqualTo: user.id)
-          .where("series_id", isEqualTo: bibleSeriesId)
-          .get();
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
-    } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
-        details: e,
-      );
-    }
-    Map<String, CompletionDetails> completionDetails = {};
-    snapshot.docs.forEach((element) {
-      final CompletionDetails _completionDetails = CompletionsDto.fromFirestore(element).toDomain();
-      String id = findOrThrowException(element.data(), "content_id");
-      completionDetails[id] = _completionDetails;
-    });
-    return completionDetails;
-  }
-
-  @override
-  Future<CompletionDetails> getCompletion({
-    String seriesContentId,
-  }) async {
-    QuerySnapshot snapshot;
-    final LocalUser user = await getIt<IAuthenticationFacade>().getSignedInUser();
-
-    try {
-      snapshot = await _firestore
-          .collection("completions")
-          .where("user_id", isEqualTo: user.id)
-          .where("content_id", isEqualTo: seriesContentId)
-          .get();
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
-    } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
-        details: e,
-      );
-    }
-
-    if (snapshot.docs.length > 0) {
-      DocumentSnapshot document = snapshot.docs[0];
-      final CompletionDetails seriesContent = CompletionsDto.fromFirestore(document).toDomain();
-      return seriesContent;
-    }
-
-    throw BibleSeriesException(
-      code: BibleSeriesExceptionCode.NO_COMPLETION_INFO,
-      message: 'Cannot find completion details',
-    );
-  }
-
-  @override
-  Future<Responses> getResponses({
-    String completionId,
-  }) async {
-    QuerySnapshot querySnapshot;
-
-    try {
-      querySnapshot = await _firestore.collection("completions").doc(completionId).collection('responses').get();
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
-    } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
-        details: e,
-      );
-    }
-
-    if (querySnapshot.docs.isNotEmpty) {
-      DocumentSnapshot document = querySnapshot.docs[0];
-      return ResponsesDto.fromFirestore(document).toDomain();
-    }
-
-    throw BibleSeriesException(
-      code: BibleSeriesExceptionCode.NO_RESPONSES,
-      message: 'Cannot find completion details',
     );
   }
 }

@@ -1,4 +1,5 @@
 import '../../domain/bible_series/entities.dart';
+import '../../domain/completions/entities.dart';
 
 BibleSeries addCompletionDetailsToSeries(
   BibleSeries bibleSeries,

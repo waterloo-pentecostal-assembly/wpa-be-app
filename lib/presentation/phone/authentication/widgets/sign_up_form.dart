@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 
 import '../../../../application/authentication/sign_up/sign_up_bloc.dart';
-import '../../../common/constants.dart';
+import '../../../../constants.dart';
 import '../../../common/loader.dart';
 
 class SignUpForm extends StatelessWidget {

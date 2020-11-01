@@ -25,16 +25,3 @@ SeriesContentType contentTypeMapper(type) {
     details: 'Unsupported content type: $type',
   );
 }
-
-ResponseType responseTypeMapper(type) {
-  if (type == 'text') {
-    return ResponseType.TEXT;
-  } else if (type == 'image') {
-    return ResponseType.IMAGE;
-  }
-  throw BibleSeriesException(
-    code: BibleSeriesExceptionCode.UNSUPPORTED_RESPONSE_TYPE,
-    message: 'Unsupported response type',
-    details: 'Unsupported response type: $type',
-  );
-}

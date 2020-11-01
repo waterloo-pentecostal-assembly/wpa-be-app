@@ -11,12 +11,11 @@ class BibleSeriesInitial extends BibleSeriesState {
 
 class BibleSeriesError extends BibleSeriesState {
   final String message;
-  final dynamic code;
 
-  BibleSeriesError({@required this.message, @required this.code});
+  BibleSeriesError({@required this.message});
 
   @override
-  List<Object> get props => [message, code];
+  List<Object> get props => [message];
 }
 
 class FetchingBibleSeries extends BibleSeriesState {

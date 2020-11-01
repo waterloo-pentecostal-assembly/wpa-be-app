@@ -4,9 +4,12 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
+import '../../constants.dart';
 import '../../domain/bible_series/entities.dart';
 import '../../domain/bible_series/interfaces.dart';
 import '../../domain/common/exceptions.dart';
+import '../../domain/completions/entities.dart';
+import '../../domain/completions/interfaces.dart';
 import 'helpers.dart';
 
 part 'bible_series_event.dart';
@@ -14,8 +17,9 @@ part 'bible_series_state.dart';
 
 class BibleSeriesBloc extends Bloc<BibleSeriesEvent, BibleSeriesState> {
   final IBibleSeriesRepository _iBibleSeriesRepository;
+  final ICompletionsRepository _iCompletionsRepository;
 
-  BibleSeriesBloc(this._iBibleSeriesRepository) : super(BibleSeriesInitial());
+  BibleSeriesBloc(this._iBibleSeriesRepository, this._iCompletionsRepository) : super(BibleSeriesInitial());
 
   @override
   Stream<BibleSeriesState> mapEventToState(
@@ -24,19 +28,19 @@ class BibleSeriesBloc extends Bloc<BibleSeriesEvent, BibleSeriesState> {
     if (event is RecentBibleSeriesRequested) {
       yield* _mapGetRecentBibleSeriesEventToState(
         event,
-        _iBibleSeriesRepository.getRecentBibleSeries,
+        _iBibleSeriesRepository.getBibleSeries,
       );
     } else if (event is BibleSeriesDetailRequested) {
       yield* _mapBibleSeriesDetailRequestedEventToState(
         event,
         _iBibleSeriesRepository.getBibleSeriesDetails,
-        _iBibleSeriesRepository.getAllCompletions,
+        _iCompletionsRepository.getAllCompletions,
       );
     } else if (event is ContentDetailRequested) {
       yield* _mapContentDetailRequestedEventToState(
         event,
         _iBibleSeriesRepository.getContentDetails,
-        _iBibleSeriesRepository.getCompletion,
+        _iCompletionsRepository.getCompletion,
       );
     }
   }
@@ -72,33 +76,29 @@ Stream<BibleSeriesState> _mapContentDetailRequestedEventToState(
   } on BaseApplicationException catch (e) {
     yield BibleSeriesError(
       message: e.message,
-      code: e.code,
     );
   } catch (e) {
     yield BibleSeriesError(
       message: 'An unknown error occured.',
-      code: e.code,
     );
   }
 }
 
 Stream<BibleSeriesState> _mapGetRecentBibleSeriesEventToState(
   RecentBibleSeriesRequested event,
-  Future Function() getRecentBibleSeriesFunction,
+  Future<List<BibleSeries>> Function({@required int limit}) getBibleSeriesFunction,
 ) async* {
   yield FetchingBibleSeries();
   try {
-    List<BibleSeries> bibleSeriesList = await getRecentBibleSeriesFunction();
+    List<BibleSeries> bibleSeriesList = await getBibleSeriesFunction(limit: event.amount);
     yield RecentBibleSeries(bibleSeriesList);
   } on BaseApplicationException catch (e) {
     yield BibleSeriesError(
       message: e.message,
-      code: e.code,
     );
   } catch (e) {
     yield BibleSeriesError(
       message: 'An unknown error occured.',
-      code: e.code,
     );
   }
 }
@@ -106,8 +106,7 @@ Stream<BibleSeriesState> _mapGetRecentBibleSeriesEventToState(
 Stream<BibleSeriesState> _mapBibleSeriesDetailRequestedEventToState(
   BibleSeriesDetailRequested event,
   Future<BibleSeries> Function({@required String bibleSeriesId}) getBibleSeriesDetailsFunction,
-  Future<Map<String, CompletionDetails>> Function({@required String bibleSeriesId})
-      getAllCompletionDetailsFunction,
+  Future<Map<String, CompletionDetails>> Function({@required String bibleSeriesId}) getAllCompletionDetailsFunction,
 ) async* {
   yield FetchingBibleSeries();
 
@@ -128,12 +127,10 @@ Stream<BibleSeriesState> _mapBibleSeriesDetailRequestedEventToState(
   } on BaseApplicationException catch (e) {
     yield BibleSeriesError(
       message: e.message,
-      code: e.code,
     );
   } catch (e) {
     yield BibleSeriesError(
       message: 'An unknown error occured.',
-      code: e.code,
     );
   }
 }
