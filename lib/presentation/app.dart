@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/infrastructure/messaging/firebase_messaging_handler.dart';
 
 import '../application/authentication/authentication_bloc.dart';
 import '../application/navigation_bar/navigation_bar_bloc.dart';
@@ -13,8 +14,13 @@ import 'phone/index.dart';
 import 'phone/splash/splash_page.dart';
 
 class App extends StatelessWidget {
+  void initializeBackgroundServices() {
+    getIt<FireBaseMessagingHandler>();
+  }
+
   @override
   Widget build(BuildContext context) {
+    initializeBackgroundServices();
     //TODO: try to inject the device type here to determine whether to load the mobile view or the tablet view
     return FutureBuilder(
       future: Firebase.initializeApp(),

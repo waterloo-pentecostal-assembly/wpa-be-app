@@ -12,6 +12,7 @@ import 'domain/authentication/interfaces.dart';
 import 'domain/bible_series/interfaces.dart';
 import 'infrastructure/authentication/firebase_authentication_facade.dart';
 import 'infrastructure/bible_series/bible_series_repository.dart';
+import 'infrastructure/messaging/firebase_messaging_handler.dart';
 import 'presentation/phone/common/factories/text_factory.dart';
 
 // Global ServiceLocator
@@ -30,6 +31,9 @@ void init() {
 
   getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
   getIt.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
+
+  getIt.registerLazySingleton<FireBaseMessagingHandler>(
+      () => FireBaseMessagingHandler());
 
   // Blocs
   getIt.registerFactory<AuthenticationBloc>(
