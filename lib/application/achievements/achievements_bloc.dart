@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 
 import '../../domain/achievements/entities.dart';
 import '../../domain/achievements/interfaces.dart';
-import '../../domain/common/exceptions.dart';
 
 part 'achievements_event.dart';
 part 'achievements_state.dart';
@@ -16,16 +15,44 @@ class AchievementsBloc extends Bloc<AchievementsEvent, AchievementsState> {
 
   AchievementsBloc(this._iAchievementsRepository) : super(AchievementsLoading());
 
+  StreamSubscription<Achievements> _achievementsStreamSubscription;
+
   @override
   Stream<AchievementsState> mapEventToState(
     AchievementsEvent event,
   ) async* {
-    if (event is AchievementsRequested) {
+    if (event is WatchAchievementsStarted) {
+      yield* _mapWatchAchievementsStartedToState(event);
+    } else if (event is AchievementsReceived) {
+      yield AchievementsLoaded(
+        achievements: event.achievements,
+      );
+    } else if (event is AchievementsErrorReceived) {
+      yield AchievementsError();
+    } else if (event is AchievementsRequested) {
       yield* _mapAchievementsRequestedToState(
         event,
         _iAchievementsRepository.getAchievements,
       );
     }
+  }
+
+  Stream<AchievementsState> _mapWatchAchievementsStartedToState(
+    WatchAchievementsStarted event,
+  ) async* {
+    await _achievementsStreamSubscription?.cancel();
+    _achievementsStreamSubscription = _iAchievementsRepository.watchAchievements().listen((event) {
+      return add(AchievementsReceived(achievements: event));
+    })
+      ..onError((_) {
+        return add(AchievementsErrorReceived());
+      });
+  }
+
+  @override
+  Future<void> close() async {
+    await _achievementsStreamSubscription.cancel();
+    return super.close();
   }
 }
 
@@ -39,13 +66,7 @@ Stream<AchievementsState> _mapAchievementsRequestedToState(
     yield AchievementsLoaded(
       achievements: achievements,
     );
-  } on BaseApplicationException catch (e) {
-    yield AchievementsError(
-      message: e.message,
-    );
-  } catch (e) {
-    yield AchievementsError(
-      message: 'An unknown error occured.',
-    );
+  } catch (_) {
+    yield AchievementsError();
   }
 }

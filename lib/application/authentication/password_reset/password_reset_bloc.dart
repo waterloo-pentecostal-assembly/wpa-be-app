@@ -50,7 +50,7 @@ Stream<PasswordResetState> _mapEmailChangedToState(
   } catch (e) {
     yield state.copyWith(
       emailAddress: event.email,
-      emailAddressError: 'An unknown error occured.',
+      emailAddressError: 'An unknown error occurred',
     );
   }
 }
@@ -86,7 +86,7 @@ Stream<PasswordResetState> _mapResetPasswordToState(
     yield state.copyWith(
       submitting: false,
       passwordResetSuccess: false,
-      passwordResetError: 'An unknown error occured.',
+      passwordResetError: 'An unknown error occurred',
     );
   }
 }

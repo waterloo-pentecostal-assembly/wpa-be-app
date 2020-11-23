@@ -59,7 +59,7 @@ class HomeIndex extends StatelessWidget {
             RaisedButton(
               child: Text('Engage'),
               onPressed: () {
-                context.bloc<NavigationBarBloc>()
+                BlocProvider.of<NavigationBarBloc>(context)
                   ..add(
                     NavigationBarEvent(
                       tab: NavigationTabEnum.ENGAGE,
@@ -70,7 +70,7 @@ class HomeIndex extends StatelessWidget {
             RaisedButton(
               child: Text('Example Notification Detail'),
               onPressed: () {
-                context.bloc<NavigationBarBloc>()
+                BlocProvider.of<NavigationBarBloc>(context)
                   ..add(
                     NavigationBarEvent(tab: NavigationTabEnum.NOTIFICATIONS, route: '/notification_detail'),
                   );

@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wpa_app/constants.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../application/navigation_bar/navigation_bar_bloc.dart';
+import '../../constants.dart';
 import '../../injection.dart';
 import 'common/interfaces.dart';
 import 'engage/main/engage.dart';
 import 'give/give_page.dart';
 import 'home/home_page.dart';
 import 'notifications/notifications_page.dart';
-import 'profile/profile_page.dart';
+import 'profile/profile.dart';
 
 class IndexPage extends StatelessWidget {
   final List<IIndexedPage> indexedPages = [
@@ -66,6 +67,30 @@ class NavigationBar extends StatelessWidget {
 
   const NavigationBar({Key key, this.tabIndex, this.indexedPages}) : super(key: key);
 
+  void handleOnTap(BuildContext context, int index) async {
+    if (NavigationTabEnum.values[index] == NavigationTabEnum.GIVE) {
+      if (await canLaunch(kWpaGiveUrl)) {
+        await launch(kWpaGiveUrl, forceWebView: true);
+      } else {
+        // TODO: show popup saying can't open URL
+        throw 'Could not launch';
+      }
+    } else if (tabIndex != index) {
+      BlocProvider.of<NavigationBarBloc>(context)
+        ..add(
+          NavigationBarEvent(
+            tab: NavigationTabEnum.values[index],
+          ),
+        );
+    } else {
+      // If the user is re-selecting the tab, the common
+      // behavior is to empty the stack.
+      if (indexedPages[index].navigatorKey.currentState != null) {
+        indexedPages[index].navigatorKey.currentState.popUntil((route) => route.isFirst);
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -73,7 +98,7 @@ class NavigationBar extends StatelessWidget {
         NavigatorState currentNavigatorState = indexedPages[tabIndex].navigatorKey.currentState;
 
         if (currentNavigatorState.canPop()) {
-          !await currentNavigatorState.maybePop();
+          return !await currentNavigatorState.maybePop();
         } else {
           // return true;
           // TODO: return true to exit the app. Return false for testing
@@ -96,22 +121,7 @@ class NavigationBar extends StatelessWidget {
           unselectedItemColor: Colors.grey[500],
           type: BottomNavigationBarType.fixed,
           currentIndex: tabIndex,
-          onTap: (int index) {
-            if (tabIndex != index) {
-              context.bloc<NavigationBarBloc>()
-                ..add(
-                  NavigationBarEvent(
-                    tab: NavigationTabEnum.values[index],
-                  ),
-                );
-            } else {
-              // If the user is re-selecting the tab, the common
-              // behavior is to empty the stack.
-              if (indexedPages[index].navigatorKey.currentState != null) {
-                indexedPages[index].navigatorKey.currentState.popUntil((route) => route.isFirst);
-              }
-            }
-          },
+          onTap: (int index) => handleOnTap(context, index),
           items: [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),

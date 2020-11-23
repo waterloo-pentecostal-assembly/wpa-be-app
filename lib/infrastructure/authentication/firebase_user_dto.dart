@@ -2,8 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../domain/authentication/entities.dart';
-import '../../domain/common/value_objects.dart';
+import '../../injection.dart';
 import '../common/helpers.dart';
+import '../common/firebase_storage_helper.dart';
 
 class FirebaseUserDto {
   final String id;
@@ -12,6 +13,7 @@ class FirebaseUserDto {
   final String email;
   final int reports;
   final String profilePhotoUrl;
+  final String profilePhotoGsLocation;
 
   factory FirebaseUserDto.fromJson(Map<String, dynamic> json) {
     return FirebaseUserDto._(
@@ -19,7 +21,7 @@ class FirebaseUserDto {
       lastName: findOrThrowException(json, 'last_name'),
       email: findOrThrowException(json, 'email'),
       reports: findOrThrowException(json, 'reports'),
-      profilePhotoUrl: json['profile_photo_url'],
+      profilePhotoGsLocation: json['profile_photo_gs_location'],
     );
   }
 
@@ -34,6 +36,7 @@ class FirebaseUserDto {
     String email,
     int reports,
     String profilePhotoUrl,
+    String profilePhotoGsLocation,
   }) {
     return FirebaseUserDto._(
       id: id ?? this.id,
@@ -42,6 +45,7 @@ class FirebaseUserDto {
       email: email ?? this.email,
       reports: reports ?? this.reports,
       profilePhotoUrl: profilePhotoUrl ?? this.profilePhotoUrl,
+      profilePhotoGsLocation: profilePhotoGsLocation ?? this.profilePhotoGsLocation,
     );
   }
 
@@ -51,18 +55,24 @@ class FirebaseUserDto {
     @required this.lastName,
     @required this.email,
     @required this.reports,
-    @required this.profilePhotoUrl,
+    this.profilePhotoUrl,
+    @required this.profilePhotoGsLocation,
   });
 }
 
 extension FirebaseUserDtoX on FirebaseUserDto {
-  LocalUser toDomain() {
+  Future<LocalUser> toDomain(FirebaseStorageHelper firebaseStorageHelper) async {
+    // Convert GS Location to Download URL
+    String profilePhotoUrl = await firebaseStorageHelper.getDownloadUrl(this.profilePhotoGsLocation);
+
     return LocalUser(
-        id: this.id,
-        firstName: this.firstName,
-        lastName: this.lastName,
-        email: this.email,
-        reports: this.reports,
-        profilePhotoUrl: this.profilePhotoUrl);
+      id: this.id,
+      firstName: this.firstName,
+      lastName: this.lastName,
+      email: this.email,
+      reports: this.reports,
+      profilePhotoUrl: profilePhotoUrl,
+      profilePhotoGsLocation: this.profilePhotoGsLocation,
+    );
   }
 }

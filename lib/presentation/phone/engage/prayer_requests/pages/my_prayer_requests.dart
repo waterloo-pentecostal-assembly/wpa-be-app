@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wpa_app/presentation/phone/engage/prayer_requests/widgets/my_prayer_request_card.dart';
 
 import '../../../../../application/prayer_requests/prayer_requests_bloc.dart';
 import '../../../../../domain/prayer_requests/entities.dart';
 import '../../../../common/loader.dart';
-
-final GlobalKey<AnimatedListState> myPrayerRequestsListKey = GlobalKey<AnimatedListState>();
+import '../widgets/prayer_request_card.dart';
+import '../widgets/prayer_request_error.dart';
 
 class MyPrayerRequests extends StatefulWidget {
   @override
@@ -14,7 +13,8 @@ class MyPrayerRequests extends StatefulWidget {
 }
 
 class _MyPrayerRequestsState extends State<MyPrayerRequests> with AutomaticKeepAliveClientMixin {
-  List<PrayerRequest> prayerRequests;
+  final GlobalKey<AnimatedListState> _myPrayerRequestsListKey = GlobalKey<AnimatedListState>();
+  List<PrayerRequest> _prayerRequests;
   Widget _child = Loader();
 
   @override
@@ -27,27 +27,29 @@ class _MyPrayerRequestsState extends State<MyPrayerRequests> with AutomaticKeepA
   }
 
   Widget _buildItem(BuildContext context, int index, Animation<double> animation) {
-    return _MyPrayerRequestCard(
-      prayerRequest: prayerRequests[index],
+    return PrayerRequestCard(
       animation: animation,
+      prayerRequest: _prayerRequests[index],
+      prayButtonOrIndicator: PrayedByIndicator(amount: _prayerRequests[index].prayedBy.length),
     );
   }
 
-  Widget _buildDeletedItem(BuildContext context, PrayerRequest item, Animation<double> animation) {
-    return _MyPrayerRequestCard(
-      prayerRequest: item,
+  Widget _buildDeletedItem(BuildContext context, PrayerRequest prayerRequest, Animation<double> animation) {
+    return PrayerRequestCard(
       animation: animation,
+      prayerRequest: prayerRequest,
+      prayButtonOrIndicator: PrayedByIndicator(amount: prayerRequest.prayedBy.length),
     );
   }
 
-  void _insert(PrayerRequest prayerRequest) {
-    prayerRequests.insert(0, prayerRequest);
-    myPrayerRequestsListKey.currentState.insertItem(0);
+  void _insertAtTop(PrayerRequest prayerRequest) {
+    _prayerRequests.insert(0, prayerRequest);
+    _myPrayerRequestsListKey.currentState.insertItem(0);
   }
 
   void _delete(int indexToDelete) {
-    PrayerRequest deletedPrayerRequest = prayerRequests.removeAt(indexToDelete);
-    myPrayerRequestsListKey.currentState.removeItem(
+    PrayerRequest deletedPrayerRequest = _prayerRequests.removeAt(indexToDelete);
+    _myPrayerRequestsListKey.currentState.removeItem(
       indexToDelete,
       (context, animation) => _buildDeletedItem(context, deletedPrayerRequest, animation),
     );
@@ -56,61 +58,72 @@ class _MyPrayerRequestsState extends State<MyPrayerRequests> with AutomaticKeepA
   @override
   Widget build(BuildContext context) {
     super.build(context);
-
-    return BlocListener<MyPrayerRequestsBloc, PrayerRequestsState>(
-      listener: (context, state) {
-        if (state is MyPrayerRequestsLoaded) {
-          prayerRequests = state.prayerRequests;
-          setChild(
-            AnimatedList(
-              key: myPrayerRequestsListKey,
-              initialItemCount: state.prayerRequests.length,
-              itemBuilder: _buildItem,
-            ),
-          );
-        } else if (state is PrayerRequestDeleteComplete) {
-          int indexToDelete;
-          for (PrayerRequest prayerRequest in prayerRequests) {
-            int index = prayerRequests.indexOf(prayerRequest);
-            if (prayerRequest.id == state.id) {
-              indexToDelete = index;
-              break;
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<PrayerRequestsBloc, PrayerRequestsState>(
+          listener: (context, state) {
+            if (state is MyPrayerRequestDeleteComplete) {
+              int indexToDelete = getIndexToDelete(state.id);
+              if (indexToDelete != null) {
+                _delete(indexToDelete);
+              }
+            } else if (state is NewPrayerRequestLoaded) {
+              _insertAtTop(state.prayerRequest);
             }
-          }
-          _delete(indexToDelete);
-        } else if (state is NewPrayerRequestLoaded) {
-          _insert(state.prayerRequest);
-        }
-      },
+          },
+        ),
+        BlocListener<MyPrayerRequestsBloc, PrayerRequestsState>(
+          listener: (context, state) {
+            if (state is MyPrayerRequestsLoaded) {
+              _prayerRequests = state.prayerRequests;
+              setChild(createPrayerRequestAnimatedlist(state));
+            } else if (state is PrayerRequestsError) {
+              setChild(PrayerRequestsErrorWidget(message: state.message));
+            }
+          },
+        )
+      ],
       child: _child,
+    );
+  }
+
+  int getIndexToDelete(String id) {
+    int indexToDelete;
+    for (PrayerRequest prayerRequest in _prayerRequests) {
+      int index = _prayerRequests.indexOf(prayerRequest);
+      if (prayerRequest.id == id) {
+        indexToDelete = index;
+        break;
+      }
+    }
+    return indexToDelete;
+  }
+
+  Widget createPrayerRequestAnimatedlist(MyPrayerRequestsLoaded state) {
+    return RefreshIndicator(
+      onRefresh: () async {
+        BlocProvider.of<MyPrayerRequestsBloc>(context)..add(MyPrayerRequestsRequested());
+      },
+      child: AnimatedList(
+        physics: AlwaysScrollableScrollPhysics(),
+        key: _myPrayerRequestsListKey,
+        initialItemCount: state.prayerRequests.length,
+        itemBuilder: _buildItem,
+      ),
     );
   }
 }
 
-class _MyPrayerRequestCard extends StatelessWidget {
-  final PrayerRequest prayerRequest;
-  final Animation<double> animation;
+/* 
+both:
+  - my request deleted 
+  - NewPrayerRequestLoaded
 
-  const _MyPrayerRequestCard({Key key, @required this.prayerRequest, @required this.animation}) : super(key: key);
+all 
+  - requests requested 
+  - request reported and removed 
+  - more requests requested 
 
-  @override
-  Widget build(BuildContext context) {
-    return MyPrayerRequestCard(prayerRequest: prayerRequest, animation: animation);
-      // return FadeTransition(
-      //   opacity: animation,
-      //   child: GestureDetector(
-      //     onTap: () {
-      //       BlocProvider.of<MyPrayerRequestsBloc>(context)
-      //         ..add(PrayerRequestDeleted(
-      //           id: prayerRequest.id,
-      //         ));
-      //     },
-      //     child: Container(
-      //       height: 50,
-      //       decoration: BoxDecoration(border: Border.all(color: Colors.amber)),
-      //       child: Text(prayerRequest.request),
-      //     ),
-      //   ),
-      // );
-  }
-}
+my 
+  - my requests requested 
+*/

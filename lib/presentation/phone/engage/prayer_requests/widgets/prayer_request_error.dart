@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-// TODO: make this a pop up messsage. 
+// TODO: Add reload button
 class PrayerRequestsErrorWidget extends StatelessWidget {
   final String message;
 
@@ -9,7 +9,7 @@ class PrayerRequestsErrorWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Text(message),
+      child: Text('Unable to load prayer requests.'),
     );
   }
 }

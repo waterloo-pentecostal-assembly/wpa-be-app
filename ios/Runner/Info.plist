@@ -26,6 +26,12 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Photo Library Access</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Camera Access</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Microphone Access</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>

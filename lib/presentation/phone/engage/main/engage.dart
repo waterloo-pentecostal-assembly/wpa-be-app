@@ -3,14 +3,16 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../application/achievements/achievements_bloc.dart';
 import '../../../../application/bible_series/bible_series_bloc.dart';
+import '../../../../application/media/media_bloc.dart';
 import '../../../../application/prayer_requests/prayer_requests_bloc.dart';
 import '../../../../injection.dart';
-import '../../common/factories/text_factory.dart';
+import '../../common/text_factory.dart';
 import '../../common/interfaces.dart';
 import '../bible_series/pages/all_bible_series.dart';
 import '../bible_series/pages/bible_series_detail.dart';
 import '../bible_series/pages/series_content_detail.dart';
 import '../prayer_requests/pages/prayer_requests.dart';
+import 'widgets/media_widget.dart';
 import 'widgets/recent_bible_series.dart';
 import 'widgets/recent_prayer_requests.dart';
 import 'widgets/streaks_widget.dart';
@@ -41,7 +43,14 @@ class EngagePage extends IIndexedPage {
         BlocProvider<AchievementsBloc>(
           create: (BuildContext context) => getIt<AchievementsBloc>()
             ..add(
-              AchievementsRequested(),
+              WatchAchievementsStarted(),
+              // AchievementsRequested(),
+            ),
+        ),
+        BlocProvider<MediaBloc>(
+          create: (BuildContext context) => getIt<MediaBloc>()
+            ..add(
+              AvailableMediaRequested(),
             ),
         ),
       ],
@@ -86,25 +95,48 @@ class EngagePage extends IIndexedPage {
 class EngageIndex extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        body: Container(
-          child: ListView(
-            physics: ClampingScrollPhysics(),
-            children: <Widget>[
-              Padding(
-                padding: EdgeInsets.only(left: 24, top: 16, bottom: 16),
-                child: getIt<TextFactory>().heading('Engage'),
+    return Container(
+      color: Colors.grey.shade200,
+      child: SafeArea(
+        child: Scaffold(
+          body: Container(
+            // TODO: Add pull to refresh here
+            child: RefreshIndicator(
+              onRefresh: () async {
+                // TODO: determine number of recents to get based on screen size
+                BlocProvider.of<AchievementsBloc>(context)..add(WatchAchievementsStarted());
+                BlocProvider.of<BibleSeriesBloc>(context)..add(RecentBibleSeriesRequested(amount: 3));
+                BlocProvider.of<PrayerRequestsBloc>(context)..add(RecentPrayerRequestsRequested(amount: 10));
+              },
+              child: ListView(
+                physics: AlwaysScrollableScrollPhysics(),
+                children: <Widget>[
+                  HeaderWidget(),
+                  StreaksWidget(),
+                  SizedBox(height: 16.0),
+                  RecentBibleSeriesWidget(),
+                  SizedBox(height: 16.0),
+                  RecentPrayerRequestsWidget(),
+                  SizedBox(height: 16.0),
+                  MediaWidget(),
+                ],
               ),
-              StreaksWidget(),
-              RecentBibleSeriesWidget(),
-              SizedBox(
-                height: 20.0,
-              ),
-              RecentPrayerRequestsWidget(),
-            ],
+            ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class HeaderWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(color: Colors.grey.shade200),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+        child: getIt<TextFactory>().heading('Engage'),
       ),
     );
   }

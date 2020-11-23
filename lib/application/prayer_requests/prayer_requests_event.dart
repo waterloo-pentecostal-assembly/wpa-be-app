@@ -24,18 +24,26 @@ class PrayerRequestsRequested extends PrayerRequestsEvent {
   List<Object> get props => [amount];
 }
 
-class MyPrayerRequestsRequested extends PrayerRequestsEvent {
+class PrayerRequestReported extends PrayerRequestsEvent {
+  final String id;
 
+  PrayerRequestReported({@required this.id});
+
+  @override
+  List<Object> get props => [id];
+}
+
+class MyPrayerRequestsRequested extends PrayerRequestsEvent {
   MyPrayerRequestsRequested();
 
   @override
   List<Object> get props => [];
 }
 
-class PrayerRequestDeleted extends PrayerRequestsEvent {
+class MyPrayerRequestDeleted extends PrayerRequestsEvent {
   final String id;
 
-  PrayerRequestDeleted({@required this.id});
+  MyPrayerRequestDeleted({@required this.id});
 
   @override
   List<Object> get props => [id];
@@ -51,11 +59,11 @@ class MorePrayerRequestsRequested extends PrayerRequestsEvent {
   List<Object> get props => [amount];
 }
 
-class PrayerRequestCreated extends PrayerRequestsEvent {
+class NewPrayerRequestCreated extends PrayerRequestsEvent {
   final String request;
   final bool isAnonymous;
 
-  PrayerRequestCreated({@required this.request, @required this.isAnonymous});
+  NewPrayerRequestCreated({@required this.request, @required this.isAnonymous});
 
   @override
   List<Object> get props => [request, isAnonymous];
@@ -68,4 +76,29 @@ class PrayForRequest extends PrayerRequestsEvent {
 
   @override
   List<Object> get props => [id];
+}
+
+class NewPrayerRequestStarted extends PrayerRequestsEvent {
+  NewPrayerRequestStarted();
+
+  @override
+  List<Object> get props => [];
+}
+
+class NewPrayerRequestRequestChanged extends PrayerRequestsEvent {
+  final String prayerRequest;
+
+  NewPrayerRequestRequestChanged({@required this.prayerRequest});
+
+  @override
+  List<Object> get props => [prayerRequest];
+}
+
+class NewPrayerRequestAnonymousChanged extends PrayerRequestsEvent {
+  final bool isAnonymous;
+
+  NewPrayerRequestAnonymousChanged({@required this.isAnonymous});
+
+  @override
+  List<Object> get props => [isAnonymous];
 }

@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../application/prayer_requests/prayer_requests_bloc.dart';
-import '../../../../../constants.dart';
 import '../../../../../domain/prayer_requests/entities.dart';
 import '../../../../common/loader.dart';
+import '../../../../common/toast_message.dart';
 import '../widgets/prayer_request_card.dart';
-import '../widgets/prayer_request_card_placeholder.dart';
 import '../widgets/prayer_request_error.dart';
 import 'prayer_requests.dart';
 
@@ -16,10 +15,14 @@ class AllPrayerRequests extends StatefulWidget {
 }
 
 class _AllPrayerRequestsState extends State<AllPrayerRequests> with AutomaticKeepAliveClientMixin {
+  GlobalKey<AnimatedListState> _allPrayerRequestsListKey = GlobalKey<AnimatedListState>();
   final _scrollController = ScrollController();
   final _scrollThreshold = 200.0;
   bool _isEndOfList = false;
   bool _moreRequested = false;
+  List<PrayerRequest> _prayerRequests;
+  Widget _child = Loader();
+  int _amountToFetch;
 
   _AllPrayerRequestsState() {
     _scrollController.addListener(_onScroll);
@@ -28,44 +31,131 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests> with AutomaticKee
   @override
   bool get wantKeepAlive => true;
 
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    return BlocConsumer<AllPrayerRequestsBloc, PrayerRequestsState>(
-      listener: (context, state) {},
-      builder: (BuildContext context, PrayerRequestsState state) {
-        return Scaffold(
-          body: SafeArea(
-            child: Container(
-              // child: prayerRequestBody(state),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  prayerRequestBody(state),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
+  void setChild(Widget child) {
+    setState(() {
+      _child = child;
+    });
+  }
+
+  Widget _buildItem(BuildContext context, int index, Animation<double> animation) {
+    return PrayerRequestCard(
+      prayerRequest: _prayerRequests[index],
+      animation: animation,
+      prayButtonOrIndicator: PrayButton(prayerRequest: _prayerRequests[index]),
     );
   }
 
-  Widget prayerRequestBody(PrayerRequestsState state) {
-    if (state is PrayerRequestsLoaded) {
-      this._isEndOfList = state.isEndOfList;
-      if (_moreRequested) {
-        _moreRequested = false; // Reset _moreRequested flag
-      }
-      return PrayerRequestsListBuilder(
-        prayerRequests: state.prayerRequests,
-        scrollController: _scrollController,
-        isEndOfList: state.isEndOfList,
-      );
-    } else if (state is PrayerRequestsError) {
-      return PrayerRequestsErrorWidget(message: state.message);
+  Widget _buildDeletedItem(BuildContext context, PrayerRequest item, Animation<double> animation) {
+    return PrayerRequestCard(
+      prayerRequest: item,
+      animation: animation,
+      prayButtonOrIndicator: PrayButton(prayerRequest: item),
+    );
+  }
+
+  void _insert(PrayerRequest prayerRequest) {
+    _prayerRequests.insert(0, prayerRequest);
+    _allPrayerRequestsListKey.currentState.insertItem(0);
+  }
+
+  void _addMany(List<PrayerRequest> prayerRequests) {
+    int insertIndex = _prayerRequests.length - 1;
+    _prayerRequests.addAll(prayerRequests);
+    for (int offset = 0; offset < prayerRequests.length; offset++) {
+      _allPrayerRequestsListKey.currentState.insertItem(insertIndex + offset);
     }
-    return Loader();
+  }
+
+  void _delete(int indexToDelete) {
+    PrayerRequest deletedPrayerRequest = _prayerRequests.removeAt(indexToDelete);
+    _allPrayerRequestsListKey.currentState.removeItem(
+      indexToDelete,
+      (context, animation) => _buildDeletedItem(context, deletedPrayerRequest, animation),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    _amountToFetch = calculateFetchAmount(context);
+
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<PrayerRequestsBloc, PrayerRequestsState>(listener: (context, state) {
+          // Handle states that are common to both
+          if (state is NewPrayerRequestLoaded) {
+            _insert(state.prayerRequest);
+          } else if (state is MyPrayerRequestDeleteComplete) {
+            int indexToDelete = getIndexToDelete(state.id);
+            if (indexToDelete != null) {
+              _delete(indexToDelete);
+            }
+          } else if (state is NewPrayerRequestError) {
+            ToastMessage.showErrorToast(state.message, context);
+          } else if (state is PrayerRequestDeleteError) {
+            ToastMessage.showErrorToast(state.message, context);
+          }
+          // No need to handle these two in MyPrayerRequests since this
+          // BlocListener will be loaded in either case. If it is also
+          // handled in MyPrayerRequests then two toasts will be shown
+          // if the error was thron from MyPrayerRequests.
+        }),
+        BlocListener<AllPrayerRequestsBloc, PrayerRequestsState>(
+          // Handle states that are specific to all prayer requests
+          listener: (context, state) {
+            if (state is PrayerRequestsLoaded) {
+              // Reset key on initial and subsequent loads.
+              _allPrayerRequestsListKey = GlobalKey<AnimatedListState>();
+              _isEndOfList = state.isEndOfList;
+              _prayerRequests = state.prayerRequests;
+              setChild(createPrayerRequestAnimatedlist());
+            } else if (state is MorePrayerRequestsLoaded) {
+              _isEndOfList = state.isEndOfList;
+              _moreRequested = _moreRequested ? false : _moreRequested;
+              _addMany(state.prayerRequests);
+            } else if (state is PrayerRequestsError) {
+              setChild(PrayerRequestsErrorWidget(message: state.message));
+            } else if (state is PrayerRequestReportedAndRemoved) {
+              int indexToDelete = getIndexToDelete(state.id);
+              if (indexToDelete != null) {
+                _delete(indexToDelete);
+              }
+            } else if (state is PrayerRequestReportError) {
+              ToastMessage.showErrorToast(state.message, context);
+              // !!!! ONLY REMOVING AFTER 3 REPORTS ... AND ONE PERSON CAN REPORT MULTIPLE TIMES
+            }
+          },
+        ),
+      ],
+      child: _child,
+    );
+  }
+
+  int getIndexToDelete(String id) {
+    int indexToDelete;
+    for (PrayerRequest prayerRequest in _prayerRequests) {
+      int index = _prayerRequests.indexOf(prayerRequest);
+      if (prayerRequest.id == id) {
+        indexToDelete = index;
+        break;
+      }
+    }
+    return indexToDelete;
+  }
+
+  Widget createPrayerRequestAnimatedlist() {
+    return RefreshIndicator(
+      onRefresh: () async {
+        BlocProvider.of<AllPrayerRequestsBloc>(context)..add(PrayerRequestsRequested(amount: _amountToFetch));
+      },
+      child: AnimatedList(
+        physics: AlwaysScrollableScrollPhysics(),
+        controller: _scrollController,
+        key: _allPrayerRequestsListKey,
+        initialItemCount: _prayerRequests.length,
+        itemBuilder: _buildItem,
+      ),
+    );
   }
 
   @override
@@ -77,47 +167,10 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests> with AutomaticKee
   void _onScroll() {
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.position.pixels;
-    final int amount = calculateFetchAmount(context);
-
+    final int amount = _amountToFetch;
     if (maxScroll - currentScroll <= _scrollThreshold && !_isEndOfList && !_moreRequested) {
-      context.bloc<AllPrayerRequestsBloc>().add(MorePrayerRequestsRequested(amount: amount));
+      BlocProvider.of<AllPrayerRequestsBloc>(context)..add(MorePrayerRequestsRequested(amount: amount));
       _moreRequested = true; // Set _moreRequested flag
     }
-  }
-}
-
-class PrayerRequestsListBuilder extends StatelessWidget {
-  final ScrollController scrollController;
-  final List<PrayerRequest> prayerRequests;
-  final bool isEndOfList;
-
-  const PrayerRequestsListBuilder({
-    Key key,
-    @required this.scrollController,
-    @required this.prayerRequests,
-    @required this.isEndOfList,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    final int amount = calculateFetchAmount(context);
-    return Expanded(
-      child: RefreshIndicator(
-        color: kWpaBlue,
-        onRefresh: () async {
-          BlocProvider.of<AllPrayerRequestsBloc>(context).add(PrayerRequestsRequested(amount: amount));
-        },
-        child: ListView.builder(
-          physics: AlwaysScrollableScrollPhysics(),
-          itemBuilder: (BuildContext context, int index) {
-            return index >= prayerRequests.length
-                ? PrayerRequestCardPlaceholder()
-                : PrayerRequestCard(prayerRequest: prayerRequests[index]);
-          },
-          itemCount: isEndOfList ? prayerRequests.length : prayerRequests.length,
-          controller: scrollController,
-        ),
-      ),
-    );
   }
 }

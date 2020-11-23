@@ -44,9 +44,9 @@ class PasswordResetForm extends StatelessWidget {
                     ),
                     child: Column(
                       children: <Widget>[
-                        if (context.bloc<PasswordResetBloc>().state.passwordResetError != null) ...{
+                        if (BlocProvider.of<PasswordResetBloc>(context).state.passwordResetError != null) ...{
                           Text(
-                            context.bloc<PasswordResetBloc>().state.passwordResetError,
+                            BlocProvider.of<PasswordResetBloc>(context).state.passwordResetError,
                             style: TextStyle(
                               color: kErrorTextColor,
                             ),
@@ -77,11 +77,11 @@ class PasswordResetForm extends StatelessWidget {
                                       child: TextFormField(
                                         validator: (_) {
                                           String emailAddressError =
-                                              context.bloc<PasswordResetBloc>().state.emailAddressError;
+                                              BlocProvider.of<PasswordResetBloc>(context).state.emailAddressError;
                                           return emailAddressError != '' ? emailAddressError : null;
                                         },
                                         onChanged: (value) {
-                                          context.bloc<PasswordResetBloc>().add(EmailChanged(email: value));
+                                          BlocProvider.of<PasswordResetBloc>(context).add(EmailChanged(email: value));
                                         },
                                         autocorrect: false,
                                         decoration: InputDecoration(
@@ -113,7 +113,7 @@ class PasswordResetForm extends StatelessWidget {
                                     disabledColor: Colors.grey[400],
                                     onPressed: state.submitting || !state.ispasswordResetFormValid
                                         ? null
-                                        : () => context.bloc<PasswordResetBloc>().add(
+                                        : () => BlocProvider.of<PasswordResetBloc>(context).add(
                                               ResetPassword(),
                                             ),
                                     child: Center(

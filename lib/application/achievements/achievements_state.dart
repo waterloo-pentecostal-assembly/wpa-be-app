@@ -19,10 +19,6 @@ class AchievementsLoaded extends AchievementsState {
 }
 
 class AchievementsError extends AchievementsState {
-  final String message;
-
-  AchievementsError({@required this.message});
-
   @override
-  List<Object> get props => [message];
+  List<Object> get props => [];
 }

@@ -5,12 +5,15 @@ class TextFactory {
 
   TextFactory(this._fontFamily);
 
-  Text heading(String text) {
+  Text heading(
+    String text, {
+    FontWeight fontWeight = FontWeight.w700,
+  }) {
     return Text(
       text,
       style: TextStyle(
         fontFamily: _fontFamily,
-        fontWeight: FontWeight.w700,
+        fontWeight: fontWeight,
         fontSize: 30.0,
       ),
     );
@@ -60,30 +63,66 @@ class TextFactory {
     );
   }
 
+  Text regularButton(String text) {
+    return Text(
+      text,
+      style: TextStyle(
+        fontFamily: _fontFamily,
+        fontWeight: FontWeight.w600,
+        fontSize: 13.0,
+      ),
+    );
+  }
+
   Text regular(
     String text, {
     TextOverflow overflow = TextOverflow.visible,
     TextAlign textAlign = TextAlign.left,
+    Color color = Colors.black87,
+    double fontSize = 12.0,
   }) {
     return Text(
       text,
       overflow: overflow,
-      style: TextStyle(
-        fontFamily: 'Montserrat',
-        fontWeight: FontWeight.w600,
-        fontSize: 12.0,
-      ),
+      style: regularTextStyle(color: color, fontSize: fontSize),
       textAlign: textAlign,
     );
   }
 
-  Text lite(String text, {double fontSize = 12.0}) {
+  TextStyle regularTextStyle({ double fontSize, Color color = Colors.black}) {
+    return TextStyle(
+      fontFamily: _fontFamily,
+      fontWeight: FontWeight.w600,
+      fontSize: fontSize,
+      color: color,
+    );
+  }
+
+  Text textFormFieldInput(String text,
+      {TextOverflow overflow = TextOverflow.visible,
+      TextAlign textAlign = TextAlign.left,
+      Color color = Colors.black,
+      double fontSize = 14.0}) {
+    return Text(
+      text,
+      overflow: overflow,
+      style: textFormFieldInputStyle(color: color, fontSize: fontSize),
+      textAlign: textAlign,
+    );
+  }
+
+  TextStyle textFormFieldInputStyle({Color color = Colors.black, double fontSize = 14.0}) {
+    return TextStyle(fontFamily: _fontFamily, fontWeight: FontWeight.w500, fontSize: fontSize, color: color);
+  }
+
+  Text lite(String text, {double fontSize = 12.0, Color color: Colors.black}) {
     return Text(
       text,
       style: TextStyle(
-        fontFamily: 'Montserrat',
+        fontFamily: _fontFamily,
         fontWeight: FontWeight.w400,
         fontSize: fontSize,
+        color: color,
       ),
     );
   }

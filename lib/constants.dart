@@ -14,6 +14,7 @@ Color kCardOverlayGrey = Colors.grey.shade100;
 // Size Constants
 const kRecentBibleSeriesTileWidth = 250.0;
 const kRecentBibleSeriesTileHeight = 150.0;
+const kRecentBibleSeriesTileDescriptionHeight = 36.0;
 const kAllPrayerRequestsCardHeight = 100.0;
 
 // Limits
@@ -32,3 +33,6 @@ const kEmailRegex = r"""^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+
 const kMaxResponseBody = 4000;
 const kMaxPrayerRequestBody = 500;
 const kMaxActivePrayerRequests = 10;
+
+// URLs
+const kWpaGiveUrl = 'https://www.canadahelps.org/en/dne/15479';

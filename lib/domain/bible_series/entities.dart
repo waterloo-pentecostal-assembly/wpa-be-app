@@ -25,6 +25,7 @@ class BibleSeries {
   final String title;
   final String subTitle;
   final String imageUrl;
+  final String imageGsLocation;
   final Timestamp startDate;
   final Timestamp endDate;
   final bool isActive;
@@ -35,6 +36,7 @@ class BibleSeries {
     @required this.title,
     @required this.subTitle,
     @required this.imageUrl,
+    @required this.imageGsLocation,
     @required this.startDate,
     @required this.endDate,
     @required this.isActive,

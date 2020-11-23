@@ -6,7 +6,7 @@ import '../../../../../application/bible_series/bible_series_bloc.dart';
 import '../../../../../domain/bible_series/entities.dart';
 import '../../../../../injection.dart';
 import '../../../../common/loader.dart';
-import '../../../common/factories/text_factory.dart';
+import '../../../common/text_factory.dart';
 
 class BibleSeriesDetailPage extends StatelessWidget {
   final String bibleSeriesId;
@@ -130,6 +130,8 @@ class _BibleSeriesState extends State<BibleSeriesWidget> with TickerProviderStat
               ],
             ),
           );
+        } else if (state is BibleSeriesError) {
+          return Scaffold(body: SafeArea(child: Text('Error: ${state.message}')));
         }
         return Loader();
       },

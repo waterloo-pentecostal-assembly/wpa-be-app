@@ -6,7 +6,9 @@ class PrayerRequest {
   final String userId;
   final String request;
   final List<String> prayedBy;
+  final List<String> reportedBy;
   final bool hasPrayed;
+  final bool hasReported;
   final bool isMine;
   final Timestamp date;
   final bool isAnonymous;
@@ -17,7 +19,9 @@ class PrayerRequest {
     @required this.userId,
     @required this.request,
     @required this.prayedBy,
+    @required this.reportedBy,
     @required this.hasPrayed,
+    @required this.hasReported,
     @required this.isMine,
     @required this.date,
     @required this.isAnonymous,
@@ -26,8 +30,9 @@ class PrayerRequest {
 
   @override
   String toString() {
-    return '''id: $id, userId: $userId, request: $request, prayedBy: $prayedBy, hasPrayed: $hasPrayed, 
-              date: $date, isAnonymous: $isAnonymous, userSnippet: $userSnippet''';
+    return '''id: $id, userId: $userId, request: $request, prayedBy: $prayedBy, reportedBy: $reportedBy, 
+              hasPrayed: $hasPrayed, hasReported: $hasReported, date: $date, isAnonymous: $isAnonymous, 
+              userSnippet: $userSnippet''';
   }
 }
 
@@ -35,11 +40,13 @@ class UserSnippet {
   final String firstName;
   final String lastName;
   final String profilePhotoUrl;
+  final String profilePhotoGsLocation;
 
   UserSnippet({
     @required this.firstName,
     @required this.lastName,
     @required this.profilePhotoUrl,
+    @required this.profilePhotoGsLocation,
   });
 
   @override

@@ -8,7 +8,6 @@ import '../../domain/completions/entities.dart';
 import '../../domain/completions/exceptions.dart';
 import '../../domain/completions/interfaces.dart';
 import '../../injection.dart';
-import '../common/firebase_helpers.dart';
 import '../common/helpers.dart';
 import 'completions_dto.dart';
 import 'responses_dto.dart';
@@ -40,7 +39,7 @@ class CompletionsRepository extends ICompletionsRepository {
     } catch (e) {
       throw ApplicationException(
         code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
+        message: 'An unknown error occurred',
         details: e,
       );
     }
@@ -57,7 +56,7 @@ class CompletionsRepository extends ICompletionsRepository {
     } catch (e) {
       throw ApplicationException(
         code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
+        message: 'An unknown error occurred',
         details: e,
       );
     }
@@ -82,7 +81,7 @@ class CompletionsRepository extends ICompletionsRepository {
     } catch (e) {
       throw ApplicationException(
         code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
+        message: 'An unknown error occurred',
         details: e,
       );
     }
@@ -104,7 +103,7 @@ class CompletionsRepository extends ICompletionsRepository {
     } catch (e) {
       throw ApplicationException(
         code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
+        message: 'An unknown error occurred',
         details: e,
       );
     }
@@ -134,7 +133,7 @@ class CompletionsRepository extends ICompletionsRepository {
     } catch (e) {
       throw ApplicationException(
         code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
+        message: 'An unknown error occurred',
         details: e,
       );
     }
@@ -164,7 +163,7 @@ class CompletionsRepository extends ICompletionsRepository {
     } catch (e) {
       throw ApplicationException(
         code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
+        message: 'An unknown error occurred',
         details: e,
       );
     }

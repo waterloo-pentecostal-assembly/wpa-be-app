@@ -7,7 +7,7 @@ validatePrayerRequestBody(String responseBody) {
   } else {
     throw ValueObjectException(
       code: ValueObjectExceptionCode.TOO_LONG,
-      message: 'Prayer request should be less than $kMaxPrayerRequestBody characters.',
+      message: '$kMaxPrayerRequestBody character limit exceeded',
     );
   }
 }

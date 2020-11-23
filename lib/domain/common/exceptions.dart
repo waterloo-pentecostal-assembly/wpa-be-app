@@ -66,3 +66,24 @@ class ApplicationException implements BaseApplicationException {
     this.details,
   });
 }
+
+enum FirebaseStorageExceptionCode {
+  OBJECT_NOT_FOUND,
+  UNAUTHORIZED,
+  UNKNOWN,
+}
+
+/// Implements [BaseApplicationException] to provide an exception type for firebase storage level errors.
+class FirebaseStorageException implements BaseApplicationException {
+  final FirebaseStorageExceptionCode code;
+  final String message;
+  final dynamic details;
+
+  /// Creates a [ApplicationException] with the specified error [type],
+  /// [message], and optional error [details].
+  FirebaseStorageException({
+    @required this.code,
+    @required this.message,
+    this.details,
+  });
+}

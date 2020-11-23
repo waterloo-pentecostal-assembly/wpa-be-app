@@ -1,6 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../constants.dart';
 import '../../domain/authentication/entities.dart';
@@ -10,15 +9,17 @@ import '../../domain/prayer_requests/entities.dart';
 import '../../domain/prayer_requests/exceptions.dart';
 import '../../domain/prayer_requests/interfaces.dart';
 import '../../injection.dart';
-import '../common/firebase_helpers.dart';
+import '../common/firebase_storage_helper.dart';
+import '../common/helpers.dart';
 import 'prayer_requests_dto.dart';
 
 class PrayerRequestsRepository extends IPrayerRequestsRepository {
   final FirebaseFirestore _firestore;
+  final FirebaseStorageHelper _firebaseStorageHelper;
   CollectionReference _prayerRequestsCollection;
   DocumentSnapshot _lastPrayerRequestDocument;
 
-  PrayerRequestsRepository(this._firestore) {
+  PrayerRequestsRepository(this._firestore, this._firebaseStorageHelper) {
     _prayerRequestsCollection = _firestore.collection("prayer_requests");
   }
 
@@ -38,12 +39,12 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
     } catch (e) {
       throw ApplicationException(
         code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
+        message: 'An unknown error occurred',
         details: e,
       );
     }
 
-    return PrayerRequestsDto.fromFirestore(documentSnapshot, user.id).toDomain();
+    return PrayerRequestsDto.fromFirestore(documentSnapshot, user.id).toDomain(_firebaseStorageHelper);
   }
 
   @override
@@ -55,7 +56,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
     } catch (e) {
       throw ApplicationException(
         code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
+        message: 'An unknown error occurred',
         details: e,
       );
     }
@@ -77,15 +78,17 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
     } catch (e) {
       throw ApplicationException(
         code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
+        message: 'An unknown error occurred',
         details: e,
       );
     }
 
     List<PrayerRequest> myPrayerRequests = [];
-    querySnapshot.docs.forEach((element) {
-      myPrayerRequests.add(PrayerRequestsDto.fromFirestore(element, user.id).toDomain());
-    });
+
+    for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+      PrayerRequest prayerRequest = await PrayerRequestsDto.fromFirestore(doc, user.id).toDomain(_firebaseStorageHelper);
+      myPrayerRequests.add(prayerRequest);
+    }
 
     return myPrayerRequests;
   }
@@ -96,6 +99,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
     DocumentSnapshot startAtDocument,
   }) async {
     final LocalUser user = await getIt<IAuthenticationFacade>().getSignedInUser();
+    List<PrayerRequest> prayerRequests = [];
     QuerySnapshot querySnapshot;
 
     if (_lastPrayerRequestDocument == null) {
@@ -117,19 +121,16 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
     } catch (e) {
       throw ApplicationException(
         code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
+        message: 'An unknown error occurred',
         details: e,
       );
     }
 
-    List<PrayerRequest> prayerRequests = [];
-
     if (querySnapshot.docs.length > 0) {
-      querySnapshot.docs.forEach((element) {
-        if (element.data()["user_id"] != user.id) {
-          prayerRequests.add(PrayerRequestsDto.fromFirestore(element, user.id).toDomain());
-        }
-      });
+      for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+        PrayerRequest prayerRequest = await PrayerRequestsDto.fromFirestore(doc, user.id).toDomain(_firebaseStorageHelper);
+        prayerRequests.add(prayerRequest);
+      }
       _lastPrayerRequestDocument = querySnapshot.docs.last;
     } else {
       // Reset tracker if no more documents exist
@@ -157,7 +158,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
     } catch (e) {
       throw ApplicationException(
         code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
+        message: 'An unknown error occurred',
         details: e,
       );
     }
@@ -165,11 +166,10 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
     List<PrayerRequest> prayerRequests = [];
 
     if (querySnapshot.docs.length > 0) {
-      querySnapshot.docs.forEach((element) {
-        if (element.data()["user_id"] != user.id) {
-          prayerRequests.add(PrayerRequestsDto.fromFirestore(element, user.id).toDomain());
-        }
-      });
+      for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+        PrayerRequest prayerRequest = await PrayerRequestsDto.fromFirestore(doc, user.id).toDomain(_firebaseStorageHelper);
+        prayerRequests.add(prayerRequest);
+      }
 
       /// save last element to be used by [getMorePrayerRequests] function
       _lastPrayerRequestDocument = querySnapshot.docs.last;
@@ -187,6 +187,14 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
         DocumentReference documentReference = _prayerRequestsCollection.doc(id);
         DocumentSnapshot documentSnapshot = await transaction.get(documentReference);
 
+        // Check if prayer request exists
+        if (documentSnapshot.data() == null) {
+          throw PrayerRequestsException(
+            code: PrayerRequestsExceptionCode.PRAYER_REQUEST_NOT_FOUND,
+            message: 'Prayer request not found',
+          );
+        }
+
         List<dynamic> prayedBy = documentSnapshot.data()["prayed_by"];
 
         if (prayedBy == null) {
@@ -202,43 +210,52 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
     } catch (e) {
       throw ApplicationException(
         code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
+        message: 'An unknown error occurred',
         details: e,
       );
     }
   }
 
   @override
-  Future<void> reportPrayerRequest({String id}) async {
+  Future<bool> reportPrayerRequest({String id}) async {
+    final LocalUser user = await getIt<IAuthenticationFacade>().getSignedInUser();
+    bool isSafe = false;
+
     try {
       // Using transaction to avoid stale data
       await _firestore.runTransaction((transaction) async {
         DocumentReference documentReference = _prayerRequestsCollection.doc(id);
         DocumentSnapshot documentSnapshot = await transaction.get(documentReference);
 
-        int reports = documentSnapshot.data()["reports"];
-        reports = reports == null ? 0 : reports + 1;
+        List<dynamic> reportedBy = documentSnapshot.data()["reported_by"] ?? [];
 
-        if (reports >= kPrayerRequestsReportsLimit) {
-          transaction.update(documentReference, {
-            "reports": reports,
-            "is_safe": false,
-          });
-        } else {
-          transaction.update(documentReference, {
-            "reports": reports,
-          });
+        if (reportedBy.contains(user.id)) {
+          throw PrayerRequestsException(
+            code: PrayerRequestsExceptionCode.ALREADY_REPORTED,
+            message: 'You already reported this prayer request',
+          );
         }
+
+        reportedBy.add(user.id);
+        isSafe = reportedBy.length < kPrayerRequestsReportsLimit;
+
+        transaction.update(documentReference, {
+          "reported_by": reportedBy,
+          "is_safe": isSafe,
+        });
       });
+    } on PrayerRequestsException catch (_) {
+      rethrow;
     } on PlatformException catch (e) {
       handlePlatformException(e);
     } catch (e) {
       throw ApplicationException(
         code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
+        message: 'An unknown error occurred',
         details: e,
       );
     }
+    return isSafe;
   }
 
   @override
@@ -257,7 +274,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
     } catch (e) {
       throw ApplicationException(
         code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
+        message: 'An unknown error occurred',
         details: e,
       );
     }

@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 enum ResponseType {
   IMAGE,
   TEXT,
@@ -9,6 +11,7 @@ class CompletionDetails {
   final String contentId;
   final bool isOnTime;
   final bool isDraft;
+  final Timestamp completionDate;
 
   CompletionDetails({
     this.id,
@@ -16,6 +19,7 @@ class CompletionDetails {
     this.contentId,
     this.isOnTime,
     this.isDraft,
+    this.completionDate,
   });
 }
 

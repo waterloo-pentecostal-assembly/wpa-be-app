@@ -7,7 +7,7 @@ validateResponseBody(String responseBody) {
   } else {
     throw ValueObjectException(
       code: ValueObjectExceptionCode.TOO_LONG,
-      message: 'Response should be less than $kMaxResponseBody characters.',
+      message: 'Response should be less than $kMaxResponseBody characters',
     );
   }
 }

@@ -7,16 +7,19 @@ import '../../domain/authentication/exceptions.dart';
 import '../../domain/authentication/interfaces.dart';
 import '../../domain/authentication/value_objects.dart';
 import '../../domain/common/exceptions.dart';
-import '../common/firebase_helpers.dart';
+import '../common/firebase_storage_helper.dart';
+import '../common/helpers.dart';
 import 'firebase_user_dto.dart';
 
 class FirebaseAuthenticationFacade implements IAuthenticationFacade {
   final FirebaseAuth _firebaseAuth;
   final FirebaseFirestore _firestore;
+  final FirebaseStorageHelper _firebaseStorageHelper;
 
   FirebaseAuthenticationFacade(
     this._firebaseAuth,
     this._firestore,
+    this._firebaseStorageHelper,
   );
 
   @override
@@ -26,7 +29,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
     if (user == null) {
       throw AuthenticationException(
         code: AuthenticationExceptionCode.NOT_AUTHENTICATED,
-        message: 'User not authenticated.',
+        message: 'User not authenticated',
       );
     } else if (!user.emailVerified) {
       throw AuthenticationException(
@@ -42,11 +45,13 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
     if (userInfo.data() == null) {
       throw AuthenticationException(
         code: AuthenticationExceptionCode.USER_COLLECTION_NOT_FOUND,
-        message: 'User details not found.',
+        message: 'User details not found',
       );
     }
 
-    return FirebaseUserDto.fromFirestore(userInfo).toDomain();
+    LocalUser domainUser = await FirebaseUserDto.fromFirestore(userInfo).toDomain(_firebaseStorageHelper);
+
+    return domainUser;
   }
 
   @override
@@ -71,7 +76,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
       if (e.code == 'email-already-in-use') {
         throw AuthenticationException(
           code: AuthenticationExceptionCode.EMAIL_IN_USE,
-          message: 'A user with this email already exists. Please try signing in.',
+          message: 'A user with this email already exists. Please try signing in',
         );
       } else {
         rethrow;
@@ -79,7 +84,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
     } catch (e) {
       throw ApplicationException(
         code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
+        message: 'An unknown error occurred',
         details: e,
       );
     }
@@ -99,7 +104,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
       userCredential.user.delete();
       throw ApplicationException(
         code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
+        message: 'An unknown error occurred',
         details: e,
       );
     }
@@ -125,29 +130,29 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
       if (e.code == 'invalid-email' || e.code == 'wrong-password') {
         throw AuthenticationException(
           code: AuthenticationExceptionCode.INVALID_EMAIL_OR_PASSWORD,
-          message: 'Invalid Email or Password.',
+          message: 'Invalid Email or Password',
         );
       } else if (e.code == 'user-disabled') {
         throw AuthenticationException(
           code: AuthenticationExceptionCode.USER_DISABLED,
-          message: 'User disabled.',
+          message: 'User disabled',
         );
       } else if (e.code == 'user-not-found') {
         throw AuthenticationException(
           code: AuthenticationExceptionCode.USER_NOT_FOUND,
-          message: 'User not found.',
+          message: 'User not found',
         );
       } else {
         throw ApplicationException(
           code: ApplicationExceptionCode.UNKNOWN,
-          message: 'An unknown error occured. 1',
+          message: 'An unknown error occurred',
           details: e,
         );
       }
     } catch (e) {
       throw ApplicationException(
         code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured. 2',
+        message: 'An unknown error occurred',
         details: e,
       );
     }
@@ -171,13 +176,13 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
       if (e.code == 'user-not-found') {
         throw AuthenticationException(
           code: AuthenticationExceptionCode.USER_NOT_FOUND,
-          message: 'User not found, please verify email and try again.',
+          message: 'User not found, please verify email and try again',
         );
       }
     } catch (e) {
       throw ApplicationException(
         code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
+        message: 'An unknown error occurred',
         details: e,
       );
     }
@@ -193,13 +198,13 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
       if (e.code == 'requires-recent-login') {
         throw AuthenticationException(
           code: AuthenticationExceptionCode.REQUIRES_RECENT_LOGIN,
-          message: 'Please sign out and sign in again before deleting account.',
+          message: 'Please sign out and sign in again before deleting account',
         );
       }
     } catch (e) {
       throw ApplicationException(
         code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
+        message: 'An unknown error occurred',
         details: e,
       );
     }
@@ -213,7 +218,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
     } catch (e) {
       throw ApplicationException(
         code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
+        message: 'An unknown error occurred',
         details: e,
       );
     }
@@ -236,7 +241,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
     } catch (e) {
       throw ApplicationException(
         code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
+        message: 'An unknown error occurred',
         details: e,
       );
     }

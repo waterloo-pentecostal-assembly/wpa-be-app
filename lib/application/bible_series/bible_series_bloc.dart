@@ -79,7 +79,7 @@ Stream<BibleSeriesState> _mapContentDetailRequestedEventToState(
     );
   } catch (e) {
     yield BibleSeriesError(
-      message: 'An unknown error occured.',
+      message: 'An unknown error occurred',
     );
   }
 }
@@ -98,7 +98,7 @@ Stream<BibleSeriesState> _mapGetRecentBibleSeriesEventToState(
     );
   } catch (e) {
     yield BibleSeriesError(
-      message: 'An unknown error occured.',
+      message: 'An unknown error occurred',
     );
   }
 }
@@ -130,7 +130,7 @@ Stream<BibleSeriesState> _mapBibleSeriesDetailRequestedEventToState(
     );
   } catch (e) {
     yield BibleSeriesError(
-      message: 'An unknown error occured.',
+      message: 'An unknown error occurred',
     );
   }
 }

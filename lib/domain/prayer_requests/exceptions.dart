@@ -4,6 +4,8 @@ import '../common/exceptions.dart';
 
 enum PrayerRequestsExceptionCode {
   NO_STARTING_DOCUMENT,
+  PRAYER_REQUEST_NOT_FOUND,
+  ALREADY_REPORTED,
 }
 
 /// Implements [BaseException] to provide an exception type specific to Bible Series.

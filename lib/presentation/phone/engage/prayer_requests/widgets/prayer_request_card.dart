@@ -5,41 +5,30 @@ import '../../../../../application/prayer_requests/prayer_requests_bloc.dart';
 import '../../../../../constants.dart';
 import '../../../../../domain/prayer_requests/entities.dart';
 import '../../../../../injection.dart';
-import '../../../common/factories/text_factory.dart';
+import '../../../../common/toast_message.dart';
+import '../../../common/text_factory.dart';
 import '../../../common/helpers.dart';
 
 enum PrayerActionOptions {
-  DELETE,
+  MY_DELETE,
   REPORT,
-}
-
-class PrayerRequestCardInherited extends InheritedWidget {
-  final PrayerRequest prayerRequest;
-
-  const PrayerRequestCardInherited({
-    Key key,
-    @required this.prayerRequest,
-    @required Widget child,
-  }) : super(key: key, child: child);
-
-  @override
-  bool updateShouldNotify(PrayerRequestCardInherited oldWidget) {
-    return oldWidget.prayerRequest != prayerRequest;
-  }
-
-  static PrayerRequestCardInherited of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<PrayerRequestCardInherited>();
-  }
 }
 
 class PrayerRequestCard extends StatelessWidget {
   final PrayerRequest prayerRequest;
+  final Widget prayButtonOrIndicator;
+  final Animation<double> animation;
 
-  const PrayerRequestCard({Key key, this.prayerRequest}) : super(key: key);
+  const PrayerRequestCard({
+    Key key,
+    @required this.prayerRequest,
+    @required this.prayButtonOrIndicator,
+    @required this.animation,
+  }) : super(key: key);
 
   Widget build(BuildContext context) {
-    return PrayerRequestCardInherited(
-      prayerRequest: prayerRequest,
+    return FadeTransition(
+      opacity: animation,
       child: Container(
         margin: EdgeInsets.all(8.0),
         width: 0.9 * MediaQuery.of(context).size.width,
@@ -62,8 +51,8 @@ class PrayerRequestCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                PrayerRequestUserAndDate(),
-                PrayerRequestMenuButton(),
+                PrayerRequestUserAndDate(prayerRequest: prayerRequest),
+                PrayerRequestMenuButton(prayerRequest: prayerRequest),
               ],
             ),
             SizedBox(height: 16),
@@ -72,7 +61,7 @@ class PrayerRequestCard extends StatelessWidget {
             Container(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: [PrayButton()],
+                children: [prayButtonOrIndicator],
               ),
             ),
             SizedBox(height: 8),
@@ -84,13 +73,16 @@ class PrayerRequestCard extends StatelessWidget {
 }
 
 class PrayerRequestMenuButton extends StatelessWidget {
-  PrayerRequest prayerRequest(context) => PrayerRequestCardInherited.of(context).prayerRequest;
+  final PrayerRequest prayerRequest;
+
+  const PrayerRequestMenuButton({Key key, @required this.prayerRequest}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return PopupMenuButton(
       onSelected: (value) {
-        print(value.toString());
+        value = value as MenuButtonValue;
+        handleMenuButtonSelection(value, context);
       },
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.all(
@@ -98,14 +90,54 @@ class PrayerRequestMenuButton extends StatelessWidget {
         ),
       ),
       color: kCardOverlayGrey,
-      itemBuilder: (BuildContext context) => getPrayerRequestCardMenuItems(prayerRequest(context)),
+      itemBuilder: (BuildContext context) => getPrayerRequestCardMenuItems(prayerRequest),
       child: Icon(Icons.more_horiz),
     );
+  }
+
+  void handleMenuButtonSelection(MenuButtonValue menuButtonValue, BuildContext context) {
+    if (menuButtonValue.action == PrayerActionOptions.MY_DELETE) {
+      BlocProvider.of<PrayerRequestsBloc>(context)..add(MyPrayerRequestDeleted(id: menuButtonValue.id));
+    } else if (menuButtonValue.action == PrayerActionOptions.REPORT) {
+      BlocProvider.of<AllPrayerRequestsBloc>(context)..add(PrayerRequestReported(id: menuButtonValue.id));
+    }
+  }
+
+  List<PopupMenuItem> getPrayerRequestCardMenuItems(PrayerRequest prayerRequest) {
+    List<PopupMenuItem> popupMenuItems = [];
+
+    if (prayerRequest.isMine) {
+      popupMenuItems.add(PopupMenuItem(
+        value: MenuButtonValue(id: prayerRequest.id, action: PrayerActionOptions.MY_DELETE),
+        child: Row(
+          children: [
+            Icon(Icons.delete),
+            SizedBox(width: 4),
+            getIt<TextFactory>().lite('DELETE'),
+          ],
+        ),
+      ));
+    } else {
+      popupMenuItems.add(PopupMenuItem(
+        value: MenuButtonValue(id: prayerRequest.id, action: PrayerActionOptions.REPORT),
+        child: Row(
+          children: [
+            Icon(Icons.error),
+            SizedBox(width: 4),
+            getIt<TextFactory>().lite('REPORT'),
+          ],
+        ),
+      ));
+    }
+
+    return popupMenuItems;
   }
 }
 
 class PrayerRequestUserAndDate extends StatelessWidget {
-  PrayerRequest prayerRequest(context) => PrayerRequestCardInherited.of(context).prayerRequest;
+  final PrayerRequest prayerRequest;
+
+  const PrayerRequestUserAndDate({Key key, @required this.prayerRequest}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -115,13 +147,12 @@ class PrayerRequestUserAndDate extends StatelessWidget {
           child: Container(
             height: 30,
             width: 30,
-            // child: prayerRequest(context).userSnippet.profilePhotoUrl != null
-            child: (prayerRequest(context).userSnippet.profilePhotoUrl == null || prayerRequest(context).isAnonymous)
+            child: (prayerRequest.userSnippet.profilePhotoUrl == null || prayerRequest.isAnonymous)
                 ? Image.asset(kProfilePhotoPlaceholder)
                 : FadeInImage.assetNetwork(
                     fit: BoxFit.cover,
                     placeholder: kProfilePhotoPlaceholder,
-                    image: prayerRequest(context).userSnippet.profilePhotoUrl,
+                    image: prayerRequest.userSnippet.profilePhotoUrl,
                   ),
           ),
         ),
@@ -130,14 +161,14 @@ class PrayerRequestUserAndDate extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             () {
-              if (prayerRequest(context).isAnonymous) {
+              if (prayerRequest.isAnonymous) {
                 return getIt<TextFactory>().regular("Anonymous");
               } else {
-                return getIt<TextFactory>().regular(
-                    '${prayerRequest(context).userSnippet.firstName} ${prayerRequest(context).userSnippet.lastName}');
+                return getIt<TextFactory>()
+                    .regular('${prayerRequest.userSnippet.firstName} ${prayerRequest.userSnippet.lastName}');
               }
             }(),
-            getIt<TextFactory>().lite(toReadableDate(prayerRequest(context).date), fontSize: 9.0)
+            getIt<TextFactory>().lite(toReadableDate(prayerRequest.date), fontSize: 9.0)
           ],
         )
       ],
@@ -146,26 +177,36 @@ class PrayerRequestUserAndDate extends StatelessWidget {
 }
 
 class PrayButton extends StatelessWidget {
+  final PrayerRequest prayerRequest;
+
+  const PrayButton({Key key, @required this.prayerRequest}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<AllPrayerRequestsBloc>(
       create: (BuildContext context) => getIt<PrayerRequestsBloc>(),
-      child: _PrayButton(),
+      child: _PrayButton(
+        prayerRequest: prayerRequest,
+      ),
     );
   }
 }
 
 class _PrayButton extends StatelessWidget {
-  PrayerRequest prayerRequest(context) => PrayerRequestCardInherited.of(context).prayerRequest;
+  final PrayerRequest prayerRequest;
+
+  const _PrayButton({Key key, @required this.prayerRequest}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AllPrayerRequestsBloc, PrayerRequestsState>(
+    return BlocConsumer<AllPrayerRequestsBloc, PrayerRequestsState>(
+      listener: (BuildContext context, PrayerRequestsState state) {
+        if (state is PrayForRequestError) {
+          ToastMessage.showErrorToast(state.message, context);
+        }
+      },
       builder: (BuildContext context, PrayerRequestsState state) {
-        if (prayerRequest(context).hasPrayed || state is PrayForRequestComplete || state is PrayForRequestError) {
-          // TODO: We should should show a pop up if there is an error.
-          // For now we are showing the PRAY button again. Not a huge deal since the likelyhood
-          // of this error happening is very low
+        if (prayerRequest.hasPrayed || state is PrayForRequestComplete) {
           return _createPrayedButton();
         } else if (state is PrayForRequestLoading) {
           return _createLoadingButton();
@@ -186,7 +227,7 @@ class _PrayButton extends StatelessWidget {
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         onPressed: () {
           BlocProvider.of<AllPrayerRequestsBloc>(context).add(PrayForRequest(
-            id: prayerRequest(context).id,
+            id: prayerRequest.id,
           ));
         },
         child: getIt<TextFactory>().regular('PRAY'),
@@ -201,7 +242,7 @@ class _PrayButton extends StatelessWidget {
       padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       onPressed: null,
-      child: getIt<TextFactory>().regular('PRAYED!'),
+      child: getIt<TextFactory>().regular('PRAYED!', color: Colors.black54),
     );
   }
 
@@ -217,38 +258,34 @@ class _PrayButton extends StatelessWidget {
   }
 }
 
-List<PopupMenuItem> getPrayerRequestCardMenuItems(PrayerRequest prayerRequest) {
-  List<PopupMenuItem> popupMenuItems = [];
+class PrayedByIndicator extends StatelessWidget {
+  final int amount;
 
-  if (prayerRequest.isMine) {
-    popupMenuItems.add(PopupMenuItem(
-      value: {
-        "id": prayerRequest.id,
-        "action": PrayerActionOptions.DELETE,
-      },
-      child: Row(
-        children: [
-          Icon(Icons.delete),
-          SizedBox(width: 4),
-          getIt<TextFactory>().lite('DELETE'),
-        ],
-      ),
-    ));
-  } else {
-    popupMenuItems.add(PopupMenuItem(
-      value: {
-        "id": prayerRequest.id,
-        "action": PrayerActionOptions.REPORT,
-      },
-      child: Row(
-        children: [
-          Icon(Icons.error),
-          SizedBox(width: 4),
-          getIt<TextFactory>().lite('REPORT'),
-        ],
-      ),
-    ));
+  const PrayedByIndicator({Key key, @required this.amount}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return FlatButton(
+      height: 24,
+      minWidth: 0,
+      padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      onPressed: null,
+      child: getIt<TextFactory>().regular('Prayed by $amount other${getS(amount)}', color: Colors.black54),
+    );
   }
 
-  return popupMenuItems;
+  String getS(int amount) {
+    if (amount == 1) {
+      return '';
+    }
+    return 's';
+  }
+}
+
+class MenuButtonValue {
+  final String id;
+  final PrayerActionOptions action;
+
+  MenuButtonValue({@required this.id, @required this.action});
 }

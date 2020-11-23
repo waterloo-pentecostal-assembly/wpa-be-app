@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
+import 'package:wpa_app/presentation/common/date_formatter.dart';
 
 import '../../../../../application/bible_series/bible_series_bloc.dart';
 import '../../../../../constants.dart';
 import '../../../../../domain/bible_series/entities.dart';
 import '../../../../../injection.dart';
-import '../../../common/factories/text_factory.dart';
+import '../../../common/text_factory.dart';
 
 class RecentBibleSeriesWidget extends StatelessWidget {
   @override
@@ -50,7 +52,7 @@ class RecentBibleSeriesList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: kRecentBibleSeriesTileHeight,
+      height: kRecentBibleSeriesTileHeight + kRecentBibleSeriesTileDescriptionHeight,
       child: ListView.builder(
         padding: EdgeInsets.only(left: 16),
         scrollDirection: Axis.horizontal,
@@ -75,7 +77,6 @@ class BibleSeriesCard extends StatelessWidget {
         Navigator.pushNamed(context, '/bible_series', arguments: {'bibleSeriesId': bibleSeries.id});
       },
       child: Container(
-        // height: 10,
         width: kRecentBibleSeriesTileWidth,
         padding: EdgeInsets.only(
           right: 8,
@@ -83,20 +84,34 @@ class BibleSeriesCard extends StatelessWidget {
           top: 8,
           bottom: 8,
         ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(15.0),
-          // child: FadeInImage.assetNetwork(placeholder: kWpaLogoLoc, image: bibleSeries.imageUrl),
-          child: Image.network(
-            bibleSeries.imageUrl,
-            fit: BoxFit.fill,
-            frameBuilder: (BuildContext context, Widget child, int frame, bool wasSynchronouslyLoaded) {
-              if (frame != null && frame >= 0) {
-                return child;
-              } else {
-                return BibleSeriesCardPlaceholder();
-              }
-            },
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(15.0),
+              // child: FadeInImage.assetNetwork(placeholder: kWpaLogoLoc, image: bibleSeries.imageUrl),
+              child: Image.network(
+                bibleSeries.imageUrl,
+                fit: BoxFit.fill,
+                frameBuilder: (BuildContext context, Widget child, int frame, bool wasSynchronouslyLoaded) {
+                  if (frame != null && frame >= 0) {
+                    return child;
+                  } else {
+                    return BibleSeriesCardPlaceholder();
+                  }
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0, top: 8.0),
+              child: getIt<TextFactory>().regular(bibleSeries.title),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: getIt<TextFactory>().lite(
+                  '${dateFormatter.timeStampToString(bibleSeries.startDate)} - ${dateFormatter.timeStampToString(bibleSeries.endDate)}'),
+            ),
+          ],
         ),
       ),
     );

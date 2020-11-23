@@ -54,7 +54,7 @@ Stream<SignInState> _mapEmailChangedToState(
   } catch (e) {
     yield state.copyWith(
       emailAddress: event.email,
-      emailAddressError: 'An unknown error occured.',
+      emailAddressError: 'An unknown error occurred',
     );
   }
 }
@@ -77,7 +77,7 @@ Stream<SignInState> _mapPasswordChangedToState(
   } catch (e) {
     yield state.copyWith(
       password: event.password,
-      passwordError: 'An unknown error occured.',
+      passwordError: 'An unknown error occurred',
     );
   }
 }
@@ -122,7 +122,7 @@ Stream<SignInState> _mapSignInWithEmailAndPasswordToState(
     yield state.copyWith(
       submitting: false,
       signInSuccess: false,
-      signInError: 'An unknown error occured.',
+      signInError: 'An unknown error occurred',
     );
   }
 }

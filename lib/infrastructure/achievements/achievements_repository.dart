@@ -7,7 +7,7 @@ import '../../domain/authentication/entities.dart';
 import '../../domain/authentication/interfaces.dart';
 import '../../domain/common/exceptions.dart';
 import '../../injection.dart';
-import '../common/firebase_helpers.dart';
+import '../common/helpers.dart';
 import 'achievements_dto.dart';
 
 class AchievementsRepository implements IAchievementsRepository {
@@ -29,7 +29,7 @@ class AchievementsRepository implements IAchievementsRepository {
     } catch (e) {
       throw ApplicationException(
         code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
+        message: 'An unknown error occurred',
         details: e,
       );
     }
@@ -39,5 +39,26 @@ class AchievementsRepository implements IAchievementsRepository {
     }
 
     return AchievementsDto.fromFirestore(documentSnapshot).toDomain();
+  }
+
+  @override
+  Stream<Achievements> watchAchievements() async* {
+    final LocalUser user = await getIt<IAuthenticationFacade>().getSignedInUser();
+    try {
+      yield* _achievementsCollection.doc(user.id).snapshots().map((documentSnapshot) {
+        if (documentSnapshot.data() == null) {
+          return Achievements(currentStreak: 0, longestStreak: 0, perfectSeries: 0);
+        }
+        return AchievementsDto.fromFirestore(documentSnapshot).toDomain();
+      });
+    } on PlatformException catch (e) {
+      handlePlatformException(e);
+    } catch (e) {
+      throw ApplicationException(
+        code: ApplicationExceptionCode.UNKNOWN,
+        message: 'An unknown error occurred',
+        details: e,
+      );
+    }
   }
 }

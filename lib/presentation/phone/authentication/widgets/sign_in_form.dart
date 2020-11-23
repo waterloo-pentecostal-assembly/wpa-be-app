@@ -13,7 +13,7 @@ class SignInForm extends StatelessWidget {
       listener: (BuildContext context, SignInState state) {
         if (state.signInSuccess) {
           // Navigate to HOME tab upon login
-          context.bloc<NavigationBarBloc>()
+          BlocProvider.of<NavigationBarBloc>(context)
             ..add(
               NavigationBarEvent(
                 tab: NavigationTabEnum.HOME,
@@ -51,9 +51,9 @@ class SignInForm extends StatelessWidget {
                     ),
                     child: Column(
                       children: <Widget>[
-                        if (context.bloc<SignInBloc>().state.signInError != null) ...{
+                        if (BlocProvider.of<SignInBloc>(context).state.signInError != null) ...{
                           Text(
-                            context.bloc<SignInBloc>().state.signInError,
+                            BlocProvider.of<SignInBloc>(context).state.signInError,
                             style: TextStyle(
                               color: kErrorTextColor,
                             ),
@@ -90,11 +90,11 @@ class SignInForm extends StatelessWidget {
                                       ),
                                       child: TextFormField(
                                         validator: (_) {
-                                          String emailAddressError = context.bloc<SignInBloc>().state.emailAddressError;
+                                          String emailAddressError = BlocProvider.of<SignInBloc>(context).state.emailAddressError;
                                           return emailAddressError != '' ? emailAddressError : null;
                                         },
                                         onChanged: (value) {
-                                          context.bloc<SignInBloc>().add(EmailChanged(email: value));
+                                          BlocProvider.of<SignInBloc>(context).add(EmailChanged(email: value));
                                         },
                                         autocorrect: false,
                                         decoration: InputDecoration(
@@ -110,11 +110,11 @@ class SignInForm extends StatelessWidget {
                                       padding: EdgeInsets.all(4.0),
                                       child: TextFormField(
                                         validator: (_) {
-                                          String passwordError = context.bloc<SignInBloc>().state.passwordError;
+                                          String passwordError = BlocProvider.of<SignInBloc>(context).state.passwordError;
                                           return passwordError != '' ? passwordError : null;
                                         },
                                         onChanged: (value) {
-                                          context.bloc<SignInBloc>().add(PasswordChanged(password: value));
+                                          BlocProvider.of<SignInBloc>(context).add(PasswordChanged(password: value));
                                         },
                                         obscureText: true,
                                         autocorrect: false,
@@ -164,7 +164,7 @@ class SignInForm extends StatelessWidget {
                                     disabledColor: Colors.grey[400],
                                     onPressed: state.submitting || !state.isSignInFormValid
                                         ? null
-                                        : () => context.bloc<SignInBloc>().add(
+                                        : () => BlocProvider.of<SignInBloc>(context).add(
                                               SignInWithEmailAndPassword(),
                                             ),
                                     child: Center(

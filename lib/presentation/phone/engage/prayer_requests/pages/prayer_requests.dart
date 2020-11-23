@@ -3,7 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../application/prayer_requests/prayer_requests_bloc.dart';
 import '../../../../../injection.dart';
-import '../../../common/factories/text_factory.dart';
+import '../../../common/text_factory.dart';
+import '../widgets/new_prayer_request.dart';
 import 'all_prayer_requests.dart';
 import 'my_prayer_requests.dart';
 
@@ -13,17 +14,11 @@ class PrayerRequestsPage extends StatelessWidget {
     final int amount = calculateFetchAmount(context);
     return MultiBlocProvider(
       providers: [
-        BlocProvider<MyPrayerRequestsBloc>(
-          create: (BuildContext context) => getIt<PrayerRequestsBloc>()
-            ..add(
-              MyPrayerRequestsRequested(),
-            ),
-        ),
         BlocProvider<AllPrayerRequestsBloc>(
-          create: (BuildContext context) => getIt<PrayerRequestsBloc>()
-            ..add(
-              PrayerRequestsRequested(amount: amount),
-            ),
+          create: (BuildContext context) => getIt<PrayerRequestsBloc>()..add(PrayerRequestsRequested(amount: amount)),
+        ),
+        BlocProvider<MyPrayerRequestsBloc>(
+          create: (BuildContext context) => getIt<PrayerRequestsBloc>()..add(MyPrayerRequestsRequested()),
         ),
       ],
       child: Scaffold(
@@ -119,11 +114,14 @@ class PrayerRequestsTitleBar extends StatelessWidget {
           ),
           GestureDetector(
             onTap: () {
-              BlocProvider.of<MyPrayerRequestsBloc>(context)
-                ..add(PrayerRequestCreated(
-                  request: 'new request ${DateTime.now()}',
-                  isAnonymous: false,
-                ));
+              OverlayEntry entry;
+              Overlay.of(context).insert(
+                entry = OverlayEntry(
+                  builder: (context) {
+                    return NewPrayerRequestForm(entry: entry);
+                  },
+                ),
+              );
             },
             child: ClipOval(
               child: Container(
@@ -139,7 +137,6 @@ class PrayerRequestsTitleBar extends StatelessWidget {
     );
   }
 }
-
 
 int calculateFetchAmount(context) {
   double availableSpace = MediaQuery.of(context).size.height;

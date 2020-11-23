@@ -11,13 +11,16 @@ class CompletionsDto {
   final String contentId;
   final bool isOnTime;
   final bool isDraft;
+  final Timestamp completionDate;
 
   factory CompletionsDto.fromJson(Map<String, dynamic> json) {
+    bool isDraft = json['is_draft'] ?? false;
     return CompletionsDto._(
       seriesId: findOrThrowException(json, 'series_id'),
       contentId: findOrThrowException(json, 'content_id'),
-      isOnTime: findOrThrowException(json, 'is_on_time'),
-      isDraft: json['is_draft'] ?? false,
+      isOnTime: !isDraft ? findOrThrowException(json, 'is_on_time') : false,
+      isDraft: isDraft,
+      completionDate: !isDraft ? findOrThrowException(json, 'completion_date') : null,
     );
   }
 
@@ -27,6 +30,7 @@ class CompletionsDto {
       contentId: completionDetails.contentId,
       isOnTime: completionDetails.isOnTime,
       isDraft: completionDetails.isDraft,
+      completionDate: completionDetails.completionDate,
     );
   }
 
@@ -40,6 +44,7 @@ class CompletionsDto {
     String contentId,
     bool isOnTime,
     bool isDraft,
+    Timestamp completionDate,
   }) {
     return CompletionsDto._(
       id: id ?? this.id,
@@ -47,6 +52,7 @@ class CompletionsDto {
       contentId: contentId ?? this.contentId,
       isOnTime: isOnTime ?? this.isOnTime,
       isDraft: isDraft ?? this.isDraft,
+      completionDate: completionDate ?? this.completionDate,
     );
   }
 
@@ -56,6 +62,7 @@ class CompletionsDto {
     @required this.contentId,
     @required this.isOnTime,
     @required this.isDraft,
+    this.completionDate,
   });
 }
 

@@ -1,8 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:wpa_app/infrastructure/common/firebase_storage_helper.dart';
 
 import '../../domain/bible_series/entities.dart';
+import '../../injection.dart';
 import '../common/helpers.dart';
 import 'helpers.dart';
 
@@ -11,6 +13,7 @@ class BibleSeriesDto {
   final String title;
   final String subTitle;
   final String imageUrl;
+  final String imageGsLocation;
   final Timestamp startDate;
   final Timestamp endDate;
   final bool isActive;
@@ -27,7 +30,7 @@ class BibleSeriesDto {
     return BibleSeriesDto._(
       title: findOrThrowException(json, 'title'),
       subTitle: findOrThrowException(json, 'sub_title'),
-      imageUrl: findOrThrowException(json, 'image_url'),
+      imageGsLocation: findOrThrowException(json, 'image_gs_location'),
       startDate: findOrThrowException(json, 'start_date'),
       endDate: findOrThrowException(json, 'end_date'),
       isActive: json['is_active'] ?? false,
@@ -44,6 +47,7 @@ class BibleSeriesDto {
     String title,
     String subTitle,
     String imageUrl,
+    String imageGsLocation,
     Timestamp startDate,
     Timestamp endDate,
     bool isActive,
@@ -54,6 +58,7 @@ class BibleSeriesDto {
       title: title ?? this.title,
       subTitle: subTitle ?? this.subTitle,
       imageUrl: imageUrl ?? this.imageUrl,
+      imageGsLocation: imageGsLocation ?? this.imageGsLocation,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       isActive: isActive ?? this.isActive,
@@ -65,7 +70,8 @@ class BibleSeriesDto {
     this.id,
     @required this.title,
     @required this.subTitle,
-    @required this.imageUrl,
+    this.imageUrl,
+    @required this.imageGsLocation,
     @required this.startDate,
     @required this.endDate,
     @required this.isActive,
@@ -74,17 +80,21 @@ class BibleSeriesDto {
 }
 
 extension BibleSeriesDtoX on BibleSeriesDto {
-  BibleSeries toDomain() {
+  Future<BibleSeries> toDomain(FirebaseStorageHelper firebaseStorageHelper) async {
     List<SeriesContentSnippet> _seriesContentSnippet = [];
     this.seriesContentSnippet.forEach((element) {
       _seriesContentSnippet.add(element.toDomain());
     });
 
+    // Convert GS URL to Download URL
+    String imageUrl = await firebaseStorageHelper.getDownloadUrl(this.imageGsLocation);
+
     return BibleSeries(
       id: this.id,
       title: this.title,
       subTitle: this.subTitle,
-      imageUrl: this.imageUrl,
+      imageUrl: imageUrl,
+      imageGsLocation: this.imageGsLocation,
       startDate: this.startDate,
       endDate: this.endDate,
       isActive: this.isActive,

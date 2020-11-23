@@ -1,21 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:wpa_app/infrastructure/common/firebase_storage_helper.dart';
 
 import '../../domain/bible_series/entities.dart';
 import '../../domain/bible_series/exceptions.dart';
 import '../../domain/bible_series/interfaces.dart';
 import '../../domain/common/exceptions.dart';
-import '../../infrastructure/common/firebase_helpers.dart';
+import '../common/helpers.dart';
 import 'bible_series_dtos.dart';
 import 'series_content_dtos.dart';
 
 class BibleSeriesRepository implements IBibleSeriesRepository {
   final FirebaseFirestore _firestore;
+  final FirebaseStorageHelper _firebaseStorageHelper;
   CollectionReference _bibleSeriesCollection;
   DocumentSnapshot _lastBibleSeriesDocument;
 
-  BibleSeriesRepository(this._firestore) {
+  BibleSeriesRepository(this._firestore, this._firebaseStorageHelper) {
     _bibleSeriesCollection = _firestore.collection("bible_series");
   }
 
@@ -38,7 +40,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
     } catch (e) {
       throw ApplicationException(
         code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
+        message: 'An unknown error occurred',
         details: e,
       );
     }
@@ -46,16 +48,15 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
     List<BibleSeries> bibleSeriesList = [];
 
     if (querySnapshot.docs.length > 0) {
-      querySnapshot.docs.forEach((element) {
-        // Handle exceptions separately for each document conversion.
-        // This will ensure that corrupted documents do not affect the others.
+      for (QueryDocumentSnapshot doc in querySnapshot.docs) {
         try {
-          final BibleSeries bibleSeriesDto = BibleSeriesDto.fromFirestore(element).toDomain();
+          final BibleSeries bibleSeriesDto = await BibleSeriesDto.fromFirestore(doc).toDomain(_firebaseStorageHelper);
           bibleSeriesList.add(bibleSeriesDto);
         } catch (e) {
-          // print(e.toString());
+          // Handle exceptions separately for each document conversion.
+          // This will ensure that corrupted documents do not affect the others.
         }
-      });
+      }
 
       /// save last element to be used by [getMoreBibleSeries] function
       _lastBibleSeriesDocument = querySnapshot.docs.last;
@@ -91,7 +92,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
     } catch (e) {
       throw ApplicationException(
         code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
+        message: 'An unknown error occurred',
         details: e,
       );
     }
@@ -99,17 +100,15 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
     List<BibleSeries> bibleSeriesList = [];
 
     if (querySnapshot.docs.length > 0) {
-      querySnapshot.docs.forEach((element) {
-        // Handle exceptions separately for each document conversion.
-        // This will ensure that corrupted documents do not affect the others.
+      for (QueryDocumentSnapshot doc in querySnapshot.docs) {
         try {
-          final BibleSeries bibleSeriesDto = BibleSeriesDto.fromFirestore(element).toDomain();
+          final BibleSeries bibleSeriesDto = await BibleSeriesDto.fromFirestore(doc).toDomain(_firebaseStorageHelper);
           bibleSeriesList.add(bibleSeriesDto);
         } catch (e) {
-          // TODO: Report this error in the backend. User does not have to see this error but we should be aware of it.
+          // Handle exceptions separately for each document conversion.
+          // This will ensure that corrupted documents do not affect the others.
         }
-      });
-
+      }
       _lastBibleSeriesDocument = querySnapshot.docs.last;
     } else {
       // Reset _lastBibleSeriesDocument if no more documents exist
@@ -134,7 +133,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
     } catch (e) {
       throw ApplicationException(
         code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
+        message: 'An unknown error occurred',
         details: e,
       );
     }
@@ -147,7 +146,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
       );
     }
 
-    final BibleSeries bibleSeries = BibleSeriesDto.fromFirestore(document).toDomain();
+    final BibleSeries bibleSeries = await BibleSeriesDto.fromFirestore(document).toDomain(_firebaseStorageHelper);
     return bibleSeries;
   }
 
@@ -168,7 +167,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
     } catch (e) {
       throw ApplicationException(
         code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occured.',
+        message: 'An unknown error occurred',
         details: e,
       );
     }
