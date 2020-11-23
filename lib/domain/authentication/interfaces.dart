@@ -4,11 +4,15 @@ import 'entities.dart';
 import 'value_objects.dart';
 
 abstract class IAuthenticationFacade {
+  Future<bool> deviceTokenExists();
+
+  Future<void> addDeviceToken();
+
   /// Gets current signed in user. Returns a [LocalUser] object.
   /// Throws [ApplicationException] or [AuthenticationException].
   Future<LocalUser> getSignedInUser();
 
-  /// Register user using first name, last name, email address and password. 
+  /// Register user using first name, last name, email address and password.
   /// Throws [ApplicationException] or [AuthenticationException].
   Future<void> registerWithEmailAndPassword({
     @required Name firstName,
@@ -17,7 +21,7 @@ abstract class IAuthenticationFacade {
     @required Password password,
   });
 
-  /// Sign in user using email address and password. Returns a [LocalUser] 
+  /// Sign in user using email address and password. Returns a [LocalUser]
   /// object with the user details.
   /// Throws [ApplicationException] or [AuthenticationException].
   Future<LocalUser> signInWithEmailAndPassword({

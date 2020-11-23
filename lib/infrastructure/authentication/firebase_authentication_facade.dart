@@ -246,4 +246,16 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
       );
     }
   }
+
+  @override
+  Future<void> addDeviceToken() {
+    // TODO: implement addDeviceToken
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<bool> deviceTokenExists() {
+    // TODO: implement deviceTokenExists
+    throw UnimplementedError();
+  }
 }
