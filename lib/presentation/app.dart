@@ -7,8 +7,10 @@ import '../application/authentication/authentication_bloc.dart';
 import '../application/navigation_bar/navigation_bar_bloc.dart';
 import '../injection.dart';
 import 'common/loader.dart';
+import 'phone/authentication/password_reset_page.dart';
+import 'phone/authentication/sign_in_page.dart';
+import 'phone/authentication/sign_up_page.dart';
 import 'phone/index.dart';
-import 'phone/sign_in/sign_in_page.dart';
 import 'phone/splash/splash_page.dart';
 
 class App extends StatelessWidget {
@@ -73,6 +75,18 @@ Route routes(RouteSettings settings) {
     return MaterialPageRoute(
       builder: (BuildContext context) {
         return SignInPage();
+      },
+    );
+  } else if (settings.name == '/sign_up') {
+    return MaterialPageRoute(
+      builder: (BuildContext context) {
+        return SignUpPage();
+      },
+    );
+  } else if (settings.name == '/password_reset') {
+    return MaterialPageRoute(
+      builder: (BuildContext context) {
+        return PasswordResetPage();
       },
     );
   }

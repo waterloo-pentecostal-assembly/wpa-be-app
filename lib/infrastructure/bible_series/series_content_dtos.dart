@@ -1,10 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:wpa_app/domain/bible_series/exceptions.dart';
 
 import '../../domain/bible_series/entities.dart';
-import '../../domain/common/value_objects.dart';
+import '../../domain/bible_series/exceptions.dart';
 import '../common/helpers.dart';
 import 'helpers.dart';
 
@@ -69,11 +68,11 @@ extension SeriesContentDtoX on SeriesContentDto {
   SeriesContent toDomain() {
     List<ISeriesContentBody> _body = [];
     this.body.forEach((element) {
-      _body.add(element.toDomain());
+      _body.add(element.toDomain(body.indexOf(element)));
     });
 
     return SeriesContent(
-      id: UniqueId.fromUniqueString(this.id),
+      id: this.id,
       title: this.title,
       subTitle: this.subTitle,
       contentType: contentTypeMapper(this.contentType),
@@ -92,8 +91,7 @@ class SeriesContentBodyDto {
     Map<String, dynamic> _properties = {};
 
     if (_bodyType == 'audio') {
-      _properties['audioFileUrl'] =
-          findOrThrowException(json, 'audio_file_url');
+      _properties['audioFileUrl'] = findOrThrowException(json, 'audio_file_url');
     } else if (_bodyType == 'text') {
       _properties['paragraphs'] = findOrThrowException(json, 'paragraphs');
     } else if (_bodyType == 'question') {
@@ -106,7 +104,7 @@ class SeriesContentBodyDto {
     } else {
       throw BibleSeriesException(
         message: 'Invalid body_type: $_bodyType',
-        errorType: BibleSeriesExceptionType.INVALID_CONTENT_BODY,
+        code: BibleSeriesExceptionCode.INVALID_CONTENT_BODY,
       );
     }
 
@@ -128,7 +126,7 @@ class SeriesContentBodyDto {
 
 extension SeriesContentBodyDtoX on SeriesContentBodyDto {
   // ignore: missing_return
-  ISeriesContentBody toDomain() {
+  ISeriesContentBody toDomain(int index) {
     if (this.bodyType == 'audio') {
       AudioBodyProperties bodyProperties = AudioBodyProperties();
       bodyProperties.audioFileUrl = this.properties['audioFileUrl'];
@@ -159,8 +157,7 @@ extension SeriesContentBodyDtoX on SeriesContentBodyDto {
       List<dynamic> _scriptures = this.properties['scriptures'];
       _scriptures.forEach((element) {
         Map<String, String> _verses = {};
-        Map<String, dynamic> _versesFirebase =
-            findOrThrowException(element, 'verses');
+        Map<String, dynamic> _versesFirebase = findOrThrowException(element, 'verses');
 
         _versesFirebase.forEach((key, value) {
           _verses[key] = value;
@@ -182,11 +179,13 @@ extension SeriesContentBodyDtoX on SeriesContentBodyDto {
       );
     } else if (this.bodyType == 'question') {
       QuestionBodyProperties bodyProperties = QuestionBodyProperties();
-      List<String> _questions = [];
+      List<Question> _questions = [];
+      dynamic questions = this.properties['questions'];
 
-      this.properties['questions'].forEach((element) {
-        _questions.add(element);
+      questions.forEach((question) {
+        _questions.add(Question(location: [index, questions.indexOf(question)], question: question));
       });
+
       bodyProperties.questions = _questions;
 
       return QuestionBody(

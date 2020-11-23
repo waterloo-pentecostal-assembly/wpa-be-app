@@ -59,8 +59,7 @@ class HomeIndex extends StatelessWidget {
             RaisedButton(
               child: Text('Engage'),
               onPressed: () {
-                // getIt<BibleSeriesBloc>()..add(BibleSeriesInformationRequested(bibleSeriesId: UniqueId.fromUniqueString('EJypQsJ8LXsT4zEnpMLp')));
-                getIt<NavigationBarBloc>()
+                context.bloc<NavigationBarBloc>()
                   ..add(
                     NavigationBarEvent(
                       tab: NavigationTabEnum.ENGAGE,
@@ -71,11 +70,9 @@ class HomeIndex extends StatelessWidget {
             RaisedButton(
               child: Text('Example Notification Detail'),
               onPressed: () {
-                getIt<NavigationBarBloc>()
+                context.bloc<NavigationBarBloc>()
                   ..add(
-                    NavigationBarEvent(
-                        tab: NavigationTabEnum.NOTIFICATIONS,
-                        route: '/notification_detail'),
+                    NavigationBarEvent(tab: NavigationTabEnum.NOTIFICATIONS, route: '/notification_detail'),
                   );
               },
             ),

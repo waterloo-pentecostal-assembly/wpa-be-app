@@ -1,8 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-import '../common/value_objects.dart';
-
 enum SeriesContentType {
   REFLECT,
   LISTEN,
@@ -22,8 +20,13 @@ enum SeriesContentBodyType {
   IMAGE_INPUT,
 }
 
+enum ResponseType {
+  IMAGE,
+  TEXT,
+}
+
 class BibleSeries {
-  final UniqueId id;
+  final String id;
   final String title;
   final String subTitle;
   final String imageUrl;
@@ -45,34 +48,101 @@ class BibleSeries {
 
   @override
   String toString() {
-    return '''id: ${id.value}, title: $title, subtitle: $subTitle, imageUrl: $imageUrl, 
+    return '''id: ${id}, title: $title, subtitle: $subTitle, imageUrl: $imageUrl, 
               startDate: $startDate, endDate: $endDate, isActive: $isActive, 
               seriesContentSnippet: $seriesContentSnippet''';
   }
 }
 
 class SeriesContentSnippet {
-  final Map<SeriesContentType, UniqueId> contentTypes;
+  final List<AvailableContentType> availableContentTypes;
   final Timestamp date;
+  bool _isCompleted;
+  bool _isOnTime;
+  bool _isDraft;
+
+  set isCompleted(bool isCompleted) {
+    this._isCompleted = isCompleted;
+  }
+
+  get isCompleted => _isCompleted;
+
+  set isOnTime(bool isOnTime) {
+    this._isOnTime = isOnTime;
+  }
+
+  get isOnTime => _isOnTime;
+
+  set isDraft(bool isDraft) {
+    this._isDraft = isDraft;
+  }
+
+  get isDraft => _isDraft;
 
   SeriesContentSnippet({
-    @required this.contentTypes,
+    @required this.availableContentTypes,
     @required this.date,
   });
 
   @override
   String toString() {
-    return 'contentTypes: $contentTypes, date: $date';
+    return 'availableContentTypes: $availableContentTypes, date: $date, isCompleted: $isCompleted, isOnTime: $isOnTime';
+  }
+}
+
+class AvailableContentType {
+  final SeriesContentType seriesContentType;
+  final String contentId;
+  bool _isCompleted;
+  bool _isOnTime;
+  bool _isDraft;
+
+  set isCompleted(bool isCompleted) {
+    this._isCompleted = isCompleted;
+  }
+
+  get isCompleted => _isCompleted;
+
+  set isOnTime(bool isOnTime) {
+    this._isOnTime = isOnTime;
+  }
+
+  get isOnTime => _isOnTime;
+
+  set isDraft(bool isDraft) {
+    this._isDraft = isDraft;
+  }
+
+  get isDraft => _isDraft;
+
+  AvailableContentType({
+    @required this.seriesContentType,
+    @required this.contentId,
+  });
+
+  @override
+  String toString() {
+    return 'seriesContentType: $seriesContentType, contentId: $contentId, isCompleted: $isCompleted, isOnTime: $isOnTime';
   }
 }
 
 class SeriesContent {
-  final UniqueId id;
+  final String id;
   final SeriesContentType contentType;
   final Timestamp date;
   final String title;
   final String subTitle;
   final List<ISeriesContentBody> body;
+
+  /// Checks if it possible to have a response for this [SeriesContent]
+  bool get isResponsePossible {
+    this.body.forEach((element) {
+      if (element.type == SeriesContentBodyType.QUESTION || element.type == SeriesContentBodyType.IMAGE_INPUT) {
+        return true;
+      }
+    });
+    return false;
+  }
 
   SeriesContent({
     @required this.id,
@@ -170,7 +240,17 @@ class QuestionBody implements ISeriesContentBody {
 }
 
 class QuestionBodyProperties {
-  List<String> questions;
+  List<Question> questions;
+}
+
+class Question {
+  final String question;
+  final List<int> location;
+
+  Question({
+    @required this.question,
+    @required this.location,
+  });
 }
 
 class ImageInputBody implements ISeriesContentBody {
@@ -182,4 +262,40 @@ class ImageInputBody implements ISeriesContentBody {
 
   @override
   get properties => {};
+}
+
+class CompletionDetails {
+  final String id;
+  final String seriesId;
+  final String contentId;
+  final bool isOnTime;
+  final bool isDraft;
+
+  CompletionDetails({
+    this.id,
+    this.seriesId,
+    this.contentId,
+    this.isOnTime,
+    this.isDraft,
+  });
+}
+
+class Responses {
+  final String id;
+  final Map<String, Map<String, ResponseDetails>> responses;
+
+  Responses({
+    this.id,
+    this.responses,
+  });
+}
+
+class ResponseDetails {
+  final ResponseType type;
+  final String response;
+
+  ResponseDetails({
+    this.type,
+    this.response,
+  });
 }

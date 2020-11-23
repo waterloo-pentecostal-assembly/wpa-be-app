@@ -1,12 +1,12 @@
+import 'package:wpa_app/constants.dart';
+
 import '../common/exceptions.dart';
 
 validateEmailAddress(String emailAddress) {
-  const emailRegex =
-      r"""^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+""";
-  if (RegExp(emailRegex).hasMatch(emailAddress)) {
+  if (RegExp(AppConstants.emailRegex).hasMatch(emailAddress)) {
     return emailAddress;
   } else {
-    throw ApplicationException(message: 'Invalid email address.', errorType: ApplicationExceptionType.VALUE_OBJECT);
+    throw ValueObjectException(message: 'Invalid email address.');
   }
 }
 
@@ -14,14 +14,20 @@ validatePassword(String password) {
   if (password.length >= 8) {
     return password;
   } else {
-    throw ApplicationException(message: 'Password must be at least 8 characters.', errorType: ApplicationExceptionType.VALUE_OBJECT);
+    throw ValueObjectException(message: 'Password must be at least 8 characters.');
   }
+  // if (RegExp(AppConstants.passwordRegex).hasMatch(password)) {
+  //   return password;
+  // } else {
+  //   throw ValueObjectException(
+  //       message: 'Password must be at least 8 characters including at least 1 number and 1 letter');
+  // }
 }
 
 validateName(String name) {
   if (name.length > 0) {
     return name;
   } else {
-    throw ApplicationException(message: 'Name must be at least one letter.', errorType: ApplicationExceptionType.VALUE_OBJECT);
+    throw ValueObjectException(message: 'Name must be at least one letter.');
   }
 }

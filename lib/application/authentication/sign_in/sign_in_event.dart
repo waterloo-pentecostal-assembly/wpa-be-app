@@ -38,15 +38,3 @@ class SignInWithEmailAndPassword extends SignInEvent {
   String toString() => 'SignInWithEmailAndPassword Event';
 }
 
-class SignInWithGoogle extends SignInEvent {
-// TODO: SignInWithGoogle may need updating when domain and infrastructure is implemented
-  const SignInWithGoogle();
-
-  @override
-  List<Object> get props => [];
-
-  @override
-  String toString() => 'SignInWithGoogle Event';
-}
-
-// TODO: event for sign in with facebook

@@ -9,6 +9,16 @@ class BibleSeriesInitial extends BibleSeriesState {
   List<Object> get props => [];
 }
 
+class BibleSeriesError extends BibleSeriesState {
+  final String message;
+  final dynamic code;
+
+  BibleSeriesError({@required this.message, @required this.code});
+
+  @override
+  List<Object> get props => [message, code];
+}
+
 class FetchingBibleSeries extends BibleSeriesState {
   @override
   List<Object> get props => [];
@@ -19,25 +29,32 @@ class RecentBibleSeries extends BibleSeriesState {
 
   RecentBibleSeries(this._bibleSeriesList);
 
-  @override
-  List<Object> get props => [bibleSeriesList];
-
   List<BibleSeries> get bibleSeriesList => _bibleSeriesList;
 
   @override
-  String toString() {
-    // TODO: implement toString
-    return super.toString();
-  }
+  List<Object> get props => [bibleSeriesList];
 }
 
-class BibleSeriesInformation extends BibleSeriesState {
-  final BibleSeries _bibleSeriesInformation;
+class BibleSeriesDetail extends BibleSeriesState {
+  final BibleSeries _bibleSeriesDetail;
 
-  BibleSeriesInformation(this._bibleSeriesInformation);
+  BibleSeriesDetail(this._bibleSeriesDetail);
 
-  BibleSeries get bibleSeriesInformation => _bibleSeriesInformation;
+  BibleSeries get bibleSeriesDetail => _bibleSeriesDetail;
 
   @override
-  List<Object> get props => [_bibleSeriesInformation];
+  List<Object> get props => [_bibleSeriesDetail];
+}
+
+class SeriesContentDetail extends BibleSeriesState {
+  final SeriesContent _seriesContentDetail;
+  final CompletionDetails _completionDetail;
+
+  SeriesContentDetail(this._seriesContentDetail, this._completionDetail);
+
+  SeriesContent get seriesContentDetail => _seriesContentDetail;
+  CompletionDetails get contentCompletionDetail => _completionDetail;
+
+  @override
+  List<Object> get props => [_seriesContentDetail, _completionDetail];
 }

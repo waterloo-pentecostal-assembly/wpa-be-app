@@ -11,6 +11,7 @@ class FirebaseUserDto {
   final String lastName;
   final String email;
   final int reports;
+  final String profilePhotoUrl;
 
   factory FirebaseUserDto.fromJson(Map<String, dynamic> json) {
     return FirebaseUserDto._(
@@ -18,6 +19,7 @@ class FirebaseUserDto {
       lastName: findOrThrowException(json, 'last_name'),
       email: findOrThrowException(json, 'email'),
       reports: findOrThrowException(json, 'reports'),
+      profilePhotoUrl: json['profile_photo_url'],
     );
   }
 
@@ -31,6 +33,7 @@ class FirebaseUserDto {
     String lastName,
     String email,
     int reports,
+    String profilePhotoUrl,
   }) {
     return FirebaseUserDto._(
       id: id ?? this.id,
@@ -38,6 +41,7 @@ class FirebaseUserDto {
       lastName: lastName ?? this.lastName,
       email: email ?? this.email,
       reports: reports ?? this.reports,
+      profilePhotoUrl: profilePhotoUrl ?? this.profilePhotoUrl,
     );
   }
 
@@ -47,17 +51,18 @@ class FirebaseUserDto {
     @required this.lastName,
     @required this.email,
     @required this.reports,
+    @required this.profilePhotoUrl,
   });
 }
 
 extension FirebaseUserDtoX on FirebaseUserDto {
   LocalUser toDomain() {
     return LocalUser(
-      id: UniqueId.fromUniqueString(this.id),
-      firstName: this.firstName,
-      lastName: this.lastName,
-      email: this.email,
-      reports: this.reports,
-    );
+        id: this.id,
+        firstName: this.firstName,
+        lastName: this.lastName,
+        email: this.email,
+        reports: this.reports,
+        profilePhotoUrl: this.profilePhotoUrl);
   }
 }

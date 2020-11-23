@@ -19,7 +19,7 @@ void main() {
     // arrange
     final String invalidEmail = 'mail.com';
     final String expectedErrorMessage = 'Invalid email address.';
-    ApplicationException error;
+    ValueObjectException error;
 
     // act
     try {
@@ -30,5 +30,6 @@ void main() {
     
     //act and assert
     expect(error.message, expectedErrorMessage);
+    expect(error.code, ValueObjectExceptionCode.INVALID_FORMAT);
   });
 }

@@ -1,4 +1,5 @@
 import '../../domain/bible_series/entities.dart';
+import '../../domain/bible_series/exceptions.dart';
 
 SeriesContentType contentTypeMapper(type) {
   if (type == 'reflect') {
@@ -18,5 +19,22 @@ SeriesContentType contentTypeMapper(type) {
   } else if (type == 'memorize') {
     return SeriesContentType.MEMORIZE;
   }
-  return null;
+  throw BibleSeriesException(
+    code: BibleSeriesExceptionCode.UNSUPPORTED_CONTENT_TYPE,
+    message: 'Unsupported content type',
+    details: 'Unsupported content type: $type',
+  );
+}
+
+ResponseType responseTypeMapper(type) {
+  if (type == 'text') {
+    return ResponseType.TEXT;
+  } else if (type == 'image') {
+    return ResponseType.IMAGE;
+  }
+  throw BibleSeriesException(
+    code: BibleSeriesExceptionCode.UNSUPPORTED_RESPONSE_TYPE,
+    message: 'Unsupported response type',
+    details: 'Unsupported response type: $type',
+  );
 }

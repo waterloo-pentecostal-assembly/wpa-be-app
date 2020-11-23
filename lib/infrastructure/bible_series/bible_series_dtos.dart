@@ -3,7 +3,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../domain/bible_series/entities.dart';
-import '../../domain/common/value_objects.dart';
 import '../common/helpers.dart';
 import 'helpers.dart';
 
@@ -82,7 +81,7 @@ extension BibleSeriesDtoX on BibleSeriesDto {
     });
 
     return BibleSeries(
-      id: UniqueId.fromUniqueString(this.id),
+      id: this.id,
       title: this.title,
       subTitle: this.subTitle,
       imageUrl: this.imageUrl,
@@ -122,16 +121,19 @@ class SeriesContentSnippetDto {
 
 extension SeriesContentSnippetDtoX on SeriesContentSnippetDto {
   SeriesContentSnippet toDomain() {
-    Map<SeriesContentType, UniqueId> contentTypes = {};
+    List<AvailableContentType> availableContentTypes = [];
     this.contentTypes.forEach((key, value) {
       final SeriesContentType newKey = contentTypeMapper(key);
       if (newKey != null) {
-        contentTypes[newKey] = UniqueId.fromUniqueString(value);
+        availableContentTypes.add(AvailableContentType(
+          seriesContentType: newKey,
+          contentId: value,
+        ));
       }
     });
 
     return SeriesContentSnippet(
-      contentTypes: contentTypes,
+      availableContentTypes: availableContentTypes,
       date: this.date,
     );
   }

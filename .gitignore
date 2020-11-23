@@ -9,6 +9,7 @@
 .history
 .svn/
 *.lock
+.todo
 
 # vscode related
 *.vscode/
