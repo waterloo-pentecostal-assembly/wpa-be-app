@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../application/authentication/authentication_bloc.dart';
 import '../application/navigation_bar/navigation_bar_bloc.dart';
+import '../infrastructure/firebase_messaging/firebase_messaging_service.dart';
 import '../injection.dart';
 import 'common/loader.dart';
 import 'phone/authentication/password_reset_page.dart';
@@ -13,11 +14,15 @@ import 'phone/index.dart';
 import 'phone/splash/splash_page.dart';
 
 class App extends StatelessWidget {
+  Future<void> initializeServices() async {
+    await getIt<FirebaseMessagingService>().initialize();
+    await Firebase.initializeApp();
+  }
+
   @override
   Widget build(BuildContext context) {
-    //TODO: try to inject the device type here to determine whether to load the mobile view or the tablet view
     return FutureBuilder(
-      future: Firebase.initializeApp(),
+      future: initializeServices(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.done) {
           return MultiBlocProvider(

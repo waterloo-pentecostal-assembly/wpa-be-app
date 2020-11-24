@@ -25,7 +25,8 @@ class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> 
 
         // Register user infomation with getIt to have access to it throughout the application
         if (!getIt.isRegistered<LocalUser>()) {
-          getIt.registerFactory(() => localUser);
+          getIt.registerLazySingleton(() => localUser);
+          // getIt.registerFactory(() => localUser);
         }
 
         yield Authenticated(localUser);

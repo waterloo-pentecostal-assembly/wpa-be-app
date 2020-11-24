@@ -2,9 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../domain/authentication/entities.dart';
-import '../../injection.dart';
 import '../common/helpers.dart';
-import '../common/firebase_storage_helper.dart';
+import '../firebase_storage/firebase_storage_service.dart';
 
 class FirebaseUserDto {
   final String id;
@@ -61,9 +60,9 @@ class FirebaseUserDto {
 }
 
 extension FirebaseUserDtoX on FirebaseUserDto {
-  Future<LocalUser> toDomain(FirebaseStorageHelper firebaseStorageHelper) async {
+  Future<LocalUser> toDomain(FirebaseStorageService firebaseStorageService) async {
     // Convert GS Location to Download URL
-    String profilePhotoUrl = await firebaseStorageHelper.getDownloadUrl(this.profilePhotoGsLocation);
+    String profilePhotoUrl = await firebaseStorageService.getDownloadUrl(this.profilePhotoGsLocation);
 
     return LocalUser(
       id: this.id,

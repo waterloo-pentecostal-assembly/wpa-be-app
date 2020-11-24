@@ -1,21 +1,20 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:get_it/get_it.dart';
 import 'package:mockito/mockito.dart';
 import 'package:wpa_app/domain/media/entities.dart';
-import 'package:wpa_app/infrastructure/common/firebase_storage_helper.dart';
+import 'package:wpa_app/infrastructure/firebase_storage/firebase_storage_service.dart';
 import 'package:wpa_app/infrastructure/media/media_dto.dart';
 
-class MockFirebaseStorageHelper extends Mock implements FirebaseStorageHelper {}
+class MockFirebaseStorageService extends Mock implements FirebaseStorageService {}
 
 void main() {
-  MockFirebaseStorageHelper mockFirebaseStorageHelper;
+  MockFirebaseStorageService mockFirebaseStorageService;
   // GetIt getIt;
 
   setUp(() {
-    mockFirebaseStorageHelper = MockFirebaseStorageHelper();
+    mockFirebaseStorageService = MockFirebaseStorageService();
     // getIt = GetIt.instance;
 
-    // getIt.registerLazySingleton<FirebaseStorageHelper>(() => mockFirebaseStorageHelper);
+    // getIt.registerLazySingleton<FirebaseStorageHelper>(() => mockFirebaseStorageService);
   });
 
   test('should return valid Media object based on Json input', () async {
@@ -27,11 +26,11 @@ void main() {
       "thumbnail_gs_location": "thumbnail_gs_location"
     };
 
-    when(mockFirebaseStorageHelper.getDownloadUrl(any)).thenAnswer((_) async => 'thumbnail_download_url');
+    when(mockFirebaseStorageService.getDownloadUrl(any)).thenAnswer((_) async => 'thumbnail_download_url');
 
     // act
     final Media mediaObject =
-        await MediaDto.fromJson(validMediaJson).copyWith(id: "id").toDomain(mockFirebaseStorageHelper);
+        await MediaDto.fromJson(validMediaJson).copyWith(id: "id").toDomain(mockFirebaseStorageService);
 
     //assert
     expect(mediaObject.id, "id");

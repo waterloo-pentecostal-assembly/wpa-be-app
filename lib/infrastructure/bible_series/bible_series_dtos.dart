@@ -1,11 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:wpa_app/infrastructure/common/firebase_storage_helper.dart';
 
 import '../../domain/bible_series/entities.dart';
-import '../../injection.dart';
 import '../common/helpers.dart';
+import '../firebase_storage/firebase_storage_service.dart';
 import 'helpers.dart';
 
 class BibleSeriesDto {
@@ -80,14 +79,14 @@ class BibleSeriesDto {
 }
 
 extension BibleSeriesDtoX on BibleSeriesDto {
-  Future<BibleSeries> toDomain(FirebaseStorageHelper firebaseStorageHelper) async {
+  Future<BibleSeries> toDomain(FirebaseStorageService firebaseStorageService) async {
     List<SeriesContentSnippet> _seriesContentSnippet = [];
     this.seriesContentSnippet.forEach((element) {
       _seriesContentSnippet.add(element.toDomain());
     });
 
     // Convert GS URL to Download URL
-    String imageUrl = await firebaseStorageHelper.getDownloadUrl(this.imageGsLocation);
+    String imageUrl = await firebaseStorageService.getDownloadUrl(this.imageGsLocation);
 
     return BibleSeries(
       id: this.id,

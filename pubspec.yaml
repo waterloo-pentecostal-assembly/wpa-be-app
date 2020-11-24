@@ -28,6 +28,7 @@ dependencies:
   equatable: ^1.2.5
   firebase_auth: ^0.18.3
   firebase_core: ^0.5.2
+  firebase_messaging: ^7.0.3
   firebase_storage: ^5.0.1
   flutter_bloc: ^6.1.0
   fluttertoast: ^7.1.1

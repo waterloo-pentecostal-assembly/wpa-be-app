@@ -1,11 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:wpa_app/infrastructure/common/firebase_storage_helper.dart';
 
 import '../../domain/authentication/entities.dart';
 import '../../domain/prayer_requests/entities.dart';
-import '../../injection.dart';
 import '../common/helpers.dart';
+import '../firebase_storage/firebase_storage_service.dart';
 
 class PrayerRequestsDto {
   final String id;
@@ -111,7 +110,7 @@ class PrayerRequestsDto {
 }
 
 extension PrayerRequestsDtoX on PrayerRequestsDto {
-  Future<PrayerRequest> toDomain(FirebaseStorageHelper firebaseStorageHelper) async {
+  Future<PrayerRequest> toDomain(FirebaseStorageService firebaseStorageService) async {
     return PrayerRequest(
       id: this.id,
       date: this.date,
@@ -123,7 +122,7 @@ extension PrayerRequestsDtoX on PrayerRequestsDto {
       isMine: this.isMine,
       request: this.request,
       userId: this.userId,
-      userSnippet: await this.userSnippet.toDomain(firebaseStorageHelper),
+      userSnippet: await this.userSnippet.toDomain(firebaseStorageService),
     );
   }
 
@@ -179,9 +178,9 @@ class UserSnippetDto {
 }
 
 extension UserSnippetDtoX on UserSnippetDto {
-  Future<UserSnippet> toDomain(FirebaseStorageHelper firebaseStorageHelper) async {
+  Future<UserSnippet> toDomain(FirebaseStorageService firebaseStorageService) async {
     // Convert GS Location to Download URL
-    String profilePhotoUrl = await firebaseStorageHelper.getDownloadUrl(this.profilePhotoGsLocation);
+    String profilePhotoUrl = await firebaseStorageService.getDownloadUrl(this.profilePhotoGsLocation);
 
     return UserSnippet(
       firstName: this.firstName,

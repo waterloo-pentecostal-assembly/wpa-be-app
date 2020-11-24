@@ -30,7 +30,7 @@ class SignInBloc extends Bloc<SignInEvent, SignInState> {
       yield* _mapSignInWithEmailAndPasswordToState(
         event,
         state,
-        _iAuthenticationFacade.signInWithEmailAndPassword,
+        _iAuthenticationFacade,
       );
     }
   }
@@ -85,18 +85,14 @@ Stream<SignInState> _mapPasswordChangedToState(
 Stream<SignInState> _mapSignInWithEmailAndPasswordToState(
   SignInWithEmailAndPassword event,
   SignInState state,
-  Future Function({
-    @required EmailAddress emailAddress,
-    @required Password password,
-  })
-      signInFunction,
+  IAuthenticationFacade iAuthenticationFacade,
 ) async* {
   yield state.copyWith(
     submitting: true,
   );
 
   try {
-    LocalUser localUser = await signInFunction(
+    LocalUser localUser = await iAuthenticationFacade.signInWithEmailAndPassword(
       emailAddress: EmailAddress(state.emailAddress),
       password: Password(state.password),
     );
@@ -105,7 +101,15 @@ Stream<SignInState> _mapSignInWithEmailAndPasswordToState(
     if (getIt.isRegistered<LocalUser>()) {
       getIt.unregister<LocalUser>();
     }
-    getIt.registerFactory(() => localUser);
+    getIt.registerLazySingleton(() => localUser);
+
+    // Check if device token is saved
+    bool deviceTokenExists = await iAuthenticationFacade.deviceTokenExists(localUser.id);
+
+    // If not, save it on login
+    if (!deviceTokenExists) {
+      iAuthenticationFacade.addDeviceToken(localUser.id);
+    }
 
     yield state.copyWith(
       submitting: false,
@@ -113,12 +117,14 @@ Stream<SignInState> _mapSignInWithEmailAndPasswordToState(
       signInError: null,
     );
   } on BaseApplicationException catch (e) {
+    iAuthenticationFacade.signOut();
     yield state.copyWith(
       submitting: false,
       signInSuccess: false,
       signInError: e.message,
     );
   } catch (e) {
+    iAuthenticationFacade.signOut();
     yield state.copyWith(
       submitting: false,
       signInSuccess: false,

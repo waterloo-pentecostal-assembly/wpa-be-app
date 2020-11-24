@@ -9,17 +9,17 @@ import '../../domain/prayer_requests/entities.dart';
 import '../../domain/prayer_requests/exceptions.dart';
 import '../../domain/prayer_requests/interfaces.dart';
 import '../../injection.dart';
-import '../common/firebase_storage_helper.dart';
 import '../common/helpers.dart';
+import '../firebase_storage/firebase_storage_service.dart';
 import 'prayer_requests_dto.dart';
 
 class PrayerRequestsRepository extends IPrayerRequestsRepository {
   final FirebaseFirestore _firestore;
-  final FirebaseStorageHelper _firebaseStorageHelper;
+  final FirebaseStorageService _firebaseStorageService;
   CollectionReference _prayerRequestsCollection;
   DocumentSnapshot _lastPrayerRequestDocument;
 
-  PrayerRequestsRepository(this._firestore, this._firebaseStorageHelper) {
+  PrayerRequestsRepository(this._firestore, this._firebaseStorageService) {
     _prayerRequestsCollection = _firestore.collection("prayer_requests");
   }
 
@@ -44,7 +44,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
       );
     }
 
-    return PrayerRequestsDto.fromFirestore(documentSnapshot, user.id).toDomain(_firebaseStorageHelper);
+    return PrayerRequestsDto.fromFirestore(documentSnapshot, user.id).toDomain(_firebaseStorageService);
   }
 
   @override
@@ -86,7 +86,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
     List<PrayerRequest> myPrayerRequests = [];
 
     for (QueryDocumentSnapshot doc in querySnapshot.docs) {
-      PrayerRequest prayerRequest = await PrayerRequestsDto.fromFirestore(doc, user.id).toDomain(_firebaseStorageHelper);
+      PrayerRequest prayerRequest =
+          await PrayerRequestsDto.fromFirestore(doc, user.id).toDomain(_firebaseStorageService);
       myPrayerRequests.add(prayerRequest);
     }
 
@@ -128,7 +129,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
 
     if (querySnapshot.docs.length > 0) {
       for (QueryDocumentSnapshot doc in querySnapshot.docs) {
-        PrayerRequest prayerRequest = await PrayerRequestsDto.fromFirestore(doc, user.id).toDomain(_firebaseStorageHelper);
+        PrayerRequest prayerRequest =
+            await PrayerRequestsDto.fromFirestore(doc, user.id).toDomain(_firebaseStorageService);
         prayerRequests.add(prayerRequest);
       }
       _lastPrayerRequestDocument = querySnapshot.docs.last;
@@ -167,7 +169,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
 
     if (querySnapshot.docs.length > 0) {
       for (QueryDocumentSnapshot doc in querySnapshot.docs) {
-        PrayerRequest prayerRequest = await PrayerRequestsDto.fromFirestore(doc, user.id).toDomain(_firebaseStorageHelper);
+        PrayerRequest prayerRequest =
+            await PrayerRequestsDto.fromFirestore(doc, user.id).toDomain(_firebaseStorageService);
         prayerRequests.add(prayerRequest);
       }
 

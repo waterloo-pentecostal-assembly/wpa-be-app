@@ -2,9 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../domain/media/entities.dart';
-import '../../injection.dart';
 import '../common/helpers.dart';
-import '../common/firebase_storage_helper.dart';
+import '../firebase_storage/firebase_storage_service.dart';
 
 class MediaDto {
   final String id;
@@ -55,10 +54,10 @@ class MediaDto {
 }
 
 extension MediaDtoX on MediaDto {
-  Future<Media> toDomain(FirebaseStorageHelper firebaseStorageHelper) async {
+  Future<Media> toDomain(FirebaseStorageService firebaseStorageService) async {
     // Convert GS Location to Download URL
-    String thumbnailUrl = await firebaseStorageHelper.getDownloadUrl(this.thumbnailGsLocation);
-    // String thumbnailUrl = await getIt<FirebaseStorageHelper>().getDownloadUrl(this.thumbnailGsLocation);
+    String thumbnailUrl = await firebaseStorageService.getDownloadUrl(this.thumbnailGsLocation);
+    // String thumbnailUrl = await getIt<FirebaseStorageService>().getDownloadUrl(this.thumbnailGsLocation);
 
     return Media(
       id: this.id,

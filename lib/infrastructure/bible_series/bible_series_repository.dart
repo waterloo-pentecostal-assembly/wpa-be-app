@@ -1,23 +1,23 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:wpa_app/infrastructure/common/firebase_storage_helper.dart';
 
 import '../../domain/bible_series/entities.dart';
 import '../../domain/bible_series/exceptions.dart';
 import '../../domain/bible_series/interfaces.dart';
 import '../../domain/common/exceptions.dart';
 import '../common/helpers.dart';
+import '../firebase_storage/firebase_storage_service.dart';
 import 'bible_series_dtos.dart';
 import 'series_content_dtos.dart';
 
 class BibleSeriesRepository implements IBibleSeriesRepository {
   final FirebaseFirestore _firestore;
-  final FirebaseStorageHelper _firebaseStorageHelper;
+  final FirebaseStorageService _firebaseStorageService;
   CollectionReference _bibleSeriesCollection;
   DocumentSnapshot _lastBibleSeriesDocument;
 
-  BibleSeriesRepository(this._firestore, this._firebaseStorageHelper) {
+  BibleSeriesRepository(this._firestore, this._firebaseStorageService) {
     _bibleSeriesCollection = _firestore.collection("bible_series");
   }
 
@@ -50,7 +50,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
     if (querySnapshot.docs.length > 0) {
       for (QueryDocumentSnapshot doc in querySnapshot.docs) {
         try {
-          final BibleSeries bibleSeriesDto = await BibleSeriesDto.fromFirestore(doc).toDomain(_firebaseStorageHelper);
+          final BibleSeries bibleSeriesDto = await BibleSeriesDto.fromFirestore(doc).toDomain(_firebaseStorageService);
           bibleSeriesList.add(bibleSeriesDto);
         } catch (e) {
           // Handle exceptions separately for each document conversion.
@@ -102,7 +102,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
     if (querySnapshot.docs.length > 0) {
       for (QueryDocumentSnapshot doc in querySnapshot.docs) {
         try {
-          final BibleSeries bibleSeriesDto = await BibleSeriesDto.fromFirestore(doc).toDomain(_firebaseStorageHelper);
+          final BibleSeries bibleSeriesDto = await BibleSeriesDto.fromFirestore(doc).toDomain(_firebaseStorageService);
           bibleSeriesList.add(bibleSeriesDto);
         } catch (e) {
           // Handle exceptions separately for each document conversion.
@@ -146,7 +146,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
       );
     }
 
-    final BibleSeries bibleSeries = await BibleSeriesDto.fromFirestore(document).toDomain(_firebaseStorageHelper);
+    final BibleSeries bibleSeries = await BibleSeriesDto.fromFirestore(document).toDomain(_firebaseStorageService);
     return bibleSeries;
   }
 

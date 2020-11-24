@@ -2,10 +2,10 @@ import 'package:firebase_storage/firebase_storage.dart';
 
 import '../../domain/common/exceptions.dart';
 
-class FirebaseStorageHelper {
+class FirebaseStorageService {
   final FirebaseStorage _firebaseStorage;
 
-  FirebaseStorageHelper(this._firebaseStorage);
+  FirebaseStorageService(this._firebaseStorage);
 
   Future<String> getDownloadUrl(String gsUrl) async {
     try {

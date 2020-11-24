@@ -7,19 +7,22 @@ import '../../domain/authentication/exceptions.dart';
 import '../../domain/authentication/interfaces.dart';
 import '../../domain/authentication/value_objects.dart';
 import '../../domain/common/exceptions.dart';
-import '../common/firebase_storage_helper.dart';
 import '../common/helpers.dart';
+import '../firebase_messaging/firebase_messaging_service.dart';
+import '../firebase_storage/firebase_storage_service.dart';
 import 'firebase_user_dto.dart';
 
 class FirebaseAuthenticationFacade implements IAuthenticationFacade {
   final FirebaseAuth _firebaseAuth;
   final FirebaseFirestore _firestore;
-  final FirebaseStorageHelper _firebaseStorageHelper;
+  final FirebaseStorageService _firebaseStorageService;
+  final FirebaseMessagingService _firebaseMessagingService;
 
   FirebaseAuthenticationFacade(
     this._firebaseAuth,
     this._firestore,
-    this._firebaseStorageHelper,
+    this._firebaseStorageService,
+    this._firebaseMessagingService,
   );
 
   @override
@@ -39,18 +42,27 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
       );
     }
 
-    String userId = user.uid;
-    DocumentSnapshot userInfo = await _firestore.collection("users").doc(userId).get();
+    DocumentSnapshot userInfo;
+    try {
+      userInfo = await _firestore.collection("users").doc(user.uid).get();
+    } on PlatformException catch (e) {
+      handlePlatformException(e);
+    } catch (e) {
+      throw ApplicationException(
+        code: ApplicationExceptionCode.UNKNOWN,
+        message: 'An unknown error occurred',
+        details: e,
+      );
+    }
 
-    if (userInfo.data() == null) {
+    if (userInfo == null || userInfo.data() == null) {
       throw AuthenticationException(
         code: AuthenticationExceptionCode.USER_COLLECTION_NOT_FOUND,
         message: 'User details not found',
       );
     }
 
-    LocalUser domainUser = await FirebaseUserDto.fromFirestore(userInfo).toDomain(_firebaseStorageHelper);
-
+    LocalUser domainUser = await FirebaseUserDto.fromFirestore(userInfo).toDomain(_firebaseStorageService);
     return domainUser;
   }
 
@@ -248,14 +260,48 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
   }
 
   @override
-  Future<void> addDeviceToken() {
-    // TODO: implement addDeviceToken
-    throw UnimplementedError();
+  Future<void> addDeviceToken(String userId) async {
+    String deviceToken = await _firebaseMessagingService.getToken();
+    String platform = _firebaseMessagingService.getPlatform();
+
+    try {
+      await _firestore.collection("users").doc(userId).collection("devices").doc(deviceToken).set({
+        "token": deviceToken,
+        "created_at": Timestamp.now(),
+        "platform": platform,
+      });
+    } on PlatformException catch (e) {
+      handlePlatformException(e);
+    } catch (e) {
+      throw ApplicationException(
+        code: ApplicationExceptionCode.UNKNOWN,
+        message: 'An unknown error occurred',
+        details: e,
+      );
+    }
   }
 
   @override
-  Future<bool> deviceTokenExists() {
-    // TODO: implement deviceTokenExists
-    throw UnimplementedError();
+  Future<bool> deviceTokenExists(String userId) async {
+    String deviceToken = await _firebaseMessagingService.getToken();
+
+    DocumentSnapshot documentSnapshot;
+    try {
+      documentSnapshot = await _firestore.collection("users").doc(userId).collection("devices").doc(deviceToken).get();
+    } on PlatformException catch (e) {
+      handlePlatformException(e);
+    } catch (e) {
+      throw ApplicationException(
+        code: ApplicationExceptionCode.UNKNOWN,
+        message: 'An unknown error occurred',
+        details: e,
+      );
+    }
+    
+    if (documentSnapshot.data() != null) {
+      return true;
+    }
+
+    return false;
   }
 }

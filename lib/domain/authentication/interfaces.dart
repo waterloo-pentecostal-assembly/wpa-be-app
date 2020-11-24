@@ -4,9 +4,9 @@ import 'entities.dart';
 import 'value_objects.dart';
 
 abstract class IAuthenticationFacade {
-  Future<bool> deviceTokenExists();
+  Future<bool> deviceTokenExists(String userId);
 
-  Future<void> addDeviceToken();
+  Future<void> addDeviceToken(String userId);
 
   /// Gets current signed in user. Returns a [LocalUser] object.
   /// Throws [ApplicationException] or [AuthenticationException].
