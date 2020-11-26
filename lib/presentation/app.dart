@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../application/authentication/authentication_bloc.dart';
 import '../application/navigation_bar/navigation_bar_bloc.dart';
-import '../infrastructure/firebase_messaging/firebase_messaging_service.dart';
+import '../services/firebase_messaging_service.dart';
 import '../injection.dart';
 import 'common/loader.dart';
 import 'phone/authentication/password_reset_page.dart';

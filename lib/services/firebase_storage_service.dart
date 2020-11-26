@@ -1,6 +1,6 @@
 import 'package:firebase_storage/firebase_storage.dart';
 
-import '../../domain/common/exceptions.dart';
+import '../domain/common/exceptions.dart';
 
 class FirebaseStorageService {
   final FirebaseStorage _firebaseStorage;

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../domain/bible_series/entities.dart';
 import '../common/helpers.dart';
-import '../firebase_storage/firebase_storage_service.dart';
+import '../../services/firebase_storage_service.dart';
 import 'helpers.dart';
 
 class BibleSeriesDto {

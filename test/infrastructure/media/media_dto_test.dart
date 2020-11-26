@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:wpa_app/domain/media/entities.dart';
-import 'package:wpa_app/infrastructure/firebase_storage/firebase_storage_service.dart';
+import 'package:wpa_app/services/firebase_storage_service.dart';
 import 'package:wpa_app/infrastructure/media/media_dto.dart';
 
 class MockFirebaseStorageService extends Mock implements FirebaseStorageService {}

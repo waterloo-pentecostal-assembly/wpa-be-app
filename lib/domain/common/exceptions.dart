@@ -87,3 +87,23 @@ class FirebaseStorageException implements BaseApplicationException {
     this.details,
   });
 }
+
+enum FirebaseFirestoreExceptionCode {
+  PERMISSION_DENIED,
+  UNKNOWN,
+}
+
+/// Implements [BaseApplicationException] to provide an exception type for firebase firestore level errors.
+class FirebaseFirestoreException implements BaseApplicationException {
+  final FirebaseFirestoreExceptionCode code;
+  final String message;
+  final dynamic details;
+
+  /// Creates a [ApplicationException] with the specified error [type],
+  /// [message], and optional error [details].
+  FirebaseFirestoreException({
+    @required this.code,
+    @required this.message,
+    this.details,
+  });
+}

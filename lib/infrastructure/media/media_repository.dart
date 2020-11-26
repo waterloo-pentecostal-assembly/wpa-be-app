@@ -4,18 +4,20 @@ import 'package:flutter/services.dart';
 import '../../domain/common/exceptions.dart';
 import '../../domain/media/entities.dart';
 import '../../domain/media/interfaces.dart';
-import '../common/helpers.dart';
-import '../firebase_storage/firebase_storage_service.dart';
+import '../../services/firebase_firestore_service.dart';
+import '../../services/firebase_storage_service.dart';
 import 'media_dto.dart';
 
 class MediaRepository implements IMediaRepository {
   final FirebaseFirestore _firestore;
   final FirebaseStorageService _firebaseStorageService;
+  final FirebaseFirestoreService _firebaseFirestoreService;
   CollectionReference _mediaCollection;
 
   MediaRepository(
     this._firestore,
     this._firebaseStorageService,
+    this._firebaseFirestoreService,
   ) {
     _mediaCollection = _firestore.collection("media");
   }
@@ -26,14 +28,8 @@ class MediaRepository implements IMediaRepository {
 
     try {
       querySnapshot = await _mediaCollection.get();
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
     } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occurred',
-        details: e,
-      );
+      _firebaseFirestoreService.handleException(e);
     }
 
     List<Media> mediaList = [];

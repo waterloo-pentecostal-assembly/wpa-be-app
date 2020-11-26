@@ -168,7 +168,7 @@ class NotificationSettings extends StatefulWidget {
 
 class _NotificationSettingsState extends State<NotificationSettings> {
   bool isEngagementReminderSwitched = false;
-  bool isOtherNotificationsSwitched = false;
+  // bool isOtherNotificationsSwitched = false;
 
   @override
   Widget build(BuildContext context) {
@@ -201,66 +201,66 @@ class _NotificationSettingsState extends State<NotificationSettings> {
               ),
             ],
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              getIt<TextFactory>().lite("Reactions"),
-              Container(
-                height: 30,
-                child: Switch(
-                  value: isOtherNotificationsSwitched,
-                  onChanged: (value) {
-                    setState(() {
-                      isOtherNotificationsSwitched = value;
-                      print(isOtherNotificationsSwitched);
-                    });
-                  },
-                  activeTrackColor: kWpaBlue.withOpacity(0.25),
-                  activeColor: kWpaBlue,
-                ),
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              getIt<TextFactory>().lite("Prayers"),
-              Container(
-                height: 30,
-                child: Switch(
-                  value: isOtherNotificationsSwitched,
-                  onChanged: (value) {
-                    setState(() {
-                      isOtherNotificationsSwitched = value;
-                      print(isOtherNotificationsSwitched);
-                    });
-                  },
-                  activeTrackColor: kWpaBlue.withOpacity(0.25),
-                  activeColor: kWpaBlue,
-                ),
-              ),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              getIt<TextFactory>().lite("Reports"),
-              Container(
-                height: 30,
-                child: Switch(
-                  value: isOtherNotificationsSwitched,
-                  onChanged: (value) {
-                    setState(() {
-                      isOtherNotificationsSwitched = value;
-                      print(isOtherNotificationsSwitched);
-                    });
-                  },
-                  activeTrackColor: kWpaBlue.withOpacity(0.25),
-                  activeColor: kWpaBlue,
-                ),
-              ),
-            ],
-          ),
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //   children: [
+          //     getIt<TextFactory>().lite("Reactions"),
+          //     Container(
+          //       height: 30,
+          //       child: Switch(
+          //         value: isOtherNotificationsSwitched,
+          //         onChanged: (value) {
+          //           setState(() {
+          //             isOtherNotificationsSwitched = value;
+          //             print(isOtherNotificationsSwitched);
+          //           });
+          //         },
+          //         activeTrackColor: kWpaBlue.withOpacity(0.25),
+          //         activeColor: kWpaBlue,
+          //       ),
+          //     ),
+          //   ],
+          // ),
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //   children: [
+          //     getIt<TextFactory>().lite("Prayers"),
+          //     Container(
+          //       height: 30,
+          //       child: Switch(
+          //         value: isOtherNotificationsSwitched,
+          //         onChanged: (value) {
+          //           setState(() {
+          //             isOtherNotificationsSwitched = value;
+          //             print(isOtherNotificationsSwitched);
+          //           });
+          //         },
+          //         activeTrackColor: kWpaBlue.withOpacity(0.25),
+          //         activeColor: kWpaBlue,
+          //       ),
+          //     ),
+          //   ],
+          // ),
+          // Row(
+          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          //   children: [
+          //     getIt<TextFactory>().lite("Reports"),
+          //     Container(
+          //       height: 30,
+          //       child: Switch(
+          //         value: isOtherNotificationsSwitched,
+          //         onChanged: (value) {
+          //           setState(() {
+          //             isOtherNotificationsSwitched = value;
+          //             print(isOtherNotificationsSwitched);
+          //           });
+          //         },
+          //         activeTrackColor: kWpaBlue.withOpacity(0.25),
+          //         activeColor: kWpaBlue,
+          //       ),
+          //     ),
+          //   ],
+          // ),
           Divider(),
         ],
       ),

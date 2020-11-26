@@ -3,6 +3,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get_it/get_it.dart';
+import 'package:wpa_app/domain/notification_settings/interfaces.dart';
+import 'package:wpa_app/infrastructure/notification_settings/notification_settings_service.dart';
+import 'package:wpa_app/services/firebase_firestore_service.dart';
 
 import 'application/achievements/achievements_bloc.dart';
 import 'application/authentication/authentication_bloc.dart';
@@ -23,8 +26,8 @@ import 'infrastructure/achievements/achievements_repository.dart';
 import 'infrastructure/authentication/firebase_authentication_facade.dart';
 import 'infrastructure/bible_series/bible_series_repository.dart';
 import 'infrastructure/completions/completions_repository.dart';
-import 'infrastructure/firebase_messaging/firebase_messaging_service.dart';
-import 'infrastructure/firebase_storage/firebase_storage_service.dart';
+import 'services/firebase_messaging_service.dart';
+import 'services/firebase_storage_service.dart';
 import 'infrastructure/media/media_repository.dart';
 import 'infrastructure/prayer_requests/prayer_requests_repository.dart';
 import 'presentation/phone/common/text_factory.dart';
@@ -51,6 +54,7 @@ void init() {
   // Services
   getIt.registerLazySingleton<FirebaseStorageService>(() => FirebaseStorageService(getIt<FirebaseStorage>()));
   getIt.registerLazySingleton<FirebaseMessagingService>(() => FirebaseMessagingService(getIt<FirebaseMessaging>()));
+  getIt.registerLazySingleton<FirebaseFirestoreService>(() => FirebaseFirestoreService());
 
   // Blocs
   getIt.registerFactory<AuthenticationBloc>(
@@ -99,6 +103,7 @@ void init() {
       getIt<FirebaseFirestore>(),
       getIt<FirebaseStorageService>(),
       getIt<FirebaseMessagingService>(),
+      getIt<FirebaseFirestoreService>(),
     ),
   );
 
@@ -106,18 +111,21 @@ void init() {
     () => BibleSeriesRepository(
       getIt<FirebaseFirestore>(),
       getIt<FirebaseStorageService>(),
+      getIt<FirebaseFirestoreService>(),
     ),
   );
 
   getIt.registerLazySingleton<ICompletionsRepository>(
     () => CompletionsRepository(
       getIt<FirebaseFirestore>(),
+      getIt<FirebaseFirestoreService>(),
     ),
   );
 
   getIt.registerLazySingleton<IAchievementsRepository>(
     () => AchievementsRepository(
       getIt<FirebaseFirestore>(),
+      getIt<FirebaseFirestoreService>(),
     ),
   );
 
@@ -125,6 +133,7 @@ void init() {
     () => PrayerRequestsRepository(
       getIt<FirebaseFirestore>(),
       getIt<FirebaseStorageService>(),
+      getIt<FirebaseFirestoreService>(),
     ),
   );
 
@@ -132,6 +141,15 @@ void init() {
     () => MediaRepository(
       getIt<FirebaseFirestore>(),
       getIt<FirebaseStorageService>(),
+      getIt<FirebaseFirestoreService>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<INotificationSettingsService>(
+    () => NotificationSettingsService(
+      getIt<FirebaseMessagingService>(),
+      getIt<FirebaseFirestore>(),
+      getIt<FirebaseFirestoreService>(),
     ),
   );
 

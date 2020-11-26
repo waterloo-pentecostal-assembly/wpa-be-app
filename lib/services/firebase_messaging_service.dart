@@ -3,30 +3,38 @@ import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 
 class FirebaseMessagingService {
-  final FirebaseMessaging _fcm;
+  final FirebaseMessaging _firebaseMessaging;
 
-  FirebaseMessagingService(this._fcm);
+  FirebaseMessagingService(this._firebaseMessaging);
 
   Future<String> getToken() async {
-    return await _fcm.getToken();
+    return _firebaseMessaging.getToken();
   }
 
   String getPlatform() {
     return Platform.operatingSystem;
   }
 
+  Future<void> subscribeToTopic(topic) {
+    return _firebaseMessaging.subscribeToTopic(topic);
+  }
+
+  Future<void> unsubscribeFromTopic(topic) {
+    return _firebaseMessaging.unsubscribeFromTopic(topic);
+  }
+
   Future<void> initialize() async {
     if (Platform.isIOS) {
-      _fcm.requestNotificationPermissions(IosNotificationSettings());
+      _firebaseMessaging.requestNotificationPermissions(IosNotificationSettings());
     }
 
     // If you want to test the push notification locally,
     // you need to get the token and input to the Firebase console
     // https://console.firebase.google.com/project/YOUR_PROJECT_ID/notification/compose
-    String token = await _fcm.getToken();
+    String token = await _firebaseMessaging.getToken();
     print("FirebaseMessaging token: $token");
 
-    _fcm.configure(
+    _firebaseMessaging.configure(
       //when the app is running in the foreground and the notification is clicked
       onMessage: (Map<String, dynamic> message) async {
         print("onMessage: $message");

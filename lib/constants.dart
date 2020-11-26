@@ -36,3 +36,6 @@ const kMaxActivePrayerRequests = 10;
 
 // URLs
 const kWpaGiveUrl = 'https://www.canadahelps.org/en/dne/15479';
+
+// Firebase Messaging Topics
+const kDailyEngagementReminderTopic = 'daily_engagement_reminder';

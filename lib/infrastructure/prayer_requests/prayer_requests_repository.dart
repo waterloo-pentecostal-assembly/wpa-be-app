@@ -1,25 +1,24 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/services.dart';
 
 import '../../constants.dart';
 import '../../domain/authentication/entities.dart';
 import '../../domain/authentication/interfaces.dart';
-import '../../domain/common/exceptions.dart';
 import '../../domain/prayer_requests/entities.dart';
 import '../../domain/prayer_requests/exceptions.dart';
 import '../../domain/prayer_requests/interfaces.dart';
 import '../../injection.dart';
-import '../common/helpers.dart';
-import '../firebase_storage/firebase_storage_service.dart';
+import '../../services/firebase_firestore_service.dart';
+import '../../services/firebase_storage_service.dart';
 import 'prayer_requests_dto.dart';
 
 class PrayerRequestsRepository extends IPrayerRequestsRepository {
   final FirebaseFirestore _firestore;
   final FirebaseStorageService _firebaseStorageService;
+  final FirebaseFirestoreService _firebaseFirestoreService;
   CollectionReference _prayerRequestsCollection;
   DocumentSnapshot _lastPrayerRequestDocument;
 
-  PrayerRequestsRepository(this._firestore, this._firebaseStorageService) {
+  PrayerRequestsRepository(this._firestore, this._firebaseStorageService, this._firebaseFirestoreService) {
     _prayerRequestsCollection = _firestore.collection("prayer_requests");
   }
 
@@ -34,14 +33,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
         PrayerRequestsDto.newRequestFromDomain(request, isAnonymous, user).newRequestToFirestore(),
       );
       documentSnapshot = await documentReference.get();
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
     } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occurred',
-        details: e,
-      );
+      _firebaseFirestoreService.handleException(e);
     }
 
     return PrayerRequestsDto.fromFirestore(documentSnapshot, user.id).toDomain(_firebaseStorageService);
@@ -51,14 +44,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
   Future<void> deletePrayerRequest({String id}) async {
     try {
       await _prayerRequestsCollection.doc(id).delete();
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
     } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occurred',
-        details: e,
-      );
+      _firebaseFirestoreService.handleException(e);
     }
   }
 
@@ -73,14 +60,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
           .where("is_safe", isEqualTo: true)
           .orderBy("date", descending: true)
           .get();
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
     } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occurred',
-        details: e,
-      );
+      _firebaseFirestoreService.handleException(e);
     }
 
     List<PrayerRequest> myPrayerRequests = [];
@@ -117,14 +98,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
           .startAfterDocument(_lastPrayerRequestDocument)
           .limit(limit)
           .get();
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
     } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occurred',
-        details: e,
-      );
+      _firebaseFirestoreService.handleException(e);
     }
 
     if (querySnapshot.docs.length > 0) {
@@ -155,14 +130,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
           .orderBy("date", descending: true)
           .limit(limit)
           .get();
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
     } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occurred',
-        details: e,
-      );
+      _firebaseFirestoreService.handleException(e);
     }
 
     List<PrayerRequest> prayerRequests = [];
@@ -208,14 +177,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
 
         transaction.update(documentReference, {"prayed_by": prayedBy});
       });
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
     } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occurred',
-        details: e,
-      );
+      _firebaseFirestoreService.handleException(e);
     }
   }
 
@@ -249,14 +212,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
       });
     } on PrayerRequestsException catch (_) {
       rethrow;
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
     } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occurred',
-        details: e,
-      );
+      _firebaseFirestoreService.handleException(e);
     }
     return isSafe;
   }
@@ -272,14 +229,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
           .where("is_safe", isEqualTo: true)
           .orderBy("date", descending: true)
           .get();
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
     } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occurred',
-        details: e,
-      );
+      _firebaseFirestoreService.handleException(e);
     }
 
     if (querySnapshot.docs.length < kPrayerRequestPerUserLimit) {

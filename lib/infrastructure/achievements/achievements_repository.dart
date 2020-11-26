@@ -1,20 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/services.dart';
 
 import '../../domain/achievements/entities.dart';
 import '../../domain/achievements/interfaces.dart';
 import '../../domain/authentication/entities.dart';
 import '../../domain/authentication/interfaces.dart';
-import '../../domain/common/exceptions.dart';
 import '../../injection.dart';
-import '../common/helpers.dart';
+import '../../services/firebase_firestore_service.dart';
 import 'achievements_dto.dart';
 
 class AchievementsRepository implements IAchievementsRepository {
   final FirebaseFirestore _firestore;
+  final FirebaseFirestoreService _firebaseFirestoreService;
   CollectionReference _achievementsCollection;
 
-  AchievementsRepository(this._firestore) {
+  AchievementsRepository(this._firestore, this._firebaseFirestoreService) {
     _achievementsCollection = _firestore.collection("achievements");
   }
 
@@ -24,14 +23,8 @@ class AchievementsRepository implements IAchievementsRepository {
     final LocalUser user = await getIt<IAuthenticationFacade>().getSignedInUser();
     try {
       documentSnapshot = await _achievementsCollection.doc(user.id).get();
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
     } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occurred',
-        details: e,
-      );
+      _firebaseFirestoreService.handleException(e);
     }
 
     if (documentSnapshot.data().isEmpty) {
@@ -51,14 +44,8 @@ class AchievementsRepository implements IAchievementsRepository {
         }
         return AchievementsDto.fromFirestore(documentSnapshot).toDomain();
       });
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
     } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occurred',
-        details: e,
-      );
+      _firebaseFirestoreService.handleException(e);
     }
   }
 }

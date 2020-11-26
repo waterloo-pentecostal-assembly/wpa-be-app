@@ -1,23 +1,25 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:wpa_app/services/firebase_firestore_service.dart';
 
 import '../../domain/bible_series/entities.dart';
 import '../../domain/bible_series/exceptions.dart';
 import '../../domain/bible_series/interfaces.dart';
 import '../../domain/common/exceptions.dart';
 import '../common/helpers.dart';
-import '../firebase_storage/firebase_storage_service.dart';
+import '../../services/firebase_storage_service.dart';
 import 'bible_series_dtos.dart';
 import 'series_content_dtos.dart';
 
 class BibleSeriesRepository implements IBibleSeriesRepository {
   final FirebaseFirestore _firestore;
   final FirebaseStorageService _firebaseStorageService;
+  final FirebaseFirestoreService _firebaseFirestoreService;
   CollectionReference _bibleSeriesCollection;
   DocumentSnapshot _lastBibleSeriesDocument;
 
-  BibleSeriesRepository(this._firestore, this._firebaseStorageService) {
+  BibleSeriesRepository(this._firestore, this._firebaseStorageService, this._firebaseFirestoreService) {
     _bibleSeriesCollection = _firestore.collection("bible_series");
   }
 
@@ -35,14 +37,8 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
           .where("is_active", isEqualTo: true)
           .limit(limit)
           .get();
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
     } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occurred',
-        details: e,
-      );
+      _firebaseFirestoreService.handleException(e);
     }
 
     List<BibleSeries> bibleSeriesList = [];
@@ -87,14 +83,8 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
           .startAfterDocument(_lastBibleSeriesDocument)
           .limit(limit)
           .get();
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
     } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occurred',
-        details: e,
-      );
+      _firebaseFirestoreService.handleException(e);
     }
 
     List<BibleSeries> bibleSeriesList = [];
@@ -128,14 +118,8 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
     DocumentSnapshot document;
     try {
       document = await _bibleSeriesCollection.doc(bibleSeriesId).get();
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
     } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occurred',
-        details: e,
-      );
+      _firebaseFirestoreService.handleException(e);
     }
 
     if (bibleSeriesId == null) {
@@ -162,14 +146,8 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
     try {
       document =
           await _bibleSeriesCollection.doc(bibleSeriesId).collection("series_content").doc(seriesContentId).get();
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
     } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occurred',
-        details: e,
-      );
+      _firebaseFirestoreService.handleException(e);
     }
 
     if (document.data() != null) {

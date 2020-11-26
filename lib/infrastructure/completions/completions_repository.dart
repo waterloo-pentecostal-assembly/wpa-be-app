@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/services.dart';
+import 'package:wpa_app/services/firebase_firestore_service.dart';
 
 import '../../domain/authentication/entities.dart';
 import '../../domain/authentication/interfaces.dart';
@@ -14,9 +15,10 @@ import 'responses_dto.dart';
 
 class CompletionsRepository extends ICompletionsRepository {
   final FirebaseFirestore _firestore;
+  final FirebaseFirestoreService _firebaseFirestoreService;
   CollectionReference _completionsCollection;
 
-  CompletionsRepository(this._firestore) {
+  CompletionsRepository(this._firestore, this._firebaseFirestoreService) {
     _completionsCollection = _firestore.collection("completions");
   }
 
@@ -34,14 +36,8 @@ class CompletionsRepository extends ICompletionsRepository {
         "series_id": completionsDto.seriesId,
         "user_id": user.id,
       });
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
     } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occurred',
-        details: e,
-      );
+      _firebaseFirestoreService.handleException(e);
     }
   }
 
@@ -51,14 +47,8 @@ class CompletionsRepository extends ICompletionsRepository {
   }) async {
     try {
       await _completionsCollection.doc(completionId).delete();
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
     } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occurred',
-        details: e,
-      );
+      _firebaseFirestoreService.handleException(e);
     }
   }
 
@@ -76,14 +66,8 @@ class CompletionsRepository extends ICompletionsRepository {
       } else {
         await responseCollection.add(responsesDto.responses);
       }
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
     } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occurred',
-        details: e,
-      );
+      _firebaseFirestoreService.handleException(e);
     }
   }
 
@@ -98,14 +82,8 @@ class CompletionsRepository extends ICompletionsRepository {
           .where("user_id", isEqualTo: user.id)
           .where("series_id", isEqualTo: bibleSeriesId)
           .get();
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
     } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occurred',
-        details: e,
-      );
+      _firebaseFirestoreService.handleException(e);
     }
     Map<String, CompletionDetails> completionDetails = {};
     snapshot.docs.forEach((element) {
@@ -128,14 +106,8 @@ class CompletionsRepository extends ICompletionsRepository {
           .where("user_id", isEqualTo: user.id)
           .where("content_id", isEqualTo: seriesContentId)
           .get();
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
     } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occurred',
-        details: e,
-      );
+      _firebaseFirestoreService.handleException(e);
     }
 
     if (snapshot.docs.length > 0) {
@@ -158,14 +130,8 @@ class CompletionsRepository extends ICompletionsRepository {
 
     try {
       querySnapshot = await _completionsCollection.doc(completionId).collection("responses").get();
-    } on PlatformException catch (e) {
-      handlePlatformException(e);
     } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occurred',
-        details: e,
-      );
+      _firebaseFirestoreService.handleException(e);
     }
 
     if (querySnapshot.docs.isNotEmpty) {
