@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:wpa_app/presentation/common/toast_message.dart';
 
 import '../../../../../application/media/media_bloc.dart';
+import '../../../../../constants.dart';
 import '../../../../../domain/media/entities.dart';
 import '../../../../../injection.dart';
 import '../../../common/text_factory.dart';
@@ -26,7 +29,7 @@ class MediaWidget extends StatelessWidget {
             () {
               if (state is AvailableMediaLoaded) {
                 return MediaWidgetLoaded(
-                  media: state.media,
+                  mediaList: state.media,
                 );
               } else if (state is AvailableMediaError) {
                 return MediaWidgetError(
@@ -44,14 +47,88 @@ class MediaWidget extends StatelessWidget {
 }
 
 class MediaWidgetLoaded extends StatelessWidget {
-  final List<Media> media;
+  final List<Media> mediaList;
 
-  const MediaWidgetLoaded({Key key, @required this.media}) : super(key: key);
+  const MediaWidgetLoaded({Key key, @required this.mediaList}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Text('media widget loaded'),
+      height: kMediaTileHeight + kMediaTileDescriptionHeight,
+      child: ListView.builder(
+        padding: EdgeInsets.only(left: 16),
+        scrollDirection: Axis.horizontal,
+        itemCount: mediaList.length,
+        itemBuilder: (context, index) => MediaCard(
+          media: mediaList[index],
+        ),
+      ),
+    );
+  }
+}
+
+class MediaCard extends StatelessWidget {
+  final Media media;
+
+  const MediaCard({Key key, this.media}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () async {
+        if (await canLaunch(media.link)) {
+          await launch(media.link, forceSafariVC: false);
+        } else {
+          ToastMessage.showErrorToast("Error opening page", context);
+        }
+      },
+      child: Container(
+        width: kMediaTileWidth,
+        padding: EdgeInsets.only(
+          right: 8,
+          left: 8,
+          top: 8,
+          bottom: 8,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(15.0),
+              child: Image.network(
+                media.thumbnailUrl,
+                height: kMediaTileHeight,
+                fit: BoxFit.fill,
+                frameBuilder: (BuildContext context, Widget child, int frame, bool wasSynchronouslyLoaded) {
+                  if (frame != null && frame >= 0) {
+                    return child;
+                  } else {
+                    return MediaCardPlaceholder();
+                  }
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0, top: 8.0),
+              child: getIt<TextFactory>().regular(media.platform),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 8.0),
+              child: getIt<TextFactory>().lite(media.description, overflow: TextOverflow.ellipsis),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class MediaCardPlaceholder extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: kMediaTileHeight,
+      color: Colors.grey.shade200,
     );
   }
 }

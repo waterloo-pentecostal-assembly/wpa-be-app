@@ -92,6 +92,7 @@ class BibleSeriesCard extends StatelessWidget {
               // child: FadeInImage.assetNetwork(placeholder: kWpaLogoLoc, image: bibleSeries.imageUrl),
               child: Image.network(
                 bibleSeries.imageUrl,
+                height: kRecentBibleSeriesTileHeight,
                 fit: BoxFit.fill,
                 frameBuilder: (BuildContext context, Widget child, int frame, bool wasSynchronouslyLoaded) {
                   if (frame != null && frame >= 0) {
@@ -122,7 +123,8 @@ class BibleSeriesCardPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.grey.shade100,
+      height: kRecentBibleSeriesTileHeight,
+      color: Colors.grey.shade200,
     );
   }
 }

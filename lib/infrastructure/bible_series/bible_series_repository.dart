@@ -1,13 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:wpa_app/services/firebase_firestore_service.dart';
 
 import '../../domain/bible_series/entities.dart';
 import '../../domain/bible_series/exceptions.dart';
 import '../../domain/bible_series/interfaces.dart';
 import '../../domain/common/exceptions.dart';
-import '../common/helpers.dart';
+import '../../services/firebase_firestore_service.dart';
 import '../../services/firebase_storage_service.dart';
 import 'bible_series_dtos.dart';
 import 'series_content_dtos.dart';

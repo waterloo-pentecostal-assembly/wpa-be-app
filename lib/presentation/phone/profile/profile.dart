@@ -5,9 +5,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../application/authentication/authentication_bloc.dart';
+import '../../../application/notification_settings/notification_settings_bloc.dart';
 import '../../../constants.dart';
 import '../../../domain/authentication/entities.dart';
 import '../../../injection.dart';
+import '../../common/toast_message.dart';
 import '../common/interfaces.dart';
 import '../common/text_factory.dart';
 import 'privacy_policy.dart';
@@ -23,6 +25,9 @@ class ProfilePage extends IIndexedPage {
       providers: [
         BlocProvider<AuthenticationBloc>(
           create: (BuildContext context) => getIt<AuthenticationBloc>(),
+        ),
+        BlocProvider<NotificationSettingsBloc>(
+          create: (BuildContext context) => getIt<NotificationSettingsBloc>()..add(NotificationSettingsRequested()),
         ),
       ],
       child: Scaffold(
@@ -74,18 +79,6 @@ class ProfilePageRoot extends StatelessWidget {
                 NotificationSettings(),
                 SizedBox(height: 18),
                 Other(),
-                // RaisedButton(
-                //   child: Text('Privacy Policy'),
-                //   onPressed: () {
-                //     Navigator.pushNamed(context, '/privacy_policy');
-                //   },
-                // ),
-                // RaisedButton(
-                //   child: Text('Sign Out'),
-                //   onPressed: () {
-                //     BlocProvider.of<AuthenticationBloc>(context).add(SignOut());
-                //   },
-                // ),
               ],
             ),
           ),
@@ -167,8 +160,8 @@ class NotificationSettings extends StatefulWidget {
 }
 
 class _NotificationSettingsState extends State<NotificationSettings> {
-  bool isEngagementReminderSwitched = false;
-  // bool isOtherNotificationsSwitched = false;
+  bool isEngagementReminderSwitched;
+  bool isPrayerNotificationsSwitched;
 
   @override
   Widget build(BuildContext context) {
@@ -187,80 +180,99 @@ class _NotificationSettingsState extends State<NotificationSettings> {
               getIt<TextFactory>().lite("Daily Engagement Reminder"),
               Container(
                 height: 30,
-                child: Switch(
-                  value: isEngagementReminderSwitched,
-                  onChanged: (value) {
-                    setState(() {
-                      isEngagementReminderSwitched = value;
-                      print(isEngagementReminderSwitched);
-                    });
+                child: BlocConsumer<NotificationSettingsBloc, NotificationSettingsState>(
+                  listener: (context, NotificationSettingsState state) {
+                    if (state is NotificationSettingsPositions) {
+                      setState(() {
+                        isEngagementReminderSwitched = state.notificationSettings.dailyEngagementReminder;
+                      });
+                    } else if (state is DailyEngagementReminderError) {
+                      ToastMessage.showErrorToast(state.message, context);
+                      setState(() {
+                        isEngagementReminderSwitched = !isEngagementReminderSwitched;
+                      });
+                    }
                   },
-                  activeTrackColor: kWpaBlue.withOpacity(0.25),
-                  activeColor: kWpaBlue,
+                  builder: (context, NotificationSettingsState state) {
+                    if (isEngagementReminderSwitched != null) {
+                      return Switch(
+                        value: isEngagementReminderSwitched,
+                        onChanged: (value) {
+                          setState(() {
+                            isEngagementReminderSwitched = value;
+                          });
+                          if (value) {
+                            BlocProvider.of<NotificationSettingsBloc>(context)
+                              ..add(SubscribedToDailyEngagementReminder());
+                          } else {
+                            BlocProvider.of<NotificationSettingsBloc>(context)
+                              ..add(UnsubscribedFromDailyEngagementReminder());
+                          }
+                        },
+                        activeTrackColor: kWpaBlue.withOpacity(0.25),
+                        activeColor: kWpaBlue,
+                      );
+                    } else {
+                      return Switch(
+                        value: false,
+                        onChanged: null,
+                      );
+                    }
+                  },
                 ),
               ),
             ],
           ),
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //   children: [
-          //     getIt<TextFactory>().lite("Reactions"),
-          //     Container(
-          //       height: 30,
-          //       child: Switch(
-          //         value: isOtherNotificationsSwitched,
-          //         onChanged: (value) {
-          //           setState(() {
-          //             isOtherNotificationsSwitched = value;
-          //             print(isOtherNotificationsSwitched);
-          //           });
-          //         },
-          //         activeTrackColor: kWpaBlue.withOpacity(0.25),
-          //         activeColor: kWpaBlue,
-          //       ),
-          //     ),
-          //   ],
-          // ),
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //   children: [
-          //     getIt<TextFactory>().lite("Prayers"),
-          //     Container(
-          //       height: 30,
-          //       child: Switch(
-          //         value: isOtherNotificationsSwitched,
-          //         onChanged: (value) {
-          //           setState(() {
-          //             isOtherNotificationsSwitched = value;
-          //             print(isOtherNotificationsSwitched);
-          //           });
-          //         },
-          //         activeTrackColor: kWpaBlue.withOpacity(0.25),
-          //         activeColor: kWpaBlue,
-          //       ),
-          //     ),
-          //   ],
-          // ),
-          // Row(
-          //   mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          //   children: [
-          //     getIt<TextFactory>().lite("Reports"),
-          //     Container(
-          //       height: 30,
-          //       child: Switch(
-          //         value: isOtherNotificationsSwitched,
-          //         onChanged: (value) {
-          //           setState(() {
-          //             isOtherNotificationsSwitched = value;
-          //             print(isOtherNotificationsSwitched);
-          //           });
-          //         },
-          //         activeTrackColor: kWpaBlue.withOpacity(0.25),
-          //         activeColor: kWpaBlue,
-          //       ),
-          //     ),
-          //   ],
-          // ),
+          SizedBox(height: 4),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              getIt<TextFactory>().lite("Prayers"),
+              Container(
+                height: 30,
+                child: BlocConsumer<NotificationSettingsBloc, NotificationSettingsState>(
+                  listener: (context, NotificationSettingsState state) {
+                    if (state is NotificationSettingsPositions) {
+                      setState(() {
+                        isPrayerNotificationsSwitched = state.notificationSettings.prayers;
+                      });
+                    } else if (state is PrayerNotificationError) {
+                      ToastMessage.showErrorToast(state.message, context);
+                      setState(() {
+                        isPrayerNotificationsSwitched = !isPrayerNotificationsSwitched;
+                      });
+                    }
+                  },
+                  builder: (context, NotificationSettingsState state) {
+                    if (isPrayerNotificationsSwitched != null) {
+                      return Switch(
+                        value: isPrayerNotificationsSwitched,
+                        onChanged: (value) {
+                          setState(() {
+                            isPrayerNotificationsSwitched = value;
+                          });
+                          if (value) {
+                            BlocProvider.of<NotificationSettingsBloc>(context)
+                              ..add(SubscribedToPrayerNotifications());
+                          } else {
+                            BlocProvider.of<NotificationSettingsBloc>(context)
+                              ..add(UnsubscribedFromPrayerNotifications());
+                          }
+                        },
+                        activeTrackColor: kWpaBlue.withOpacity(0.25),
+                        activeColor: kWpaBlue,
+                      );
+                    } else {
+                      return Switch(
+                        value: false,
+                        onChanged: null,
+                      );
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
           Divider(),
         ],
       ),

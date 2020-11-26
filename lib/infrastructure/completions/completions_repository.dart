@@ -1,14 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/services.dart';
-import 'package:wpa_app/services/firebase_firestore_service.dart';
 
 import '../../domain/authentication/entities.dart';
 import '../../domain/authentication/interfaces.dart';
-import '../../domain/common/exceptions.dart';
 import '../../domain/completions/entities.dart';
 import '../../domain/completions/exceptions.dart';
 import '../../domain/completions/interfaces.dart';
 import '../../injection.dart';
+import '../../services/firebase_firestore_service.dart';
 import '../common/helpers.dart';
 import 'completions_dto.dart';
 import 'responses_dto.dart';

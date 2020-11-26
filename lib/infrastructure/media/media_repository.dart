@@ -1,7 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/services.dart';
 
-import '../../domain/common/exceptions.dart';
 import '../../domain/media/entities.dart';
 import '../../domain/media/interfaces.dart';
 import '../../services/firebase_firestore_service.dart';

@@ -107,6 +107,7 @@ class EngageIndex extends StatelessWidget {
                 BlocProvider.of<AchievementsBloc>(context)..add(WatchAchievementsStarted());
                 BlocProvider.of<BibleSeriesBloc>(context)..add(RecentBibleSeriesRequested(amount: 3));
                 BlocProvider.of<PrayerRequestsBloc>(context)..add(RecentPrayerRequestsRequested(amount: 10));
+                BlocProvider.of<MediaBloc>(context)..add(AvailableMediaRequested());
               },
               child: ListView(
                 physics: AlwaysScrollableScrollPhysics(),

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get_it/get_it.dart';
+import 'package:wpa_app/application/notification_settings/notification_settings_bloc.dart';
 import 'package:wpa_app/domain/notification_settings/interfaces.dart';
 import 'package:wpa_app/infrastructure/notification_settings/notification_settings_service.dart';
 import 'package:wpa_app/services/firebase_firestore_service.dart';
@@ -86,6 +87,10 @@ void init() {
 
   getIt.registerFactory<MediaBloc>(
     () => MediaBloc(getIt<IMediaRepository>()),
+  );
+
+  getIt.registerFactory<NotificationSettingsBloc>(
+    () => NotificationSettingsBloc(getIt<INotificationSettingsService>()),
   );
 
   getIt.registerFactory<PrayerRequestsBloc>(

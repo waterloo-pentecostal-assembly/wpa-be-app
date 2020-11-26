@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../application/navigation_bar/navigation_bar_bloc.dart';
 import '../../constants.dart';
 import '../../injection.dart';
+import '../common/toast_message.dart';
 import 'common/interfaces.dart';
 import 'engage/main/engage.dart';
 import 'give/give_page.dart';
@@ -70,10 +71,9 @@ class NavigationBar extends StatelessWidget {
   void handleOnTap(BuildContext context, int index) async {
     if (NavigationTabEnum.values[index] == NavigationTabEnum.GIVE) {
       if (await canLaunch(kWpaGiveUrl)) {
-        await launch(kWpaGiveUrl, forceWebView: true);
+        await launch(kWpaGiveUrl, forceWebView: true, enableJavaScript: true);
       } else {
-        // TODO: show popup saying can't open URL
-        throw 'Could not launch';
+        ToastMessage.showErrorToast("Error opening page", context);
       }
     } else if (tabIndex != index) {
       BlocProvider.of<NavigationBarBloc>(context)

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+
+import '../../../injection.dart';
 import '../common/interfaces.dart';
+import '../common/text_factory.dart';
 
 // class NotificationsPage extends StatelessWidget {
 //   @override
@@ -14,9 +17,7 @@ import '../common/interfaces.dart';
 //   }
 // }
 
-
 class NotificationsPage extends IIndexedPage {
-
   final GlobalKey<NavigatorState> navigatorKey;
 
   const NotificationsPage({Key key, this.navigatorKey}) : super(key: key);
@@ -49,8 +50,10 @@ class NotificationsPageRoot extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Container(
-        child: Column(
+        child: ListView(
           children: <Widget>[
+            HeaderWidget(),
+            SizedBox(height: 12),
             RaisedButton(
               child: Text('Example Notification'),
               onPressed: () {
@@ -84,3 +87,23 @@ class NotificationDetail extends StatelessWidget {
     );
   }
 }
+
+class HeaderWidget extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+        child: getIt<TextFactory>().heading('Notifications'),
+      ),
+    );
+  }
+}
+
+// return SafeArea(
+//           child: Container(
+//             // child: TestImagePicker(),
+//             child: ListView(
+//               // crossAxisAlignment: CrossAxisAlignment.start,
+//               children: <Widget>[
+//                 HeaderWidget(),

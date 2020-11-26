@@ -115,7 +115,7 @@ class TextFactory {
     return TextStyle(fontFamily: _fontFamily, fontWeight: FontWeight.w500, fontSize: fontSize, color: color);
   }
 
-  Text lite(String text, {double fontSize = 12.0, Color color: Colors.black}) {
+  Text lite(String text, {double fontSize = 12.0, Color color: Colors.black, TextOverflow overflow = TextOverflow.visible,}) {
     return Text(
       text,
       style: TextStyle(
@@ -124,6 +124,7 @@ class TextFactory {
         fontSize: fontSize,
         color: color,
       ),
+      overflow: overflow,
     );
   }
 }

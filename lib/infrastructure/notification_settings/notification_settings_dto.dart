@@ -7,10 +7,12 @@ import '../common/helpers.dart';
 class NotificationSettingsDto {
   final String id;
   final bool dailyEngagementReminder;
+  final bool prayers;
 
   factory NotificationSettingsDto.fromJson(Map<String, dynamic> json) {
     return NotificationSettingsDto._(
       dailyEngagementReminder: findOrDefaultTo(json, 'daily_engagement_reminder', false),
+      prayers: findOrDefaultTo(json, 'prayers', false),
     );
   }
 
@@ -20,17 +22,20 @@ class NotificationSettingsDto {
 
   NotificationSettingsDto copyWith({
     String id,
-    String description,
+    String dailyEngagementReminder,
+    String prayers,
   }) {
     return NotificationSettingsDto._(
       id: id ?? this.id,
       dailyEngagementReminder: dailyEngagementReminder ?? this.dailyEngagementReminder,
+      prayers: prayers ?? this.prayers,
     );
   }
 
   NotificationSettingsDto._({
     this.id,
     @required this.dailyEngagementReminder,
+    @required this.prayers,
   });
 }
 
@@ -39,6 +44,7 @@ extension NotificationSettingsDtoX on NotificationSettingsDto {
     return NotificationSettingsEntity(
       id: this.id,
       dailyEngagementReminder: this.dailyEngagementReminder,
+      prayers: this.prayers,
     );
   }
 }
