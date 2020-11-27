@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../domain/authentication/entities.dart';
-import '../../domain/authentication/interfaces.dart';
 import '../../domain/completions/entities.dart';
 import '../../domain/completions/exceptions.dart';
 import '../../domain/completions/interfaces.dart';
@@ -25,7 +24,7 @@ class CompletionsRepository extends ICompletionsRepository {
     CompletionDetails completionDetails,
   }) async {
     CompletionsDto completionsDto = CompletionsDto.fromDomain(completionDetails);
-    final LocalUser user = await getIt<IAuthenticationFacade>().getSignedInUser();
+    final LocalUser user = getIt<LocalUser>();
 
     try {
       await _completionsCollection.add({
@@ -74,7 +73,7 @@ class CompletionsRepository extends ICompletionsRepository {
     String bibleSeriesId,
   }) async {
     QuerySnapshot snapshot;
-    final LocalUser user = await getIt<IAuthenticationFacade>().getSignedInUser();
+    final LocalUser user = getIt<LocalUser>();
     try {
       snapshot = await _completionsCollection
           .where("user_id", isEqualTo: user.id)
@@ -97,7 +96,7 @@ class CompletionsRepository extends ICompletionsRepository {
     String seriesContentId,
   }) async {
     QuerySnapshot snapshot;
-    final LocalUser user = await getIt<IAuthenticationFacade>().getSignedInUser();
+    final LocalUser user = getIt<LocalUser>();
 
     try {
       snapshot = await _completionsCollection

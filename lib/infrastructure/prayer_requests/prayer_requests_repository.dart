@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../constants.dart';
 import '../../domain/authentication/entities.dart';
-import '../../domain/authentication/interfaces.dart';
 import '../../domain/prayer_requests/entities.dart';
 import '../../domain/prayer_requests/exceptions.dart';
 import '../../domain/prayer_requests/interfaces.dart';
@@ -13,8 +12,8 @@ import 'prayer_requests_dto.dart';
 
 class PrayerRequestsRepository extends IPrayerRequestsRepository {
   final FirebaseFirestore _firestore;
-  final FirebaseStorageService _firebaseStorageService;
   final FirebaseFirestoreService _firebaseFirestoreService;
+  final FirebaseStorageService _firebaseStorageService;
   CollectionReference _prayerRequestsCollection;
   DocumentSnapshot _lastPrayerRequestDocument;
 
@@ -24,7 +23,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
 
   @override
   Future<PrayerRequest> createPrayerRequest({String request, bool isAnonymous}) async {
-    final LocalUser user = await getIt<IAuthenticationFacade>().getSignedInUser();
+    final LocalUser user = getIt<LocalUser>();
     DocumentReference documentReference;
     DocumentSnapshot documentSnapshot;
 
@@ -51,7 +50,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
 
   @override
   Future<List<PrayerRequest>> getMyPrayerRequests() async {
-    final LocalUser user = await getIt<IAuthenticationFacade>().getSignedInUser();
+    final LocalUser user = getIt<LocalUser>();
     QuerySnapshot querySnapshot;
 
     try {
@@ -80,7 +79,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
     int limit,
     DocumentSnapshot startAtDocument,
   }) async {
-    final LocalUser user = await getIt<IAuthenticationFacade>().getSignedInUser();
+    final LocalUser user = getIt<LocalUser>();
     List<PrayerRequest> prayerRequests = [];
     QuerySnapshot querySnapshot;
 
@@ -121,7 +120,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
   Future<List<PrayerRequest>> getPrayerRequests({
     int limit,
   }) async {
-    final LocalUser user = await getIt<IAuthenticationFacade>().getSignedInUser();
+    final LocalUser user = getIt<LocalUser>();
     QuerySnapshot querySnapshot;
 
     try {
@@ -152,7 +151,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
 
   @override
   Future<void> prayForPrayerRequest({String id}) async {
-    final LocalUser user = await getIt<IAuthenticationFacade>().getSignedInUser();
+    final LocalUser user = getIt<LocalUser>();
     try {
       // Using transaction to avoid stale data
       await _firestore.runTransaction((transaction) async {
@@ -184,7 +183,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
 
   @override
   Future<bool> reportPrayerRequest({String id}) async {
-    final LocalUser user = await getIt<IAuthenticationFacade>().getSignedInUser();
+    final LocalUser user = getIt<LocalUser>();
     bool isSafe = false;
 
     try {
@@ -220,7 +219,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
 
   @override
   Future<bool> canAddPrayerRequest() async {
-    final LocalUser user = await getIt<IAuthenticationFacade>().getSignedInUser();
+    final LocalUser user = getIt<LocalUser>();
     QuerySnapshot querySnapshot;
 
     try {

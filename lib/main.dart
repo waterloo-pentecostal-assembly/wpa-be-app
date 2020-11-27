@@ -4,6 +4,6 @@ import 'injection.dart';
 import 'presentation/app.dart';
 
 void main() async {
-  init();
+  initializeInjections();
   runApp(App());
 }

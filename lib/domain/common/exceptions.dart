@@ -70,6 +70,7 @@ class ApplicationException implements BaseApplicationException {
 enum FirebaseStorageExceptionCode {
   OBJECT_NOT_FOUND,
   UNAUTHORIZED,
+  UNABLE_TO_START_UPLOAD,
   UNKNOWN,
 }
 

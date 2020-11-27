@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/achievements/entities.dart';
 import '../../domain/achievements/interfaces.dart';
 import '../../domain/authentication/entities.dart';
-import '../../domain/authentication/interfaces.dart';
 import '../../injection.dart';
 import '../../services/firebase_firestore_service.dart';
 import 'achievements_dto.dart';
@@ -20,7 +19,7 @@ class AchievementsRepository implements IAchievementsRepository {
   @override
   Future<Achievements> getAchievements() async {
     DocumentSnapshot documentSnapshot;
-    final LocalUser user = await getIt<IAuthenticationFacade>().getSignedInUser();
+    final LocalUser user = getIt<LocalUser>();
     try {
       documentSnapshot = await _achievementsCollection.doc(user.id).get();
     } catch (e) {
@@ -36,7 +35,7 @@ class AchievementsRepository implements IAchievementsRepository {
 
   @override
   Stream<Achievements> watchAchievements() async* {
-    final LocalUser user = await getIt<IAuthenticationFacade>().getSignedInUser();
+    final LocalUser user = getIt<LocalUser>();
     try {
       yield* _achievementsCollection.doc(user.id).snapshots().map((documentSnapshot) {
         if (documentSnapshot.data() == null) {

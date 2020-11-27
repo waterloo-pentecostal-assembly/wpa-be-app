@@ -1,16 +1,20 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../application/authentication/authentication_bloc.dart';
 import '../../../application/notification_settings/notification_settings_bloc.dart';
+import '../../../application/user_profile/user_profile_bloc.dart';
 import '../../../constants.dart';
 import '../../../domain/authentication/entities.dart';
 import '../../../injection.dart';
 import '../../common/toast_message.dart';
 import '../common/interfaces.dart';
+import '../common/platform_switch.dart';
 import '../common/text_factory.dart';
 import 'privacy_policy.dart';
 
@@ -25,6 +29,9 @@ class ProfilePage extends IIndexedPage {
       providers: [
         BlocProvider<AuthenticationBloc>(
           create: (BuildContext context) => getIt<AuthenticationBloc>(),
+        ),
+        BlocProvider<UserProfileBloc>(
+          create: (BuildContext context) => getIt<UserProfileBloc>(),
         ),
         BlocProvider<NotificationSettingsBloc>(
           create: (BuildContext context) => getIt<NotificationSettingsBloc>()..add(NotificationSettingsRequested()),
@@ -106,33 +113,57 @@ class ProfileImageAndName extends StatefulWidget {
 }
 
 class _ProfileImageAndNameState extends State<ProfileImageAndName> {
+  ImagePicker imagePicker = ImagePicker();
+
   @override
   Widget build(BuildContext context) {
+    LocalUser localUser = getIt<LocalUser>();
     double profilePhotoDiameter =
         150 > MediaQuery.of(context).size.width * 0.5 ? MediaQuery.of(context).size.width * 0.5 : 150;
-
-    LocalUser localUser = getIt<LocalUser>();
 
     return Column(
       children: [
         ClipOval(
-          child: Container(
-            height: profilePhotoDiameter,
-            width: profilePhotoDiameter,
-            // child: (prayerRequest.userSnippet.profilePhotoUrl == null || prayerRequest.isAnonymous)
-            //     ? Image.asset(kProfilePhotoPlaceholder)
-            //     : FadeInImage.assetNetwork(
-            child: FadeInImage.assetNetwork(
-              fit: BoxFit.cover,
-              placeholder: kProfilePhotoPlaceholder,
-              image: localUser.profilePhotoUrl,
-            ),
+          child: Stack(
+            alignment: AlignmentDirectional.bottomCenter,
+            children: [
+              Container(
+                height: profilePhotoDiameter,
+                width: profilePhotoDiameter,
+                child: (localUser.profilePhotoUrl == null)
+                    ? Image.asset(kProfilePhotoPlaceholder)
+                    : FadeInImage.assetNetwork(
+                        fit: BoxFit.cover,
+                        placeholder: kProfilePhotoPlaceholder,
+                        image: localUser.profilePhotoUrl,
+                      ),
+              ),
+              GestureDetector(
+                onTap: selectNewProfileImage,
+                child: Container(
+                  color: Colors.black.withOpacity(0.5),
+                  width: profilePhotoDiameter,
+                  height: 30,
+                  child: Container(
+                    alignment: Alignment.center,
+                    child: getIt<TextFactory>().regular('EDIT', color: Colors.white, fontSize: 12.0),
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
         SizedBox(height: 12),
         getIt<TextFactory>().regular(localUser.fullName)
       ],
     );
+  }
+
+  void selectNewProfileImage() async {
+    PickedFile selected = await imagePicker.getImage(source: ImageSource.gallery);
+    if (selected != null && selected.path != null) {
+      BlocProvider.of<UserProfileBloc>(context)..add(UploadProfilePhoto(profilePhoto: File(selected.path)));
+    }
   }
 }
 
@@ -195,7 +226,7 @@ class _NotificationSettingsState extends State<NotificationSettings> {
                   },
                   builder: (context, NotificationSettingsState state) {
                     if (isEngagementReminderSwitched != null) {
-                      return Switch(
+                      return PlatformSwitch(
                         value: isEngagementReminderSwitched,
                         onChanged: (value) {
                           setState(() {
@@ -209,21 +240,17 @@ class _NotificationSettingsState extends State<NotificationSettings> {
                               ..add(UnsubscribedFromDailyEngagementReminder());
                           }
                         },
-                        activeTrackColor: kWpaBlue.withOpacity(0.25),
-                        activeColor: kWpaBlue,
+                        activeColor: kWpaBlue.withOpacity(0.6),
                       );
                     } else {
-                      return Switch(
-                        value: false,
-                        onChanged: null,
-                      );
+                      return PlatformSwitch(disabled: true);
                     }
                   },
                 ),
               ),
             ],
           ),
-          SizedBox(height: 4),
+          SizedBox(height: 8),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -245,28 +272,23 @@ class _NotificationSettingsState extends State<NotificationSettings> {
                   },
                   builder: (context, NotificationSettingsState state) {
                     if (isPrayerNotificationsSwitched != null) {
-                      return Switch(
+                      return PlatformSwitch(
                         value: isPrayerNotificationsSwitched,
                         onChanged: (value) {
                           setState(() {
                             isPrayerNotificationsSwitched = value;
                           });
                           if (value) {
-                            BlocProvider.of<NotificationSettingsBloc>(context)
-                              ..add(SubscribedToPrayerNotifications());
+                            BlocProvider.of<NotificationSettingsBloc>(context)..add(SubscribedToPrayerNotifications());
                           } else {
                             BlocProvider.of<NotificationSettingsBloc>(context)
                               ..add(UnsubscribedFromPrayerNotifications());
                           }
                         },
-                        activeTrackColor: kWpaBlue.withOpacity(0.25),
-                        activeColor: kWpaBlue,
+                        activeColor: kWpaBlue.withOpacity(0.6),
                       );
                     } else {
-                      return Switch(
-                        value: false,
-                        onChanged: null,
-                      );
+                      return PlatformSwitch(disabled: true);
                     }
                   },
                 ),
@@ -313,27 +335,57 @@ class Other extends StatelessWidget {
               )
             ],
           ),
-          SizedBox(height: 6),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              getIt<TextFactory>().lite("Help"),
-              Icon(
-                Icons.keyboard_arrow_right,
-                color: kDarkGreyColor,
-              )
-            ],
+          SizedBox(height: 8),
+          GestureDetector(
+            onTap: () async {
+              final Uri _emailLaunchUri = Uri(
+                scheme: 'mailto',
+                path: kWpaContactEmail,
+                queryParameters: {'subject': kHelpEmailSubject},
+              );
+
+              if (await canLaunch(_emailLaunchUri.toString())) {
+                await launch(_emailLaunchUri.toString());
+              } else {
+                ToastMessage.showErrorToast("Error opening page", context);
+              }
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                getIt<TextFactory>().lite("Help"),
+                Icon(
+                  Icons.keyboard_arrow_right,
+                  color: kDarkGreyColor,
+                )
+              ],
+            ),
           ),
-          SizedBox(height: 6),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              getIt<TextFactory>().lite("Report a Problem"),
-              Icon(
-                Icons.keyboard_arrow_right,
-                color: kDarkGreyColor,
-              )
-            ],
+          SizedBox(height: 8),
+          GestureDetector(
+            onTap: () async {
+              final Uri _emailLaunchUri = Uri(
+                scheme: 'mailto',
+                path: kWpaContactEmail,
+                queryParameters: {'subject': kReportEmailSubject},
+              );
+
+              if (await canLaunch(_emailLaunchUri.toString())) {
+                await launch(_emailLaunchUri.toString());
+              } else {
+                ToastMessage.showErrorToast("Error opening page", context);
+              }
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                getIt<TextFactory>().lite("Report a Problem"),
+                Icon(
+                  Icons.keyboard_arrow_right,
+                  color: kDarkGreyColor,
+                )
+              ],
+            ),
           ),
           SizedBox(height: 8),
           Row(

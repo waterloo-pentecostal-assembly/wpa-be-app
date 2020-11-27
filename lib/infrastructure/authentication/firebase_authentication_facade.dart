@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -50,7 +52,6 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
     } catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
-
     if (userInfo == null || userInfo.data() == null) {
       throw AuthenticationException(
         code: AuthenticationExceptionCode.USER_COLLECTION_NOT_FOUND,

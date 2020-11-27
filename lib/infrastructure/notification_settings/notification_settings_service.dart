@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../constants.dart';
 import '../../domain/authentication/entities.dart';
-import '../../domain/authentication/interfaces.dart';
 import '../../domain/notification_settings/entities.dart';
 import '../../domain/notification_settings/exceptions.dart';
 import '../../domain/notification_settings/interfaces.dart';
@@ -61,7 +60,7 @@ class NotificationSettingsService implements INotificationSettingsService {
 
   Future<void> _setNotificationSetting(Map<String, dynamic> notificationSetting) async {
     // Future<void> unsubscribeFromDailyEngagementReminder(String notificationSettingsId) async {
-    final LocalUser user = await getIt<IAuthenticationFacade>().getSignedInUser();
+    final LocalUser user = getIt<LocalUser>();
 
     // Should always be available.  This is just a fail-safe
     String _notificationSettingsId = notificationSettingsId ?? _getNotificationSettingsId();
@@ -83,7 +82,7 @@ class NotificationSettingsService implements INotificationSettingsService {
 
   @override
   Future<NotificationSettingsEntity> getNotificationSettings() async {
-    final LocalUser user = await getIt<IAuthenticationFacade>().getSignedInUser();
+    final LocalUser user = getIt<LocalUser>();
     QuerySnapshot querySnapshot;
     try {
       querySnapshot = await _firestore.collection("users").doc(user.id).collection("notification_settings").get();
@@ -106,7 +105,7 @@ class NotificationSettingsService implements INotificationSettingsService {
   }
 
   Future<String> _getNotificationSettingsId() async {
-    final LocalUser user = await getIt<IAuthenticationFacade>().getSignedInUser();
+    final LocalUser user = getIt<LocalUser>();
     QuerySnapshot querySnapshot;
     try {
       querySnapshot = await _firestore.collection("users").doc(user.id).collection("notification_settings").get();

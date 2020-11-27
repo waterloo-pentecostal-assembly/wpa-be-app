@@ -42,3 +42,8 @@ const kWpaGiveUrl = 'https://www.canadahelps.org/en/dne/15479';
 
 // Firebase Messaging Topics
 const kDailyEngagementReminderTopic = 'daily_engagement_reminder';
+
+// Help/Reporting
+const kWpaContactEmail = 'dan@wpa.church';
+const kHelpEmailSubject = '[WPA BE APP] Help Request';
+const kReportEmailSubject = '[WPA BE APP] Problem Report';

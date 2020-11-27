@@ -3,10 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get_it/get_it.dart';
-import 'package:wpa_app/application/notification_settings/notification_settings_bloc.dart';
-import 'package:wpa_app/domain/notification_settings/interfaces.dart';
-import 'package:wpa_app/infrastructure/notification_settings/notification_settings_service.dart';
-import 'package:wpa_app/services/firebase_firestore_service.dart';
 
 import 'application/achievements/achievements_bloc.dart';
 import 'application/authentication/authentication_bloc.dart';
@@ -16,27 +12,34 @@ import 'application/authentication/sign_up/sign_up_bloc.dart';
 import 'application/bible_series/bible_series_bloc.dart';
 import 'application/media/media_bloc.dart';
 import 'application/navigation_bar/navigation_bar_bloc.dart';
+import 'application/notification_settings/notification_settings_bloc.dart';
 import 'application/prayer_requests/prayer_requests_bloc.dart';
+import 'application/user_profile/user_profile_bloc.dart';
 import 'domain/achievements/interfaces.dart';
 import 'domain/authentication/interfaces.dart';
 import 'domain/bible_series/interfaces.dart';
 import 'domain/completions/interfaces.dart';
 import 'domain/media/interfaces.dart';
+import 'domain/notification_settings/interfaces.dart';
 import 'domain/prayer_requests/interfaces.dart';
+import 'domain/user_profile/interfaces.dart';
 import 'infrastructure/achievements/achievements_repository.dart';
 import 'infrastructure/authentication/firebase_authentication_facade.dart';
 import 'infrastructure/bible_series/bible_series_repository.dart';
 import 'infrastructure/completions/completions_repository.dart';
+import 'infrastructure/media/media_repository.dart';
+import 'infrastructure/notification_settings/notification_settings_service.dart';
+import 'infrastructure/prayer_requests/prayer_requests_repository.dart';
+import 'infrastructure/user_profile/user_profile_repository.dart';
+import 'presentation/phone/common/text_factory.dart';
+import 'services/firebase_firestore_service.dart';
 import 'services/firebase_messaging_service.dart';
 import 'services/firebase_storage_service.dart';
-import 'infrastructure/media/media_repository.dart';
-import 'infrastructure/prayer_requests/prayer_requests_repository.dart';
-import 'presentation/phone/common/text_factory.dart';
 
 // Global ServiceLocator
 GetIt getIt = GetIt.instance;
 
-void init() {
+void initializeInjections() {
   // Dependency Injection Configuration
 
   // NOTE: Different settings for different environments (PROD, TEST, etc) can be configured here as well
@@ -49,8 +52,21 @@ void init() {
 
   getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
   getIt.registerLazySingleton<FirebaseStorage>(() => FirebaseStorage.instance);
-  getIt.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
+  // getIt.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
   getIt.registerLazySingleton<FirebaseMessaging>(() => FirebaseMessaging());
+
+  getIt.registerLazySingleton<FirebaseFirestore>(() {
+    FirebaseFirestore firebaseFirestoreInstance = FirebaseFirestore.instance;
+
+    // For connection to local Firestore Emulator
+    // firebaseFirestoreInstance.settings = Settings(
+    //   host: 'localhost:8080',
+    //   sslEnabled: false,
+    //   persistenceEnabled: false,
+    // );
+
+    return firebaseFirestoreInstance;
+  });
 
   // Services
   getIt.registerLazySingleton<FirebaseStorageService>(() => FirebaseStorageService(getIt<FirebaseStorage>()));
@@ -95,6 +111,10 @@ void init() {
 
   getIt.registerFactory<PrayerRequestsBloc>(
     () => PrayerRequestsBloc(getIt<IPrayerRequestsRepository>()),
+  );
+
+  getIt.registerFactory<UserProfileBloc>(
+    () => UserProfileBloc(getIt<IUserProfileRepository>()),
   );
 
   getIt.registerFactory<NavigationBarBloc>(
@@ -155,6 +175,14 @@ void init() {
       getIt<FirebaseMessagingService>(),
       getIt<FirebaseFirestore>(),
       getIt<FirebaseFirestoreService>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<IUserProfileRepository>(
+    () => UserProfileRepository(
+      getIt<FirebaseFirestore>(),
+      getIt<FirebaseFirestoreService>(),
+      getIt<FirebaseStorageService>(),
     ),
   );
 

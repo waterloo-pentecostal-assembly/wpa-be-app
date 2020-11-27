@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:firebase_storage/firebase_storage.dart';
 
 import '../domain/common/exceptions.dart';
@@ -8,6 +10,10 @@ class FirebaseStorageService {
   FirebaseStorageService(this._firebaseStorage);
 
   Future<String> getDownloadUrl(String gsUrl) async {
+    if (gsUrl == null) {
+      return null;
+    }
+
     try {
       String downloadUrl = await _firebaseStorage.refFromURL(gsUrl).getDownloadURL();
       return downloadUrl;
@@ -31,6 +37,18 @@ class FirebaseStorageService {
           details: e,
         );
       }
+    }
+  }
+
+  UploadTask startFileUpload(String filePath, File file) {
+    try {
+      return _firebaseStorage.ref().child(filePath).putFile(file);
+    } catch (e) {
+      throw FirebaseStorageException(
+        code: FirebaseStorageExceptionCode.UNABLE_TO_START_UPLOAD,
+        message: "Unable to start upload",
+        details: e,
+      );
     }
   }
 }
