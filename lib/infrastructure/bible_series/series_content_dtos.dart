@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:wpa_app/services/firebase_storage_service.dart';
 
 import '../../domain/bible_series/entities.dart';
 import '../../domain/bible_series/exceptions.dart';
@@ -65,10 +66,12 @@ class SeriesContentDto {
 }
 
 extension SeriesContentDtoX on SeriesContentDto {
-  SeriesContent toDomain() {
+  SeriesContent toDomain(FirebaseStorageService firebaseStorageService) {
     List<ISeriesContentBody> _body = [];
-    this.body.forEach((element) {
-      _body.add(element.toDomain(body.indexOf(element)));
+    
+    this.body.forEach((element) async {
+      ISeriesContentBody seriesContentBody = await element.toDomain(body.indexOf(element), firebaseStorageService);
+      _body.add(seriesContentBody);
     });
 
     return SeriesContent(
@@ -91,7 +94,7 @@ class SeriesContentBodyDto {
     Map<String, dynamic> _properties = {};
 
     if (_bodyType == 'audio') {
-      _properties['audioFileUrl'] = findOrThrowException(json, 'audio_file_url');
+      _properties['audioFileGsLocation'] = findOrThrowException(json, 'audio_file_gs_location');
     } else if (_bodyType == 'text') {
       _properties['paragraphs'] = findOrThrowException(json, 'paragraphs');
     } else if (_bodyType == 'question') {
@@ -126,10 +129,14 @@ class SeriesContentBodyDto {
 
 extension SeriesContentBodyDtoX on SeriesContentBodyDto {
   // ignore: missing_return
-  ISeriesContentBody toDomain(int index) {
+  Future<ISeriesContentBody> toDomain(int index, FirebaseStorageService firebaseStorageService) async {
     if (this.bodyType == 'audio') {
       AudioBodyProperties bodyProperties = AudioBodyProperties();
-      bodyProperties.audioFileUrl = this.properties['audioFileUrl'];
+
+      // Convert GS URL to Download URL
+      String audioFileUrl = await firebaseStorageService.getDownloadUrl(this.properties['audioFileGsLocation']);
+
+      bodyProperties.audioFileUrl = audioFileUrl;
 
       return AudioBody(
         type: SeriesContentBodyType.AUDIO,

@@ -3,10 +3,7 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:wpa_app/injection.dart';
 
-import '../../../domain/authentication/entities.dart';
-import '../../../domain/authentication/exceptions.dart';
 import '../../../domain/authentication/interfaces.dart';
 import '../../../domain/authentication/value_objects.dart';
 import '../../../domain/common/exceptions.dart';

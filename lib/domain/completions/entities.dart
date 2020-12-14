@@ -26,10 +26,12 @@ class CompletionDetails {
 class Responses {
   final String id;
   final Map<String, Map<String, ResponseDetails>> responses;
+  final String userId;
 
   Responses({
     this.id,
     this.responses,
+    this.userId,
   });
 }
 

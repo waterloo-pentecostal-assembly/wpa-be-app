@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "755795301430",
+    "project_id": "wpa-be-app",
+    "storage_bucket": "wpa-be-app.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:755795301430:android:5e60436110d62f144fb497",
+        "android_client_info": {
+          "package_name": "church.wpa.beapp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "755795301430-b7bgr96e3003gqupdg1ourfchbf69hf5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCaqX54b86nZtd1Fw0-tj7ZMPnnqooxP2c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "755795301430-b7bgr96e3003gqupdg1ourfchbf69hf5.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "755795301430-6fddj4gegjkg7bcq25bjn562o5srljg8.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "church.wpa.beapp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

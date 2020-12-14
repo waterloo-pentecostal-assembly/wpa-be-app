@@ -2,8 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
+import 'app/app_config.dart';
 import 'application/achievements/achievements_bloc.dart';
 import 'application/authentication/authentication_bloc.dart';
 import 'application/authentication/password_reset/password_reset_bloc.dart';
@@ -39,7 +41,11 @@ import 'services/firebase_storage_service.dart';
 // Global ServiceLocator
 GetIt getIt = GetIt.instance;
 
-void initializeInjections() {
+void initializeInjections({
+  @required useLocalFirestore,
+  @required useLocalAuth,
+  @required AppConfig appConfig,
+}) {
   // Dependency Injection Configuration
 
   // NOTE: Different settings for different environments (PROD, TEST, etc) can be configured here as well
@@ -50,22 +56,36 @@ void initializeInjections() {
   Factory - New instance each time 
   */
 
-  getIt.registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance);
+  // Register AppConfig
+  getIt.registerLazySingleton<AppConfig>(() => appConfig);
+
   getIt.registerLazySingleton<FirebaseStorage>(() => FirebaseStorage.instance);
-  // getIt.registerLazySingleton<FirebaseFirestore>(() => FirebaseFirestore.instance);
   getIt.registerLazySingleton<FirebaseMessaging>(() => FirebaseMessaging());
 
   getIt.registerLazySingleton<FirebaseFirestore>(() {
     FirebaseFirestore firebaseFirestoreInstance = FirebaseFirestore.instance;
 
-    // For connection to local Firestore Emulator
-    // firebaseFirestoreInstance.settings = Settings(
-    //   host: 'localhost:8080',
-    //   sslEnabled: false,
-    //   persistenceEnabled: false,
-    // );
+    if (useLocalFirestore) {
+      firebaseFirestoreInstance.settings = Settings(
+        host: 'localhost:8080',
+        sslEnabled: false,
+        persistenceEnabled: false,
+      );
+    }
 
     return firebaseFirestoreInstance;
+  });
+
+  getIt.registerLazySingleton<FirebaseAuth>(() {
+    FirebaseAuth firebaseAuthInstance = FirebaseAuth.instance;
+
+    // Local auth emulator not yet implemented in SDK
+    // Follow issue here https://github.com/FirebaseExtended/flutterfire/issues/3980
+    if (useLocalAuth) {
+      // TODO: implement local auth settings here
+    }
+
+    return firebaseAuthInstance;
   });
 
   // Services

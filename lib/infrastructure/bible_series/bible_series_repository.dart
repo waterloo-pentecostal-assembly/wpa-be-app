@@ -47,6 +47,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
           final BibleSeries bibleSeriesDto = await BibleSeriesDto.fromFirestore(doc).toDomain(_firebaseStorageService);
           bibleSeriesList.add(bibleSeriesDto);
         } catch (e) {
+          print(e);
           // Handle exceptions separately for each document conversion.
           // This will ensure that corrupted documents do not affect the others.
         }
@@ -149,7 +150,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
     }
 
     if (document.data() != null) {
-      final SeriesContent seriesContent = SeriesContentDto.fromFirestore(document).toDomain();
+      final SeriesContent seriesContent = SeriesContentDto.fromFirestore(document).toDomain(_firebaseStorageService);
       return seriesContent;
     }
 

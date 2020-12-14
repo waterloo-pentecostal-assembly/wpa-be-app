@@ -8,11 +8,15 @@ import '../common/helpers.dart';
 class ResponsesDto {
   final String id;
   final Map<String, Map<String, ResponseDetails>> responses;
+  final String userId;
 
   factory ResponsesDto.fromJson(Map<String, dynamic> json) {
     Map<String, Map<String, ResponseDetails>> _responses = {};
-    
-    json.forEach((String k1, dynamic v1) {
+
+    String userId = findOrThrowException(json, 'user_id');
+    Map<String, dynamic> responses = findOrDefaultTo(json, 'responses', {});
+
+    responses.forEach((String k1, dynamic v1) {
       v1.forEach((String k2, dynamic v2) {
         ResponseDetails responseDetails = ResponseDetails(
           type: findOrThrowException(json, 'type'),
@@ -21,23 +25,19 @@ class ResponsesDto {
         _responses[k1] = {k2: responseDetails};
       });
     });
-    
-    return ResponsesDto._(
-      responses: _responses,
-    );
+
+    return ResponsesDto._(responses: _responses, userId: userId);
   }
 
-  factory ResponsesDto.fromDomain(Map<String, Map<String, ResponseDetails>> responses) {
+  factory ResponsesDto.fromDomain(Map<String, Map<String, ResponseDetails>> responses, String userId) {
     Map<String, dynamic> _responses = {};
-    
+
     responses.forEach((String k1, Map<String, ResponseDetails> v1) {
       v1.forEach((String k2, ResponseDetails v2) {
         _responses[k1] = {k2: v2.response};
       });
     });
-    return ResponsesDto._(
-      responses: _responses,
-    );
+    return ResponsesDto._(responses: _responses, userId: userId);
   }
 
   factory ResponsesDto.fromFirestore(DocumentSnapshot doc) {
@@ -51,12 +51,14 @@ class ResponsesDto {
     return ResponsesDto._(
       id: id ?? this.id,
       responses: responses ?? this.responses,
+      userId: userId ?? this.userId,
     );
   }
 
   const ResponsesDto._({
     this.id,
     @required this.responses,
+    @required this.userId,
   });
 }
 
@@ -65,7 +67,14 @@ extension ContentCompletionDtoX on ResponsesDto {
     return Responses(
       id: this.id,
       responses: this.responses,
+      userId: this.userId,
     );
   }
-}
 
+  Map<String, dynamic> toFirestore() {
+    return {
+      "user_id": this.userId,
+      "response": this.responses,
+    };
+  }
+}

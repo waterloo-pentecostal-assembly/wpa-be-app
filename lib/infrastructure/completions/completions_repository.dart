@@ -54,14 +54,15 @@ class CompletionsRepository extends ICompletionsRepository {
     String completionId,
     Responses responses,
   }) async {
-    ResponsesDto responsesDto = ResponsesDto.fromDomain(responses.responses);
+    final LocalUser user = getIt<LocalUser>();
+    Map<String, dynamic> responsesForFirestore = ResponsesDto.fromDomain(responses.responses, user.id).toFirestore();
 
     try {
       CollectionReference responseCollection = _completionsCollection.doc(completionId).collection("responses");
       if (responses.id != null) {
-        await responseCollection.doc(responsesDto.id).set(responsesDto.responses);
+        await responseCollection.doc(responses.id).set(responsesForFirestore);
       } else {
-        await responseCollection.add(responsesDto.responses);
+        await responseCollection.add(responsesForFirestore);
       }
     } catch (e) {
       _firebaseFirestoreService.handleException(e);

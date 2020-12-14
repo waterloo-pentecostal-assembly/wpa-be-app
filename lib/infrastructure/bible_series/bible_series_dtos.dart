@@ -103,7 +103,7 @@ extension BibleSeriesDtoX on BibleSeriesDto {
 }
 
 class SeriesContentSnippetDto {
-  final Map<String, dynamic> contentTypes;
+  final List<dynamic> contentTypes;
   final Timestamp date;
 
   factory SeriesContentSnippetDto.fromJson(Map<String, dynamic> json) {
@@ -131,12 +131,13 @@ class SeriesContentSnippetDto {
 extension SeriesContentSnippetDtoX on SeriesContentSnippetDto {
   SeriesContentSnippet toDomain() {
     List<AvailableContentType> availableContentTypes = [];
-    this.contentTypes.forEach((key, value) {
-      final SeriesContentType newKey = contentTypeMapper(key);
-      if (newKey != null) {
+    this.contentTypes.forEach((element) {
+      final SeriesContentType seriesContentType = contentTypeMapper(findOrThrowException(element, 'content_type'));
+      final String seriesContentId = findOrThrowException(element, 'content_id');
+      if (seriesContentType != null) {
         availableContentTypes.add(AvailableContentType(
-          seriesContentType: newKey,
-          contentId: value,
+          seriesContentType: seriesContentType,
+          contentId: seriesContentId,
         ));
       }
     });

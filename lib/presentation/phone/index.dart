@@ -13,6 +13,8 @@ import 'home/home_page.dart';
 import 'notifications/notifications_page.dart';
 import 'profile/profile.dart';
 
+// See here to custom icons: https://medium.com/codechai/how-to-use-custom-icons-in-flutter-834a079d977
+
 class IndexPage extends StatelessWidget {
   final List<IIndexedPage> indexedPages = [
     HomePage(navigatorKey: GlobalKey()),

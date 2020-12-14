@@ -226,7 +226,8 @@ _signUpSuccessAlert(BuildContext context, String emailAddress) {
   Alert(
     context: context,
     title: "Registration Successful!",
-    desc: "Please follow steps sent to $emailAddress to verify your account before signing in.",
+    desc: "Once your account is validated, a confirmation will be sent to $emailAddress",
+    // desc: "Please follow steps sent to $emailAddress to verify your account before signing in.",
     buttons: [
       DialogButton(
         child: Text(

@@ -20,31 +20,34 @@ class NotificationSettingsService implements INotificationSettingsService {
 
   @override
   Future<void> subscribeToDailyEngagementReminder() async {
-    try {
-      // Add subscription to FirebaseMessaging
-      await _firebaseMessagingService.subscribeToTopic(kDailyEngagementReminderTopic);
-    } catch (e) {
-      throw NotificationSettingsException(
-        code: NotificationSettingsExceptionCode.UNABLE_TO_SUBSCRIBE,
-        message: "Unable to subscribe to daily engagement reminders",
-        details: e,
-      );
-    }
+    // try {
+    //   // Add subscription to FirebaseMessaging
+    //   await _firebaseMessagingService.subscribeToTopic(kDailyEngagementReminderTopic);
+    // } catch (e) {
+    //   throw NotificationSettingsException(
+    //     code: NotificationSettingsExceptionCode.UNABLE_TO_SUBSCRIBE,
+    //     message: "Unable to subscribe to daily engagement reminders",
+    //     details: e,
+    //   );
+    // }
+    // FCM topic subscription handled by Firebase Functions
     _setNotificationSetting({"daily_engagement_reminder": true});
   }
 
   @override
   Future<void> unsubscribeFromDailyEngagementReminder() async {
-    try {
-      // Remove subscription from FirebaseMessaging
-      await _firebaseMessagingService.unsubscribeFromTopic(kDailyEngagementReminderTopic);
-    } catch (e) {
-      throw NotificationSettingsException(
-        code: NotificationSettingsExceptionCode.UNABLE_TO_UNSUBSCRIBE,
-        message: "Unable to unsubscribe from daily engagement reminders",
-        details: e,
-      );
-    }
+    // try {
+    //   // Remove subscription from FirebaseMessaging
+    //   await _firebaseMessagingService.unsubscribeFromTopic(kDailyEngagementReminderTopic);
+    // } catch (e) {
+    //   throw NotificationSettingsException(
+    //     code: NotificationSettingsExceptionCode.UNABLE_TO_UNSUBSCRIBE,
+    //     message: "Unable to unsubscribe from daily engagement reminders",
+    //     details: e,
+    //   );
+    // }
+
+    // FCM topic unsubscription handled by Firebase Functions
     _setNotificationSetting({"daily_engagement_reminder": false});
   }
 

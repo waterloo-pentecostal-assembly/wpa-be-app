@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/app/app_config.dart';
 
 import '../../../application/bible_series/bible_series_bloc.dart';
 import '../../../application/navigation_bar/navigation_bar_bloc.dart';
@@ -76,6 +77,9 @@ class HomeIndex extends StatelessWidget {
                   );
               },
             ),
+            Container(
+              child: Text(getIt<AppConfig>().appEnvironment.toString()),
+            )
           ],
         ),
       ),
