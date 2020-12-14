@@ -9,7 +9,7 @@ import '../../domain/authentication/entities.dart';
 import '../../domain/authentication/interfaces.dart';
 import '../../domain/user_profile/exceptions.dart';
 import '../../domain/user_profile/interfaces.dart';
-import '../../injection.dart';
+import '../../app/injection.dart';
 import '../../services/firebase_storage_service.dart';
 
 class UserProfileRepository implements IUserProfileRepository {

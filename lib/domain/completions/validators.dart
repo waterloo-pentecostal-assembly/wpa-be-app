@@ -1,4 +1,4 @@
-import '../../constants.dart';
+import '../../app/constants.dart';
 import '../common/exceptions.dart';
 
 validateResponseBody(String responseBody) {

@@ -5,7 +5,7 @@ import 'package:equatable/equatable.dart';
 
 import '../../domain/authentication/entities.dart';
 import '../../domain/authentication/interfaces.dart';
-import '../../injection.dart';
+import '../../app/injection.dart';
 
 part 'authentication_event.dart';
 part 'authentication_state.dart';

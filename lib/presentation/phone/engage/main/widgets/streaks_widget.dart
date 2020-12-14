@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../application/achievements/achievements_bloc.dart';
 import '../../../../../domain/achievements/entities.dart';
-import '../../../../../injection.dart';
+import '../../../../../app/injection.dart';
 import '../../../../common/loader.dart';
 import '../../../common/text_factory.dart';
 

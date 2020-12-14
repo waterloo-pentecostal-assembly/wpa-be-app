@@ -5,7 +5,7 @@ import 'package:wpa_app/app/app_config.dart';
 import '../../../application/bible_series/bible_series_bloc.dart';
 import '../../../application/navigation_bar/navigation_bar_bloc.dart';
 import '../../../domain/authentication/entities.dart';
-import '../../../injection.dart';
+import '../../../app/injection.dart';
 import '../common/interfaces.dart';
 
 class HomePage extends IIndexedPage {

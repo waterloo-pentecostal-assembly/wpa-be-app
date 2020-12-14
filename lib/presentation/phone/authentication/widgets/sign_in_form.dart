@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../application/authentication/sign_in/sign_in_bloc.dart';
 import '../../../../application/navigation_bar/navigation_bar_bloc.dart';
-import '../../../../constants.dart';
+import '../../../../app/constants.dart';
 import '../../../common/loader.dart';
 
 class SignInForm extends StatelessWidget {

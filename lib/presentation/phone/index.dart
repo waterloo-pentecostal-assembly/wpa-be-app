@@ -3,8 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../application/navigation_bar/navigation_bar_bloc.dart';
-import '../../constants.dart';
-import '../../injection.dart';
+import '../../app/constants.dart';
+import '../../app/injection.dart';
 import '../common/toast_message.dart';
 import 'common/interfaces.dart';
 import 'engage/main/engage.dart';

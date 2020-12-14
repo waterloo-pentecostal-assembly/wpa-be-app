@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../constants.dart';
+import '../../app/constants.dart';
 import '../../domain/authentication/entities.dart';
 import '../../domain/prayer_requests/entities.dart';
 import '../../domain/prayer_requests/exceptions.dart';
 import '../../domain/prayer_requests/interfaces.dart';
-import '../../injection.dart';
+import '../../app/injection.dart';
 import '../../services/firebase_firestore_service.dart';
 import '../../services/firebase_storage_service.dart';
 import 'prayer_requests_dto.dart';

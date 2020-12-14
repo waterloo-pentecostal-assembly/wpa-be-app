@@ -4,9 +4,9 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:wpa_app/presentation/common/toast_message.dart';
 
 import '../../../../../application/media/media_bloc.dart';
-import '../../../../../constants.dart';
+import '../../../../../app/constants.dart';
 import '../../../../../domain/media/entities.dart';
-import '../../../../../injection.dart';
+import '../../../../../app/injection.dart';
 import '../../../common/text_factory.dart';
 
 class MediaWidget extends StatelessWidget {

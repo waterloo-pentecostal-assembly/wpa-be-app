@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../injection.dart';
+import '../../../app/injection.dart';
 import '../common/interfaces.dart';
 import '../common/text_factory.dart';
 

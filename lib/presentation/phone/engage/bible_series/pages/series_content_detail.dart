@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../application/bible_series/bible_series_bloc.dart';
-import '../../../../../injection.dart';
+import '../../../../../app/injection.dart';
 
 class ContentDetailPage extends StatelessWidget {
   final String seriesContentId;

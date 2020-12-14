@@ -8,7 +8,7 @@ import '../../../domain/authentication/entities.dart';
 import '../../../domain/authentication/interfaces.dart';
 import '../../../domain/authentication/value_objects.dart';
 import '../../../domain/common/exceptions.dart';
-import '../../../injection.dart';
+import '../../../app/injection.dart';
 
 part 'sign_in_event.dart';
 part 'sign_in_state.dart';

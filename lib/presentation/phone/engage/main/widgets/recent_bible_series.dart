@@ -4,9 +4,9 @@ import 'package:intl/intl.dart';
 import 'package:wpa_app/presentation/common/date_formatter.dart';
 
 import '../../../../../application/bible_series/bible_series_bloc.dart';
-import '../../../../../constants.dart';
+import '../../../../../app/constants.dart';
 import '../../../../../domain/bible_series/entities.dart';
-import '../../../../../injection.dart';
+import '../../../../../app/injection.dart';
 import '../../../common/text_factory.dart';
 
 class RecentBibleSeriesWidget extends StatelessWidget {

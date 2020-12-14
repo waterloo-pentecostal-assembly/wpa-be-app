@@ -4,7 +4,7 @@ import '../../domain/authentication/entities.dart';
 import '../../domain/completions/entities.dart';
 import '../../domain/completions/exceptions.dart';
 import '../../domain/completions/interfaces.dart';
-import '../../injection.dart';
+import '../../app/injection.dart';
 import '../../services/firebase_firestore_service.dart';
 import '../common/helpers.dart';
 import 'completions_dto.dart';

@@ -1,11 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../constants.dart';
+import '../../app/constants.dart';
 import '../../domain/authentication/entities.dart';
 import '../../domain/notification_settings/entities.dart';
 import '../../domain/notification_settings/exceptions.dart';
 import '../../domain/notification_settings/interfaces.dart';
-import '../../injection.dart';
+import '../../app/injection.dart';
 import '../../services/firebase_firestore_service.dart';
 import '../../services/firebase_messaging_service.dart';
 import 'notification_settings_dto.dart';

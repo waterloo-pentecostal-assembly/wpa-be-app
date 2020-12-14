@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../application/prayer_requests/prayer_requests_bloc.dart';
-import '../../../../../injection.dart';
+import '../../../../../app/injection.dart';
 import '../../../common/text_factory.dart';
 import '../widgets/new_prayer_request.dart';
 import 'all_prayer_requests.dart';

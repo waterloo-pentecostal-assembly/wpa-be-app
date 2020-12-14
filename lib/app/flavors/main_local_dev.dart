@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:wpa_app/app/app_config.dart';
 
-import '../../injection.dart';
+import '../injection.dart';
 import '../app.dart';
 
 void main() async {

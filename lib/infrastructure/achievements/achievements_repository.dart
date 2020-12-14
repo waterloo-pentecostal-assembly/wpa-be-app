@@ -3,7 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/achievements/entities.dart';
 import '../../domain/achievements/interfaces.dart';
 import '../../domain/authentication/entities.dart';
-import '../../injection.dart';
+import '../../app/injection.dart';
 import '../../services/firebase_firestore_service.dart';
 import 'achievements_dto.dart';
 

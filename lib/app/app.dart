@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../application/authentication/authentication_bloc.dart';
 import '../application/navigation_bar/navigation_bar_bloc.dart';
-import '../injection.dart';
+import 'injection.dart';
 import '../presentation/common/loader.dart';
 import '../presentation/phone/authentication/password_reset_page.dart';
 import '../presentation/phone/authentication/sign_in_page.dart';

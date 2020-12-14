@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../application/prayer_requests/prayer_requests_bloc.dart';
-import '../../../../../constants.dart';
+import '../../../../../app/constants.dart';
 import '../../../../../domain/prayer_requests/entities.dart';
-import '../../../../../injection.dart';
+import '../../../../../app/injection.dart';
 import '../../../../common/toast_message.dart';
 import '../../../common/text_factory.dart';
 import '../../../common/helpers.dart';

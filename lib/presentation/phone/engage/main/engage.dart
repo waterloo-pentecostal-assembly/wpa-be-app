@@ -5,7 +5,7 @@ import '../../../../application/achievements/achievements_bloc.dart';
 import '../../../../application/bible_series/bible_series_bloc.dart';
 import '../../../../application/media/media_bloc.dart';
 import '../../../../application/prayer_requests/prayer_requests_bloc.dart';
-import '../../../../injection.dart';
+import '../../../../app/injection.dart';
 import '../../common/text_factory.dart';
 import '../../common/interfaces.dart';
 import '../bible_series/pages/all_bible_series.dart';
