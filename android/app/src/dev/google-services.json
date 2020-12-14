@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:744695216061:android:cc1e456000614d77da84d4",
+        "mobilesdk_app_id": "1:744695216061:android:7c3001ea219a22c5da84d4",
         "android_client_info": {
-          "package_name": "church.wpa.beappdev"
+          "package_name": "church.wpa.beapp.dev"
         }
       },
       "oauth_client": [
@@ -31,10 +31,10 @@
               "client_type": 3
             },
             {
-              "client_id": "744695216061-ho142ekcug8aj03a0lhk1kip3ie0cjeo.apps.googleusercontent.com",
+              "client_id": "744695216061-7auqqenfjnhkiqi1u2tm7r1i4aqh8is3.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "church.wpa.be-app-dev"
+                "bundle_id": "church.wpa.beapp.dev"
               }
             }
           ]

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -66,8 +68,15 @@ void initializeInjections({
     FirebaseFirestore firebaseFirestoreInstance = FirebaseFirestore.instance;
 
     if (useLocalFirestore) {
+      String host = 'localhost';
+      String port = '8080';
+
+      if (Platform.isAndroid) {
+        host = '10.0.2.2';
+      }
+
       firebaseFirestoreInstance.settings = Settings(
-        host: 'localhost:8080',
+        host: '$host:$port',
         sslEnabled: false,
         persistenceEnabled: false,
       );
