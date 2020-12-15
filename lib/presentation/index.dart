@@ -2,11 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../application/navigation_bar/navigation_bar_bloc.dart';
 import '../app/constants.dart';
 import '../app/injection.dart';
-import 'common/toast_message.dart';
+import '../application/navigation_bar/navigation_bar_bloc.dart';
 import 'common/interfaces.dart';
+import 'common/text_factory.dart';
+import 'common/toast_message.dart';
 import 'engage/main/engage.dart';
 import 'give/give_page.dart';
 import 'home/home_page.dart';
@@ -121,54 +122,31 @@ class NavigationBar extends StatelessWidget {
         bottomNavigationBar: BottomNavigationBar(
           selectedItemColor: kWpaBlue.withOpacity(0.6),
           unselectedItemColor: Colors.grey[500],
+          selectedLabelStyle: getIt<TextFactory>().regularTextStyle(fontSize: 12),
+          unselectedLabelStyle: getIt<TextFactory>().liteTextStyle(fontSize: 10),
           type: BottomNavigationBarType.fixed,
           currentIndex: tabIndex,
           onTap: (int index) => handleOnTap(context, index),
           items: [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
-              title: Text(
-                "HOME",
-                style: TextStyle(
-                  fontSize: 10,
-                ),
-              ),
+              label: 'HOME',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.class_),
-              title: Text(
-                "ENGAGE",
-                style: TextStyle(
-                  fontSize: 10,
-                ),
-              ),
+              label: 'ENGAGE',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.favorite),
-              title: Text(
-                "GIVE",
-                style: TextStyle(
-                  fontSize: 10,
-                ),
-              ),
+              label: 'GIVE',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.notifications),
-              title: Text(
-                "NOTIFICATIONS",
-                style: TextStyle(
-                  fontSize: 10,
-                ),
-              ),
+              label: 'NOTIFICATIONS',
             ),
             BottomNavigationBarItem(
               icon: Icon(Icons.person),
-              title: Text(
-                "PROFILE",
-                style: TextStyle(
-                  fontSize: 10,
-                ),
-              ),
+              label: 'PROFILE',
             ),
           ],
         ),
