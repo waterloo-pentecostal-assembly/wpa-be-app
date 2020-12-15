@@ -3,7 +3,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../app/constants.dart';
 import '../../app/injection.dart';
-import '../phone/common/text_factory.dart';
+import 'text_factory.dart';
 
 class ToastMessage {
   ToastMessage.showErrorToast(String errorMessage, BuildContext context) {

@@ -6,11 +6,11 @@ import '../application/authentication/authentication_bloc.dart';
 import '../application/navigation_bar/navigation_bar_bloc.dart';
 import 'injection.dart';
 import '../presentation/common/loader.dart';
-import '../presentation/phone/authentication/password_reset_page.dart';
-import '../presentation/phone/authentication/sign_in_page.dart';
-import '../presentation/phone/authentication/sign_up_page.dart';
-import '../presentation/phone/index.dart';
-import '../presentation/phone/splash/splash_page.dart';
+import '../presentation/authentication/password_reset_page.dart';
+import '../presentation/authentication/sign_in_page.dart';
+import '../presentation/authentication/sign_up_page.dart';
+import '../presentation/index.dart';
+import '../presentation/splash/splash_page.dart';
 import '../services/firebase_messaging_service.dart';
 
 class App extends StatelessWidget {

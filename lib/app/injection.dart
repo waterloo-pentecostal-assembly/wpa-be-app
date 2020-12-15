@@ -35,7 +35,7 @@ import '../infrastructure/media/media_repository.dart';
 import '../infrastructure/notification_settings/notification_settings_service.dart';
 import '../infrastructure/prayer_requests/prayer_requests_repository.dart';
 import '../infrastructure/user_profile/user_profile_repository.dart';
-import '../presentation/phone/common/text_factory.dart';
+import '../presentation/common/text_factory.dart';
 import '../services/firebase_firestore_service.dart';
 import '../services/firebase_messaging_service.dart';
 import '../services/firebase_storage_service.dart';
