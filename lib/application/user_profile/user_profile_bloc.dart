@@ -5,6 +5,8 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:wpa_app/app/injection.dart';
+import 'package:wpa_app/domain/authentication/entities.dart';
 import 'package:wpa_app/domain/user_profile/interfaces.dart';
 
 part 'user_profile_event.dart';
@@ -29,8 +31,35 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     IUserProfileRepository userProfileRepository,
   ) async* {
     try {
-      UploadTask uploadTask = userProfileRepository.uploadProfilePhoto(event.profilePhoto);
+      final LocalUser user = getIt<LocalUser>();
+
+      UploadTask uploadTask = userProfileRepository.uploadProfilePhoto(event.profilePhoto, user.id);
       yield NewProfilePhotoUploadStarted(uploadTask: uploadTask);
+
+      TaskSnapshot data = await uploadTask;
+
+      // build ptofile_photo_gs_location
+      final String profilePhotoGsLocation = 'gs://${data.ref.bucket}/${data.ref.fullPath}';
+
+      // Update user collection
+      await userProfileRepository.updateUserCollection(
+        {
+          "profile_photo_gs_location": profilePhotoGsLocation,
+        },
+        user.id,
+      );
+
+      // update local user
+      await userProfileRepository.updateLocalUser();
+
+      // yield complete
+      yield NewProfilePhotoUploadComplete();
+
+      // delete old profile photo if it exists
+      if (user.profilePhotoGsLocation != null) {
+        // fire and forget
+        userProfileRepository.deleteOldProfilePhoto(user.profilePhotoGsLocation, user.id);
+      }
     } catch (e) {
       yield UploadProfilePhotoError(message: "Error uploading photo");
     }

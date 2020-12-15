@@ -1,17 +1,18 @@
 import 'dart:io';
 
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../../app/constants.dart';
+import '../../../app/injection.dart';
 import '../../../application/authentication/authentication_bloc.dart';
 import '../../../application/notification_settings/notification_settings_bloc.dart';
 import '../../../application/user_profile/user_profile_bloc.dart';
-import '../../../app/constants.dart';
 import '../../../domain/authentication/entities.dart';
-import '../../../app/injection.dart';
 import '../../common/toast_message.dart';
 import '../common/interfaces.dart';
 import '../common/platform_switch.dart';
@@ -117,45 +118,98 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
 
   @override
   Widget build(BuildContext context) {
-    LocalUser localUser = getIt<LocalUser>();
+    // LocalUser localUser = getIt<LocalUser>();
+
     double profilePhotoDiameter =
         150 > MediaQuery.of(context).size.width * 0.5 ? MediaQuery.of(context).size.width * 0.5 : 150;
 
-    return Column(
-      children: [
-        ClipOval(
-          child: Stack(
-            alignment: AlignmentDirectional.bottomCenter,
-            children: [
-              Container(
-                height: profilePhotoDiameter,
-                width: profilePhotoDiameter,
-                child: (localUser.profilePhotoUrl == null)
-                    ? Image.asset(kProfilePhotoPlaceholder)
-                    : FadeInImage.assetNetwork(
-                        fit: BoxFit.cover,
-                        placeholder: kProfilePhotoPlaceholder,
-                        image: localUser.profilePhotoUrl,
-                      ),
-              ),
-              GestureDetector(
-                onTap: selectNewProfileImage,
-                child: Container(
-                  color: Colors.black.withOpacity(0.5),
-                  width: profilePhotoDiameter,
-                  height: 30,
-                  child: Container(
-                    alignment: Alignment.center,
-                    child: getIt<TextFactory>().regular('EDIT', color: Colors.white, fontSize: 12.0),
+    return BlocConsumer<UserProfileBloc, UserProfileState>(
+      listener: (context, UserProfileState state) {},
+      builder: (context, UserProfileState state) {
+        if (state is NewProfilePhotoUploadStarted) {
+          UploadTask uploadTask = state.uploadTask;
+          LocalUser localUser = getIt<LocalUser>();
+
+          return StreamBuilder(
+            stream: uploadTask.snapshotEvents,
+            builder: (context, AsyncSnapshot<TaskSnapshot> snapshot) {
+              int bytesTransferred = snapshot?.data?.bytesTransferred;
+              int totalBytes = snapshot?.data?.totalBytes;
+              int progressPercent = 0;
+
+              if (bytesTransferred != null && totalBytes != null) {
+                progressPercent = ((bytesTransferred / totalBytes) * 100).ceil();
+              }
+
+              return Column(
+                children: [
+                  ClipOval(
+                    child: Stack(
+                      alignment: AlignmentDirectional.bottomCenter,
+                      children: [
+                        Container(
+                            height: profilePhotoDiameter,
+                            width: profilePhotoDiameter,
+                            child: Image.asset(kProfilePhotoPlaceholder)),
+                        Container(
+                          color: Colors.black.withOpacity(0.5),
+                          width: profilePhotoDiameter,
+                          height: 30,
+                          child: Container(
+                            alignment: Alignment.center,
+                            child:
+                                getIt<TextFactory>().regular('$progressPercent%', color: Colors.white, fontSize: 12.0),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                  SizedBox(height: 12),
+                  getIt<TextFactory>().regular(localUser.fullName)
+                ],
+              );
+            },
+          );
+        } else {
+          LocalUser localUser = getIt<LocalUser>();
+          return Column(
+            children: [
+              ClipOval(
+                child: Stack(
+                  alignment: AlignmentDirectional.bottomCenter,
+                  children: [
+                    Container(
+                      height: profilePhotoDiameter,
+                      width: profilePhotoDiameter,
+                      child: (localUser.profilePhotoUrl == null)
+                          ? Image.asset(kProfilePhotoPlaceholder)
+                          : FadeInImage.assetNetwork(
+                              fit: BoxFit.cover,
+                              placeholder: kProfilePhotoPlaceholder,
+                              image: localUser.profilePhotoUrl,
+                            ),
+                    ),
+                    GestureDetector(
+                      onTap: selectNewProfileImage,
+                      child: Container(
+                        color: Colors.black.withOpacity(0.5),
+                        width: profilePhotoDiameter,
+                        height: 30,
+                        child: Container(
+                          alignment: Alignment.center,
+                          child: getIt<TextFactory>().regular('EDIT', color: Colors.white, fontSize: 12.0),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
+              SizedBox(height: 12),
+              getIt<TextFactory>().regular(localUser.fullName)
             ],
-          ),
-        ),
-        SizedBox(height: 12),
-        getIt<TextFactory>().regular(localUser.fullName)
-      ],
+          );
+        }
+      },
     );
   }
 

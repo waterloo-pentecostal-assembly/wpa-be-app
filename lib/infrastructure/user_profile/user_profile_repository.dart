@@ -34,11 +34,11 @@ class UserProfileRepository implements IUserProfileRepository {
   }
 
   @override
-  UploadTask uploadProfilePhoto(File file) {
-    final LocalUser user = getIt<LocalUser>();
+  UploadTask uploadProfilePhoto(File file, String userId) {
+    // final LocalUser user = getIt<LocalUser>();
     String fileExt = path.extension(file.path);
-    String filePath = '/users/${user.id}/profile_photo/profile_photo_${DateTime.now()}$fileExt';
-    
+    String filePath = '/users/$userId/profile_photo/profile_photo_${DateTime.now()}$fileExt';
+
     try {
       return _firebaseStorageService.startFileUpload(filePath, file);
     } catch (e) {
@@ -47,6 +47,24 @@ class UserProfileRepository implements IUserProfileRepository {
         message: "Unable to upload image",
         details: e,
       );
+    }
+  }
+
+  @override
+  void deleteOldProfilePhoto(String gsUrl, String userId) async {
+    try {
+      await _firebaseStorageService.deleteFile(gsUrl);
+    } catch (e) {
+      //TODO: log somewhere for monitoring
+    }
+  }
+
+  @override
+  Future<void> updateUserCollection(Map<String, dynamic> data, String userId) {
+    try {
+      return _firestore.collection('users').doc(userId).update(data);
+    } catch (e) {
+      _firebaseFirestoreService.handleException(e);
     }
   }
 }

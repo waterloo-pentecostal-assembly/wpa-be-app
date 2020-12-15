@@ -71,6 +71,7 @@ enum FirebaseStorageExceptionCode {
   OBJECT_NOT_FOUND,
   UNAUTHORIZED,
   UNABLE_TO_START_UPLOAD,
+  UNABLE_TO_DELETE_FILE,
   UNKNOWN,
 }
 

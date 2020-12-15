@@ -51,4 +51,16 @@ class FirebaseStorageService {
       );
     }
   }
+
+  Future<void> deleteFile(String gsUrl) {
+    try {
+      return _firebaseStorage.refFromURL(gsUrl).delete();
+    } catch (e) {
+      throw FirebaseStorageException(
+        code: FirebaseStorageExceptionCode.UNABLE_TO_DELETE_FILE,
+        message: "Unable to delete file",
+        details: e,
+      );
+    }
+  }
 }

@@ -2,7 +2,7 @@ part of 'user_profile_bloc.dart';
 
 abstract class UserProfileState extends Equatable {
   const UserProfileState();
-  
+
   @override
   List<Object> get props => [];
 }
@@ -16,6 +16,11 @@ class NewProfilePhotoUploadStarted extends UserProfileState {
 
   @override
   List<Object> get props => [uploadTask];
+}
+
+class NewProfilePhotoUploadComplete extends UserProfileState {
+  @override
+  List<Object> get props => [];
 }
 
 class UploadProfilePhotoError extends UserProfileState {

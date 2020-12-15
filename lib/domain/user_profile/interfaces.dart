@@ -10,5 +10,10 @@ abstract class IUserProfileRepository {
   Future<LocalUser> updateLocalUser();
 
   /// Start the upload of a new profile photo
-  UploadTask uploadProfilePhoto(File file);
+  UploadTask uploadProfilePhoto(File file, String userId);
+
+  /// Add/Update given data in user collection
+  Future<void> updateUserCollection(Map<String, dynamic> data, String userId);
+
+  void deleteOldProfilePhoto(String gsLocation, String userId);
 }
