@@ -154,10 +154,14 @@ void main() {
       // arrange
       final SignInBloc bloc = SignInBloc(mockIAuthenticationFacade);
       LocalUser user = LocalUser(id: '184243aa-a087-4947-9be8-1c2dcaed941b');
+
+      // mock
       when(mockIAuthenticationFacade.signInWithEmailAndPassword(
         emailAddress: anyNamed('emailAddress'),
         password: anyNamed('password'),
       )).thenAnswer((_) async => user);
+
+      when(mockIAuthenticationFacade.deviceTokenExists(user.id)).thenAnswer((_) async => true);
 
       // act
       bloc

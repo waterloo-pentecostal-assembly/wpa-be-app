@@ -122,7 +122,7 @@ class NavigationBar extends StatelessWidget {
         bottomNavigationBar: BottomNavigationBar(
           selectedItemColor: kWpaBlue.withOpacity(0.6),
           unselectedItemColor: Colors.grey[500],
-          selectedLabelStyle: getIt<TextFactory>().regularTextStyle(fontSize: 12),
+          selectedLabelStyle: getIt<TextFactory>().regularTextStyle(fontSize: 11),
           unselectedLabelStyle: getIt<TextFactory>().liteTextStyle(fontSize: 10),
           type: BottomNavigationBarType.fixed,
           currentIndex: tabIndex,
