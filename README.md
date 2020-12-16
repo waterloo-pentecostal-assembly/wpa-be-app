@@ -37,3 +37,12 @@ Follow this guide if you are developing on a Mac
 - dart-import
 - Flutter
 - TODO Highlight
+
+
+## Setting up the dev environment 
+
+1. Go to console.firebase.com
+2. Click on wpa-be-ap-dev (you will need to request developer access to this project)
+3. Go to settings - general 
+4. Scroll to the "Your apps" section and download the `google-services.json` from the `wpa-be-app-dev-andriod` app 
+and the `GoogleService-info.plist` from the `wpa-be-app-dev-ios` app. 
