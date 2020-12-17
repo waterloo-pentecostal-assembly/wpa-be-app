@@ -27,6 +27,7 @@
 
 # Firebase related
 google-services.json
+GoogleService-info.plist
 
 # Flutter/Dart/Pub related
 **/doc/api/

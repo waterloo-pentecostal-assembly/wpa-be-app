@@ -3,21 +3,21 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>744695216061-7auqqenfjnhkiqi1u2tm7r1i4aqh8is3.apps.googleusercontent.com</string>
+	<string>755795301430-6fddj4gegjkg7bcq25bjn562o5srljg8.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.744695216061-7auqqenfjnhkiqi1u2tm7r1i4aqh8is3</string>
+	<string>com.googleusercontent.apps.755795301430-6fddj4gegjkg7bcq25bjn562o5srljg8</string>
 	<key>API_KEY</key>
-	<string>AIzaSyBrj3hYK_j01doU-1kE0H-FSndhCKgeXIQ</string>
+	<string>AIzaSyDVwqlxfx_JcsL6KajSVZ08CW_J0QlkpKs</string>
 	<key>GCM_SENDER_ID</key>
-	<string>744695216061</string>
+	<string>755795301430</string>
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>church.wpa.beapp.dev</string>
+	<string>church.wpa.beapp</string>
 	<key>PROJECT_ID</key>
-	<string>wpa-be-app-dev</string>
+	<string>wpa-be-app</string>
 	<key>STORAGE_BUCKET</key>
-	<string>wpa-be-app-dev.appspot.com</string>
+	<string>wpa-be-app.appspot.com</string>
 	<key>IS_ADS_ENABLED</key>
 	<false></false>
 	<key>IS_ANALYTICS_ENABLED</key>
@@ -29,6 +29,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:744695216061:ios:1a10e6305635d014da84d4</string>
+	<string>1:755795301430:ios:f869477219d6427d4fb497</string>
 </dict>
 </plist>

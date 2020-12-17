@@ -15,12 +15,13 @@ import '../services/firebase_messaging_service.dart';
 
 class App extends StatelessWidget {
   Future<void> initializeServices() async {
-    await getIt<FirebaseMessagingService>().initialize();
     await Firebase.initializeApp();
+    await getIt<FirebaseMessagingService>().initialize();
   }
 
   @override
   Widget build(BuildContext context) {
+    print('RUN APP');
     return FutureBuilder(
       future: initializeServices(),
       builder: (context, snapshot) {

@@ -12,6 +12,6 @@ void main() async {
         appEnvironment: AppEnvironment.DEV,
         title: 'WPA Bible Engagement DEV',
       ));
-
+      
   runApp(App());
 }

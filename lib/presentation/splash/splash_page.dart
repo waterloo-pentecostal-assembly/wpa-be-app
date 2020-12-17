@@ -12,8 +12,8 @@ class SplashPage extends StatelessWidget {
         if (state is Authenticated) {
           // Navigator.pushNamed(context, '/home');
           // NOTE: pushNamedAndRemoveUntil - Push the route with
-          // the given name onto the navigator that most tightly 
-          // encloses the given context, and then remove all the 
+          // the given name onto the navigator that most tightly
+          // encloses the given context, and then remove all the
           // previous routes until the predicate returns true.
 
           Navigator.pushNamedAndRemoveUntil(
