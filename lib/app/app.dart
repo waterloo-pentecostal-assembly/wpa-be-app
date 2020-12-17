@@ -21,7 +21,6 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('RUN APP');
     return FutureBuilder(
       future: initializeServices(),
       builder: (context, snapshot) {
