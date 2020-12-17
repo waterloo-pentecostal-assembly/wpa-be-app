@@ -1,36 +1,56 @@
 # WPA Bible Engagement App
 
-This is an app aimed at digitizing the bible engagement experience at WPA.
+A mobile application aimed at taking the bible engagement and church community experience at WPA into the digital realm.
 
-# Getting Started
-Some notes on things to install as a developer
-## Mac OSX
-Follow this guide if you are developing on a Mac
-1. Download the code in this repository using `git clone git@bitbucket.org:wpa-tdd/wpa-be-app.git`
-2. Open the resulting `wpa-be-app/ios` folder in Xcode
-3. In Xcode, go to the left-hand side folder directory and click on `Runner`, then in the top navigation bar click on `Signing & Capabilites`, then sign in with your apple account to sign the application.
-4. Download `flutter` and `dart` from [the flutter website](https://flutter.dev/docs/get-started/install/macos) to your `~/Downloads` folder by clicking the blue "flutter_macos_1.29.3-stable.zip" button.
-5. Unzip the zip file to get a "flutter" folder
-6. Move the flutter folder to somewhere on your system by running `mv ~/Downloads/flutter /usr/local/lib`
-7. Create a symbolic link to the flutter executable and dart executable by running `ln -s /usr/local/lib/flutter/bin/flutter /usr/local/bin/flutter` and `ln -s /usr/local/lib/flutter/bin/dart /usr/local/bin/dart`
-8. Ensure that your `PATH` variable includes `/usr/local/bin` by running `echo $PATH` (If it isn't listed, you can add it using `export PATH=$PATH:/usr/local/bin`)
-9. Test that flutter and dart are found by running `which flutter` and `which dart`
-10. Run `flutter clean` in the project directory (This can be done from the VSCode terminal)
-### iOS
-1. Ensure you have a clean output for the iOS relevant sections when you run `flutter doctor`. You most likely need to run the following commands:
-    - `sudo xcode-select --switch /Applications/Xcode.app/Contents/Developer`
-    - `sudo xcode-select -runFirstLaunch`
-2. Make sure you have cocoapods installed by running `which pod`, otherwise download it with `sudo gem install cocoapods`
-3. Run `flutter build ios` in the project directory
-4. You need to have Simulator downloaded, which you should get automatically when you download [Xcode from the App Store](https://apps.apple.com/us/app/xcode/id497799835?mt=12).
-5. If this is your first time running Xcode, you need to open it and accept the user license agreement.
-6. Now you can close Xcode, and open the Simulator by using Spotlight Search (CMD + Space) and typing "Simulator" and opening the application.
-7. With Simulator running and the device open on your screen, you can run `flutter run`.
-### Android
-1. TODO
+## Flutter Installation 
 
-# Notes to Developers 
-## Suggested VS Code Extensions 
+Follow instructions [here](https://flutter.dev/docs/get-started/install) for your operating system. If you are on Windows or Linux, ensure that you are able to run the Android Emulator. If you are on macOS, ensure that you are able to run both the Android Emulator and iOS Simulator. Once the installation is complete, run `flutter doctor` and ensure that there are no errors. 
+
+### Test setup with the default Flutter app
+
+1. Create a temporary folder somewhere on your system. 
+2. In the terminal, run `flutter create default-app`. 
+3. Once setup is complete, `cd default-app` and run `flutter run`. 
+4. Ensure that you are able to run the default app on an Android Emulator (and iOS simulator if you are on macOS).
+5. Delete the `default-app` once it runs as expected. 
+
+## Setting up the dev environment 
+
+1. Go to console.firebase.com
+2. Click on wpa-be-ap-dev (you will need to request developer access to this project)
+3. Go to settings - general 
+4. Scroll to the "Your apps" section and download the `google-services.json` from the `wpa-be-app-dev-android` app 
+and the `GoogleService-info.plist` from the `wpa-be-app-dev-ios` app. Save these for later.
+
+### Android Configuration 
+
+1. In the `android/app/src` folder, create folder called `dev` and place the `google-services.json` from step 4. in it. 
+
+
+### iOS Configuration 
+
+1. In Xcode, open the `ios/Runner.xcodeproj` project. 
+2. In the root `Runner` project, create a folder called `config`. In there, create another folder called `dev`. 
+3. Drag the `GoogleService-info.plist` from step 4. above into this folder. 
+
+
+### Starting the app
+
+There are currently two ways we can run the application in the development environment. 
+
+1. By connecting it to the remote Firebase instance (referred to as dev mode).
+
+> To do this, run `flutter run -t lib/app/flavors/main_dev.dart --flavor dev` in the `wpa-be-app` folder. 
+
+2. By connecting it to a local Firebase emulator (referred to as local_dev mode).
+
+> To do this, ensure that the location emulator is running and run `flutter run -t lib/app/flavors/main_local_dev.dart --flavor dev` in the `wpa-be-app` folder. 
+
+
+## Recommended Editor
+
+It is recommended to use VSCode, with the following extensions for this project. 
+
 - Pubspec Assist
 - bloc
 - Dart
@@ -38,11 +58,32 @@ Follow this guide if you are developing on a Mac
 - Flutter
 - TODO Highlight
 
+In the `.vscode/launch.json` file, add the following to be able to run and debug the app from within VSCode. 
 
-## Setting up the dev environment 
-
-1. Go to console.firebase.com
-2. Click on wpa-be-ap-dev (you will need to request developer access to this project)
-3. Go to settings - general 
-4. Scroll to the "Your apps" section and download the `google-services.json` from the `wpa-be-app-dev-andriod` app 
-and the `GoogleService-info.plist` from the `wpa-be-app-dev-ios` app. 
+```
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "wpa-be-app-dev",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/app/flavors/main_dev.dart",
+            "args": [
+                "--flavor",
+                "dev"
+            ]
+        },
+        {
+            "name": "wpa-be-app-local-dev",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/app/flavors/main_local_dev.dart",
+            "args": [
+                "--flavor",
+                "dev"
+            ]
+        }
+    ]
+}
+```

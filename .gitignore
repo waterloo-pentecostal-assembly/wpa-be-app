@@ -10,6 +10,7 @@
 .svn/
 *.lock
 .todo
+.github/*
 
 # vscode related
 *.vscode/
