@@ -45,7 +45,7 @@ class BibleSeries {
 
   @override
   String toString() {
-    return '''id: ${id}, title: $title, subtitle: $subTitle, imageUrl: $imageUrl, 
+    return '''id: $id, title: $title, subtitle: $subTitle, imageUrl: $imageUrl, 
               startDate: $startDate, endDate: $endDate, isActive: $isActive, 
               seriesContentSnippet: $seriesContentSnippet''';
   }

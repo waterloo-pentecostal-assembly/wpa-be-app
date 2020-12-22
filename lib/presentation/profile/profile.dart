@@ -51,6 +51,8 @@ class ProfilePage extends IIndexedPage {
                     return ProfilePageRoot();
                   case '/privacy_policy':
                     return PrivacyPolicyPage();
+                  default:
+                    return ProfilePageRoot();
                 }
               },
             );

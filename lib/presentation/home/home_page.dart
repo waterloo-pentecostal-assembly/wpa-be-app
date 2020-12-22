@@ -33,6 +33,8 @@ class HomePage extends IIndexedPage {
                 switch (settings.name) {
                   case '/':
                     return HomeIndex();
+                  default: 
+                    return HomeIndex();
                 }
               },
             );
@@ -73,9 +75,7 @@ class HomeIndex extends StatelessWidget {
               onPressed: () {
                 BlocProvider.of<NavigationBarBloc>(context)
                   ..add(
-                    NavigationBarEvent(
-                        tab: NavigationTabEnum.NOTIFICATIONS,
-                        route: '/notification_detail'),
+                    NavigationBarEvent(tab: NavigationTabEnum.NOTIFICATIONS, route: '/notification_detail'),
                   );
               },
             ),

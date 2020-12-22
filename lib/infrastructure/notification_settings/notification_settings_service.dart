@@ -1,16 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../app/constants.dart';
+import '../../app/injection.dart';
 import '../../domain/authentication/entities.dart';
 import '../../domain/notification_settings/entities.dart';
 import '../../domain/notification_settings/exceptions.dart';
 import '../../domain/notification_settings/interfaces.dart';
-import '../../app/injection.dart';
 import '../../services/firebase_firestore_service.dart';
 import '../../services/firebase_messaging_service.dart';
 import 'notification_settings_dto.dart';
 
 class NotificationSettingsService implements INotificationSettingsService {
+  // ignore: unused_field
   final FirebaseMessagingService _firebaseMessagingService;
   final FirebaseFirestoreService _firebaseFirestoreService;
   final FirebaseFirestore _firestore;
@@ -21,34 +21,11 @@ class NotificationSettingsService implements INotificationSettingsService {
 
   @override
   Future<void> subscribeToDailyEngagementReminder() async {
-    // try {
-    //   // Add subscription to FirebaseMessaging
-    //   await _firebaseMessagingService.subscribeToTopic(kDailyEngagementReminderTopic);
-    // } catch (e) {
-    //   throw NotificationSettingsException(
-    //     code: NotificationSettingsExceptionCode.UNABLE_TO_SUBSCRIBE,
-    //     message: "Unable to subscribe to daily engagement reminders",
-    //     details: e,
-    //   );
-    // }
-    // FCM topic subscription handled by Firebase Functions
     _setNotificationSetting({"daily_engagement_reminder": true});
   }
 
   @override
   Future<void> unsubscribeFromDailyEngagementReminder() async {
-    // try {
-    //   // Remove subscription from FirebaseMessaging
-    //   await _firebaseMessagingService.unsubscribeFromTopic(kDailyEngagementReminderTopic);
-    // } catch (e) {
-    //   throw NotificationSettingsException(
-    //     code: NotificationSettingsExceptionCode.UNABLE_TO_UNSUBSCRIBE,
-    //     message: "Unable to unsubscribe from daily engagement reminders",
-    //     details: e,
-    //   );
-    // }
-
-    // FCM topic unsubscription handled by Firebase Functions
     _setNotificationSetting({"daily_engagement_reminder": false});
   }
 
@@ -64,7 +41,6 @@ class NotificationSettingsService implements INotificationSettingsService {
 
   Future<void> _setNotificationSetting(
       Map<String, dynamic> notificationSetting) async {
-    // Future<void> unsubscribeFromDailyEngagementReminder(String notificationSettingsId) async {
     final LocalUser user = getIt<LocalUser>();
 
     // Should always be available.  This is just a fail-safe

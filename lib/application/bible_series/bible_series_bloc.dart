@@ -4,7 +4,6 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
-import '../../app/constants.dart';
 import '../../domain/bible_series/entities.dart';
 import '../../domain/bible_series/interfaces.dart';
 import '../../domain/common/exceptions.dart';
