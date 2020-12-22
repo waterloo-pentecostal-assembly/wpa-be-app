@@ -15,7 +15,8 @@ class FirebaseStorageService {
     }
 
     try {
-      String downloadUrl = await _firebaseStorage.refFromURL(gsUrl).getDownloadURL();
+      String downloadUrl =
+          await _firebaseStorage.refFromURL(gsUrl).getDownloadURL();
       return downloadUrl;
     } catch (e) {
       if (e.code == 'object-not-found') {

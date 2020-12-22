@@ -44,9 +44,14 @@ class PasswordResetForm extends StatelessWidget {
                     ),
                     child: Column(
                       children: <Widget>[
-                        if (BlocProvider.of<PasswordResetBloc>(context).state.passwordResetError != null) ...{
+                        if (BlocProvider.of<PasswordResetBloc>(context)
+                                .state
+                                .passwordResetError !=
+                            null) ...{
                           Text(
-                            BlocProvider.of<PasswordResetBloc>(context).state.passwordResetError,
+                            BlocProvider.of<PasswordResetBloc>(context)
+                                .state
+                                .passwordResetError,
                             style: TextStyle(
                               color: kErrorTextColor,
                             ),
@@ -77,11 +82,19 @@ class PasswordResetForm extends StatelessWidget {
                                       child: TextFormField(
                                         validator: (_) {
                                           String emailAddressError =
-                                              BlocProvider.of<PasswordResetBloc>(context).state.emailAddressError;
-                                          return emailAddressError != '' ? emailAddressError : null;
+                                              BlocProvider.of<
+                                                          PasswordResetBloc>(
+                                                      context)
+                                                  .state
+                                                  .emailAddressError;
+                                          return emailAddressError != ''
+                                              ? emailAddressError
+                                              : null;
                                         },
                                         onChanged: (value) {
-                                          BlocProvider.of<PasswordResetBloc>(context).add(EmailChanged(email: value));
+                                          BlocProvider.of<PasswordResetBloc>(
+                                                  context)
+                                              .add(EmailChanged(email: value));
                                         },
                                         autocorrect: false,
                                         decoration: InputDecoration(
@@ -106,20 +119,28 @@ class PasswordResetForm extends StatelessWidget {
                                   height: 50,
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
-                                      colors: [Color.fromRGBO(0, 146, 214, 1), Color.fromRGBO(0, 146, 214, 0.7)],
+                                      colors: [
+                                        Color.fromRGBO(0, 146, 214, 1),
+                                        Color.fromRGBO(0, 146, 214, 0.7)
+                                      ],
                                     ),
                                   ),
                                   child: FlatButton(
                                     disabledColor: Colors.grey[400],
-                                    onPressed: state.submitting || !state.ispasswordResetFormValid
+                                    onPressed: state.submitting ||
+                                            !state.ispasswordResetFormValid
                                         ? null
-                                        : () => BlocProvider.of<PasswordResetBloc>(context).add(
+                                        : () =>
+                                            BlocProvider.of<PasswordResetBloc>(
+                                                    context)
+                                                .add(
                                               ResetPassword(),
                                             ),
                                     child: Center(
                                       child: Text(
                                         "RESET PASSWORD",
-                                        style: TextStyle(color: Colors.white, fontSize: 16),
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 16),
                                       ),
                                     ),
                                   ),

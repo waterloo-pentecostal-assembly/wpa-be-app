@@ -17,11 +17,13 @@ class UserProfileRepository implements IUserProfileRepository {
   final FirebaseFirestoreService _firebaseFirestoreService;
   final FirebaseStorageService _firebaseStorageService;
 
-  UserProfileRepository(this._firestore, this._firebaseFirestoreService, this._firebaseStorageService);
+  UserProfileRepository(this._firestore, this._firebaseFirestoreService,
+      this._firebaseStorageService);
 
   @override
   Future<LocalUser> updateLocalUser() async {
-    LocalUser localUser = await getIt<IAuthenticationFacade>().getSignedInUser();
+    LocalUser localUser =
+        await getIt<IAuthenticationFacade>().getSignedInUser();
 
     // Register user infomation with getIt to have access to it throughout the application
     if (getIt.isRegistered<LocalUser>()) {
@@ -37,7 +39,8 @@ class UserProfileRepository implements IUserProfileRepository {
   UploadTask uploadProfilePhoto(File file, String userId) {
     // final LocalUser user = getIt<LocalUser>();
     String fileExt = path.extension(file.path);
-    String filePath = '/users/$userId/profile_photo/profile_photo_${DateTime.now()}$fileExt';
+    String filePath =
+        '/users/$userId/profile_photo/profile_photo_${DateTime.now()}$fileExt';
 
     try {
       return _firebaseStorageService.startFileUpload(filePath, file);

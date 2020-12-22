@@ -37,7 +37,7 @@ class ValueObjectException implements BaseApplicationException {
   final dynamic details;
 
   /// Creates a [ValueObjectException] with the specified error [type],
-  /// [message], and optional error [details]. Default code is 
+  /// [message], and optional error [details]. Default code is
   /// [ValueObjectExceptionCode.INVALID_FORMAT]
   ValueObjectException({
     this.code = ValueObjectExceptionCode.INVALID_FORMAT,

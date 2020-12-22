@@ -92,7 +92,8 @@ Stream<SignInState> _mapSignInWithEmailAndPasswordToState(
   );
 
   try {
-    LocalUser localUser = await iAuthenticationFacade.signInWithEmailAndPassword(
+    LocalUser localUser =
+        await iAuthenticationFacade.signInWithEmailAndPassword(
       emailAddress: EmailAddress(state.emailAddress),
       password: Password(state.password),
     );
@@ -104,7 +105,8 @@ Stream<SignInState> _mapSignInWithEmailAndPasswordToState(
     getIt.registerLazySingleton(() => localUser);
 
     // Check if device token is saved
-    bool deviceTokenExists = await iAuthenticationFacade.deviceTokenExists(localUser.id);
+    bool deviceTokenExists =
+        await iAuthenticationFacade.deviceTokenExists(localUser.id);
 
     // If not, save it on login
     if (!deviceTokenExists) {

@@ -13,10 +13,12 @@ class NewPrayerRequestForm extends StatefulWidget {
   const NewPrayerRequestForm({Key key, @required this.entry}) : super(key: key);
 
   @override
-  _NewPrayerRequestFormState createState() => _NewPrayerRequestFormState(entry: entry);
+  _NewPrayerRequestFormState createState() =>
+      _NewPrayerRequestFormState(entry: entry);
 }
 
-class _NewPrayerRequestFormState extends State<NewPrayerRequestForm> with TickerProviderStateMixin {
+class _NewPrayerRequestFormState extends State<NewPrayerRequestForm>
+    with TickerProviderStateMixin {
   final OverlayEntry entry;
   final FocusNode _focusNode = FocusNode();
   final TextEditingController _textEditingController = TextEditingController();
@@ -37,7 +39,8 @@ class _NewPrayerRequestFormState extends State<NewPrayerRequestForm> with Ticker
       upperBound: 1,
     );
 
-    _animation = CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn);
+    _animation =
+        CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn);
 
     _controller.forward();
   }
@@ -52,7 +55,8 @@ class _NewPrayerRequestFormState extends State<NewPrayerRequestForm> with Ticker
   @override
   Widget build(BuildContext context) {
     return BlocProvider<NewPrayerRequestsBloc>(
-      create: (BuildContext context) => getIt<PrayerRequestsBloc>()..add(NewPrayerRequestStarted()),
+      create: (BuildContext context) =>
+          getIt<PrayerRequestsBloc>()..add(NewPrayerRequestStarted()),
       child: BlocBuilder<NewPrayerRequestsBloc, PrayerRequestsState>(
         builder: (BuildContext context, state) {
           if (state is NewPrayerRequestState) {
@@ -96,7 +100,8 @@ class _NewPrayerRequestFormState extends State<NewPrayerRequestForm> with Ticker
                           shrinkWrap: true,
                           children: [
                             Container(
-                              padding: EdgeInsets.only(top: 8, left: 8, right: 8),
+                              padding:
+                                  EdgeInsets.only(top: 8, left: 8, right: 8),
                               child: TextFormField(
                                 controller: _textEditingController,
                                 keyboardType: TextInputType.multiline,
@@ -104,25 +109,34 @@ class _NewPrayerRequestFormState extends State<NewPrayerRequestForm> with Ticker
                                 focusNode: _focusNode,
                                 autofocus: true,
                                 onChanged: (value) {
-                                  BlocProvider.of<NewPrayerRequestsBloc>(context)
-                                    ..add(NewPrayerRequestRequestChanged(prayerRequest: value.toString()));
+                                  BlocProvider.of<NewPrayerRequestsBloc>(
+                                      context)
+                                    ..add(NewPrayerRequestRequestChanged(
+                                        prayerRequest: value.toString()));
                                 },
                                 decoration: InputDecoration(
                                   border: InputBorder.none,
                                   hintText: 'Prayer Request',
-                                  hintStyle: getIt<TextFactory>().textFormFieldInputStyle().copyWith(
+                                  hintStyle: getIt<TextFactory>()
+                                      .textFormFieldInputStyle()
+                                      .copyWith(
                                         color: Colors.grey.shade300,
                                       ),
                                 ),
-                                style: getIt<TextFactory>().textFormFieldInputStyle(),
+                                style: getIt<TextFactory>()
+                                    .textFormFieldInputStyle(),
                               ),
                             ),
                             Container(
-                              padding: state.errorExist ? null : EdgeInsets.only(bottom: 16),
+                              padding: state.errorExist
+                                  ? null
+                                  : EdgeInsets.only(bottom: 16),
                               child: state.errorExist
                                   ? Text('')
-                                  : getIt<TextFactory>().textFormFieldInput(state.prayerRequestError,
-                                      color: kErrorTextColor.withOpacity(0.8), fontSize: 12.0),
+                                  : getIt<TextFactory>().textFormFieldInput(
+                                      state.prayerRequestError,
+                                      color: kErrorTextColor.withOpacity(0.8),
+                                      fontSize: 12.0),
                             ),
                             Wrap(
                               runSpacing: 16.0,
@@ -135,8 +149,11 @@ class _NewPrayerRequestFormState extends State<NewPrayerRequestForm> with Ticker
                                     AnonymousCheckbox(
                                       value: _isAnonymous,
                                       onChanged: (bool state) {
-                                        BlocProvider.of<NewPrayerRequestsBloc>(context)
-                                          ..add(NewPrayerRequestAnonymousChanged(isAnonymous: state));
+                                        BlocProvider.of<NewPrayerRequestsBloc>(
+                                            context)
+                                          ..add(
+                                              NewPrayerRequestAnonymousChanged(
+                                                  isAnonymous: state));
                                       },
                                     ),
                                     SizedBox(width: 4),
@@ -177,10 +194,13 @@ class AnonymousCheckbox extends StatefulWidget {
   final bool value;
   final Function(bool state) onChanged;
 
-  const AnonymousCheckbox({Key key, @required this.value, @required this.onChanged}) : super(key: key);
+  const AnonymousCheckbox(
+      {Key key, @required this.value, @required this.onChanged})
+      : super(key: key);
 
   @override
-  _AnonymousCheckboxState createState() => _AnonymousCheckboxState(value: value, onChanged: onChanged);
+  _AnonymousCheckboxState createState() =>
+      _AnonymousCheckboxState(value: value, onChanged: onChanged);
 }
 
 class _AnonymousCheckboxState extends State<AnonymousCheckbox> {

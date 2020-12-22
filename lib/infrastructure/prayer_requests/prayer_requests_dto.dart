@@ -19,7 +19,8 @@ class PrayerRequestsDto {
   final bool isAnonymous;
   final UserSnippetDto userSnippet;
 
-  factory PrayerRequestsDto.fromJson(Map<String, dynamic> json, String signedInUserId) {
+  factory PrayerRequestsDto.fromJson(
+      Map<String, dynamic> json, String signedInUserId) {
     List<String> _prayedBy = [];
     List<String> _reportedBy = [];
     List<dynamic> _prayedByFirestore = json['prayed_by'];
@@ -48,11 +49,13 @@ class PrayerRequestsDto {
       isMine: _userId == signedInUserId,
       date: findOrThrowException(json, 'date'),
       isAnonymous: findOrThrowException(json, 'is_anonymous'),
-      userSnippet: UserSnippetDto.fromFirestore(findOrThrowException(json, 'user_snippet')),
+      userSnippet: UserSnippetDto.fromFirestore(
+          findOrThrowException(json, 'user_snippet')),
     );
   }
 
-  factory PrayerRequestsDto.newRequestFromDomain(String request, bool isAnonymous, LocalUser user) {
+  factory PrayerRequestsDto.newRequestFromDomain(
+      String request, bool isAnonymous, LocalUser user) {
     return PrayerRequestsDto._(
       userId: user.id,
       request: request,
@@ -62,8 +65,10 @@ class PrayerRequestsDto {
     );
   }
 
-  factory PrayerRequestsDto.fromFirestore(DocumentSnapshot doc, String signedInUserId) {
-    return PrayerRequestsDto.fromJson(doc.data(), signedInUserId).copyWith(id: doc.id);
+  factory PrayerRequestsDto.fromFirestore(
+      DocumentSnapshot doc, String signedInUserId) {
+    return PrayerRequestsDto.fromJson(doc.data(), signedInUserId)
+        .copyWith(id: doc.id);
   }
 
   PrayerRequestsDto copyWith({
@@ -110,7 +115,8 @@ class PrayerRequestsDto {
 }
 
 extension PrayerRequestsDtoX on PrayerRequestsDto {
-  Future<PrayerRequest> toDomain(FirebaseStorageService firebaseStorageService) async {
+  Future<PrayerRequest> toDomain(
+      FirebaseStorageService firebaseStorageService) async {
     return PrayerRequest(
       id: this.id,
       date: this.date,
@@ -178,9 +184,11 @@ class UserSnippetDto {
 }
 
 extension UserSnippetDtoX on UserSnippetDto {
-  Future<UserSnippet> toDomain(FirebaseStorageService firebaseStorageService) async {
+  Future<UserSnippet> toDomain(
+      FirebaseStorageService firebaseStorageService) async {
     // Convert GS Location to Download URL
-    String profilePhotoUrl = await firebaseStorageService.getDownloadUrl(this.profilePhotoGsLocation);
+    String profilePhotoUrl = await firebaseStorageService
+        .getDownloadUrl(this.profilePhotoGsLocation);
 
     return UserSnippet(
       firstName: this.firstName,

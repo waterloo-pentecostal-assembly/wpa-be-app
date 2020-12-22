@@ -9,7 +9,7 @@ abstract class MediaEvent extends Equatable {
 
 class AvailableMediaRequested extends MediaEvent {
   const AvailableMediaRequested();
-  
+
   @override
   List<Object> get props => [];
 }

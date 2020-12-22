@@ -36,7 +36,8 @@ void main() {
 
   String validPassword = 'valid-password';
   String invalidPassword = 'inval';
-  String invalidPasswordErrorMessage = 'Password must be at least 8 characters.';
+  String invalidPasswordErrorMessage =
+      'Password must be at least 8 characters.';
 
   setUp(() {
     mockIAuthenticationFacade = MockIAuthenticationFacade();
@@ -48,9 +49,12 @@ void main() {
       build: () {
         return SignInBloc(mockIAuthenticationFacade);
       },
-      act: (SignInBloc bloc) => bloc.add(PasswordChanged(password: invalidPassword)),
+      act: (SignInBloc bloc) =>
+          bloc.add(PasswordChanged(password: invalidPassword)),
       expect: [
-        signInStateBuilder(password: invalidPassword, passwordError: invalidPasswordErrorMessage),
+        signInStateBuilder(
+            password: invalidPassword,
+            passwordError: invalidPasswordErrorMessage),
       ],
     );
 
@@ -59,7 +63,8 @@ void main() {
       build: () {
         return SignInBloc(mockIAuthenticationFacade);
       },
-      act: (SignInBloc bloc) => bloc.add(PasswordChanged(password: validPassword)),
+      act: (SignInBloc bloc) =>
+          bloc.add(PasswordChanged(password: validPassword)),
       expect: [
         signInStateBuilder(password: validPassword),
       ],
@@ -74,7 +79,9 @@ void main() {
       },
       act: (SignInBloc bloc) => bloc.add(EmailChanged(email: invalidEmail)),
       expect: [
-        signInStateBuilder(emailAddress: invalidEmail, emailAddressError: invalidEmailErrorMessage),
+        signInStateBuilder(
+            emailAddress: invalidEmail,
+            emailAddressError: invalidEmailErrorMessage),
       ],
     );
 
@@ -91,32 +98,44 @@ void main() {
   });
 
   group('SignInWithEmailAndPassword', () {
-    test('Should not be able to sign in if email is invalid and password is valid', () {
+    test(
+        'Should not be able to sign in if email is invalid and password is valid',
+        () {
       // arrange
       final SignInBloc bloc = SignInBloc(mockIAuthenticationFacade);
 
       // act
-      bloc..add(EmailChanged(email: invalidEmail))..add(PasswordChanged(password: validPassword));
+      bloc
+        ..add(EmailChanged(email: invalidEmail))
+        ..add(PasswordChanged(password: validPassword));
 
       // assert
       expectLater(
         bloc,
         emitsInOrder([
-          signInStateBuilder(emailAddress: invalidEmail, emailAddressError: invalidEmailErrorMessage),
           signInStateBuilder(
-              emailAddress: invalidEmail, emailAddressError: invalidEmailErrorMessage, password: validPassword),
+              emailAddress: invalidEmail,
+              emailAddressError: invalidEmailErrorMessage),
+          signInStateBuilder(
+              emailAddress: invalidEmail,
+              emailAddressError: invalidEmailErrorMessage,
+              password: validPassword),
         ]),
       ).then((_) {
         expect(bloc.state.isSignInFormValid, false);
       });
     });
 
-    test('Should not be able to sign in if email is valid and password is invalid', () {
+    test(
+        'Should not be able to sign in if email is valid and password is invalid',
+        () {
       // arrange
       final SignInBloc bloc = SignInBloc(mockIAuthenticationFacade);
 
       // act
-      bloc..add(EmailChanged(email: validEmail))..add(PasswordChanged(password: invalidPassword));
+      bloc
+        ..add(EmailChanged(email: validEmail))
+        ..add(PasswordChanged(password: invalidPassword));
 
       // assert
       expectLater(
@@ -124,7 +143,9 @@ void main() {
         emitsInOrder([
           signInStateBuilder(emailAddress: validEmail),
           signInStateBuilder(
-              emailAddress: validEmail, password: invalidPassword, passwordError: invalidPasswordErrorMessage),
+              emailAddress: validEmail,
+              password: invalidPassword,
+              passwordError: invalidPasswordErrorMessage),
         ]),
       ).then((_) {
         expect(bloc.state.isSignInFormValid, false);
@@ -136,7 +157,9 @@ void main() {
       final SignInBloc bloc = SignInBloc(mockIAuthenticationFacade);
 
       // act
-      bloc..add(EmailChanged(email: validEmail))..add(PasswordChanged(password: validPassword));
+      bloc
+        ..add(EmailChanged(email: validEmail))
+        ..add(PasswordChanged(password: validPassword));
 
       // assert
       expectLater(
@@ -150,7 +173,9 @@ void main() {
       });
     });
 
-    test('Should emit state with signInSuccess true if Firebase sign in was successful', () {
+    test(
+        'Should emit state with signInSuccess true if Firebase sign in was successful',
+        () {
       // arrange
       final SignInBloc bloc = SignInBloc(mockIAuthenticationFacade);
       LocalUser user = LocalUser(id: '184243aa-a087-4947-9be8-1c2dcaed941b');
@@ -161,7 +186,8 @@ void main() {
         password: anyNamed('password'),
       )).thenAnswer((_) async => user);
 
-      when(mockIAuthenticationFacade.deviceTokenExists(user.id)).thenAnswer((_) async => true);
+      when(mockIAuthenticationFacade.deviceTokenExists(user.id))
+          .thenAnswer((_) async => true);
 
       // act
       bloc
@@ -175,8 +201,14 @@ void main() {
         emitsInOrder([
           signInStateBuilder(emailAddress: validEmail),
           signInStateBuilder(emailAddress: validEmail, password: validPassword),
-          signInStateBuilder(emailAddress: validEmail, password: validPassword, submitting: true),
-          signInStateBuilder(emailAddress: validEmail, password: validPassword, signInSuccess: true),
+          signInStateBuilder(
+              emailAddress: validEmail,
+              password: validPassword,
+              submitting: true),
+          signInStateBuilder(
+              emailAddress: validEmail,
+              password: validPassword,
+              signInSuccess: true),
         ]),
       );
     });

@@ -19,7 +19,8 @@ class BibleSeriesBloc extends Bloc<BibleSeriesEvent, BibleSeriesState> {
   final IBibleSeriesRepository _iBibleSeriesRepository;
   final ICompletionsRepository _iCompletionsRepository;
 
-  BibleSeriesBloc(this._iBibleSeriesRepository, this._iCompletionsRepository) : super(BibleSeriesInitial());
+  BibleSeriesBloc(this._iBibleSeriesRepository, this._iCompletionsRepository)
+      : super(BibleSeriesInitial());
 
   @override
   Stream<BibleSeriesState> mapEventToState(
@@ -86,11 +87,13 @@ Stream<BibleSeriesState> _mapContentDetailRequestedEventToState(
 
 Stream<BibleSeriesState> _mapGetRecentBibleSeriesEventToState(
   RecentBibleSeriesRequested event,
-  Future<List<BibleSeries>> Function({@required int limit}) getBibleSeriesFunction,
+  Future<List<BibleSeries>> Function({@required int limit})
+      getBibleSeriesFunction,
 ) async* {
   yield FetchingBibleSeries();
   try {
-    List<BibleSeries> bibleSeriesList = await getBibleSeriesFunction(limit: event.amount);
+    List<BibleSeries> bibleSeriesList =
+        await getBibleSeriesFunction(limit: event.amount);
     yield RecentBibleSeries(bibleSeriesList);
   } on BaseApplicationException catch (e) {
     yield BibleSeriesError(
@@ -105,8 +108,11 @@ Stream<BibleSeriesState> _mapGetRecentBibleSeriesEventToState(
 
 Stream<BibleSeriesState> _mapBibleSeriesDetailRequestedEventToState(
   BibleSeriesDetailRequested event,
-  Future<BibleSeries> Function({@required String bibleSeriesId}) getBibleSeriesDetailsFunction,
-  Future<Map<String, CompletionDetails>> Function({@required String bibleSeriesId}) getAllCompletionDetailsFunction,
+  Future<BibleSeries> Function({@required String bibleSeriesId})
+      getBibleSeriesDetailsFunction,
+  Future<Map<String, CompletionDetails>> Function(
+          {@required String bibleSeriesId})
+      getAllCompletionDetailsFunction,
 ) async* {
   yield FetchingBibleSeries();
 
@@ -115,7 +121,8 @@ Stream<BibleSeriesState> _mapBibleSeriesDetailRequestedEventToState(
       bibleSeriesId: event.bibleSeriesId.toString(),
     );
 
-    Map<String, CompletionDetails> completionDetails = await getAllCompletionDetailsFunction(
+    Map<String, CompletionDetails> completionDetails =
+        await getAllCompletionDetailsFunction(
       bibleSeriesId: event.bibleSeriesId.toString(),
     );
 

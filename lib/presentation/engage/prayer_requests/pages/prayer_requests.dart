@@ -15,10 +15,12 @@ class PrayerRequestsPage extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<AllPrayerRequestsBloc>(
-          create: (BuildContext context) => getIt<PrayerRequestsBloc>()..add(PrayerRequestsRequested(amount: amount)),
+          create: (BuildContext context) => getIt<PrayerRequestsBloc>()
+            ..add(PrayerRequestsRequested(amount: amount)),
         ),
         BlocProvider<MyPrayerRequestsBloc>(
-          create: (BuildContext context) => getIt<PrayerRequestsBloc>()..add(MyPrayerRequestsRequested()),
+          create: (BuildContext context) =>
+              getIt<PrayerRequestsBloc>()..add(MyPrayerRequestsRequested()),
         ),
       ],
       child: Scaffold(
@@ -43,7 +45,8 @@ class TabPrayerRequestWidget extends StatefulWidget {
   _TabPrayerRequestWidgetState createState() => _TabPrayerRequestWidgetState();
 }
 
-class _TabPrayerRequestWidgetState extends State<TabPrayerRequestWidget> with SingleTickerProviderStateMixin {
+class _TabPrayerRequestWidgetState extends State<TabPrayerRequestWidget>
+    with SingleTickerProviderStateMixin {
   TabController tabController;
 
   _TabPrayerRequestWidgetState() {

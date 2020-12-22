@@ -56,7 +56,8 @@ class MediaDto {
 extension MediaDtoX on MediaDto {
   Future<Media> toDomain(FirebaseStorageService firebaseStorageService) async {
     // Convert GS Location to Download URL
-    String thumbnailUrl = await firebaseStorageService.getDownloadUrl(this.thumbnailGsLocation);
+    String thumbnailUrl =
+        await firebaseStorageService.getDownloadUrl(this.thumbnailGsLocation);
     // String thumbnailUrl = await getIt<FirebaseStorageService>().getDownloadUrl(this.thumbnailGsLocation);
 
     return Media(

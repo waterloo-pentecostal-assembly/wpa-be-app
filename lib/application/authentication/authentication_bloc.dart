@@ -10,10 +10,12 @@ import '../../app/injection.dart';
 part 'authentication_event.dart';
 part 'authentication_state.dart';
 
-class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> {
+class AuthenticationBloc
+    extends Bloc<AuthenticationEvent, AuthenticationState> {
   final IAuthenticationFacade _iAuthenticationFacade;
 
-  AuthenticationBloc(this._iAuthenticationFacade) : super(AuthenticationInitial());
+  AuthenticationBloc(this._iAuthenticationFacade)
+      : super(AuthenticationInitial());
 
   @override
   Stream<AuthenticationState> mapEventToState(

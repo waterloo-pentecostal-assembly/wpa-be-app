@@ -44,9 +44,14 @@ class SignUpForm extends StatelessWidget {
                     ),
                     child: Column(
                       children: <Widget>[
-                        if (BlocProvider.of<SignUpBloc>(context).state.signUpError != null) ...{
+                        if (BlocProvider.of<SignUpBloc>(context)
+                                .state
+                                .signUpError !=
+                            null) ...{
                           Text(
-                            BlocProvider.of<SignUpBloc>(context).state.signUpError,
+                            BlocProvider.of<SignUpBloc>(context)
+                                .state
+                                .signUpError,
                             style: TextStyle(
                               color: kErrorTextColor,
                             ),
@@ -83,11 +88,19 @@ class SignUpForm extends StatelessWidget {
                                       ),
                                       child: TextFormField(
                                         validator: (_) {
-                                          String firstNameError = BlocProvider.of<SignUpBloc>(context).state.firstNameError;
-                                          return firstNameError != '' ? firstNameError : null;
+                                          String firstNameError =
+                                              BlocProvider.of<SignUpBloc>(
+                                                      context)
+                                                  .state
+                                                  .firstNameError;
+                                          return firstNameError != ''
+                                              ? firstNameError
+                                              : null;
                                         },
                                         onChanged: (value) {
-                                          BlocProvider.of<SignUpBloc>(context).add(FirstNameChanged(firstName: value));
+                                          BlocProvider.of<SignUpBloc>(context)
+                                              .add(FirstNameChanged(
+                                                  firstName: value));
                                         },
                                         autocorrect: false,
                                         decoration: InputDecoration(
@@ -103,11 +116,19 @@ class SignUpForm extends StatelessWidget {
                                       padding: EdgeInsets.all(4.0),
                                       child: TextFormField(
                                         validator: (_) {
-                                          String lastNameError = BlocProvider.of<SignUpBloc>(context).state.lastNameError;
-                                          return lastNameError != '' ? lastNameError : null;
+                                          String lastNameError =
+                                              BlocProvider.of<SignUpBloc>(
+                                                      context)
+                                                  .state
+                                                  .lastNameError;
+                                          return lastNameError != ''
+                                              ? lastNameError
+                                              : null;
                                         },
                                         onChanged: (value) {
-                                          BlocProvider.of<SignUpBloc>(context).add(LastNameChanged(lastName: value));
+                                          BlocProvider.of<SignUpBloc>(context)
+                                              .add(LastNameChanged(
+                                                  lastName: value));
                                         },
                                         autocorrect: false,
                                         decoration: InputDecoration(
@@ -130,11 +151,18 @@ class SignUpForm extends StatelessWidget {
                                       padding: EdgeInsets.all(4.0),
                                       child: TextFormField(
                                         validator: (_) {
-                                          String emailAddressError = BlocProvider.of<SignUpBloc>(context).state.emailAddressError;
-                                          return emailAddressError != '' ? emailAddressError : null;
+                                          String emailAddressError =
+                                              BlocProvider.of<SignUpBloc>(
+                                                      context)
+                                                  .state
+                                                  .emailAddressError;
+                                          return emailAddressError != ''
+                                              ? emailAddressError
+                                              : null;
                                         },
                                         onChanged: (value) {
-                                          BlocProvider.of<SignUpBloc>(context).add(EmailChanged(email: value));
+                                          BlocProvider.of<SignUpBloc>(context)
+                                              .add(EmailChanged(email: value));
                                         },
                                         autocorrect: false,
                                         decoration: InputDecoration(
@@ -157,11 +185,19 @@ class SignUpForm extends StatelessWidget {
                                       padding: EdgeInsets.all(4.0),
                                       child: TextFormField(
                                         validator: (_) {
-                                          String passwordError = BlocProvider.of<SignUpBloc>(context).state.passwordError;
-                                          return passwordError != '' ? passwordError : null;
+                                          String passwordError =
+                                              BlocProvider.of<SignUpBloc>(
+                                                      context)
+                                                  .state
+                                                  .passwordError;
+                                          return passwordError != ''
+                                              ? passwordError
+                                              : null;
                                         },
                                         onChanged: (value) {
-                                          BlocProvider.of<SignUpBloc>(context).add(PasswordChanged(password: value));
+                                          BlocProvider.of<SignUpBloc>(context)
+                                              .add(PasswordChanged(
+                                                  password: value));
                                         },
                                         obscureText: true,
                                         autocorrect: false,
@@ -187,20 +223,27 @@ class SignUpForm extends StatelessWidget {
                                   height: 50,
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
-                                      colors: [Color.fromRGBO(0, 146, 214, 1), Color.fromRGBO(0, 146, 214, 0.7)],
+                                      colors: [
+                                        Color.fromRGBO(0, 146, 214, 1),
+                                        Color.fromRGBO(0, 146, 214, 0.7)
+                                      ],
                                     ),
                                   ),
                                   child: FlatButton(
                                     disabledColor: Colors.grey[400],
-                                    onPressed: state.submitting || !state.isSignUpFormValid
+                                    onPressed: state.submitting ||
+                                            !state.isSignUpFormValid
                                         ? null
-                                        : () => BlocProvider.of<SignUpBloc>(context).add(
+                                        : () =>
+                                            BlocProvider.of<SignUpBloc>(context)
+                                                .add(
                                               SignUpWithEmailAndPassword(),
                                             ),
                                     child: Center(
                                       child: Text(
                                         "SIGN UP",
-                                        style: TextStyle(color: Colors.white, fontSize: 16),
+                                        style: TextStyle(
+                                            color: Colors.white, fontSize: 16),
                                       ),
                                     ),
                                   ),
@@ -226,7 +269,8 @@ _signUpSuccessAlert(BuildContext context, String emailAddress) {
   Alert(
     context: context,
     title: "Registration Successful!",
-    desc: "Once your account is validated, a confirmation will be sent to $emailAddress",
+    desc:
+        "Once your account is validated, a confirmation will be sent to $emailAddress",
     // desc: "Please follow steps sent to $emailAddress to verify your account before signing in.",
     buttons: [
       DialogButton(

@@ -26,7 +26,8 @@ QuestionBody getSampleQuestionBody() {
     Question(question: 'Sample Question 2?', location: [0, 1]),
   ];
 
-  return QuestionBody(type: SeriesContentBodyType.QUESTION, properties: questionBodyProperties);
+  return QuestionBody(
+      type: SeriesContentBodyType.QUESTION, properties: questionBodyProperties);
 }
 
 ScriptureBody getSampleScriptureBody() {
@@ -48,13 +49,16 @@ ScriptureBody getSampleScriptureBody() {
       book: 'Psalm',
       chapter: '87',
       verses: {
-        '6': 'The Lordwill write in the register of the peoples: "This one was born in Zion."',
+        '6':
+            'The Lordwill write in the register of the peoples: "This one was born in Zion."',
         '7': 'As they make music they will sing, "All my fountains are in you."'
       },
     )
   ];
 
-  return ScriptureBody(type: SeriesContentBodyType.SCRIPTURE, properties: scriptureBodyProperties);
+  return ScriptureBody(
+      type: SeriesContentBodyType.SCRIPTURE,
+      properties: scriptureBodyProperties);
 }
 
 AudioBody getSampleAudioBody() {
@@ -62,5 +66,6 @@ AudioBody getSampleAudioBody() {
   audioBodyProperties.audioFileUrl =
       'https://firebasestorage.googleapis.com/v0/b/wpa-app-test.appspot.com/o/psalm91.mp3?alt=media&token=9b26fb5c-f12e-4d9e-8bd4-8e89af9e21df';
 
-  return AudioBody(type: SeriesContentBodyType.AUDIO, properties: audioBodyProperties);
+  return AudioBody(
+      type: SeriesContentBodyType.AUDIO, properties: audioBodyProperties);
 }

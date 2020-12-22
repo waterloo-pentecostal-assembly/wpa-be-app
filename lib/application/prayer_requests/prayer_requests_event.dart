@@ -49,7 +49,6 @@ class MyPrayerRequestDeleted extends PrayerRequestsEvent {
   List<Object> get props => [id];
 }
 
-
 class MorePrayerRequestsRequested extends PrayerRequestsEvent {
   final int amount;
 

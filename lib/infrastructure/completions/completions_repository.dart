@@ -23,7 +23,8 @@ class CompletionsRepository extends ICompletionsRepository {
   Future<void> markAsComplete({
     CompletionDetails completionDetails,
   }) async {
-    CompletionsDto completionsDto = CompletionsDto.fromDomain(completionDetails);
+    CompletionsDto completionsDto =
+        CompletionsDto.fromDomain(completionDetails);
     final LocalUser user = getIt<LocalUser>();
 
     try {
@@ -55,10 +56,12 @@ class CompletionsRepository extends ICompletionsRepository {
     Responses responses,
   }) async {
     final LocalUser user = getIt<LocalUser>();
-    Map<String, dynamic> responsesForFirestore = ResponsesDto.fromDomain(responses.responses, user.id).toFirestore();
+    Map<String, dynamic> responsesForFirestore =
+        ResponsesDto.fromDomain(responses.responses, user.id).toFirestore();
 
     try {
-      CollectionReference responseCollection = _completionsCollection.doc(completionId).collection("responses");
+      CollectionReference responseCollection =
+          _completionsCollection.doc(completionId).collection("responses");
       if (responses.id != null) {
         await responseCollection.doc(responses.id).set(responsesForFirestore);
       } else {
@@ -85,7 +88,8 @@ class CompletionsRepository extends ICompletionsRepository {
     }
     Map<String, CompletionDetails> completionDetails = {};
     snapshot.docs.forEach((element) {
-      final CompletionDetails _completionDetails = CompletionsDto.fromFirestore(element).toDomain();
+      final CompletionDetails _completionDetails =
+          CompletionsDto.fromFirestore(element).toDomain();
       String id = findOrThrowException(element.data(), "content_id");
       completionDetails[id] = _completionDetails;
     });
@@ -110,7 +114,8 @@ class CompletionsRepository extends ICompletionsRepository {
 
     if (snapshot.docs.length > 0) {
       DocumentSnapshot document = snapshot.docs[0];
-      final CompletionDetails seriesContent = CompletionsDto.fromFirestore(document).toDomain();
+      final CompletionDetails seriesContent =
+          CompletionsDto.fromFirestore(document).toDomain();
       return seriesContent;
     }
 
@@ -127,7 +132,10 @@ class CompletionsRepository extends ICompletionsRepository {
     QuerySnapshot querySnapshot;
 
     try {
-      querySnapshot = await _completionsCollection.doc(completionId).collection("responses").get();
+      querySnapshot = await _completionsCollection
+          .doc(completionId)
+          .collection("responses")
+          .get();
     } catch (e) {
       _firebaseFirestoreService.handleException(e);
     }

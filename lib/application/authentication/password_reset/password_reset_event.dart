@@ -25,4 +25,3 @@ class ResetPassword extends PasswordResetEvent {
   @override
   String toString() => 'ResetPassword Event';
 }
-

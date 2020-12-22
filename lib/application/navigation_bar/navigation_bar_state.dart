@@ -1,7 +1,6 @@
 part of 'navigation_bar_bloc.dart';
 
-class NavigationBarState extends Equatable{
-  
+class NavigationBarState extends Equatable {
   final NavigationTabEnum tab;
   final String route;
 

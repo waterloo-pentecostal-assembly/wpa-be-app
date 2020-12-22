@@ -5,7 +5,20 @@ String toReadableDate(Timestamp date) {
 }
 
 String _getMonth(Timestamp date) {
-  List<String> months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  List<String> months = [
+    'JAN',
+    'FEB',
+    'MAR',
+    'APR',
+    'MAY',
+    'JUN',
+    'JUL',
+    'AUG',
+    'SEP',
+    'OCT',
+    'NOV',
+    'DEC'
+  ];
   int monthNumber = int.parse(date.toDate().toString().substring(5, 7)) - 1;
   return months[monthNumber];
 }

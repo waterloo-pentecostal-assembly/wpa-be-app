@@ -13,7 +13,8 @@ part 'achievements_state.dart';
 class AchievementsBloc extends Bloc<AchievementsEvent, AchievementsState> {
   final IAchievementsRepository _iAchievementsRepository;
 
-  AchievementsBloc(this._iAchievementsRepository) : super(AchievementsLoading());
+  AchievementsBloc(this._iAchievementsRepository)
+      : super(AchievementsLoading());
 
   StreamSubscription<Achievements> _achievementsStreamSubscription;
 
@@ -41,12 +42,13 @@ class AchievementsBloc extends Bloc<AchievementsEvent, AchievementsState> {
     WatchAchievementsStarted event,
   ) async* {
     await _achievementsStreamSubscription?.cancel();
-    _achievementsStreamSubscription = _iAchievementsRepository.watchAchievements().listen((event) {
+    _achievementsStreamSubscription =
+        _iAchievementsRepository.watchAchievements().listen((event) {
       return add(AchievementsReceived(achievements: event));
     })
-      ..onError((_) {
-        return add(AchievementsErrorReceived());
-      });
+          ..onError((_) {
+            return add(AchievementsErrorReceived());
+          });
   }
 
   @override

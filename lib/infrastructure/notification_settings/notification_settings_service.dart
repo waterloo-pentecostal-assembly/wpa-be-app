@@ -16,7 +16,8 @@ class NotificationSettingsService implements INotificationSettingsService {
   final FirebaseFirestore _firestore;
   String notificationSettingsId;
 
-  NotificationSettingsService(this._firebaseMessagingService, this._firestore, this._firebaseFirestoreService);
+  NotificationSettingsService(this._firebaseMessagingService, this._firestore,
+      this._firebaseFirestoreService);
 
   @override
   Future<void> subscribeToDailyEngagementReminder() async {
@@ -61,12 +62,14 @@ class NotificationSettingsService implements INotificationSettingsService {
     _setNotificationSetting({"prayers": false});
   }
 
-  Future<void> _setNotificationSetting(Map<String, dynamic> notificationSetting) async {
+  Future<void> _setNotificationSetting(
+      Map<String, dynamic> notificationSetting) async {
     // Future<void> unsubscribeFromDailyEngagementReminder(String notificationSettingsId) async {
     final LocalUser user = getIt<LocalUser>();
 
     // Should always be available.  This is just a fail-safe
-    String _notificationSettingsId = notificationSettingsId ?? _getNotificationSettingsId();
+    String _notificationSettingsId =
+        notificationSettingsId ?? _getNotificationSettingsId();
 
     try {
       // Update flag in users/<user-doc>/notification_settings/<single-notification-settings-doc>
@@ -88,7 +91,11 @@ class NotificationSettingsService implements INotificationSettingsService {
     final LocalUser user = getIt<LocalUser>();
     QuerySnapshot querySnapshot;
     try {
-      querySnapshot = await _firestore.collection("users").doc(user.id).collection("notification_settings").get();
+      querySnapshot = await _firestore
+          .collection("users")
+          .doc(user.id)
+          .collection("notification_settings")
+          .get();
     } catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
@@ -99,7 +106,8 @@ class NotificationSettingsService implements INotificationSettingsService {
       // Set notificationSettingsId
       notificationSettingsId = notificationSettingsDoc.id;
 
-      return NotificationSettingsDto.fromFirestore(notificationSettingsDoc).toDomain();
+      return NotificationSettingsDto.fromFirestore(notificationSettingsDoc)
+          .toDomain();
     }
     throw NotificationSettingsException(
       code: NotificationSettingsExceptionCode.NO_NOTIFICATION_SETTINGS,
@@ -111,7 +119,11 @@ class NotificationSettingsService implements INotificationSettingsService {
     final LocalUser user = getIt<LocalUser>();
     QuerySnapshot querySnapshot;
     try {
-      querySnapshot = await _firestore.collection("users").doc(user.id).collection("notification_settings").get();
+      querySnapshot = await _firestore
+          .collection("users")
+          .doc(user.id)
+          .collection("notification_settings")
+          .get();
     } catch (e) {
       _firebaseFirestoreService.handleException(e);
     }

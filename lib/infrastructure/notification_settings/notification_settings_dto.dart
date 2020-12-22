@@ -11,7 +11,8 @@ class NotificationSettingsDto {
 
   factory NotificationSettingsDto.fromJson(Map<String, dynamic> json) {
     return NotificationSettingsDto._(
-      dailyEngagementReminder: findOrDefaultTo(json, 'daily_engagement_reminder', false),
+      dailyEngagementReminder:
+          findOrDefaultTo(json, 'daily_engagement_reminder', false),
       prayers: findOrDefaultTo(json, 'prayers', false),
     );
   }
@@ -27,7 +28,8 @@ class NotificationSettingsDto {
   }) {
     return NotificationSettingsDto._(
       id: id ?? this.id,
-      dailyEngagementReminder: dailyEngagementReminder ?? this.dailyEngagementReminder,
+      dailyEngagementReminder:
+          dailyEngagementReminder ?? this.dailyEngagementReminder,
       prayers: prayers ?? this.prayers,
     );
   }

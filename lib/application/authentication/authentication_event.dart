@@ -13,5 +13,3 @@ class SignOut extends AuthenticationEvent {
   @override
   List<Object> get props => [];
 }
-
-

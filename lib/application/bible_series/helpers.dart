@@ -20,7 +20,8 @@ BibleSeries addCompletionDetailsToSeries(
       contentType.isOnTime = false;
 
       if (completionDetails.containsKey(contentType.contentId)) {
-        CompletionDetails currentCompletionDetails = completionDetails[contentType.contentId];
+        CompletionDetails currentCompletionDetails =
+            completionDetails[contentType.contentId];
 
         if (currentCompletionDetails.isDraft) {
           contentType.isDraft = true;

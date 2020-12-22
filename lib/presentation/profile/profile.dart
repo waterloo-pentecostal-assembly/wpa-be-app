@@ -35,7 +35,8 @@ class ProfilePage extends IIndexedPage {
           create: (BuildContext context) => getIt<UserProfileBloc>(),
         ),
         BlocProvider<NotificationSettingsBloc>(
-          create: (BuildContext context) => getIt<NotificationSettingsBloc>()..add(NotificationSettingsRequested()),
+          create: (BuildContext context) => getIt<NotificationSettingsBloc>()
+            ..add(NotificationSettingsRequested()),
         ),
       ],
       child: Scaffold(
@@ -120,8 +121,9 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
   Widget build(BuildContext context) {
     // LocalUser localUser = getIt<LocalUser>();
 
-    double profilePhotoDiameter =
-        150 > MediaQuery.of(context).size.width * 0.5 ? MediaQuery.of(context).size.width * 0.5 : 150;
+    double profilePhotoDiameter = 150 > MediaQuery.of(context).size.width * 0.5
+        ? MediaQuery.of(context).size.width * 0.5
+        : 150;
 
     return BlocConsumer<UserProfileBloc, UserProfileState>(
       listener: (context, UserProfileState state) {},
@@ -138,7 +140,8 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
               int progressPercent = 0;
 
               if (bytesTransferred != null && totalBytes != null) {
-                progressPercent = ((bytesTransferred / totalBytes) * 100).ceil();
+                progressPercent =
+                    ((bytesTransferred / totalBytes) * 100).ceil();
               }
 
               return Column(
@@ -157,8 +160,10 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
                           height: 30,
                           child: Container(
                             alignment: Alignment.center,
-                            child:
-                                getIt<TextFactory>().regular('$progressPercent%', color: Colors.white, fontSize: 12.0),
+                            child: getIt<TextFactory>().regular(
+                                '$progressPercent%',
+                                color: Colors.white,
+                                fontSize: 12.0),
                           ),
                         ),
                       ],
@@ -197,7 +202,8 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
                         height: 30,
                         child: Container(
                           alignment: Alignment.center,
-                          child: getIt<TextFactory>().regular('EDIT', color: Colors.white, fontSize: 12.0),
+                          child: getIt<TextFactory>().regular('EDIT',
+                              color: Colors.white, fontSize: 12.0),
                         ),
                       ),
                     ),
@@ -214,9 +220,11 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
   }
 
   void selectNewProfileImage() async {
-    PickedFile selected = await imagePicker.getImage(source: ImageSource.gallery);
+    PickedFile selected =
+        await imagePicker.getImage(source: ImageSource.gallery);
     if (selected != null && selected.path != null) {
-      BlocProvider.of<UserProfileBloc>(context)..add(UploadProfilePhoto(profilePhoto: File(selected.path)));
+      BlocProvider.of<UserProfileBloc>(context)
+        ..add(UploadProfilePhoto(profilePhoto: File(selected.path)));
     }
   }
 }
@@ -230,8 +238,10 @@ class LogoutButton extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(top: 4.0, bottom: 4.0),
           child: GestureDetector(
-            onTap: () => BlocProvider.of<AuthenticationBloc>(context).add(SignOut()),
-            child: getIt<TextFactory>().lite('Logout', color: Colors.red, fontSize: 14.0),
+            onTap: () =>
+                BlocProvider.of<AuthenticationBloc>(context).add(SignOut()),
+            child: getIt<TextFactory>()
+                .lite('Logout', color: Colors.red, fontSize: 14.0),
           ),
         ),
       ],
@@ -265,16 +275,19 @@ class _NotificationSettingsState extends State<NotificationSettings> {
               getIt<TextFactory>().lite("Daily Engagement Reminder"),
               Container(
                 height: 30,
-                child: BlocConsumer<NotificationSettingsBloc, NotificationSettingsState>(
+                child: BlocConsumer<NotificationSettingsBloc,
+                    NotificationSettingsState>(
                   listener: (context, NotificationSettingsState state) {
                     if (state is NotificationSettingsPositions) {
                       setState(() {
-                        isEngagementReminderSwitched = state.notificationSettings.dailyEngagementReminder;
+                        isEngagementReminderSwitched =
+                            state.notificationSettings.dailyEngagementReminder;
                       });
                     } else if (state is DailyEngagementReminderError) {
                       ToastMessage.showErrorToast(state.message, context);
                       setState(() {
-                        isEngagementReminderSwitched = !isEngagementReminderSwitched;
+                        isEngagementReminderSwitched =
+                            !isEngagementReminderSwitched;
                       });
                     }
                   },
@@ -311,16 +324,19 @@ class _NotificationSettingsState extends State<NotificationSettings> {
               getIt<TextFactory>().lite("Prayers"),
               Container(
                 height: 30,
-                child: BlocConsumer<NotificationSettingsBloc, NotificationSettingsState>(
+                child: BlocConsumer<NotificationSettingsBloc,
+                    NotificationSettingsState>(
                   listener: (context, NotificationSettingsState state) {
                     if (state is NotificationSettingsPositions) {
                       setState(() {
-                        isPrayerNotificationsSwitched = state.notificationSettings.prayers;
+                        isPrayerNotificationsSwitched =
+                            state.notificationSettings.prayers;
                       });
                     } else if (state is PrayerNotificationError) {
                       ToastMessage.showErrorToast(state.message, context);
                       setState(() {
-                        isPrayerNotificationsSwitched = !isPrayerNotificationsSwitched;
+                        isPrayerNotificationsSwitched =
+                            !isPrayerNotificationsSwitched;
                       });
                     }
                   },
@@ -333,7 +349,8 @@ class _NotificationSettingsState extends State<NotificationSettings> {
                             isPrayerNotificationsSwitched = value;
                           });
                           if (value) {
-                            BlocProvider.of<NotificationSettingsBloc>(context)..add(SubscribedToPrayerNotifications());
+                            BlocProvider.of<NotificationSettingsBloc>(context)
+                              ..add(SubscribedToPrayerNotifications());
                           } else {
                             BlocProvider.of<NotificationSettingsBloc>(context)
                               ..add(UnsubscribedFromPrayerNotifications());
@@ -488,7 +505,8 @@ class _TestImagePickerState extends State<TestImagePicker> {
     return Column(
       children: [
         Center(
-          child: _image == null ? Text('No image selected.') : Image.file(_image),
+          child:
+              _image == null ? Text('No image selected.') : Image.file(_image),
         ),
         FlatButton(
           onPressed: getImage,
