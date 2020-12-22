@@ -33,20 +33,6 @@ and the `GoogleService-info.plist` from the `wpa-be-app-dev-ios` app. Save these
 2. In the root `Runner` project, create a folder called `config`. In there, create another folder called `dev`. 
 3. Drag the `GoogleService-info.plist` from step 4. above into this folder. 
 
-
-### Starting the app
-
-There are currently two ways we can run the application in the development environment. 
-
-1. By connecting it to the remote Firebase instance (referred to as dev mode).
-
-> To do this, run `flutter run -t lib/app/flavors/main_dev.dart --flavor dev` in the `wpa-be-app` folder. 
-
-2. By connecting it to a local Firebase emulator (referred to as local_dev mode).
-
-> To do this, ensure that the location emulator is running and run `flutter run -t lib/app/flavors/main_local_dev.dart --flavor dev` in the `wpa-be-app` folder. 
-
-
 ## Recommended Editor
 
 It is recommended to use VSCode, with the following extensions for this project. 
@@ -87,3 +73,23 @@ In the `.vscode/launch.json` file, add the following to be able to run and debug
     ]
 }
 ```
+
+## Starting the app
+
+There are currently two ways we can run the application in the development environment. 
+
+1. By connecting it to the remote Firebase instance (referred to as `dev` mode).
+
+    To do this, either:
+    
+    * Run `flutter run -t lib/app/flavors/main_dev.dart --flavor dev` in the `wpa-be-app` folder.
+    * Navigate to the run tab in VSCode, select the `wpa-be-app-dev` configuration and click the green run icon.
+
+2. By connecting it to a local Firebase Emulator (referred to as `local_dev` mode).
+
+    **N.B.** The local Firebase Emulator must be running. See instruction in the [wpa-be-firebase](https://github.com/waterloo-pentecostal-assembly/wpa-be-firebase) repository. 
+
+    To do this, either:
+    
+    * Run `flutter run -t lib/app/flavors/main_local_dev.dart --flavor dev` in the `wpa-be-app` folder.
+    * Navigate to the run tab in VSCode, select the `wpa-be-app-dev` configuration and click the green run icon.
