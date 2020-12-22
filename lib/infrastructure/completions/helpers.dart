@@ -13,4 +13,3 @@ ResponseType responseTypeMapper(type) {
     details: 'Unsupported response type: $type',
   );
 }
-

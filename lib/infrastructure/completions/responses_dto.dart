@@ -29,7 +29,8 @@ class ResponsesDto {
     return ResponsesDto._(responses: _responses, userId: userId);
   }
 
-  factory ResponsesDto.fromDomain(Map<String, Map<String, ResponseDetails>> responses, String userId) {
+  factory ResponsesDto.fromDomain(
+      Map<String, Map<String, ResponseDetails>> responses, String userId) {
     Map<String, dynamic> _responses = {};
 
     responses.forEach((String k1, Map<String, ResponseDetails> v1) {

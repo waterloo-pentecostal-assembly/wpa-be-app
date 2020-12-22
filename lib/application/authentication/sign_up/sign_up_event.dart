@@ -61,4 +61,3 @@ class SignUpWithEmailAndPassword extends SignUpEvent {
   @override
   String toString() => 'SignInWithEmailAndPassword Event';
 }
-

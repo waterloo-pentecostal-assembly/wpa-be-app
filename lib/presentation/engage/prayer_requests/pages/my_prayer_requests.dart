@@ -12,8 +12,10 @@ class MyPrayerRequests extends StatefulWidget {
   _MyPrayerRequestsState createState() => _MyPrayerRequestsState();
 }
 
-class _MyPrayerRequestsState extends State<MyPrayerRequests> with AutomaticKeepAliveClientMixin {
-  final GlobalKey<AnimatedListState> _myPrayerRequestsListKey = GlobalKey<AnimatedListState>();
+class _MyPrayerRequestsState extends State<MyPrayerRequests>
+    with AutomaticKeepAliveClientMixin {
+  final GlobalKey<AnimatedListState> _myPrayerRequestsListKey =
+      GlobalKey<AnimatedListState>();
   List<PrayerRequest> _prayerRequests;
   Widget _child = Loader();
 
@@ -26,19 +28,23 @@ class _MyPrayerRequestsState extends State<MyPrayerRequests> with AutomaticKeepA
     });
   }
 
-  Widget _buildItem(BuildContext context, int index, Animation<double> animation) {
+  Widget _buildItem(
+      BuildContext context, int index, Animation<double> animation) {
     return PrayerRequestCard(
       animation: animation,
       prayerRequest: _prayerRequests[index],
-      prayButtonOrIndicator: PrayedByIndicator(amount: _prayerRequests[index].prayedBy.length),
+      prayButtonOrIndicator:
+          PrayedByIndicator(amount: _prayerRequests[index].prayedBy.length),
     );
   }
 
-  Widget _buildDeletedItem(BuildContext context, PrayerRequest prayerRequest, Animation<double> animation) {
+  Widget _buildDeletedItem(BuildContext context, PrayerRequest prayerRequest,
+      Animation<double> animation) {
     return PrayerRequestCard(
       animation: animation,
       prayerRequest: prayerRequest,
-      prayButtonOrIndicator: PrayedByIndicator(amount: prayerRequest.prayedBy.length),
+      prayButtonOrIndicator:
+          PrayedByIndicator(amount: prayerRequest.prayedBy.length),
     );
   }
 
@@ -48,10 +54,12 @@ class _MyPrayerRequestsState extends State<MyPrayerRequests> with AutomaticKeepA
   }
 
   void _delete(int indexToDelete) {
-    PrayerRequest deletedPrayerRequest = _prayerRequests.removeAt(indexToDelete);
+    PrayerRequest deletedPrayerRequest =
+        _prayerRequests.removeAt(indexToDelete);
     _myPrayerRequestsListKey.currentState.removeItem(
       indexToDelete,
-      (context, animation) => _buildDeletedItem(context, deletedPrayerRequest, animation),
+      (context, animation) =>
+          _buildDeletedItem(context, deletedPrayerRequest, animation),
     );
   }
 
@@ -102,7 +110,8 @@ class _MyPrayerRequestsState extends State<MyPrayerRequests> with AutomaticKeepA
   Widget createPrayerRequestAnimatedlist(MyPrayerRequestsLoaded state) {
     return RefreshIndicator(
       onRefresh: () async {
-        BlocProvider.of<MyPrayerRequestsBloc>(context)..add(MyPrayerRequestsRequested());
+        BlocProvider.of<MyPrayerRequestsBloc>(context)
+          ..add(MyPrayerRequestsRequested());
       },
       child: AnimatedList(
         physics: AlwaysScrollableScrollPhysics(),

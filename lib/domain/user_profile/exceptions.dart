@@ -2,10 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../common/exceptions.dart';
 
-enum UserProfileExceptionCode {
-  UNABLE_TO_UPLOAD_IMAGE,
-  UNKNOWN
-}
+enum UserProfileExceptionCode { UNABLE_TO_UPLOAD_IMAGE, UNKNOWN }
 
 /// Implements [BaseException] to provide an exception type specific to User Profile.
 class UserProfileException implements BaseApplicationException {

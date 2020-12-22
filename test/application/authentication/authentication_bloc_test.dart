@@ -16,11 +16,13 @@ void main() {
   });
 
   group('RequestAuthenticationState', () {
-    final LocalUser user = LocalUser(id: '184243aa-a087-4947-9be8-1c2dcaed941a');
+    final LocalUser user =
+        LocalUser(id: '184243aa-a087-4947-9be8-1c2dcaed941a');
     blocTest(
       'Should emit [Authenticated] if user is already singed in',
       build: () {
-        when(mockIAuthenticationFacade.getSignedInUser()).thenAnswer((_) async => user);
+        when(mockIAuthenticationFacade.getSignedInUser())
+            .thenAnswer((_) async => user);
         return AuthenticationBloc(mockIAuthenticationFacade);
       },
       act: (AuthenticationBloc bloc) => bloc.add(RequestAuthenticationState()),

@@ -17,13 +17,15 @@ class RecentBibleSeriesWidget extends StatelessWidget {
         return Column(
           children: [
             Padding(
-              padding: EdgeInsets.only(left: 24, top: 12, bottom: 12, right: 24),
+              padding:
+                  EdgeInsets.only(left: 24, top: 12, bottom: 12, right: 24),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   getIt<TextFactory>().subHeading('Recent Bible Series'),
                   GestureDetector(
-                    onTap: () => Navigator.pushNamed(context, '/all_bible_series'),
+                    onTap: () =>
+                        Navigator.pushNamed(context, '/all_bible_series'),
                     child: getIt<TextFactory>().regular('See all'),
                   ),
                 ],
@@ -31,7 +33,8 @@ class RecentBibleSeriesWidget extends StatelessWidget {
             ),
             () {
               if (state is RecentBibleSeries) {
-                return RecentBibleSeriesList(bibleSeriesList: state.bibleSeriesList);
+                return RecentBibleSeriesList(
+                    bibleSeriesList: state.bibleSeriesList);
               } else {
                 return RecentBibleSeriesListPlaceholder();
               }
@@ -46,12 +49,14 @@ class RecentBibleSeriesWidget extends StatelessWidget {
 class RecentBibleSeriesList extends StatelessWidget {
   final List<BibleSeries> bibleSeriesList;
 
-  const RecentBibleSeriesList({Key key, @required this.bibleSeriesList}) : super(key: key);
+  const RecentBibleSeriesList({Key key, @required this.bibleSeriesList})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: kRecentBibleSeriesTileHeight + kRecentBibleSeriesTileDescriptionHeight,
+      height: kRecentBibleSeriesTileHeight +
+          kRecentBibleSeriesTileDescriptionHeight,
       child: ListView.builder(
         padding: EdgeInsets.only(left: 16),
         scrollDirection: Axis.horizontal,
@@ -67,13 +72,15 @@ class RecentBibleSeriesList extends StatelessWidget {
 class BibleSeriesCard extends StatelessWidget {
   final BibleSeries bibleSeries;
 
-  const BibleSeriesCard({Key key, @required this.bibleSeries}) : super(key: key);
+  const BibleSeriesCard({Key key, @required this.bibleSeries})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () {
-        Navigator.pushNamed(context, '/bible_series', arguments: {'bibleSeriesId': bibleSeries.id});
+        Navigator.pushNamed(context, '/bible_series',
+            arguments: {'bibleSeriesId': bibleSeries.id});
       },
       child: Container(
         width: kRecentBibleSeriesTileWidth,
@@ -93,7 +100,8 @@ class BibleSeriesCard extends StatelessWidget {
                 bibleSeries.imageUrl,
                 height: kRecentBibleSeriesTileHeight,
                 fit: BoxFit.fill,
-                frameBuilder: (BuildContext context, Widget child, int frame, bool wasSynchronouslyLoaded) {
+                frameBuilder: (BuildContext context, Widget child, int frame,
+                    bool wasSynchronouslyLoaded) {
                   if (frame != null && frame >= 0) {
                     return child;
                   } else {
@@ -136,7 +144,9 @@ class RecentBibleSeriesListPlaceholder extends StatelessWidget {
       child: ListView.builder(
         padding: EdgeInsets.only(left: 16),
         scrollDirection: Axis.horizontal,
-        itemCount: (MediaQuery.of(context).size.width / kRecentBibleSeriesTileWidth).ceil(),
+        itemCount:
+            (MediaQuery.of(context).size.width / kRecentBibleSeriesTileWidth)
+                .ceil(),
         itemBuilder: (_, __) {
           return ClipRRect(
             borderRadius: BorderRadius.circular(15.0),

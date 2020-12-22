@@ -104,10 +104,14 @@ class EngageIndex extends StatelessWidget {
             child: RefreshIndicator(
               onRefresh: () async {
                 // TODO: determine number of recents to get based on screen size
-                BlocProvider.of<AchievementsBloc>(context)..add(WatchAchievementsStarted());
-                BlocProvider.of<BibleSeriesBloc>(context)..add(RecentBibleSeriesRequested(amount: 3));
-                BlocProvider.of<PrayerRequestsBloc>(context)..add(RecentPrayerRequestsRequested(amount: 10));
-                BlocProvider.of<MediaBloc>(context)..add(AvailableMediaRequested());
+                BlocProvider.of<AchievementsBloc>(context)
+                  ..add(WatchAchievementsStarted());
+                BlocProvider.of<BibleSeriesBloc>(context)
+                  ..add(RecentBibleSeriesRequested(amount: 3));
+                BlocProvider.of<PrayerRequestsBloc>(context)
+                  ..add(RecentPrayerRequestsRequested(amount: 10));
+                BlocProvider.of<MediaBloc>(context)
+                  ..add(AvailableMediaRequested());
               },
               child: ListView(
                 physics: AlwaysScrollableScrollPhysics(),

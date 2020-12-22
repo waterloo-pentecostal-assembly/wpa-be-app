@@ -1,53 +1,31 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../app/constants.dart';
+import '../../app/injection.dart';
 import '../../domain/authentication/entities.dart';
 import '../../domain/notification_settings/entities.dart';
 import '../../domain/notification_settings/exceptions.dart';
 import '../../domain/notification_settings/interfaces.dart';
-import '../../app/injection.dart';
 import '../../services/firebase_firestore_service.dart';
 import '../../services/firebase_messaging_service.dart';
 import 'notification_settings_dto.dart';
 
 class NotificationSettingsService implements INotificationSettingsService {
+  // ignore: unused_field
   final FirebaseMessagingService _firebaseMessagingService;
   final FirebaseFirestoreService _firebaseFirestoreService;
   final FirebaseFirestore _firestore;
   String notificationSettingsId;
 
-  NotificationSettingsService(this._firebaseMessagingService, this._firestore, this._firebaseFirestoreService);
+  NotificationSettingsService(this._firebaseMessagingService, this._firestore,
+      this._firebaseFirestoreService);
 
   @override
   Future<void> subscribeToDailyEngagementReminder() async {
-    // try {
-    //   // Add subscription to FirebaseMessaging
-    //   await _firebaseMessagingService.subscribeToTopic(kDailyEngagementReminderTopic);
-    // } catch (e) {
-    //   throw NotificationSettingsException(
-    //     code: NotificationSettingsExceptionCode.UNABLE_TO_SUBSCRIBE,
-    //     message: "Unable to subscribe to daily engagement reminders",
-    //     details: e,
-    //   );
-    // }
-    // FCM topic subscription handled by Firebase Functions
     _setNotificationSetting({"daily_engagement_reminder": true});
   }
 
   @override
   Future<void> unsubscribeFromDailyEngagementReminder() async {
-    // try {
-    //   // Remove subscription from FirebaseMessaging
-    //   await _firebaseMessagingService.unsubscribeFromTopic(kDailyEngagementReminderTopic);
-    // } catch (e) {
-    //   throw NotificationSettingsException(
-    //     code: NotificationSettingsExceptionCode.UNABLE_TO_UNSUBSCRIBE,
-    //     message: "Unable to unsubscribe from daily engagement reminders",
-    //     details: e,
-    //   );
-    // }
-
-    // FCM topic unsubscription handled by Firebase Functions
     _setNotificationSetting({"daily_engagement_reminder": false});
   }
 
@@ -61,12 +39,13 @@ class NotificationSettingsService implements INotificationSettingsService {
     _setNotificationSetting({"prayers": false});
   }
 
-  Future<void> _setNotificationSetting(Map<String, dynamic> notificationSetting) async {
-    // Future<void> unsubscribeFromDailyEngagementReminder(String notificationSettingsId) async {
+  Future<void> _setNotificationSetting(
+      Map<String, dynamic> notificationSetting) async {
     final LocalUser user = getIt<LocalUser>();
 
     // Should always be available.  This is just a fail-safe
-    String _notificationSettingsId = notificationSettingsId ?? _getNotificationSettingsId();
+    String _notificationSettingsId =
+        notificationSettingsId ?? _getNotificationSettingsId();
 
     try {
       // Update flag in users/<user-doc>/notification_settings/<single-notification-settings-doc>
@@ -88,7 +67,11 @@ class NotificationSettingsService implements INotificationSettingsService {
     final LocalUser user = getIt<LocalUser>();
     QuerySnapshot querySnapshot;
     try {
-      querySnapshot = await _firestore.collection("users").doc(user.id).collection("notification_settings").get();
+      querySnapshot = await _firestore
+          .collection("users")
+          .doc(user.id)
+          .collection("notification_settings")
+          .get();
     } catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
@@ -99,7 +82,8 @@ class NotificationSettingsService implements INotificationSettingsService {
       // Set notificationSettingsId
       notificationSettingsId = notificationSettingsDoc.id;
 
-      return NotificationSettingsDto.fromFirestore(notificationSettingsDoc).toDomain();
+      return NotificationSettingsDto.fromFirestore(notificationSettingsDoc)
+          .toDomain();
     }
     throw NotificationSettingsException(
       code: NotificationSettingsExceptionCode.NO_NOTIFICATION_SETTINGS,
@@ -111,7 +95,11 @@ class NotificationSettingsService implements INotificationSettingsService {
     final LocalUser user = getIt<LocalUser>();
     QuerySnapshot querySnapshot;
     try {
-      querySnapshot = await _firestore.collection("users").doc(user.id).collection("notification_settings").get();
+      querySnapshot = await _firestore
+          .collection("users")
+          .doc(user.id)
+          .collection("notification_settings")
+          .get();
     } catch (e) {
       _firebaseFirestoreService.handleException(e);
     }

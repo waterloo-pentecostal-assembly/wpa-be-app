@@ -14,14 +14,16 @@ class RecentPrayerRequestsWidget extends StatelessWidget {
         return Column(
           children: [
             Padding(
-              padding: EdgeInsets.only(left: 24, top: 12, bottom: 12, right: 24),
+              padding:
+                  EdgeInsets.only(left: 24, top: 12, bottom: 12, right: 24),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   getIt<TextFactory>().subHeading('Recent Prayer Requests'),
                   GestureDetector(
                     child: getIt<TextFactory>().regular('See all'),
-                    onTap: () => Navigator.pushNamed(context, '/prayer_requests'),
+                    onTap: () =>
+                        Navigator.pushNamed(context, '/prayer_requests'),
                   ),
                 ],
               ),
@@ -72,7 +74,8 @@ class RecentPrayerRequestsPlaceholder extends StatelessWidget {
 class RecentPrayerRequestsError extends StatelessWidget {
   final String errorMessage;
 
-  const RecentPrayerRequestsError({Key key, this.errorMessage}) : super(key: key);
+  const RecentPrayerRequestsError({Key key, this.errorMessage})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {

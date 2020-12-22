@@ -51,11 +51,14 @@ class StreaksTile extends StatelessWidget {
                 getIt<TextFactory>().subHeading3('CURRENT STREAK'),
                 Row(
                   children: [
-                    getIt<TextFactory>().heading('${achievements.currentStreak}', fontWeight: FontWeight.w500),
+                    getIt<TextFactory>().heading(
+                        '${achievements.currentStreak}',
+                        fontWeight: FontWeight.w500),
                     Icon(Icons.flash_on, color: Colors.grey.shade600)
                   ],
                 ),
-                getIt<TextFactory>().lite('BEST: ${achievements.longestStreak} DAY${getS(achievements.longestStreak)}'),
+                getIt<TextFactory>().lite(
+                    'BEST: ${achievements.longestStreak} DAY${getS(achievements.longestStreak)}'),
               ],
             ),
           ),
@@ -70,7 +73,9 @@ class StreaksTile extends StatelessWidget {
                 getIt<TextFactory>().subHeading3('PERFECT SERIES'),
                 Row(
                   children: [
-                    getIt<TextFactory>().heading('${achievements.perfectSeries}', fontWeight: FontWeight.w500),
+                    getIt<TextFactory>().heading(
+                        '${achievements.perfectSeries}',
+                        fontWeight: FontWeight.w500),
                     Icon(
                       Icons.star,
                       color: Colors.grey.shade600,

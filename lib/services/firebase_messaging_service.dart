@@ -25,7 +25,8 @@ class FirebaseMessagingService {
 
   Future<void> initialize() async {
     if (Platform.isIOS) {
-      _firebaseMessaging.requestNotificationPermissions(IosNotificationSettings());
+      _firebaseMessaging
+          .requestNotificationPermissions(IosNotificationSettings());
     }
 
     // If you want to test the push notification locally,

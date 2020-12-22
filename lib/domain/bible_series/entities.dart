@@ -45,7 +45,7 @@ class BibleSeries {
 
   @override
   String toString() {
-    return '''id: ${id}, title: $title, subtitle: $subTitle, imageUrl: $imageUrl, 
+    return '''id: $id, title: $title, subtitle: $subTitle, imageUrl: $imageUrl, 
               startDate: $startDate, endDate: $endDate, isActive: $isActive, 
               seriesContentSnippet: $seriesContentSnippet''';
   }
@@ -134,7 +134,8 @@ class SeriesContent {
   /// Checks if it possible to have a response for this [SeriesContent]
   bool get isResponsePossible {
     this.body.forEach((element) {
-      if (element.type == SeriesContentBodyType.QUESTION || element.type == SeriesContentBodyType.IMAGE_INPUT) {
+      if (element.type == SeriesContentBodyType.QUESTION ||
+          element.type == SeriesContentBodyType.IMAGE_INPUT) {
         return true;
       }
     });

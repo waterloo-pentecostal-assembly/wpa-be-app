@@ -13,7 +13,8 @@ validatePassword(String password) {
   if (password.length >= 8) {
     return password;
   } else {
-    throw ValueObjectException(message: 'Password must be at least 8 characters.');
+    throw ValueObjectException(
+        message: 'Password must be at least 8 characters.');
   }
   // if (RegExp(AppConstants.passwordRegex).hasMatch(password)) {
   //   return password;

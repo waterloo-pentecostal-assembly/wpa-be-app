@@ -37,9 +37,13 @@ class AchievementsRepository implements IAchievementsRepository {
   Stream<Achievements> watchAchievements() async* {
     final LocalUser user = getIt<LocalUser>();
     try {
-      yield* _achievementsCollection.doc(user.id).snapshots().map((documentSnapshot) {
+      yield* _achievementsCollection
+          .doc(user.id)
+          .snapshots()
+          .map((documentSnapshot) {
         if (documentSnapshot.data() == null) {
-          return Achievements(currentStreak: 0, longestStreak: 0, perfectSeries: 0);
+          return Achievements(
+              currentStreak: 0, longestStreak: 0, perfectSeries: 0);
         }
         return AchievementsDto.fromFirestore(documentSnapshot).toDomain();
       });

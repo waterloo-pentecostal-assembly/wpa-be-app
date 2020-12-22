@@ -10,7 +10,8 @@ class SignInPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: BlocProvider(
-        create: (context) => getIt<SignInBloc>(), //SignInBloc(FirebaseAuthenticationFacade),
+        create: (context) =>
+            getIt<SignInBloc>(), //SignInBloc(FirebaseAuthenticationFacade),
         child: SignInForm(),
       ),
     );

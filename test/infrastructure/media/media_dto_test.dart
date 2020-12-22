@@ -4,7 +4,8 @@ import 'package:wpa_app/domain/media/entities.dart';
 import 'package:wpa_app/services/firebase_storage_service.dart';
 import 'package:wpa_app/infrastructure/media/media_dto.dart';
 
-class MockFirebaseStorageService extends Mock implements FirebaseStorageService {}
+class MockFirebaseStorageService extends Mock
+    implements FirebaseStorageService {}
 
 void main() {
   MockFirebaseStorageService mockFirebaseStorageService;
@@ -26,11 +27,13 @@ void main() {
       "thumbnail_gs_location": "thumbnail_gs_location"
     };
 
-    when(mockFirebaseStorageService.getDownloadUrl(any)).thenAnswer((_) async => 'thumbnail_download_url');
+    when(mockFirebaseStorageService.getDownloadUrl(any))
+        .thenAnswer((_) async => 'thumbnail_download_url');
 
     // act
-    final Media mediaObject =
-        await MediaDto.fromJson(validMediaJson).copyWith(id: "id").toDomain(mockFirebaseStorageService);
+    final Media mediaObject = await MediaDto.fromJson(validMediaJson)
+        .copyWith(id: "id")
+        .toDomain(mockFirebaseStorageService);
 
     //assert
     expect(mediaObject.id, "id");

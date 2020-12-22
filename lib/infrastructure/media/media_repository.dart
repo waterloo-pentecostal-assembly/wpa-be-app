@@ -34,7 +34,8 @@ class MediaRepository implements IMediaRepository {
 
     for (QueryDocumentSnapshot doc in querySnapshot.docs) {
       try {
-        mediaList.add(await MediaDto.fromFirestore(doc).toDomain(_firebaseStorageService));
+        mediaList.add(await MediaDto.fromFirestore(doc)
+            .toDomain(_firebaseStorageService));
       } catch (e) {
         // Handle so that malformed documents in Firestore does not affect app
       }

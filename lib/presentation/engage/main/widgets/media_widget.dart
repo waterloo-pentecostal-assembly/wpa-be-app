@@ -18,7 +18,8 @@ class MediaWidget extends StatelessWidget {
         return Column(
           children: [
             Padding(
-              padding: EdgeInsets.only(left: 24, top: 12, bottom: 12, right: 24),
+              padding:
+                  EdgeInsets.only(left: 24, top: 12, bottom: 12, right: 24),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
@@ -49,7 +50,8 @@ class MediaWidget extends StatelessWidget {
 class MediaWidgetLoaded extends StatelessWidget {
   final List<Media> mediaList;
 
-  const MediaWidgetLoaded({Key key, @required this.mediaList}) : super(key: key);
+  const MediaWidgetLoaded({Key key, @required this.mediaList})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +101,8 @@ class MediaCard extends StatelessWidget {
                 media.thumbnailUrl,
                 height: kMediaTileHeight,
                 fit: BoxFit.fill,
-                frameBuilder: (BuildContext context, Widget child, int frame, bool wasSynchronouslyLoaded) {
+                frameBuilder: (BuildContext context, Widget child, int frame,
+                    bool wasSynchronouslyLoaded) {
                   if (frame != null && frame >= 0) {
                     return child;
                   } else {
@@ -114,7 +117,8 @@ class MediaCard extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.only(left: 8.0),
-              child: getIt<TextFactory>().lite(media.description, overflow: TextOverflow.ellipsis),
+              child: getIt<TextFactory>()
+                  .lite(media.description, overflow: TextOverflow.ellipsis),
             ),
           ],
         ),

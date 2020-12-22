@@ -26,7 +26,7 @@ class SignUpState extends Equatable {
     return emailAddressValid &&
         passwordValid &&
         emailAddressFilled &&
-        passwordFilled && 
+        passwordFilled &&
         lastNameValid &&
         firstNamwValid &&
         lastNameFilled &&

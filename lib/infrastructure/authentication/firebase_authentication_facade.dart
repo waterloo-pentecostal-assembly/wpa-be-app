@@ -58,7 +58,8 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
       );
     }
 
-    LocalUser domainUser = await FirebaseUserDto.fromFirestore(userInfo).toDomain(_firebaseStorageService);
+    LocalUser domainUser = await FirebaseUserDto.fromFirestore(userInfo)
+        .toDomain(_firebaseStorageService);
     return domainUser;
   }
 
@@ -88,7 +89,8 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
       if (e.code == 'email-already-in-use') {
         throw AuthenticationException(
           code: AuthenticationExceptionCode.EMAIL_IN_USE,
-          message: 'A user with this email already exists. Please try signing in',
+          message:
+              'A user with this email already exists. Please try signing in',
         );
       } else {
         rethrow;
@@ -253,7 +255,12 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
     String platform = _firebaseMessagingService.getPlatform();
 
     try {
-      await _firestore.collection("users").doc(userId).collection("devices").doc(deviceToken).set({
+      await _firestore
+          .collection("users")
+          .doc(userId)
+          .collection("devices")
+          .doc(deviceToken)
+          .set({
         "token": deviceToken,
         "created_at": Timestamp.now(),
         "platform": platform,
@@ -269,7 +276,12 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
 
     DocumentSnapshot documentSnapshot;
     try {
-      documentSnapshot = await _firestore.collection("users").doc(userId).collection("devices").doc(deviceToken).get();
+      documentSnapshot = await _firestore
+          .collection("users")
+          .doc(userId)
+          .collection("devices")
+          .doc(deviceToken)
+          .get();
     } catch (e) {
       _firebaseFirestoreService.handleException(e);
     }

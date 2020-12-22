@@ -111,8 +111,13 @@ class TextFactory {
     );
   }
 
-  TextStyle textFormFieldInputStyle({Color color = Colors.black, double fontSize = 14.0}) {
-    return TextStyle(fontFamily: _fontFamily, fontWeight: FontWeight.w500, fontSize: fontSize, color: color);
+  TextStyle textFormFieldInputStyle(
+      {Color color = Colors.black, double fontSize = 14.0}) {
+    return TextStyle(
+        fontFamily: _fontFamily,
+        fontWeight: FontWeight.w500,
+        fontSize: fontSize,
+        color: color);
   }
 
   Text lite(

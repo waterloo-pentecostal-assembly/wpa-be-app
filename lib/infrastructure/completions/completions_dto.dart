@@ -20,7 +20,8 @@ class CompletionsDto {
       contentId: findOrThrowException(json, 'content_id'),
       isOnTime: !isDraft ? findOrThrowException(json, 'is_on_time') : false,
       isDraft: isDraft,
-      completionDate: !isDraft ? findOrThrowException(json, 'completion_date') : null,
+      completionDate:
+          !isDraft ? findOrThrowException(json, 'completion_date') : null,
     );
   }
 

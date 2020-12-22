@@ -19,7 +19,8 @@ class BibleSeriesDto {
   final List<SeriesContentSnippetDto> seriesContentSnippet;
 
   factory BibleSeriesDto.fromJson(Map<String, dynamic> json) {
-    List<dynamic> _seriesContentSnippetFirebase = json['series_content_snippet'] ?? [];
+    List<dynamic> _seriesContentSnippetFirebase =
+        json['series_content_snippet'] ?? [];
     List<SeriesContentSnippetDto> _seriesContentSnippet = [];
 
     _seriesContentSnippetFirebase.forEach((element) {
@@ -79,14 +80,16 @@ class BibleSeriesDto {
 }
 
 extension BibleSeriesDtoX on BibleSeriesDto {
-  Future<BibleSeries> toDomain(FirebaseStorageService firebaseStorageService) async {
+  Future<BibleSeries> toDomain(
+      FirebaseStorageService firebaseStorageService) async {
     List<SeriesContentSnippet> _seriesContentSnippet = [];
     this.seriesContentSnippet.forEach((element) {
       _seriesContentSnippet.add(element.toDomain());
     });
 
     // Convert GS URL to Download URL
-    String imageUrl = await firebaseStorageService.getDownloadUrl(this.imageGsLocation);
+    String imageUrl =
+        await firebaseStorageService.getDownloadUrl(this.imageGsLocation);
 
     return BibleSeries(
       id: this.id,
@@ -132,8 +135,10 @@ extension SeriesContentSnippetDtoX on SeriesContentSnippetDto {
   SeriesContentSnippet toDomain() {
     List<AvailableContentType> availableContentTypes = [];
     this.contentTypes.forEach((element) {
-      final SeriesContentType seriesContentType = contentTypeMapper(findOrThrowException(element, 'content_type'));
-      final String seriesContentId = findOrThrowException(element, 'content_id');
+      final SeriesContentType seriesContentType =
+          contentTypeMapper(findOrThrowException(element, 'content_type'));
+      final String seriesContentId =
+          findOrThrowException(element, 'content_id');
       if (seriesContentType != null) {
         availableContentTypes.add(AvailableContentType(
           seriesContentType: seriesContentType,

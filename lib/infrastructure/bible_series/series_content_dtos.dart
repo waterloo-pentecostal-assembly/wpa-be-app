@@ -68,9 +68,10 @@ class SeriesContentDto {
 extension SeriesContentDtoX on SeriesContentDto {
   SeriesContent toDomain(FirebaseStorageService firebaseStorageService) {
     List<ISeriesContentBody> _body = [];
-    
+
     this.body.forEach((element) async {
-      ISeriesContentBody seriesContentBody = await element.toDomain(body.indexOf(element), firebaseStorageService);
+      ISeriesContentBody seriesContentBody =
+          await element.toDomain(body.indexOf(element), firebaseStorageService);
       _body.add(seriesContentBody);
     });
 
@@ -94,7 +95,8 @@ class SeriesContentBodyDto {
     Map<String, dynamic> _properties = {};
 
     if (_bodyType == 'audio') {
-      _properties['audioFileGsLocation'] = findOrThrowException(json, 'audio_file_gs_location');
+      _properties['audioFileGsLocation'] =
+          findOrThrowException(json, 'audio_file_gs_location');
     } else if (_bodyType == 'text') {
       _properties['paragraphs'] = findOrThrowException(json, 'paragraphs');
     } else if (_bodyType == 'question') {
@@ -129,12 +131,14 @@ class SeriesContentBodyDto {
 
 extension SeriesContentBodyDtoX on SeriesContentBodyDto {
   // ignore: missing_return
-  Future<ISeriesContentBody> toDomain(int index, FirebaseStorageService firebaseStorageService) async {
+  Future<ISeriesContentBody> toDomain(
+      int index, FirebaseStorageService firebaseStorageService) async {
     if (this.bodyType == 'audio') {
       AudioBodyProperties bodyProperties = AudioBodyProperties();
 
       // Convert GS URL to Download URL
-      String audioFileUrl = await firebaseStorageService.getDownloadUrl(this.properties['audioFileGsLocation']);
+      String audioFileUrl = await firebaseStorageService
+          .getDownloadUrl(this.properties['audioFileGsLocation']);
 
       bodyProperties.audioFileUrl = audioFileUrl;
 
@@ -164,7 +168,8 @@ extension SeriesContentBodyDtoX on SeriesContentBodyDto {
       List<dynamic> _scriptures = this.properties['scriptures'];
       _scriptures.forEach((element) {
         Map<String, String> _verses = {};
-        Map<String, dynamic> _versesFirebase = findOrThrowException(element, 'verses');
+        Map<String, dynamic> _versesFirebase =
+            findOrThrowException(element, 'verses');
 
         _versesFirebase.forEach((key, value) {
           _verses[key] = value;
@@ -190,7 +195,9 @@ extension SeriesContentBodyDtoX on SeriesContentBodyDto {
       dynamic questions = this.properties['questions'];
 
       questions.forEach((question) {
-        _questions.add(Question(location: [index, questions.indexOf(question)], question: question));
+        _questions.add(Question(
+            location: [index, questions.indexOf(question)],
+            question: question));
       });
 
       bodyProperties.questions = _questions;

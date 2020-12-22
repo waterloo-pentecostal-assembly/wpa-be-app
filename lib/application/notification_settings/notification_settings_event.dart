@@ -21,7 +21,8 @@ class SubscribedToDailyEngagementReminder extends NotificationSettingsEvent {
   List<Object> get props => [];
 }
 
-class UnsubscribedFromDailyEngagementReminder extends NotificationSettingsEvent {
+class UnsubscribedFromDailyEngagementReminder
+    extends NotificationSettingsEvent {
   UnsubscribedFromDailyEngagementReminder();
 
   @override

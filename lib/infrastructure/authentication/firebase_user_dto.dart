@@ -44,7 +44,8 @@ class FirebaseUserDto {
       email: email ?? this.email,
       reports: reports ?? this.reports,
       profilePhotoUrl: profilePhotoUrl ?? this.profilePhotoUrl,
-      profilePhotoGsLocation: profilePhotoGsLocation ?? this.profilePhotoGsLocation,
+      profilePhotoGsLocation:
+          profilePhotoGsLocation ?? this.profilePhotoGsLocation,
     );
   }
 
@@ -60,9 +61,11 @@ class FirebaseUserDto {
 }
 
 extension FirebaseUserDtoX on FirebaseUserDto {
-  Future<LocalUser> toDomain(FirebaseStorageService firebaseStorageService) async {
+  Future<LocalUser> toDomain(
+      FirebaseStorageService firebaseStorageService) async {
     // Convert GS Location to Download URL
-    String profilePhotoUrl = await firebaseStorageService.getDownloadUrl(this.profilePhotoGsLocation);
+    String profilePhotoUrl = await firebaseStorageService
+        .getDownloadUrl(this.profilePhotoGsLocation);
 
     return LocalUser(
       id: this.id,

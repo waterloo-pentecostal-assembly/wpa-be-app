@@ -8,7 +8,8 @@ class DateFormatter {
 
   timeStampToString(Timestamp timestamp, {String format = 'd MMM yyyy'}) {
     DateFormat formatter = this.getFormatter(format);
-    DateTime dateTime = DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch);
+    DateTime dateTime =
+        DateTime.fromMillisecondsSinceEpoch(timestamp.millisecondsSinceEpoch);
     String formattedDate = formatter.format(dateTime);
     return formattedDate;
   }

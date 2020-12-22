@@ -36,6 +36,8 @@ class NotificationsPage extends IIndexedPage {
                   return NotificationsPageRoot();
                 case '/notification_detail':
                   return NotificationDetail();
+                default:
+                  return NotificationsPageRoot();
               }
             },
           );

@@ -7,15 +7,16 @@ void main() {
     // arrange
     final String validEmail = 'example@mail.com';
     final String expectedResult = 'example@mail.com';
-    
+
     // act
     final String result = validateEmailAddress(validEmail);
-    
+
     //assert
     expect(result, expectedResult);
   });
 
-  test('validateEmailAddress should raise ValueObjectException once invalid', () {
+  test('validateEmailAddress should raise ValueObjectException once invalid',
+      () {
     // arrange
     final String invalidEmail = 'mail.com';
     final String expectedErrorMessage = 'Invalid email address.';
@@ -27,7 +28,7 @@ void main() {
     } catch (e) {
       error = e;
     }
-    
+
     //act and assert
     expect(error.message, expectedErrorMessage);
     expect(error.code, ValueObjectExceptionCode.INVALID_FORMAT);
