@@ -2,13 +2,11 @@ import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 
-import 'app_config.dart';
 import '../application/achievements/achievements_bloc.dart';
 import '../application/authentication/authentication_bloc.dart';
 import '../application/authentication/password_reset/password_reset_bloc.dart';
@@ -40,6 +38,7 @@ import '../presentation/common/text_factory.dart';
 import '../services/firebase_firestore_service.dart';
 import '../services/firebase_messaging_service.dart';
 import '../services/firebase_storage_service.dart';
+import 'app_config.dart';
 
 // Global ServiceLocator
 GetIt getIt = GetIt.instance;
@@ -50,8 +49,6 @@ void initializeInjections({
   @required AppConfig appConfig,
 }) async {
   // Dependency Injection Configuration
-
-  // NOTE: Different settings for different environments (PROD, TEST, etc) can be configured here as well
 
   /*
   NOTE:
@@ -70,7 +67,7 @@ void initializeInjections({
 
     if (useLocalFirestore) {
       String host = 'localhost';
-      String port = '8080';
+      String port = '8081';
 
       if (Platform.isAndroid) {
         host = '10.0.2.2';
