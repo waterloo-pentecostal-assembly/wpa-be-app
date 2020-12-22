@@ -92,4 +92,4 @@ There are currently two ways we can run the application in the development envir
     To do this, either:
     
     * Run `flutter run -t lib/app/flavors/main_local_dev.dart --flavor dev` in the `wpa-be-app` folder.
-    * Navigate to the run tab in VSCode, select the `wpa-be-app-dev` configuration and click the green run icon.
+    * Navigate to the run tab in VSCode, select the `wpa-be-app-local-dev` configuration and click the green run icon.
