@@ -36,29 +36,38 @@ class FirebaseMessagingService {
 
     _firebaseMessaging.configure(
       //when the app is running in the foreground and the notification is clicked
-      onMessage: (Map<String, dynamic> message) async {
-        print("onMessage: $message");
-        // String _message;
-        // TODO: we may need to handle the message by platform.
-        // if (Platform.isIOS) {
-        //   //hanle ios
-        // } else {
-        //   // handle android
-        // }
-      },
+      onMessage: onMessageHanlder,
+
       //when clicking on a notification and the application is not running at all
-      onLaunch: (Map<String, dynamic> message) async {
-        print("onLaunch: $message");
-      },
+      onLaunch: onLaunchHanlder,
+
       //when clicking on a notification and the application is running in the background
-      onResume: (Map<String, dynamic> message) async {
-        print("onResume: $message");
-      },
-      onBackgroundMessage: backgroundMessageHandler,
+      onResume: onResumeHanlder,
+
+      onBackgroundMessage: onBackgroundMessageHandler,
     );
   }
 
-  Future<dynamic> backgroundMessageHandler(Map<String, dynamic> message) async {
+  Future onMessageHanlder(Map<String, dynamic> message) async {
+    print("onMessage: $message");
+    // String _message;
+    // TODO: we may need to handle the message by platform.
+    // if (Platform.isIOS) {
+    //   //hanle ios
+    // } else {
+    //   // handle android
+    // }
+  }
+
+  Future onLaunchHanlder(Map<String, dynamic> message) async {
+    print("onLaunch: $message");
+  }
+
+  Future onResumeHanlder(Map<String, dynamic> message) async {
+    print("onLaunch: $message");
+  }
+
+  Future onBackgroundMessageHandler(Map<String, dynamic> message) async {
     // Note: the protocol of data and notification are in line with the fields defined by a RemoteMessage.
     // https://firebase.google.com/docs/reference/android/com/google/firebase/messaging/RemoteMessage
 
