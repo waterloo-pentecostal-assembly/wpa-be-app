@@ -21,11 +21,17 @@ class NotificationSettingsService implements INotificationSettingsService {
 
   @override
   Future<void> subscribeToDailyEngagementReminder() async {
+    // FCM topic subscription handled by Firebase Functions
+    // This is done to handle multiple device tokens which is not
+    // possible with the dart SDK.
     _setNotificationSetting({"daily_engagement_reminder": true});
   }
 
   @override
   Future<void> unsubscribeFromDailyEngagementReminder() async {
+    // FCM topic unsubscription handled by Firebase Functions
+    // This is done to handle multiple device tokens which is not
+    // possible with the dart SDK.
     _setNotificationSetting({"daily_engagement_reminder": false});
   }
 
