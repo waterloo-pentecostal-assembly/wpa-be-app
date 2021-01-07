@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/domain/bible_series/entities.dart';
+import 'package:wpa_app/presentation/engage/bible_series/widgets/body_generator_must_delete.dart';
+import 'package:wpa_app/presentation/engage/bible_series/widgets/question_body.dart';
+import 'package:wpa_app/presentation/engage/bible_series/widgets/scripture_body.dart';
 
 import '../../../app/injection.dart';
 import '../../../application/achievements/achievements_bloc.dart';
@@ -80,6 +84,15 @@ class EngagePage extends IIndexedPage {
                       bibleSeriesId: args['bibleSeriesId'],
                       getCompletionDetails: args['getCompletionDetails'],
                     );
+                  //for testing
+                  case '/test':
+                    ScriptureBody script = getSampleScriptureBody();
+                    return ScriptureContentBodyWidget(
+                        scriptureContentBody: script);
+                  // case '/test':
+                  //   QuestionBody question = getSampleQuestionBody();
+                  //   return QuestionContentBodyWidget(
+                  //       questionContentBody: question);
                 }
                 // Handles case where no routes match
                 return EngageIndex();

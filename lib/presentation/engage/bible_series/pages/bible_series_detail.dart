@@ -208,12 +208,14 @@ List<Widget> _buildContentChildren(
           child: Tab(
             child: GestureDetector(
               onTap: () {
-                Navigator.pushNamed(context, '/content_detail', arguments: {
-                  'bibleSeriesId': bibleSeriesId,
-                  'seriesContentId': element.contentId,
-                  'getCompletionDetails':
-                      element.isCompleted || element.isDraft,
-                });
+                //testing
+                Navigator.pushNamed(context, '/test');
+                // Navigator.pushNamed(context, '/content_detail', arguments: {
+                //   'bibleSeriesId': bibleSeriesId,
+                //   'seriesContentId': element.contentId,
+                //   'getCompletionDetails':
+                //       element.isCompleted || element.isDraft,
+                // });
               },
               child: Container(
                 width: 0.9 * MediaQuery.of(context).size.width,
