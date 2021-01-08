@@ -43,7 +43,7 @@ Widget scripture(Scripture script) {
 List<Widget> buildcombinedScripture(Scripture script) {
   List<Widget> combinedScripture = [];
   combinedScripture.add(book(script));
-  if (script.title != null) {
+  if (script.title != '') {
     combinedScripture.add(Padding(
         padding: const EdgeInsets.only(bottom: 16),
         child: getIt<TextFactory>().regular(script.title)));
