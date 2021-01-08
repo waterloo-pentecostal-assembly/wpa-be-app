@@ -48,3 +48,6 @@ const kDailyEngagementReminderTopic = 'daily_engagement_reminder';
 const kWpaContactEmail = 'dan@wpa.church';
 const kHelpEmailSubject = '[WPA BE APP] Help Request';
 const kReportEmailSubject = '[WPA BE APP] Problem Report';
+
+//QuestionBody Widget Padding
+const kTopPaddingQuestionBody = 8.0;

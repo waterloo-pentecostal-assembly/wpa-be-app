@@ -141,4 +141,35 @@ class TextFactory {
       color: color,
     );
   }
+
+  Text liteLarge(
+    String text, {
+    double fontSize = 14.0,
+    Color color: Colors.black,
+    TextOverflow overflow = TextOverflow.visible,
+  }) {
+    return Text(
+      text,
+      style: liteLargeTextStyle(fontSize: fontSize, color: color),
+      overflow: overflow,
+    );
+  }
+
+  TextStyle liteLargeTextStyle({double fontSize, Color color = Colors.black}) {
+    return TextStyle(
+      fontFamily: _fontFamily,
+      fontWeight: FontWeight.w400,
+      fontSize: fontSize,
+      color: color,
+    );
+  }
+
+  TextStyle smallBoldTextStyle({double fontSize, Color color = Colors.black}) {
+    return TextStyle(
+      fontFamily: _fontFamily,
+      fontWeight: FontWeight.bold,
+      fontSize: fontSize,
+      color: color,
+    );
+  }
 }
