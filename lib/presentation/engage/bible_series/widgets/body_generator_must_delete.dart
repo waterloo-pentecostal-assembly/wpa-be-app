@@ -22,7 +22,10 @@ TextBody getSampleTextBody() {
 QuestionBody getSampleQuestionBody() {
   QuestionBodyProperties questionBodyProperties = QuestionBodyProperties();
   questionBodyProperties.questions = [
-    Question(question: 'Sample Question 1?', location: [0, 0]),
+    Question(
+        question:
+            'Sample Question 1 Sample Question 1Sample Question 1Sample Question 1Sample Question 1Sample Question 1?',
+        location: [0, 0]),
     Question(question: 'Sample Question 2?', location: [0, 1]),
   ];
 
