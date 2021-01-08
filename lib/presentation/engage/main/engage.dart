@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/domain/bible_series/entities.dart';
 import 'package:wpa_app/presentation/engage/bible_series/widgets/body_generator_must_delete.dart';
 import 'package:wpa_app/presentation/engage/bible_series/widgets/question_body.dart';
-import 'package:wpa_app/presentation/engage/bible_series/widgets/scripture_body.dart';
 
 import '../../../app/injection.dart';
 import '../../../application/achievements/achievements_bloc.dart';
