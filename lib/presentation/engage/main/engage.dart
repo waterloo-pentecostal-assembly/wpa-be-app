@@ -83,14 +83,6 @@ class EngagePage extends IIndexedPage {
                       bibleSeriesId: args['bibleSeriesId'],
                       getCompletionDetails: args['getCompletionDetails'],
                     );
-                  //for testing
-                  // case '/test':
-                  //   ScriptureBody script = getSampleScriptureBody();
-                  //   return ScriptureContentBodyWidget(
-                  //       scriptureContentBody: script);
-                  case '/test':
-                    AudioBody audio = getSampleAudioBody();
-                    return AudioContentBodyWidget(audioContentBody: audio);
                 }
                 // Handles case where no routes match
                 return EngageIndex();
