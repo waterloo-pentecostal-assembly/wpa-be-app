@@ -25,7 +25,6 @@ class ScriptureContentBodyWidget extends StatelessWidget {
                 padding: const EdgeInsets.only(top: 0),
                 itemCount: scriptureContentBody.properties.scriptures.length,
                 itemBuilder: (BuildContext context, int index) {
-                  //return Text("top");
                   return scripture(
                       scriptureContentBody.properties.scriptures[index]);
                 }),
@@ -38,36 +37,45 @@ class ScriptureContentBodyWidget extends StatelessWidget {
 }
 
 Widget scripture(Scripture script) {
-  return Column(
-    children: [
-      Padding(
-        padding: const EdgeInsets.fromLTRB(0, 8, 0, 16),
-        child: title(script),
-      ),
-      ListView.builder(
-        padding: const EdgeInsets.only(top: 0),
-        shrinkWrap: true,
-        itemCount: script.verses.length,
-        physics: ClampingScrollPhysics(),
-        itemBuilder: (BuildContext context, int index) {
-          String key = script.verses.keys.elementAt(index);
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 8.0),
-            child: verse(script, key),
-          );
-        },
-      ),
-    ],
-  );
+  return Column(children: buildcombinedScripture(script));
 }
 
-Widget title(Scripture script) {
+List<Widget> buildcombinedScripture(Scripture script) {
+  List<Widget> combinedScripture = [];
+  combinedScripture.add(book(script));
+  if (script.title != '') {
+    combinedScripture.add(Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: getIt<TextFactory>().regular(script.title)));
+  }
+  combinedScripture.add(
+    ListView.builder(
+      padding: const EdgeInsets.only(top: 0),
+      shrinkWrap: true,
+      itemCount: script.verses.length,
+      physics: ClampingScrollPhysics(),
+      itemBuilder: (BuildContext context, int index) {
+        String key = script.verses.keys.elementAt(index);
+        return Padding(
+          padding: const EdgeInsets.only(bottom: 8.0),
+          child: verse(script, key),
+        );
+      },
+    ),
+  );
+  return combinedScripture;
+}
+
+Widget book(Scripture script) {
   String start = script.verses.keys.elementAt(0);
   String end = script.verses.keys.elementAt(script.verses.length - 1);
   String book = script.book;
   String chapter = script.chapter;
   String text = "$book $chapter: $start - $end";
-  return getIt<TextFactory>().subHeading(text);
+  return Padding(
+    padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+    child: getIt<TextFactory>().subHeading(text),
+  );
 }
 
 Widget copyright(ScriptureBody script) {
