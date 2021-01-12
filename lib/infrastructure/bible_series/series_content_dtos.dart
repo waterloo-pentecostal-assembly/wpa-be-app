@@ -66,15 +66,23 @@ class SeriesContentDto {
 }
 
 extension SeriesContentDtoX on SeriesContentDto {
-  SeriesContent toDomain(FirebaseStorageService firebaseStorageService) {
+  // Future<SeriesContent> toDomain(FirebaseStorageService firebaseStorageService) {
+  //   List<ISeriesContentBody> _body = [];
+
+  //   this.body.forEach((element) async {
+  //     ISeriesContentBody seriesContentBody =
+  //         await element.toDomain(body.indexOf(element), firebaseStorageService);
+  //     _body.add(seriesContentBody);
+  //   });
+  Future<SeriesContent> toDomain(
+      FirebaseStorageService firebaseStorageService) async {
     List<ISeriesContentBody> _body = [];
 
-    this.body.forEach((element) async {
+    for (SeriesContentBodyDto element in this.body) {
       ISeriesContentBody seriesContentBody =
           await element.toDomain(body.indexOf(element), firebaseStorageService);
       _body.add(seriesContentBody);
-    });
-
+    }
     return SeriesContent(
       id: this.id,
       title: this.title,

@@ -1,23 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:wpa_app/domain/bible_series/entities.dart';
 
 //Used Stateful so that bloc and states can be implemented later
 class ImageInputBodyWidget extends StatelessWidget {
+  final ImageInputBody imageInputBody;
+  const ImageInputBodyWidget({Key key, this.imageInputBody}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return ImageInputBody();
+    return ImageInputBodyState();
   }
 }
 
-class ImageInputBody extends StatefulWidget {
+class ImageInputBodyState extends StatefulWidget {
   @override
   _ImageInputBodyState createState() => _ImageInputBodyState();
 }
 
-class _ImageInputBodyState extends State<ImageInputBody> {
+class _ImageInputBodyState extends State<ImageInputBodyState> {
   @override
   Widget build(BuildContext context) {
     return Container(
         child: IconButton(
+      alignment: Alignment.topCenter,
       icon: Icon(
         Icons.add_a_photo,
         size: 80,
