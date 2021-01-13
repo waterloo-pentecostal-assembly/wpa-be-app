@@ -46,70 +46,96 @@ class ContentDetailPage extends StatelessWidget {
 }
 
 class ContentDetailWidget extends StatelessWidget {
+  final GlobalKey<AudioSliderState> keyChild = GlobalKey();
+
+  List<Widget> contentDetailList(SeriesContent seriesContent) {
+    List<ISeriesContentBody> body = seriesContent.body;
+    List<Widget> contentBodyList = [];
+    body.forEach((element) {
+      if (element.type == SeriesContentBodyType.AUDIO) {
+        contentBodyList.add(AudioSlider(
+          key: this.keyChild,
+          audioContentBody: element,
+        ));
+      } else if (element.type == SeriesContentBodyType.TEXT) {
+        contentBodyList.add(TextContentBodyWidget(
+          textContentBody: element,
+        ));
+      } else if (element.type == SeriesContentBodyType.SCRIPTURE) {
+        contentBodyList.add(ScriptureContentBodyWidget(
+          scriptureContentBody: element,
+        ));
+      } else if (element.type == SeriesContentBodyType.QUESTION) {
+        contentBodyList.add(QuestionContentBodyWidget(
+          questionContentBody: element,
+        ));
+      } else if (element.type == SeriesContentBodyType.IMAGE_INPUT) {
+        contentBodyList.add(ImageInputBodyWidget(
+          imageInputBody: element,
+        ));
+      }
+    });
+    return contentBodyList;
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<BibleSeriesBloc, BibleSeriesState>(
-      listener: (context, state) {},
-      builder: (BuildContext context, BibleSeriesState state) {
-        if (state is SeriesContentDetail) {
-          return SafeArea(
-            child: Scaffold(
-              body: Container(
-                  padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
-                  child: Column(children: <Widget>[
-                    HeaderWidget(
-                        state.seriesContentDetail.contentType.toString()),
-                    ListView(
-                      shrinkWrap: true,
-                      children: contentDetailList(state.seriesContentDetail),
-                    )
-                  ])),
-            ),
-          );
-        } else if (state is BibleSeriesError) {
-          return Scaffold(
-              body: SafeArea(
-            child: Text('Error: ${state.message}'),
-          ));
+    return WillPopScope(
+      onWillPop: () {
+        if (keyChild.currentState != null) {
+          keyChild.currentState.stopAudio();
         }
-        return Loader();
+        Navigator.pop(context);
+        return Future.value(false);
       },
+      child: BlocConsumer<BibleSeriesBloc, BibleSeriesState>(
+        listener: (context, state) {},
+        builder: (BuildContext context, BibleSeriesState state) {
+          if (state is SeriesContentDetail) {
+            return SafeArea(
+              child: Scaffold(
+                body: Container(
+                    padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
+                    child: Column(children: <Widget>[
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        child: GestureDetector(
+                          onTap: () => {
+                            if (keyChild.currentState != null)
+                              {keyChild.currentState.stopAudio()},
+                            Navigator.pop(context)
+                          },
+                          child: Icon(
+                            Icons.arrow_back,
+                          ),
+                        ),
+                      ),
+                      HeaderWidget(
+                          contentType:
+                              state.seriesContentDetail.contentType.toString()),
+                      ListView(
+                        shrinkWrap: true,
+                        children: contentDetailList(state.seriesContentDetail),
+                      ),
+                    ])),
+              ),
+            );
+          } else if (state is BibleSeriesError) {
+            return Scaffold(
+                body: SafeArea(
+              child: Text('Error: ${state.message}'),
+            ));
+          }
+          return Loader();
+        },
+      ),
     );
   }
 }
 
-List<Widget> contentDetailList(SeriesContent seriesContent) {
-  List<ISeriesContentBody> body = seriesContent.body;
-  List<Widget> contentBodyList = [];
-  body.forEach((element) {
-    if (element.type == SeriesContentBodyType.AUDIO) {
-      contentBodyList.add(AudioContentBodyWidget(
-        audioContentBody: element,
-      ));
-    } else if (element.type == SeriesContentBodyType.TEXT) {
-      contentBodyList.add(TextContentBodyWidget(
-        textContentBody: element,
-      ));
-    } else if (element.type == SeriesContentBodyType.SCRIPTURE) {
-      contentBodyList.add(ScriptureContentBodyWidget(
-        scriptureContentBody: element,
-      ));
-    } else if (element.type == SeriesContentBodyType.QUESTION) {
-      contentBodyList.add(QuestionContentBodyWidget(
-        questionContentBody: element,
-      ));
-    } else if (element.type == SeriesContentBodyType.IMAGE_INPUT) {
-      contentBodyList.add(ImageInputBodyWidget(
-        imageInputBody: element,
-      ));
-    }
-  });
-  return contentBodyList;
-}
-
 class HeaderWidget extends StatelessWidget {
   final String contentType;
-  HeaderWidget(this.contentType);
+  const HeaderWidget({Key key, this.contentType}) : super(key: key);
 
   String splitContentType() {
     var temp = contentType.split(".");
@@ -119,24 +145,9 @@ class HeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Column(
-        children: [
-          Container(
-            alignment: Alignment.centerLeft,
-            child: GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Icon(
-                Icons.arrow_back,
-              ),
-            ),
-          ),
-          Container(
-            alignment: Alignment.topLeft,
-            padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
-            child: getIt<TextFactory>().heading(splitContentType()),
-          )
-        ],
-      ),
+      alignment: Alignment.topLeft,
+      padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
+      child: getIt<TextFactory>().heading(splitContentType()),
     );
   }
 }
