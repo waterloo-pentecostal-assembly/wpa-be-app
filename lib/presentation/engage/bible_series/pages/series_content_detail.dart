@@ -26,6 +26,7 @@ class ContentDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint(this.getCompletionDetails.toString());
     return MultiBlocProvider(
       providers: [
         BlocProvider<BibleSeriesBloc>(
