@@ -13,16 +13,12 @@ class ScriptureContentBodyWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        width:
-            1 * MediaQuery.of(context).size.width, //change depending on parent
-        padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
-        margin: const EdgeInsets.all(20),
+        padding: const EdgeInsets.only(bottom: 8),
         child: Column(
           children: [
             ListView.builder(
                 shrinkWrap: true,
                 physics: ClampingScrollPhysics(),
-                padding: const EdgeInsets.only(top: 0),
                 itemCount: scriptureContentBody.properties.scriptures.length,
                 itemBuilder: (BuildContext context, int index) {
                   return scripture(
@@ -57,7 +53,7 @@ List<Widget> buildcombinedScripture(Scripture script) {
       itemBuilder: (BuildContext context, int index) {
         String key = script.verses.keys.elementAt(index);
         return Padding(
-          padding: const EdgeInsets.only(bottom: 8.0),
+          padding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
           child: verse(script, key),
         );
       },

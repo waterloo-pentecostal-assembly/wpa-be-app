@@ -14,8 +14,10 @@ class QuestionContentBodyWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: const EdgeInsets.all(10.0),
+        padding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
         child: ListView.builder(
+            physics: ClampingScrollPhysics(),
+            shrinkWrap: true,
             itemCount: questionContentBody.properties.questions.length,
             itemBuilder: (BuildContext context, int index) {
               return questionContainer(
@@ -33,7 +35,7 @@ Widget questionContainer(Question question) {
             Container(
                 padding:
                     const EdgeInsets.fromLTRB(0, kTopPaddingQuestionBody, 0, 0),
-                alignment: Alignment.topCenter,
+                alignment: Alignment.topLeft,
                 width: 14,
                 child: getIt<TextFactory>().textFormFieldInput(
                     (question.location[1] + 1).toString() + ".")),
@@ -47,7 +49,7 @@ Widget questionContainer(Question question) {
         ),
       ),
       Padding(
-          padding: const EdgeInsets.fromLTRB(18, 0, 24, 10),
+          padding: const EdgeInsets.fromLTRB(18, 0, 24, 8),
           child: TextFormField(
             decoration: const InputDecoration.collapsed(
               hintText: "Share your thoughts ...",

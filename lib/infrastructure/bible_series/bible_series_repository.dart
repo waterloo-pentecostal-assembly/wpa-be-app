@@ -160,9 +160,11 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
     }
 
     if (document.data() != null) {
-      final SeriesContent seriesContent =
-          SeriesContentDto.fromFirestore(document)
+      //made Series Content a variable instead of a final, may cause issues
+      SeriesContent seriesContent =
+          await SeriesContentDto.fromFirestore(document)
               .toDomain(_firebaseStorageService);
+
       return seriesContent;
     }
 

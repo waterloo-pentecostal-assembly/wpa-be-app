@@ -13,12 +13,14 @@ class TextContentBodyWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-        padding: const EdgeInsets.all(8),
+        padding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
         child: ListView.builder(
+          shrinkWrap: true,
+          physics: ClampingScrollPhysics(),
           itemCount: textContentBody.properties.paragraphs.length,
           itemBuilder: (BuildContext context, int index) {
             return Padding(
-                padding: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
                 child: getIt<TextFactory>()
                     .liteLarge(textContentBody.properties.paragraphs[index]));
           },

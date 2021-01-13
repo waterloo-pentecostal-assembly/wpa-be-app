@@ -25,7 +25,7 @@ class _AudioSliderState extends State<AudioSlider> {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.fromLTRB(
-          12, 100, 12, 0), //just for testing, change top later
+          0, 40, 0, 0), //just for testing, change top later
       child: Column(
         children: [
           Center(
