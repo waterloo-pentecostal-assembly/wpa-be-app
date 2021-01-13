@@ -3,26 +3,14 @@ import 'package:flutter/material.dart';
 
 import '../../../../domain/bible_series/entities.dart';
 
-class AudioContentBodyWidget extends StatelessWidget {
-  final AudioBody audioContentBody;
-
-  const AudioContentBodyWidget({Key key, this.audioContentBody})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return AudioSlider(audioContentBody: audioContentBody);
-  }
-}
-
 class AudioSlider extends StatefulWidget {
   final AudioBody audioContentBody;
   const AudioSlider({Key key, this.audioContentBody}) : super(key: key);
   @override
-  _AudioSliderState createState() => _AudioSliderState();
+  AudioSliderState createState() => AudioSliderState();
 }
 
-class _AudioSliderState extends State<AudioSlider> {
+class AudioSliderState extends State<AudioSlider> {
   bool playing = false;
   AudioPlayer audioPlayer = new AudioPlayer();
   Duration duration = new Duration();
@@ -113,5 +101,11 @@ class _AudioSliderState extends State<AudioSlider> {
     String twoDigitMinutes = twoDigits(duration.inMinutes.remainder(60));
     String twoDigitSeconds = twoDigits(duration.inSeconds.remainder(60));
     return "$twoDigitMinutes:$twoDigitSeconds";
+  }
+
+  void stopAudio() {
+    setState(() {
+      audioPlayer.stop();
+    });
   }
 }
