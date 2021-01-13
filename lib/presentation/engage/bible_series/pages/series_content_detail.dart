@@ -26,6 +26,7 @@ class ContentDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    debugPrint(this.getCompletionDetails.toString());
     return MultiBlocProvider(
       providers: [
         BlocProvider<BibleSeriesBloc>(
@@ -125,7 +126,7 @@ class HeaderWidget extends StatelessWidget {
             child: GestureDetector(
               onTap: () => Navigator.pop(context),
               child: Icon(
-                Icons.keyboard_return_rounded,
+                Icons.arrow_back,
               ),
             ),
           ),
