@@ -20,13 +20,15 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
   @override
   Widget build(BuildContext context) {
     return Container(
-        child: IconButton(
-      alignment: Alignment.topCenter,
-      icon: Icon(
-        Icons.add_a_photo,
-        size: 80,
-      ),
-      onPressed: null,
-    ));
+        height: 80,
+        child: GestureDetector(
+          child: Center(
+            child: Icon(
+              Icons.add_a_photo,
+              size: 80,
+            ),
+          ),
+          onTap: () {},
+        ));
   }
 }

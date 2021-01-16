@@ -20,7 +20,7 @@ abstract class ICompletionsRepository {
     @required Responses responses,
   });
 
-  Future<void> markAsComplete({
+  Future<String> markAsComplete({
     @required CompletionDetails completionDetails,
   });
 

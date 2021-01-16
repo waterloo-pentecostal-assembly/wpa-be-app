@@ -20,7 +20,7 @@ class CompletionsRepository extends ICompletionsRepository {
   }
 
   @override
-  Future<void> markAsComplete({
+  Future<String> markAsComplete({
     CompletionDetails completionDetails,
   }) async {
     CompletionsDto completionsDto =
@@ -28,24 +28,29 @@ class CompletionsRepository extends ICompletionsRepository {
     final LocalUser user = getIt<LocalUser>();
 
     try {
-      await _completionsCollection.add({
+      DocumentReference documentReference = await _completionsCollection.add({
         "content_id": completionsDto.contentId,
         "is_on_time": completionsDto.isOnTime,
         "series_id": completionsDto.seriesId,
+        "completion_date": completionsDto.completionDate,
         "user_id": user.id,
       });
+      return documentReference.id;
     } catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
+    return '';
   }
 
   @override
   Future<void> markAsIncomplete({
     String completionId,
   }) async {
+    print(completionId);
     try {
       await _completionsCollection.doc(completionId).delete();
     } catch (e) {
+      print(e.toString());
       _firebaseFirestoreService.handleException(e);
     }
   }
