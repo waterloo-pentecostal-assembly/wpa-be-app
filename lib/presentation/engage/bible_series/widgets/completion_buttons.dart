@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:wpa_app/application/completions/completions_bloc.dart';
 import 'package:wpa_app/domain/bible_series/entities.dart';
 import 'package:wpa_app/domain/completions/entities.dart';

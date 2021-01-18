@@ -7,7 +7,6 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:wpa_app/application/completions/completions_bloc.dart';
-import 'package:wpa_app/application/completions/responses/responses_bloc.dart';
 
 import '../application/achievements/achievements_bloc.dart';
 import '../application/authentication/authentication_bloc.dart';
@@ -130,10 +129,6 @@ void initializeInjections({
   );
 
   getIt.registerFactory<CompletionsBloc>(() => CompletionsBloc(
-        getIt<ICompletionsRepository>(),
-      ));
-
-  getIt.registerFactory<ResponsesBloc>(() => ResponsesBloc(
         getIt<ICompletionsRepository>(),
       ));
 
