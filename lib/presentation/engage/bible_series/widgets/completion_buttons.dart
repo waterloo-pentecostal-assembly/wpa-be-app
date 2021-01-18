@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:wpa_app/application/completions/completions_bloc.dart';
 import 'package:wpa_app/domain/bible_series/entities.dart';
 import 'package:wpa_app/domain/completions/entities.dart';
@@ -17,7 +18,7 @@ class CompletionButton extends StatelessWidget {
     return BlocConsumer<CompletionsBloc, CompletionsState>(
       listener: (BuildContext context, state) {},
       builder: (BuildContext context, state) {
-        if (state is CompletionsLoaded) {
+        if (state.isComplete != null) {
           if (!state.isComplete) {
             return Container(
                 padding: const EdgeInsets.all(20),
@@ -56,8 +57,8 @@ class CompletionButton extends StatelessWidget {
                   ),
                 ));
           }
-        } else if (state is CompletionsError) {
-          return Text('Error: ${state.message}');
+        } else if (state.errorMessage != null) {
+          return Text('Error: ${state.errorMessage}');
         }
         return Loader();
       },
@@ -86,7 +87,7 @@ class ResponseCompletionButton extends StatelessWidget {
     return BlocConsumer<CompletionsBloc, CompletionsState>(
       listener: (BuildContext context, state) {},
       builder: (BuildContext context, state) {
-        if (state is CompletionsLoaded) {
+        if (state.isComplete != null) {
           if (!state.isComplete) {
             return Container(
                 padding: const EdgeInsets.all(20),
@@ -99,8 +100,28 @@ class ResponseCompletionButton extends StatelessWidget {
                           isDraft: false,
                           isOnTime: isOnTime(seriesContent.date),
                           completionDate: Timestamp.fromDate(DateTime.now()));
-                      BlocProvider.of<CompletionsBloc>(context)
-                          .add(MarkAsComplete(completionDetails));
+
+                      if (!isResponsesFilled(state.responses, seriesContent)) {
+                        return showDialog(
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            title: Text("Question(s) Was Left Blank"),
+                            content: Text(
+                                "Please fill out all responses before marking this page as complete"),
+                            actions: [
+                              FlatButton(
+                                  onPressed: () {
+                                    Navigator.of(context, rootNavigator: true)
+                                        .pop();
+                                  },
+                                  child: Text("Ok"))
+                            ],
+                          ),
+                        );
+                      } else {
+                        BlocProvider.of<CompletionsBloc>(context)
+                            .add(MarkAsComplete(completionDetails));
+                      }
                     },
                     child: Icon(
                       Icons.check_circle,
@@ -125,8 +146,8 @@ class ResponseCompletionButton extends StatelessWidget {
                   ),
                 ));
           }
-        } else if (state is CompletionsError) {
-          return Text('Error: ${state.message}');
+        } else if (state.errorMessage != null) {
+          return Text('Error: ${state.errorMessage}');
         }
         return Loader();
       },
@@ -143,5 +164,22 @@ class ResponseCompletionButton extends StatelessWidget {
     }
   }
 
-  bool isResponsesFilled() {}
+  bool isResponsesFilled(Responses responses, SeriesContent seriesContent) {
+    bool check = true;
+    for (int i = 0; i < seriesContent.body.length; i++) {
+      if (seriesContent.body[i].type == SeriesContentBodyType.QUESTION) {
+        for (int j = 0;
+            j < seriesContent.body[i].properties.questions.length;
+            j++) {
+          if (responses == null ||
+              responses.responses[i.toString()] == null ||
+              responses.responses[i.toString()][j.toString()] == null ||
+              responses.responses[i.toString()][j.toString()].response == "") {
+            check = false;
+          }
+        }
+      }
+    }
+    return check;
+  }
 }

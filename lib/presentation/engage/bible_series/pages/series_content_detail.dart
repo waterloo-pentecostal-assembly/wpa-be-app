@@ -86,6 +86,7 @@ class ContentDetailWidget extends StatelessWidget {
         ));
       }
     }
+
     if (seriesContent.isResponsePossible) {
       contentBodyList.add(ResponseCompletionButton(
           seriesContent, completionDetails, bibleSeriesId));
@@ -99,63 +100,63 @@ class ContentDetailWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () {
-        if (keyChild.currentState != null) {
-          keyChild.currentState.stopAudio();
-        }
-        Navigator.pop(context);
-        return Future.value(false);
-      },
-      child: BlocConsumer<BibleSeriesBloc, BibleSeriesState>(
-        listener: (context, state) {},
-        builder: (BuildContext context, BibleSeriesState state) {
-          if (state is SeriesContentDetail) {
-            return BlocProvider<CompletionsBloc>(
-              create: (BuildContext context) => getIt<CompletionsBloc>()
-                ..add(CompletionDetailRequested(state.contentCompletionDetail)),
-              child: SafeArea(
-                child: Scaffold(
-                  body: Container(
-                      padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
-                      child: Column(children: <Widget>[
-                        Container(
-                          alignment: Alignment.centerLeft,
-                          child: GestureDetector(
-                            onTap: () => {
-                              if (keyChild.currentState != null)
-                                {keyChild.currentState.stopAudio()},
-                              Navigator.pop(context),
-                            },
-                            child: Icon(
-                              Icons.arrow_back,
+    return BlocConsumer<BibleSeriesBloc, BibleSeriesState>(
+      listener: (context, state) {},
+      builder: (BuildContext context, BibleSeriesState state) {
+        if (state is SeriesContentDetail) {
+          return WillPopScope(
+              onWillPop: () {
+                if (keyChild.currentState != null) {
+                  keyChild.currentState.stopAudio();
+                }
+                Navigator.pop(context);
+                return Future.value(false);
+              },
+              child: BlocProvider<CompletionsBloc>(
+                create: (BuildContext context) => getIt<CompletionsBloc>()
+                  ..add(
+                      CompletionDetailRequested(state.contentCompletionDetail)),
+                child: SafeArea(
+                  child: Scaffold(
+                    body: Container(
+                        padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
+                        child: Column(children: <Widget>[
+                          Container(
+                            alignment: Alignment.centerLeft,
+                            child: GestureDetector(
+                              onTap: () => {
+                                if (keyChild.currentState != null)
+                                  {keyChild.currentState.stopAudio()},
+                                Navigator.pop(context),
+                              },
+                              child: Icon(
+                                Icons.arrow_back,
+                              ),
                             ),
                           ),
-                        ),
-                        HeaderWidget(
-                            contentType: state.seriesContentDetail.contentType
-                                .toString()),
-                        Expanded(
-                          child: ListView(
-                            shrinkWrap: true,
-                            children: contentDetailList(
-                                state.seriesContentDetail,
-                                state.contentCompletionDetail),
+                          HeaderWidget(
+                              contentType: state.seriesContentDetail.contentType
+                                  .toString()),
+                          Expanded(
+                            child: ListView(
+                              shrinkWrap: true,
+                              children: contentDetailList(
+                                  state.seriesContentDetail,
+                                  state.contentCompletionDetail),
+                            ),
                           ),
-                        ),
-                      ])),
+                        ])),
+                  ),
                 ),
-              ),
-            );
-          } else if (state is BibleSeriesError) {
-            return Scaffold(
-                body: SafeArea(
-              child: Text('Error: ${state.message}'),
-            ));
-          }
-          return Loader();
-        },
-      ),
+              ));
+        } else if (state is BibleSeriesError) {
+          return Scaffold(
+              body: SafeArea(
+            child: Text('Error: ${state.message}'),
+          ));
+        }
+        return Loader();
+      },
     );
   }
 }

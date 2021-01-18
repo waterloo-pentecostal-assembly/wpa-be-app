@@ -1,31 +1,42 @@
 part of 'completions_bloc.dart';
 
-abstract class CompletionsState extends Equatable {
-  const CompletionsState();
-
-  @override
-  List<Object> get props => [];
-}
-
-class CompletionsInitial extends CompletionsState {
-  @override
-  List<Object> get props => [];
-}
-
-class CompletionsError extends CompletionsState {
-  final String message;
-  CompletionsError({@required this.message});
-  @override
-  List<Object> get props => [message];
-}
-
-class CompletionsLoaded extends CompletionsState {
-  final bool isComplete;
+@immutable
+class CompletionsState extends Equatable {
+  final String errorMessage;
   final String id;
   final Responses responses;
+  final bool isComplete;
 
-  CompletionsLoaded({this.isComplete, this.id, this.responses});
+  CompletionsState({
+    this.errorMessage,
+    this.id,
+    this.responses,
+    this.isComplete,
+  });
+
+  factory CompletionsState.initial() {
+    return CompletionsState(
+      errorMessage: '',
+      id: '',
+      responses: null,
+      isComplete: null,
+    );
+  }
+
+  CompletionsState copyWith({
+    String errorMessage,
+    String id,
+    Responses responses,
+    bool isComplete,
+  }) {
+    return CompletionsState(
+      errorMessage: errorMessage ?? this.errorMessage,
+      id: id ?? this.id,
+      responses: responses ?? this.responses,
+      isComplete: isComplete ?? this.isComplete,
+    );
+  }
 
   @override
-  List<Object> get props => [isComplete, id];
+  List<Object> get props => [errorMessage, id, responses, isComplete];
 }

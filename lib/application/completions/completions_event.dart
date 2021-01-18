@@ -28,12 +28,12 @@ class MarkAsInComplete extends CompletionsEvent {
   List<Object> get props => [id];
 }
 
-class SavingQuestionResponse extends CompletionsEvent {
-  final Responses responses;
-  final String completionId;
-  final CompletionDetails completionDetails;
-  SavingQuestionResponse(
-      this.responses, this.completionId, this.completionDetails);
+class QuestionResponseChanged extends CompletionsEvent {
+  final String response;
+  final int contentNum;
+  final int questionNum;
+
+  QuestionResponseChanged(this.response, this.contentNum, this.questionNum);
   @override
-  List<Object> get props => [responses];
+  List<Object> get props => [response, contentNum, questionNum];
 }
