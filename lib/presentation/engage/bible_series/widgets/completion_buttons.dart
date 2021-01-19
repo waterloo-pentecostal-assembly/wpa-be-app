@@ -93,13 +93,6 @@ class ResponseCompletionButton extends StatelessWidget {
                 child: Center(
                   child: InkWell(
                     onTap: () {
-                      CompletionDetails completionDetails = CompletionDetails(
-                          seriesId: bibleId,
-                          contentId: seriesContent.id,
-                          isDraft: false,
-                          isOnTime: isOnTime(seriesContent.date),
-                          completionDate: Timestamp.fromDate(DateTime.now()));
-
                       if (!isResponsesFilled(state.responses, seriesContent)) {
                         return showDialog(
                           context: context,
@@ -110,16 +103,37 @@ class ResponseCompletionButton extends StatelessWidget {
                             actions: [
                               FlatButton(
                                   onPressed: () {
+                                    CompletionDetails completionDetails =
+                                        CompletionDetails(
+                                            seriesId: bibleId,
+                                            contentId: seriesContent.id,
+                                            isDraft: true,
+                                            isOnTime:
+                                                isOnTime(seriesContent.date),
+                                            completionDate: Timestamp.fromDate(
+                                                DateTime.now()));
+                                    BlocProvider.of<CompletionsBloc>(context)
+                                      ..add(MarkAsDraft(completionDetails));
+                                  },
+                                  child: Text("Mark as Draft")),
+                              FlatButton(
+                                  onPressed: () {
                                     Navigator.of(context, rootNavigator: true)
                                         .pop();
                                   },
-                                  child: Text("Ok"))
+                                  child: Text("Ok")),
                             ],
                           ),
                         );
                       } else {
+                        CompletionDetails completionDetails = CompletionDetails(
+                            seriesId: bibleId,
+                            contentId: seriesContent.id,
+                            isDraft: false,
+                            isOnTime: isOnTime(seriesContent.date),
+                            completionDate: Timestamp.fromDate(DateTime.now()));
                         BlocProvider.of<CompletionsBloc>(context)
-                            .add(MarkAsComplete(completionDetails));
+                          ..add(MarkAsComplete(completionDetails));
                       }
                     },
                     child: Icon(

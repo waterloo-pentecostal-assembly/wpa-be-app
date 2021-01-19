@@ -37,3 +37,17 @@ class QuestionResponseChanged extends CompletionsEvent {
   @override
   List<Object> get props => [response, contentNum, questionNum];
 }
+
+class MarkAsDraft extends CompletionsEvent {
+  final CompletionDetails completionDetails;
+  MarkAsDraft(this.completionDetails);
+  @override
+  List<Object> get props => [completionDetails];
+}
+
+class MarkQuestionAsComplete extends CompletionsEvent {
+  final CompletionDetails completionDetails;
+  MarkQuestionAsComplete(this.completionDetails);
+  @override
+  List<Object> get props => [completionDetails];
+}

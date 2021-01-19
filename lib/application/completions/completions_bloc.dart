@@ -31,6 +31,18 @@ class CompletionsBloc extends Bloc<CompletionsEvent, CompletionsState> {
           event, state, _iCompletionsRepository.markAsIncomplete);
     } else if (event is QuestionResponseChanged) {
       yield* _mapQuestionResponseChangedToState(event, state);
+    } else if (event is MarkAsDraft) {
+      yield* _mapMarkAsDraftToState(
+          event,
+          state,
+          _iCompletionsRepository.markAsComplete,
+          _iCompletionsRepository.putResponses);
+    } else if (event is MarkQuestionAsComplete) {
+      yield* _mapMarkQuestionAsCompleteEventToState(
+          event,
+          state,
+          _iCompletionsRepository.markAsComplete,
+          _iCompletionsRepository.putResponses);
     }
   }
 }
@@ -63,6 +75,29 @@ Stream<CompletionsState> _mapMarkAsCompleteEventToState(
     String id =
         await markAsComplete(completionDetails: event.completionDetails);
     yield state.copyWith(isComplete: true, id: id);
+  } on BaseApplicationException catch (e) {
+    yield state.copyWith(
+      errorMessage: e.message,
+    );
+  } catch (e) {
+    yield state.copyWith(
+      errorMessage: 'An unknown error occured',
+    );
+  }
+}
+
+Stream<CompletionsState> _mapMarkAsDraftToState(
+    MarkAsDraft event,
+    CompletionsState state,
+    Future<String> Function({@required CompletionDetails completionDetails})
+        markAsComplete,
+    Future<void> Function({@required String completionId, Responses responses})
+        putResponses) async* {
+  try {
+    String id =
+        await markAsComplete(completionDetails: event.completionDetails);
+    await putResponses(completionId: id, responses: state.responses);
+    yield state.copyWith(isComplete: false, id: id);
   } on BaseApplicationException catch (e) {
     yield state.copyWith(
       errorMessage: e.message,
@@ -112,6 +147,29 @@ Stream<CompletionsState> _mapQuestionResponseChangedToState(
   } catch (e) {
     yield state.copyWith(
       errorMessage: "Unknown Error",
+    );
+  }
+}
+
+Stream<CompletionsState> _mapMarkQuestionAsCompleteEventToState(
+    MarkQuestionAsComplete event,
+    CompletionsState state,
+    Future<String> Function({@required CompletionDetails completionDetails})
+        markAsComplete,
+    Future<void> Function({@required String completionId, Responses responses})
+        putResponses) async* {
+  try {
+    String id =
+        await markAsComplete(completionDetails: event.completionDetails);
+    await putResponses(completionId: id, responses: state.responses);
+    yield state.copyWith(isComplete: true, id: id);
+  } on BaseApplicationException catch (e) {
+    yield state.copyWith(
+      errorMessage: e.message,
+    );
+  } catch (e) {
+    yield state.copyWith(
+      errorMessage: 'An unknown error occured',
     );
   }
 }

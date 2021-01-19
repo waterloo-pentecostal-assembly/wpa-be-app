@@ -29,6 +29,7 @@ class CompletionsRepository extends ICompletionsRepository {
 
     try {
       DocumentReference documentReference = await _completionsCollection.add({
+        "is_draft": completionsDto.isDraft,
         "content_id": completionsDto.contentId,
         "is_on_time": completionsDto.isOnTime,
         "series_id": completionsDto.seriesId,
@@ -39,6 +40,7 @@ class CompletionsRepository extends ICompletionsRepository {
     } catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
+    //must have return statement due to linting issue
     return '';
   }
 
@@ -46,11 +48,9 @@ class CompletionsRepository extends ICompletionsRepository {
   Future<void> markAsIncomplete({
     String completionId,
   }) async {
-    print(completionId);
     try {
       await _completionsCollection.doc(completionId).delete();
     } catch (e) {
-      print(e.toString());
       _firebaseFirestoreService.handleException(e);
     }
   }
@@ -61,10 +61,9 @@ class CompletionsRepository extends ICompletionsRepository {
     Responses responses,
   }) async {
     final LocalUser user = getIt<LocalUser>();
-    Map<String, dynamic> responsesForFirestore =
-        ResponsesDto.fromDomain(responses.responses, user.id).toFirestore();
-
     try {
+      Map<String, dynamic> responsesForFirestore =
+          ResponsesDto.fromDomain(responses.responses, user.id).toFirestore();
       CollectionReference responseCollection =
           _completionsCollection.doc(completionId).collection("responses");
       if (responses.id != null) {
