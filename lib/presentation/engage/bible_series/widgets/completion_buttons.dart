@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/application/bible_series/bible_series_bloc.dart';
 import 'package:wpa_app/application/completions/completions_bloc.dart';
 import 'package:wpa_app/domain/bible_series/entities.dart';
 import 'package:wpa_app/domain/completions/entities.dart';
@@ -93,7 +94,25 @@ class ResponseCompletionButton extends StatelessWidget {
                 child: Center(
                   child: InkWell(
                     onTap: () {
-                      if (!isResponsesFilled(state.responses, seriesContent)) {
+                      if (state.responses == null) {
+                        return showDialog(
+                            context: context,
+                            builder: (_) => AlertDialog(
+                                  title: Text("No answers found"),
+                                  content: Text(
+                                      "Please fill out responses before marking this page as draft or complete"),
+                                  actions: [
+                                    FlatButton(
+                                        onPressed: () {
+                                          Navigator.of(context,
+                                                  rootNavigator: true)
+                                              .pop();
+                                        },
+                                        child: Text("Ok"))
+                                  ],
+                                ));
+                      } else if (!isResponsesFilled(
+                          state.responses, seriesContent)) {
                         return showDialog(
                           context: context,
                           builder: (_) => AlertDialog(
@@ -114,6 +133,13 @@ class ResponseCompletionButton extends StatelessWidget {
                                                 DateTime.now()));
                                     BlocProvider.of<CompletionsBloc>(context)
                                       ..add(MarkAsDraft(completionDetails));
+                                    BlocProvider.of<BibleSeriesBloc>(context)
+                                      ..add(ContentDetailRequested(
+                                          bibleSeriesId: bibleId,
+                                          seriesContentId: seriesContent.id,
+                                          getCompletionDetails: true));
+                                    Navigator.of(context, rootNavigator: true)
+                                        .pop();
                                   },
                                   child: Text("Mark as Draft")),
                               FlatButton(
@@ -134,6 +160,11 @@ class ResponseCompletionButton extends StatelessWidget {
                             completionDate: Timestamp.fromDate(DateTime.now()));
                         BlocProvider.of<CompletionsBloc>(context)
                           ..add(MarkAsComplete(completionDetails));
+                        BlocProvider.of<BibleSeriesBloc>(context)
+                          ..add(ContentDetailRequested(
+                              bibleSeriesId: bibleId,
+                              seriesContentId: seriesContent.id,
+                              getCompletionDetails: true));
                       }
                     },
                     child: Icon(
@@ -150,6 +181,11 @@ class ResponseCompletionButton extends StatelessWidget {
                     onTap: () {
                       BlocProvider.of<CompletionsBloc>(context)
                           .add(MarkAsInComplete(state.id));
+                      BlocProvider.of<BibleSeriesBloc>(context)
+                        ..add(ContentDetailRequested(
+                            bibleSeriesId: bibleId,
+                            seriesContentId: seriesContent.id,
+                            getCompletionDetails: false));
                     },
                     child: Icon(
                       Icons.check_circle,

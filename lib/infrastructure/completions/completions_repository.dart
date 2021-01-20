@@ -56,7 +56,7 @@ class CompletionsRepository extends ICompletionsRepository {
   }
 
   @override
-  Future<void> putResponses({
+  Future<String> putResponses({
     String completionId,
     Responses responses,
   }) async {
@@ -68,12 +68,16 @@ class CompletionsRepository extends ICompletionsRepository {
           _completionsCollection.doc(completionId).collection("responses");
       if (responses.id != null) {
         await responseCollection.doc(responses.id).set(responsesForFirestore);
+        return responses.id;
       } else {
-        await responseCollection.add(responsesForFirestore);
+        DocumentReference documentReference =
+            await responseCollection.add(responsesForFirestore);
+        return documentReference.id;
       }
     } catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
+    return '';
   }
 
   @override
@@ -148,10 +152,31 @@ class CompletionsRepository extends ICompletionsRepository {
       DocumentSnapshot document = querySnapshot.docs[0];
       return ResponsesDto.fromFirestore(document).toDomain();
     }
-
     throw CompletionsException(
       code: CompletionsExceptionCode.NO_RESPONSES,
       message: 'Cannot find completion details',
     );
+  }
+
+  @override
+  Future<String> updateComplete(
+      {CompletionDetails completionDetails, String completionId}) async {
+    CompletionsDto completionsDto =
+        CompletionsDto.fromDomain(completionDetails);
+    try {
+      DocumentReference documentReference =
+          _completionsCollection.doc(completionId);
+      if (documentReference != null) {
+        await documentReference.update({
+          "is_draft": completionsDto.isDraft,
+          "is_on_time": completionsDto.isOnTime,
+          "completion_date": completionsDto.completionDate,
+        });
+        return documentReference.id;
+      }
+    } catch (e) {
+      _firebaseFirestoreService.handleException(e);
+    }
+    return '';
   }
 }

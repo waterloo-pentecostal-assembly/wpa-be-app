@@ -1,7 +1,7 @@
 import 'package:wpa_app/domain/completions/entities.dart';
 
 Responses toResponses(Responses responses, String response, String contentNum,
-    String questionNum, ResponseType type) {
+    String questionNum, ResponseType type, String responseId) {
   Map<String, Map<String, ResponseDetails>> responseMap = new Map();
   ResponseDetails responseDetails =
       ResponseDetails(type: type, response: response);
@@ -14,5 +14,5 @@ Responses toResponses(Responses responses, String response, String contentNum,
     responseMap[contentNum] = {questionNum: responseDetails};
   }
 
-  return Responses(responses: responseMap);
+  return Responses(responses: responseMap, id: responseId);
 }

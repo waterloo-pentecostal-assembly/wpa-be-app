@@ -22,10 +22,15 @@ class CompletionsBloc extends Bloc<CompletionsEvent, CompletionsState> {
     CompletionsEvent event,
   ) async* {
     if (event is CompletionDetailRequested) {
-      yield* _mapCompletionDetailRequestedEventToState(event, state);
+      yield* _mapCompletionDetailRequestedEventToState(
+          event, state, _iCompletionsRepository.getResponses);
     } else if (event is MarkAsComplete) {
       yield* _mapMarkAsCompleteEventToState(
-          event, state, _iCompletionsRepository.markAsComplete);
+          event,
+          state,
+          _iCompletionsRepository.markAsComplete,
+          _iCompletionsRepository.putResponses,
+          _iCompletionsRepository.updateComplete);
     } else if (event is MarkAsInComplete) {
       yield* _mapMarkAsInCompleteEventToState(
           event, state, _iCompletionsRepository.markAsIncomplete);
@@ -48,10 +53,20 @@ class CompletionsBloc extends Bloc<CompletionsEvent, CompletionsState> {
 }
 
 Stream<CompletionsState> _mapCompletionDetailRequestedEventToState(
-    CompletionDetailRequested event, CompletionsState state) async* {
+    CompletionDetailRequested event,
+    CompletionsState state,
+    Future<Responses> Function({@required String completionId})
+        getResponses) async* {
   try {
-    if (event.completionDetails == null || event.completionDetails.isDraft) {
+    if (event.completionDetails == null) {
       yield state.copyWith(isComplete: false);
+    } else if (event.completionDetails.isDraft) {
+      Responses responses =
+          await getResponses(completionId: event.completionDetails.id);
+      yield state.copyWith(
+          isComplete: false,
+          id: event.completionDetails.id,
+          responses: responses);
     } else {
       yield state.copyWith(isComplete: true, id: event.completionDetails.id);
     }
@@ -70,11 +85,31 @@ Stream<CompletionsState> _mapMarkAsCompleteEventToState(
     MarkAsComplete event,
     CompletionsState state,
     Future<String> Function({@required CompletionDetails completionDetails})
-        markAsComplete) async* {
+        markAsComplete,
+    Future<String> Function(
+            {@required String completionId, Responses responses})
+        putResponses,
+    Future<String> Function(
+            {@required CompletionDetails completionDetails,
+            String completionId})
+        updateComplete) async* {
   try {
-    String id =
-        await markAsComplete(completionDetails: event.completionDetails);
-    yield state.copyWith(isComplete: true, id: id);
+    String id = state.id;
+    if (id == null || id == '') {
+      id = await markAsComplete(completionDetails: event.completionDetails);
+    } else {
+      id = await updateComplete(
+          completionDetails: event.completionDetails, completionId: id);
+    }
+    if (state.responses != null) {
+      String responseId =
+          await putResponses(completionId: id, responses: state.responses);
+      Responses newResponse =
+          Responses(id: responseId, responses: state.responses.responses);
+      yield state.copyWith(isComplete: true, id: id, responses: newResponse);
+    } else {
+      yield state.copyWith(isComplete: true, id: id);
+    }
   } on BaseApplicationException catch (e) {
     yield state.copyWith(
       errorMessage: e.message,
@@ -91,13 +126,19 @@ Stream<CompletionsState> _mapMarkAsDraftToState(
     CompletionsState state,
     Future<String> Function({@required CompletionDetails completionDetails})
         markAsComplete,
-    Future<void> Function({@required String completionId, Responses responses})
+    Future<String> Function(
+            {@required String completionId, Responses responses})
         putResponses) async* {
   try {
-    String id =
-        await markAsComplete(completionDetails: event.completionDetails);
-    await putResponses(completionId: id, responses: state.responses);
-    yield state.copyWith(isComplete: false, id: id);
+    String id = state.id;
+    if (id == null || id == '') {
+      id = await markAsComplete(completionDetails: event.completionDetails);
+    }
+    String responseId =
+        await putResponses(completionId: id, responses: state.responses);
+    Responses newResponse =
+        Responses(id: responseId, responses: state.responses.responses);
+    yield state.copyWith(isComplete: false, id: id, responses: newResponse);
   } on BaseApplicationException catch (e) {
     yield state.copyWith(
       errorMessage: e.message,
@@ -116,7 +157,7 @@ Stream<CompletionsState> _mapMarkAsInCompleteEventToState(
         markAsIncomplete) async* {
   try {
     await markAsIncomplete(completionId: event.id);
-    yield state.copyWith(isComplete: false);
+    yield state.copyWith(isComplete: false, id: '');
   } on BaseApplicationException catch (e) {
     yield state.copyWith(
       errorMessage: e.message,
@@ -133,13 +174,18 @@ Stream<CompletionsState> _mapQuestionResponseChangedToState(
   CompletionsState state,
 ) async* {
   try {
+    String id;
+    if (state.responses != null) {
+      id = state.responses.id;
+    }
     yield state.copyWith(
         responses: toResponses(
             state.responses,
             event.response,
             event.contentNum.toString(),
             event.questionNum.toString(),
-            ResponseType.TEXT));
+            ResponseType.TEXT,
+            id));
   } on BaseApplicationException catch (e) {
     yield state.copyWith(
       errorMessage: e.message,

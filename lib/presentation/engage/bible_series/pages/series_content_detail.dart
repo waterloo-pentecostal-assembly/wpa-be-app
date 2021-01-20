@@ -104,6 +104,31 @@ class ContentDetailWidget extends StatelessWidget {
         if (state is SeriesContentDetail) {
           return WillPopScope(
               onWillPop: () {
+                if (state.seriesContentDetail.isResponsePossible &&
+                    state.contentCompletionDetail == null) {
+                  return showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                            title: Text("Responses Not Saved!"),
+                            content: Text(
+                                "To save responses, click on the circular checkmark"),
+                            actions: [
+                              FlatButton(
+                                  onPressed: () {
+                                    Navigator.of(context, rootNavigator: true)
+                                        .pop();
+                                    Navigator.pop(context);
+                                  },
+                                  child: Text("Exit Anyways")),
+                              FlatButton(
+                                  onPressed: () {
+                                    Navigator.of(context, rootNavigator: true)
+                                        .pop();
+                                  },
+                                  child: Text("Ok")),
+                            ],
+                          ));
+                }
                 if (keyChild.currentState != null) {
                   keyChild.currentState.stopAudio();
                 }
@@ -121,20 +146,22 @@ class ContentDetailWidget extends StatelessWidget {
                         child: Column(children: <Widget>[
                           Container(
                             alignment: Alignment.centerLeft,
-                            child: GestureDetector(
-                              onTap: () => {
-                                if (keyChild.currentState != null)
-                                  {keyChild.currentState.stopAudio()},
-                                Navigator.pop(context),
-                              },
-                              child: Icon(
-                                Icons.arrow_back,
-                              ),
+                            child: Row(
+                              children: [
+                                GestureDetector(
+                                  onTap: () => {backFunction(state, context)},
+                                  child: Icon(
+                                    Icons.arrow_back,
+                                  ),
+                                ),
+                                SizedBox(width: 8),
+                                HeaderWidget(
+                                    contentType: state
+                                        .seriesContentDetail.contentType
+                                        .toString()),
+                              ],
                             ),
                           ),
-                          HeaderWidget(
-                              contentType: state.seriesContentDetail.contentType
-                                  .toString()),
                           Expanded(
                             child: ListView(
                               shrinkWrap: true,
@@ -157,6 +184,37 @@ class ContentDetailWidget extends StatelessWidget {
       },
     );
   }
+
+  void backFunction(SeriesContentDetail state, BuildContext context) {
+    if (state.seriesContentDetail.isResponsePossible &&
+        state.contentCompletionDetail == null) {
+      showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+                title: Text("Responses Not Saved!"),
+                content:
+                    Text("To save responses, click on the circular checkmark"),
+                actions: [
+                  FlatButton(
+                      onPressed: () {
+                        Navigator.of(context, rootNavigator: true).pop();
+                        Navigator.pop(context);
+                      },
+                      child: Text("Exit Anyways")),
+                  FlatButton(
+                      onPressed: () {
+                        Navigator.of(context, rootNavigator: true).pop();
+                      },
+                      child: Text("Ok")),
+                ],
+              ));
+    } else {
+      if (keyChild.currentState != null) {
+        keyChild.currentState.stopAudio();
+      }
+      Navigator.pop(context);
+    }
+  }
 }
 
 class HeaderWidget extends StatelessWidget {
@@ -171,9 +229,9 @@ class HeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      alignment: Alignment.topLeft,
-      padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
-      child: getIt<TextFactory>().heading(splitContentType()),
+      alignment: Alignment.center,
+      padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+      child: getIt<TextFactory>().subPageHeading(splitContentType()),
     );
   }
 }
