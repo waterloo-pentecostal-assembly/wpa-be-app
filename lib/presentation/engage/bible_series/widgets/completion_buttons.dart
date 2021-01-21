@@ -133,15 +133,15 @@ class ResponseCompletionButton extends StatelessWidget {
                                                 DateTime.now()));
                                     BlocProvider.of<CompletionsBloc>(context)
                                       ..add(MarkAsDraft(completionDetails));
-                                    BlocProvider.of<BibleSeriesBloc>(context)
-                                      ..add(ContentDetailRequested(
-                                          bibleSeriesId: bibleId,
-                                          seriesContentId: seriesContent.id,
-                                          getCompletionDetails: true));
+                                    // BlocProvider.of<BibleSeriesBloc>(context)
+                                    //   ..add(ContentDetailRequested(
+                                    //       bibleSeriesId: bibleId,
+                                    //       seriesContentId: seriesContent.id,
+                                    //       getCompletionDetails: true));
                                     Navigator.of(context, rootNavigator: true)
                                         .pop();
                                   },
-                                  child: Text("Mark as Draft")),
+                                  child: Text("Save as Draft")),
                               FlatButton(
                                   onPressed: () {
                                     Navigator.of(context, rootNavigator: true)
@@ -160,11 +160,11 @@ class ResponseCompletionButton extends StatelessWidget {
                             completionDate: Timestamp.fromDate(DateTime.now()));
                         BlocProvider.of<CompletionsBloc>(context)
                           ..add(MarkAsComplete(completionDetails));
-                        BlocProvider.of<BibleSeriesBloc>(context)
-                          ..add(ContentDetailRequested(
-                              bibleSeriesId: bibleId,
-                              seriesContentId: seriesContent.id,
-                              getCompletionDetails: true));
+                        // BlocProvider.of<BibleSeriesBloc>(context)
+                        //   ..add(ContentDetailRequested(
+                        //       bibleSeriesId: bibleId,
+                        //       seriesContentId: seriesContent.id,
+                        //       getCompletionDetails: true));
                       }
                     },
                     child: Icon(
@@ -181,11 +181,14 @@ class ResponseCompletionButton extends StatelessWidget {
                     onTap: () {
                       BlocProvider.of<CompletionsBloc>(context)
                           .add(MarkAsInComplete(state.id));
-                      BlocProvider.of<BibleSeriesBloc>(context)
-                        ..add(ContentDetailRequested(
-                            bibleSeriesId: bibleId,
-                            seriesContentId: seriesContent.id,
-                            getCompletionDetails: false));
+
+                      //Try delay?
+
+                      // BlocProvider.of<BibleSeriesBloc>(context)
+                      //   ..add(ContentDetailRequested(
+                      //       bibleSeriesId: bibleId,
+                      //       seriesContentId: seriesContent.id,
+                      //       getCompletionDetails: false));
                     },
                     child: Icon(
                       Icons.check_circle,

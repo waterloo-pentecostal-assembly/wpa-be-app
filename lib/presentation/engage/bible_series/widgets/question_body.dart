@@ -5,6 +5,7 @@ import 'package:wpa_app/app/constants.dart';
 import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/application/completions/completions_bloc.dart';
 import 'package:wpa_app/domain/completions/entities.dart';
+import 'package:wpa_app/presentation/common/loader.dart';
 
 import 'package:wpa_app/presentation/common/text_factory.dart';
 
@@ -77,19 +78,62 @@ Widget questionContainer(
           ],
         ),
       ),
-      Padding(
-          padding: const EdgeInsets.fromLTRB(18, 0, 24, 8),
-          child: TextFormField(
-            decoration: const InputDecoration.collapsed(
-              hintText: "Share your thoughts ...",
-              hintStyle: TextStyle(fontSize: 12),
-              border: UnderlineInputBorder(),
-            ),
-            onChanged: (value) {
-              BlocProvider.of<CompletionsBloc>(context)
-                ..add(QuestionResponseChanged(value, contentNum, questionNum));
-            },
-          )),
+      BlocConsumer<CompletionsBloc, CompletionsState>(
+        listener: (context, state) {
+          // TODO: implement listener
+        },
+        builder: (context, state) {
+          if (state.isComplete == null) {
+            return Loader();
+          } else if (state.responses != null) {
+            // print("start");
+            return Padding(
+                padding: const EdgeInsets.fromLTRB(18, 0, 24, 8),
+                child: TextFormField(
+                  maxLines: null,
+                  initialValue: getResponse(state, contentNum, questionNum),
+                  decoration: const InputDecoration.collapsed(
+                    hintText: "Share your thoughts ...",
+                    hintStyle: TextStyle(fontSize: 12),
+                    border: UnderlineInputBorder(),
+                  ),
+                  onChanged: (value) {
+                    BlocProvider.of<CompletionsBloc>(context)
+                      ..add(QuestionResponseChanged(
+                          value, contentNum, questionNum));
+                  },
+                ));
+          } else {
+            return Padding(
+                padding: const EdgeInsets.fromLTRB(18, 0, 24, 8),
+                child: TextFormField(
+                  maxLines: null,
+                  initialValue: '',
+                  decoration: const InputDecoration.collapsed(
+                    hintText: "Share your thoughts ...",
+                    hintStyle: TextStyle(fontSize: 12),
+                    border: UnderlineInputBorder(),
+                  ),
+                  onChanged: (value) {
+                    BlocProvider.of<CompletionsBloc>(context)
+                      ..add(QuestionResponseChanged(
+                          value, contentNum, questionNum));
+                  },
+                ));
+          }
+        },
+      ),
     ],
   );
+}
+
+String getResponse(CompletionsState state, int contentNum, int questionNum) {
+  if (state.responses.responses[contentNum.toString()]
+          [questionNum.toString()] !=
+      null) {
+    return state.responses
+        .responses[contentNum.toString()][questionNum.toString()].response;
+  } else {
+    return '';
+  }
 }

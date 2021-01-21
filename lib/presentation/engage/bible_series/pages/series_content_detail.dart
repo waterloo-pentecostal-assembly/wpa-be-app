@@ -41,8 +41,6 @@ class ContentDetailPage extends StatelessWidget {
               ),
             ),
         ),
-        BlocProvider<CompletionsBloc>(
-            create: (BuildContext context) => getIt<CompletionsBloc>()),
       ],
       child: ContentDetailWidget(bibleSeriesId),
     );
@@ -103,13 +101,14 @@ class ContentDetailWidget extends StatelessWidget {
       builder: (BuildContext context, BibleSeriesState state) {
         if (state is SeriesContentDetail) {
           return WillPopScope(
+              // change to using CompletionState
               onWillPop: () {
                 if (state.seriesContentDetail.isResponsePossible &&
                     state.contentCompletionDetail == null) {
                   return showDialog(
                       context: context,
                       builder: (_) => AlertDialog(
-                            title: Text("Responses Not Saved!"),
+                            title: Text("Remember to Save Responses!"),
                             content: Text(
                                 "To save responses, click on the circular checkmark"),
                             actions: [
@@ -119,7 +118,7 @@ class ContentDetailWidget extends StatelessWidget {
                                         .pop();
                                     Navigator.pop(context);
                                   },
-                                  child: Text("Exit Anyways")),
+                                  child: Text("Already Saved!")),
                               FlatButton(
                                   onPressed: () {
                                     Navigator.of(context, rootNavigator: true)
