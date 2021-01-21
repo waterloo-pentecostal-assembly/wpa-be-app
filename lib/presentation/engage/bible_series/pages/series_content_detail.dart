@@ -52,8 +52,8 @@ class ContentDetailWidget extends StatelessWidget {
   ContentDetailWidget(this.bibleSeriesId);
   final GlobalKey<AudioSliderState> keyChild = GlobalKey();
 
-  List<Widget> contentDetailList(
-      SeriesContent seriesContent, CompletionDetails completionDetails) {
+  List<Widget> contentDetailList(SeriesContent seriesContent,
+      CompletionDetails completionDetails, BuildContext context) {
     List<ISeriesContentBody> body = seriesContent.body;
     List<Widget> contentBodyList = [];
 
@@ -75,6 +75,7 @@ class ContentDetailWidget extends StatelessWidget {
         contentBodyList.add(QuestionContentBodyWidget(
           questionContentBody: body[index],
           contentNum: index,
+          completionDetails: completionDetails,
         ));
       } else if (body[index].type == SeriesContentBodyType.IMAGE_INPUT) {
         contentBodyList.add(ImageInputBodyWidget(
@@ -108,7 +109,7 @@ class ContentDetailWidget extends StatelessWidget {
                   return showDialog(
                       context: context,
                       builder: (_) => AlertDialog(
-                            title: Text("Remember to Save Responses!"),
+                            title: Text("Don't Forget to Save Your Responses!"),
                             content: Text(
                                 "To save responses, click on the circular checkmark"),
                             actions: [
@@ -166,7 +167,8 @@ class ContentDetailWidget extends StatelessWidget {
                               shrinkWrap: true,
                               children: contentDetailList(
                                   state.seriesContentDetail,
-                                  state.contentCompletionDetail),
+                                  state.contentCompletionDetail,
+                                  context),
                             ),
                           ),
                         ])),
@@ -190,7 +192,7 @@ class ContentDetailWidget extends StatelessWidget {
       showDialog(
           context: context,
           builder: (_) => AlertDialog(
-                title: Text("Responses Not Saved!"),
+                title: Text("Don't Forget to Save Your Responses!"),
                 content:
                     Text("To save responses, click on the circular checkmark"),
                 actions: [

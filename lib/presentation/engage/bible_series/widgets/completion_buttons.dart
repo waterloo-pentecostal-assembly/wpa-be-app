@@ -94,7 +94,7 @@ class ResponseCompletionButton extends StatelessWidget {
                 child: Center(
                   child: InkWell(
                     onTap: () {
-                      if (state.responses == null) {
+                      if (state.responses.responses == null) {
                         return showDialog(
                             context: context,
                             builder: (_) => AlertDialog(
