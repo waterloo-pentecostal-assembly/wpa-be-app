@@ -15,16 +15,21 @@ abstract class ICompletionsRepository {
     @required String completionId,
   });
 
-  Future<void> putResponses({
+  Future<String> putResponses({
     @required String completionId,
     @required Responses responses,
   });
 
-  Future<void> markAsComplete({
+  Future<String> markAsComplete({
     @required CompletionDetails completionDetails,
   });
 
   Future<void> markAsIncomplete({
+    @required String completionId,
+  });
+
+  Future<String> updateComplete({
+    @required CompletionDetails completionDetails,
     @required String completionId,
   });
 }

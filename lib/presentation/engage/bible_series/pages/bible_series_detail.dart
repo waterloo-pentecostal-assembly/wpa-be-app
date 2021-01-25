@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -207,13 +209,14 @@ List<Widget> _buildContentChildren(
           height: 60,
           child: Tab(
             child: GestureDetector(
-              onTap: () {
-                Navigator.pushNamed(context, '/content_detail', arguments: {
-                  'bibleSeriesId': bibleSeriesId,
-                  'seriesContentId': element.contentId,
-                  'getCompletionDetails':
-                      element.isCompleted || element.isDraft,
-                });
+              onTap: () async {
+                await Navigator.pushNamed(context, '/content_detail',
+                    arguments: {
+                      'bibleSeriesId': bibleSeriesId,
+                      'seriesContentId': element.contentId,
+                      'getCompletionDetails':
+                          element.isCompleted || element.isDraft,
+                    }).then((value) => {onGoBack(context, bibleSeriesId)});
               },
               child: Container(
                 width: 0.9 * MediaQuery.of(context).size.width,
@@ -321,4 +324,9 @@ int _getInitialIndex(List<SeriesContentSnippet> snippet) {
     }
   }
   return 0;
+}
+
+FutureOr onGoBack(BuildContext context, String bibleSeriesId) {
+  BlocProvider.of<BibleSeriesBloc>(context)
+    ..add(BibleSeriesDetailRequested(bibleSeriesId: bibleSeriesId));
 }

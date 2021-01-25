@@ -12,10 +12,9 @@ class ResponsesDto {
 
   factory ResponsesDto.fromJson(Map<String, dynamic> json) {
     Map<String, Map<String, ResponseDetails>> _responses = {};
-
     String userId = findOrThrowException(json, 'user_id');
-    Map<String, dynamic> responses = findOrDefaultTo(json, 'responses', {});
-
+    Map<String, dynamic> responses =
+        findOrDefaultToGetResponse(json, 'responses', {});
     responses.forEach((String k1, dynamic v1) {
       v1.forEach((String k2, dynamic v2) {
         ResponseDetails responseDetails = ResponseDetails(
@@ -31,14 +30,7 @@ class ResponsesDto {
 
   factory ResponsesDto.fromDomain(
       Map<String, Map<String, ResponseDetails>> responses, String userId) {
-    Map<String, dynamic> _responses = {};
-
-    responses.forEach((String k1, Map<String, ResponseDetails> v1) {
-      v1.forEach((String k2, ResponseDetails v2) {
-        _responses[k1] = {k2: v2.response};
-      });
-    });
-    return ResponsesDto._(responses: _responses, userId: userId);
+    return ResponsesDto._(responses: responses, userId: userId);
   }
 
   factory ResponsesDto.fromFirestore(DocumentSnapshot doc) {
@@ -73,9 +65,19 @@ extension ContentCompletionDtoX on ResponsesDto {
   }
 
   Map<String, dynamic> toFirestore() {
+    Map<String, dynamic> _responses = {};
+    this.responses.forEach((String k1, Map<String, ResponseDetails> v1) {
+      v1.forEach((String k2, ResponseDetails v2) {
+        if (_responses[k1] != null) {
+          _responses[k1][k2] = v2.response;
+        } else {
+          _responses[k1] = {k2: v2.response};
+        }
+      });
+    });
     return {
       "user_id": this.userId,
-      "response": this.responses,
+      "response": _responses,
     };
   }
 }
