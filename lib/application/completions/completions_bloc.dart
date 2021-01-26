@@ -64,12 +64,9 @@ Stream<CompletionsState> _mapCompletionDetailRequestedEventToState(
     if (event.completionDetails == null) {
       yield state.copyWith(isComplete: false);
     } else if (event.completionDetails.isDraft) {
-      // Responses responses =
-      //     await getResponses(completionId: event.completionDetails.id);
       yield state.copyWith(
         isComplete: false,
         id: event.completionDetails.id,
-        //responses: responses
       );
     } else {
       yield state.copyWith(isComplete: true, id: event.completionDetails.id);
@@ -134,15 +131,20 @@ Stream<CompletionsState> _mapMarkAsDraftToState(
             {@required String completionId, Responses responses})
         putResponses) async* {
   try {
-    String id = state.id;
-    if (id == null || id == '') {
-      id = await markAsComplete(completionDetails: event.completionDetails);
+    //checks if saving as draft is nessesary, if not, return original state
+    if (!state.isComplete && state.responses.responses != null) {
+      String id = state.id;
+      if (id == null || id == '') {
+        id = await markAsComplete(completionDetails: event.completionDetails);
+      }
+      String responseId =
+          await putResponses(completionId: id, responses: state.responses);
+      Responses newResponse =
+          Responses(id: responseId, responses: state.responses.responses);
+      yield state.copyWith(isComplete: false, id: id, responses: newResponse);
+    } else {
+      yield state;
     }
-    String responseId =
-        await putResponses(completionId: id, responses: state.responses);
-    Responses newResponse =
-        Responses(id: responseId, responses: state.responses.responses);
-    yield state.copyWith(isComplete: false, id: id, responses: newResponse);
   } on BaseApplicationException catch (e) {
     yield state.copyWith(
       errorMessage: e.message,

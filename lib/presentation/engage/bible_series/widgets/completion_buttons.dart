@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wpa_app/application/bible_series/bible_series_bloc.dart';
 import 'package:wpa_app/application/completions/completions_bloc.dart';
 import 'package:wpa_app/domain/bible_series/entities.dart';
 import 'package:wpa_app/domain/completions/entities.dart';
@@ -116,9 +115,9 @@ class ResponseCompletionButton extends StatelessWidget {
                         return showDialog(
                           context: context,
                           builder: (_) => AlertDialog(
-                            title: Text("Response(s) Were Left Blank"),
-                            content:
-                                Text("Your responses were saved as a draft"),
+                            title: Text("Response(s) Saved as Draft"),
+                            content: Text(
+                                "You can now exit this page and work on it later"),
                             actions: [
                               FlatButton(
                                   onPressed: () {

@@ -43,6 +43,8 @@ class ContentDetailPage extends StatelessWidget {
               ),
             ),
         ),
+        BlocProvider<CompletionsBloc>(
+            create: (context) => getIt<CompletionsBloc>()),
       ],
       child: ContentDetailWidget(bibleSeriesId),
     );
@@ -103,73 +105,52 @@ class ContentDetailWidget extends StatelessWidget {
       listener: (context, state) {},
       builder: (BuildContext context, BibleSeriesState state) {
         if (state is SeriesContentDetail) {
-          return BlocProvider<CompletionsBloc>(
-            create: (BuildContext context) => getIt<CompletionsBloc>()
-              ..add(CompletionDetailRequested(state.contentCompletionDetail)),
-            child: WillPopScope(
-              // change to using CompletionState
-              onWillPop: () {
-                if (state.seriesContentDetail.isResponsePossible &&
-                    state.contentCompletionDetail == null) {
-                  return showDialog(
-                      context: context,
-                      builder: (_) => AlertDialog(
-                            title: Text("Don't Forget to Save Your Responses!"),
-                            content: Text(
-                                "To save responses, click on the circular checkmark"),
-                            actions: [
-                              FlatButton(
-                                  onPressed: () {
-                                    Navigator.of(context, rootNavigator: true)
-                                        .pop();
-                                    Navigator.pop(context);
-                                  },
-                                  child: Text("Already Saved!")),
-                              FlatButton(
-                                  onPressed: () {
-                                    Navigator.of(context, rootNavigator: true)
-                                        .pop();
-                                  },
-                                  child: Text("Ok")),
-                            ],
-                          ));
-                }
-                if (keyChild.currentState != null) {
-                  keyChild.currentState.stopAudio();
-                }
-                Navigator.pop(context);
-                return Future.value(false);
-              },
-
-              child: SafeArea(
-                child: Scaffold(
-                  body: Container(
-                      padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
-                      child: Column(children: <Widget>[
-                        Container(
-                          alignment: Alignment.centerLeft,
-                          child: Row(
-                            children: [
-                              backButton(state.seriesContentDetail),
-                              SizedBox(width: 8),
-                              HeaderWidget(
-                                  contentType: state
-                                      .seriesContentDetail.contentType
-                                      .toString()),
-                            ],
-                          ),
+          BlocProvider.of<CompletionsBloc>(context)
+            ..add(CompletionDetailRequested(state.contentCompletionDetail));
+          return WillPopScope(
+            onWillPop: () {
+              if (keyChild.currentState != null) {
+                keyChild.currentState.stopAudio();
+              }
+              if (state.seriesContentDetail.isResponsePossible) {
+                CompletionDetails completionDetails = CompletionDetails(
+                    seriesId: bibleSeriesId,
+                    contentId: state.seriesContentDetail.id,
+                    isDraft: true,
+                    isOnTime: isOnTime(state.seriesContentDetail.date),
+                    completionDate: Timestamp.fromDate(DateTime.now()));
+                BlocProvider.of<CompletionsBloc>(context)
+                  ..add(MarkAsDraft(completionDetails));
+              }
+              Navigator.pop(context);
+              return Future.value(false);
+            },
+            child: SafeArea(
+              child: Scaffold(
+                body: Container(
+                    padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
+                    child: Column(children: <Widget>[
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        child: Row(
+                          children: [
+                            backButton(state.seriesContentDetail),
+                            SizedBox(width: 8),
+                            HeaderWidget(
+                                contentType: state
+                                    .seriesContentDetail.contentType
+                                    .toString()),
+                          ],
                         ),
-                        Expanded(
-                          child: ListView(
-                            shrinkWrap: true,
-                            children: contentDetailList(
-                                state.seriesContentDetail,
-                                state.contentCompletionDetail,
-                                context),
-                          ),
+                      ),
+                      Expanded(
+                        child: ListView(
+                          shrinkWrap: true,
+                          children: contentDetailList(state.seriesContentDetail,
+                              state.contentCompletionDetail, context),
                         ),
-                      ])),
-                ),
+                      ),
+                    ])),
               ),
             ),
           );
@@ -189,10 +170,7 @@ class ContentDetailWidget extends StatelessWidget {
       listener: (context, state) {},
       builder: (context, state) {
         return GestureDetector(
-          onTap: () => {
-            backFunction(
-                state, context, seriesContent.isResponsePossible, seriesContent)
-          },
+          onTap: () => {backFunction(state, context, seriesContent)},
           child: Icon(
             Icons.arrow_back,
           ),
@@ -202,10 +180,8 @@ class ContentDetailWidget extends StatelessWidget {
   }
 
   void backFunction(CompletionsState state, BuildContext context,
-      bool isResponsePossible, SeriesContent seriesContent) {
-    if (isResponsePossible &&
-        !state.isComplete &&
-        state.responses.responses != null) {
+      SeriesContent seriesContent) {
+    if (seriesContent.isResponsePossible) {
       CompletionDetails completionDetails = CompletionDetails(
           seriesId: bibleSeriesId,
           contentId: seriesContent.id,
@@ -215,26 +191,6 @@ class ContentDetailWidget extends StatelessWidget {
       BlocProvider.of<CompletionsBloc>(context)
         ..add(MarkAsDraft(completionDetails));
       Navigator.pop(context);
-      // showDialog(
-      //     context: context,
-      //     builder: (_) => AlertDialog(
-      //           title: Text("Don't Forget to Save Your Responses!"),
-      //           content:
-      //               Text("To save responses, click on the circular checkmark"),
-      //           actions: [
-      //             FlatButton(
-      //                 onPressed: () {
-      //                   Navigator.of(context, rootNavigator: true).pop();
-      //                   Navigator.pop(context);
-      //                 },
-      //                 child: Text("Exit Anyways")),
-      //             FlatButton(
-      //                 onPressed: () {
-      //                   Navigator.of(context, rootNavigator: true).pop();
-      //                 },
-      //                 child: Text("Ok")),
-      //           ],
-      //         ));
     } else {
       if (keyChild.currentState != null) {
         keyChild.currentState.stopAudio();
