@@ -148,7 +148,6 @@ Stream<CompletionsState> _mapMarkAsDraftToState(
             {@required String completionId, Responses responses})
         putResponses) async* {
   try {
-    print(state.responses.responses);
     //checks if saving as draft is nessesary, if not, return original state
     if (!state.isComplete && state.responses.responses != null) {
       String id = state.id;
@@ -157,7 +156,6 @@ Stream<CompletionsState> _mapMarkAsDraftToState(
       }
       String responseId =
           await putResponses(completionId: id, responses: state.responses);
-      print(responseId);
       Responses newResponse =
           Responses(id: responseId, responses: state.responses.responses);
       yield state.copyWith(isComplete: false, id: id, responses: newResponse);
@@ -165,12 +163,10 @@ Stream<CompletionsState> _mapMarkAsDraftToState(
       yield state;
     }
   } on BaseApplicationException catch (e) {
-    print(e);
     yield state.copyWith(
       errorMessage: e.message,
     );
   } catch (e) {
-    print(e);
     yield state.copyWith(
       errorMessage: 'An unknown error occured',
     );
@@ -324,12 +320,10 @@ Stream<CompletionsState> _mapUploadImageEventToState(
             state.responses.id),
         downloadURL: {event.contentNum.toString(): downloadURL});
   } on BaseApplicationException catch (e) {
-    print(e);
     yield state.copyWith(
       errorMessage: e.message,
     );
   } catch (e) {
-    print(e);
     yield state.copyWith(
       errorMessage: 'An unknown error occured',
     );
@@ -352,12 +346,10 @@ Stream<CompletionsState> _mapDeleteImageEventToState(
       yield state.copyWith(responses: responses, id: '', isComplete: false);
     }
   } on BaseApplicationException catch (e) {
-    print(e);
     yield state.copyWith(
       errorMessage: e.message,
     );
   } catch (e) {
-    print(e);
     yield state.copyWith(
       errorMessage: 'An unknown error occured',
     );
