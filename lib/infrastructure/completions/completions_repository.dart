@@ -1,4 +1,9 @@
+import 'dart:io';
+import 'package:path/path.dart' as path;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:wpa_app/services/firebase_storage_service.dart';
 
 import '../../domain/authentication/entities.dart';
 import '../../domain/completions/entities.dart';
@@ -13,9 +18,11 @@ import 'responses_dto.dart';
 class CompletionsRepository extends ICompletionsRepository {
   final FirebaseFirestore _firestore;
   final FirebaseFirestoreService _firebaseFirestoreService;
+  final FirebaseStorageService _firebaseStorageService;
   CollectionReference _completionsCollection;
 
-  CompletionsRepository(this._firestore, this._firebaseFirestoreService) {
+  CompletionsRepository(this._firestore, this._firebaseFirestoreService,
+      this._firebaseStorageService) {
     _completionsCollection = _firestore.collection("completions");
   }
 
@@ -49,6 +56,7 @@ class CompletionsRepository extends ICompletionsRepository {
     String completionId,
   }) async {
     try {
+      print(completionId);
       await _completionsCollection.doc(completionId).delete();
     } catch (e) {
       _firebaseFirestoreService.handleException(e);
@@ -178,5 +186,38 @@ class CompletionsRepository extends ICompletionsRepository {
       _firebaseFirestoreService.handleException(e);
     }
     return '';
+  }
+
+  @override
+  UploadTask uploadImages({File file, String userId}) {
+    String fileExt = path.extension(file.path);
+    String filePath = '/responses/$userId/${DateTime.now()}$fileExt';
+    try {
+      return _firebaseStorageService.startFileUpload(filePath, file);
+    } catch (e) {
+      throw CompletionsException(
+        code: CompletionsExceptionCode.UNABLE_TO_UPLOAD_IMAGE,
+        message: "Unable to upload image",
+        details: e,
+      );
+    }
+  }
+
+  @override
+  void deleteImages({String gsUrl}) async {
+    try {
+      await _firebaseStorageService.deleteFile(gsUrl);
+    } catch (e) {
+      throw CompletionsException(
+          code: CompletionsExceptionCode.NO_RESPONSES,
+          message: "Unable to find Images",
+          details: e);
+    }
+  }
+
+  @override
+  Future<String> getDownloadURL({String gsUrl}) async {
+    String downloadURL = await _firebaseStorageService.getDownloadUrl(gsUrl);
+    return downloadURL;
   }
 }

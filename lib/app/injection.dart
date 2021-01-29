@@ -179,6 +179,7 @@ void initializeInjections({
     () => CompletionsRepository(
       getIt<FirebaseFirestore>(),
       getIt<FirebaseFirestoreService>(),
+      getIt<FirebaseStorageService>(),
     ),
   );
 
