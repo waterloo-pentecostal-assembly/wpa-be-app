@@ -5,21 +5,28 @@ import 'package:wpa_app/app/constants.dart';
 import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/application/completions/completions_bloc.dart';
 import 'package:wpa_app/domain/completions/entities.dart';
+import 'package:wpa_app/presentation/common/loader.dart';
 
 import 'package:wpa_app/presentation/common/text_factory.dart';
 
 import '../../../../domain/bible_series/entities.dart';
 
 class QuestionContentBodyWidget extends StatelessWidget {
+  final CompletionDetails completionDetails;
   final QuestionBody questionContentBody;
   final int contentNum;
 
   const QuestionContentBodyWidget(
-      {Key key, this.questionContentBody, this.contentNum})
+      {Key key,
+      this.questionContentBody,
+      this.contentNum,
+      this.completionDetails})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    BlocProvider.of<CompletionsBloc>(context)
+      ..add(LoadResponses(completionDetails));
     return Container(
         padding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
         child: Column(
@@ -77,19 +84,67 @@ Widget questionContainer(
           ],
         ),
       ),
-      Padding(
-          padding: const EdgeInsets.fromLTRB(18, 0, 24, 8),
-          child: TextFormField(
-            decoration: const InputDecoration.collapsed(
-              hintText: "Share your thoughts ...",
-              hintStyle: TextStyle(fontSize: 12),
-              border: UnderlineInputBorder(),
-            ),
-            onChanged: (value) {
-              BlocProvider.of<CompletionsBloc>(context)
-                ..add(QuestionResponseChanged(value, contentNum, questionNum));
-            },
-          )),
+      BlocConsumer<CompletionsBloc, CompletionsState>(
+        listener: (context, state) {
+          // TODO: implement listener
+        },
+        builder: (context, state) {
+          if (state.responses != null) {
+            if (state.responses.responses != null) {
+              return Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 0, 24, 8),
+                  child: TextFormField(
+                    maxLines: null,
+                    initialValue: getResponse(state, contentNum, questionNum),
+                    decoration: const InputDecoration.collapsed(
+                      hintText: "Share your thoughts ...",
+                      hintStyle: TextStyle(fontSize: 12),
+                      border: UnderlineInputBorder(),
+                    ),
+                    onChanged: (value) {
+                      if (state.isComplete == true) {
+                        BlocProvider.of<CompletionsBloc>(context)
+                          ..add(MarkAsInComplete(state.id));
+                      }
+                      BlocProvider.of<CompletionsBloc>(context)
+                        ..add(QuestionResponseChanged(
+                            value, contentNum, questionNum));
+                    },
+                  ));
+            } else {
+              return Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 0, 24, 8),
+                  child: TextFormField(
+                    maxLines: null,
+                    initialValue: '',
+                    decoration: const InputDecoration.collapsed(
+                      hintText: "Share your thoughts ...",
+                      hintStyle: TextStyle(fontSize: 12),
+                      border: UnderlineInputBorder(),
+                    ),
+                    onChanged: (value) {
+                      BlocProvider.of<CompletionsBloc>(context)
+                        ..add(QuestionResponseChanged(
+                            value, contentNum, questionNum));
+                    },
+                  ));
+            }
+          } else {
+            return Loader();
+          }
+        },
+      ),
     ],
   );
+}
+
+String getResponse(CompletionsState state, int contentNum, int questionNum) {
+  if (state.responses.responses[contentNum.toString()]
+          [questionNum.toString()] !=
+      null) {
+    return state.responses
+        .responses[contentNum.toString()][questionNum.toString()].response;
+  } else {
+    return '';
+  }
 }

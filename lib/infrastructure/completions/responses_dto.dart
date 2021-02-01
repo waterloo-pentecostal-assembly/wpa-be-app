@@ -17,11 +17,23 @@ class ResponsesDto {
         findOrDefaultToGetResponse(json, 'responses', {});
     responses.forEach((String k1, dynamic v1) {
       v1.forEach((String k2, dynamic v2) {
-        ResponseDetails responseDetails = ResponseDetails(
-          type: findOrThrowException(json, 'type'),
-          response: findOrThrowException(json, 'response'),
-        );
-        _responses[k1] = {k2: responseDetails};
+        ResponseDetails responseDetails;
+        if (v2['type'] == 'text') {
+          responseDetails = ResponseDetails(
+            response: findOrThrowException(v2, 'response'),
+            type: ResponseType.TEXT,
+          );
+        } else {
+          responseDetails = ResponseDetails(
+            response: findOrThrowException(v2, 'response'),
+            type: ResponseType.IMAGE,
+          );
+        }
+        if (_responses[k1] != null) {
+          _responses[k1][k2] = responseDetails;
+        } else {
+          _responses[k1] = {k2: responseDetails};
+        }
       });
     });
 
@@ -69,15 +81,27 @@ extension ContentCompletionDtoX on ResponsesDto {
     this.responses.forEach((String k1, Map<String, ResponseDetails> v1) {
       v1.forEach((String k2, ResponseDetails v2) {
         if (_responses[k1] != null) {
-          _responses[k1][k2] = v2.response;
+          if (v2.type == ResponseType.TEXT) {
+            _responses[k1][k2] = {'response': v2.response, 'type': 'text'};
+          } else {
+            _responses[k1][k2] = {'response': v2.response, 'type': 'image'};
+          }
         } else {
-          _responses[k1] = {k2: v2.response};
+          if (v2.type == ResponseType.TEXT) {
+            _responses[k1] = {
+              k2: {'response': v2.response, 'type': 'text'}
+            };
+          } else {
+            _responses[k1] = {
+              k2: {'response': v2.response, 'type': 'image'}
+            };
+          }
         }
       });
     });
     return {
       "user_id": this.userId,
-      "response": _responses,
+      "responses": _responses,
     };
   }
 }

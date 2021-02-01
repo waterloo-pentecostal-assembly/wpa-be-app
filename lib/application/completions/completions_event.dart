@@ -51,3 +51,10 @@ class MarkQuestionAsComplete extends CompletionsEvent {
   @override
   List<Object> get props => [completionDetails];
 }
+
+class LoadResponses extends CompletionsEvent {
+  final CompletionDetails completionDetails;
+  LoadResponses(this.completionDetails);
+  @override
+  List<Object> get props => [completionDetails];
+}

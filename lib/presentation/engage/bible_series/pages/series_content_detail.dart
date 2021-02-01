@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/application/completions/completions_bloc.dart';
@@ -14,6 +15,7 @@ import 'package:wpa_app/presentation/engage/bible_series/widgets/text_body.dart'
 
 import '../../../../application/bible_series/bible_series_bloc.dart';
 import '../../../../app/injection.dart';
+import '../helper.dart';
 
 class ContentDetailPage extends StatelessWidget {
   final String seriesContentId;
@@ -42,7 +44,7 @@ class ContentDetailPage extends StatelessWidget {
             ),
         ),
         BlocProvider<CompletionsBloc>(
-            create: (BuildContext context) => getIt<CompletionsBloc>()),
+            create: (context) => getIt<CompletionsBloc>()),
       ],
       child: ContentDetailWidget(bibleSeriesId),
     );
@@ -54,8 +56,8 @@ class ContentDetailWidget extends StatelessWidget {
   ContentDetailWidget(this.bibleSeriesId);
   final GlobalKey<AudioSliderState> keyChild = GlobalKey();
 
-  List<Widget> contentDetailList(
-      SeriesContent seriesContent, CompletionDetails completionDetails) {
+  List<Widget> contentDetailList(SeriesContent seriesContent,
+      CompletionDetails completionDetails, BuildContext context) {
     List<ISeriesContentBody> body = seriesContent.body;
     List<Widget> contentBodyList = [];
 
@@ -77,6 +79,7 @@ class ContentDetailWidget extends StatelessWidget {
         contentBodyList.add(QuestionContentBodyWidget(
           questionContentBody: body[index],
           contentNum: index,
+          completionDetails: completionDetails,
         ));
       } else if (body[index].type == SeriesContentBodyType.IMAGE_INPUT) {
         contentBodyList.add(ImageInputBodyWidget(
@@ -102,78 +105,55 @@ class ContentDetailWidget extends StatelessWidget {
       listener: (context, state) {},
       builder: (BuildContext context, BibleSeriesState state) {
         if (state is SeriesContentDetail) {
+          BlocProvider.of<CompletionsBloc>(context)
+            ..add(CompletionDetailRequested(state.contentCompletionDetail));
           return WillPopScope(
-              onWillPop: () {
-                if (state.seriesContentDetail.isResponsePossible &&
-                    state.contentCompletionDetail == null) {
-                  return showDialog(
-                      context: context,
-                      builder: (_) => AlertDialog(
-                            title: Text("Responses Not Saved!"),
-                            content: Text(
-                                "To save responses, click on the circular checkmark"),
-                            actions: [
-                              FlatButton(
-                                  onPressed: () {
-                                    Navigator.of(context, rootNavigator: true)
-                                        .pop();
-                                    Navigator.pop(context);
-                                  },
-                                  child: Text("Exit Anyways")),
-                              FlatButton(
-                                  onPressed: () {
-                                    Navigator.of(context, rootNavigator: true)
-                                        .pop();
-                                  },
-                                  child: Text("Ok")),
-                            ],
-                          ));
-                }
-                if (keyChild.currentState != null) {
-                  keyChild.currentState.stopAudio();
-                }
-                Navigator.pop(context);
-                return Future.value(false);
-              },
-              child: BlocProvider<CompletionsBloc>(
-                create: (BuildContext context) => getIt<CompletionsBloc>()
-                  ..add(
-                      CompletionDetailRequested(state.contentCompletionDetail)),
-                child: SafeArea(
-                  child: Scaffold(
-                    body: Container(
-                        padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
-                        child: Column(children: <Widget>[
-                          Container(
-                            alignment: Alignment.centerLeft,
-                            child: Row(
-                              children: [
-                                GestureDetector(
-                                  onTap: () => {backFunction(state, context)},
-                                  child: Icon(
-                                    Icons.arrow_back,
-                                  ),
-                                ),
-                                SizedBox(width: 8),
-                                HeaderWidget(
-                                    contentType: state
-                                        .seriesContentDetail.contentType
-                                        .toString()),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: ListView(
-                              shrinkWrap: true,
-                              children: contentDetailList(
-                                  state.seriesContentDetail,
-                                  state.contentCompletionDetail),
-                            ),
-                          ),
-                        ])),
-                  ),
-                ),
-              ));
+            onWillPop: () {
+              if (keyChild.currentState != null) {
+                keyChild.currentState.stopAudio();
+              }
+              if (state.seriesContentDetail.isResponsePossible) {
+                CompletionDetails completionDetails = CompletionDetails(
+                    seriesId: bibleSeriesId,
+                    contentId: state.seriesContentDetail.id,
+                    isDraft: true,
+                    isOnTime: isOnTime(state.seriesContentDetail.date),
+                    completionDate: Timestamp.fromDate(DateTime.now()));
+                BlocProvider.of<CompletionsBloc>(context)
+                  ..add(MarkAsDraft(completionDetails));
+              }
+              Navigator.pop(context);
+              return Future.value(false);
+            },
+            child: SafeArea(
+              child: Scaffold(
+                body: Container(
+                    padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
+                    child: Column(children: <Widget>[
+                      Container(
+                        alignment: Alignment.centerLeft,
+                        child: Row(
+                          children: [
+                            backButton(state.seriesContentDetail),
+                            SizedBox(width: 8),
+                            HeaderWidget(
+                                contentType: state
+                                    .seriesContentDetail.contentType
+                                    .toString()),
+                          ],
+                        ),
+                      ),
+                      Expanded(
+                        child: ListView(
+                          shrinkWrap: true,
+                          children: contentDetailList(state.seriesContentDetail,
+                              state.contentCompletionDetail, context),
+                        ),
+                      ),
+                    ])),
+              ),
+            ),
+          );
         } else if (state is BibleSeriesError) {
           return Scaffold(
               body: SafeArea(
@@ -185,29 +165,32 @@ class ContentDetailWidget extends StatelessWidget {
     );
   }
 
-  void backFunction(SeriesContentDetail state, BuildContext context) {
-    if (state.seriesContentDetail.isResponsePossible &&
-        state.contentCompletionDetail == null) {
-      showDialog(
-          context: context,
-          builder: (_) => AlertDialog(
-                title: Text("Responses Not Saved!"),
-                content:
-                    Text("To save responses, click on the circular checkmark"),
-                actions: [
-                  FlatButton(
-                      onPressed: () {
-                        Navigator.of(context, rootNavigator: true).pop();
-                        Navigator.pop(context);
-                      },
-                      child: Text("Exit Anyways")),
-                  FlatButton(
-                      onPressed: () {
-                        Navigator.of(context, rootNavigator: true).pop();
-                      },
-                      child: Text("Ok")),
-                ],
-              ));
+  Widget backButton(SeriesContent seriesContent) {
+    return BlocConsumer<CompletionsBloc, CompletionsState>(
+      listener: (context, state) {},
+      builder: (context, state) {
+        return GestureDetector(
+          onTap: () => {backFunction(state, context, seriesContent)},
+          child: Icon(
+            Icons.arrow_back,
+          ),
+        );
+      },
+    );
+  }
+
+  void backFunction(CompletionsState state, BuildContext context,
+      SeriesContent seriesContent) {
+    if (seriesContent.isResponsePossible) {
+      CompletionDetails completionDetails = CompletionDetails(
+          seriesId: bibleSeriesId,
+          contentId: seriesContent.id,
+          isDraft: true,
+          isOnTime: isOnTime(seriesContent.date),
+          completionDate: Timestamp.fromDate(DateTime.now()));
+      BlocProvider.of<CompletionsBloc>(context)
+        ..add(MarkAsDraft(completionDetails));
+      Navigator.pop(context);
     } else {
       if (keyChild.currentState != null) {
         keyChild.currentState.stopAudio();
