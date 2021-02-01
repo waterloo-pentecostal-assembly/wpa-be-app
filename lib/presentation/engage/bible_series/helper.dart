@@ -3,8 +3,8 @@ import 'package:wpa_app/domain/bible_series/entities.dart';
 import 'package:wpa_app/domain/completions/entities.dart';
 
 bool isOnTime(Timestamp date) {
-  DateTime now = DateTime.now();
-  DateTime seriesDate = date.toDate();
+  DateTime now = DateTime.now().toUtc();
+  DateTime seriesDate = date.toDate().toUtc();
   if (seriesDate.year == now.year &&
       seriesDate.month == now.month &&
       seriesDate.day == now.day) {
