@@ -256,7 +256,11 @@ Stream<CompletionsState> _mapLoadResponsesEventToState(
           if (entry2.value.type == ResponseType.IMAGE) {
             String url = await completionsRepository.getDownloadURL(
                 gsUrl: entry2.value.response);
-            downloadURL = {entry1.key: url};
+            if (downloadURL.isEmpty) {
+              downloadURL = {entry1.key: url};
+            } else {
+              downloadURL[entry1.key] = url;
+            }
           }
         }
       }
@@ -296,20 +300,13 @@ Stream<CompletionsState> _mapUploadImageEventToState(
     final String imageLocation = 'gs://${data.ref.bucket}/${data.ref.fullPath}';
     final String downloadURL =
         await completionsRepository.getDownloadURL(gsUrl: imageLocation);
-    // if (state.responses.responses != null) {
-    //   if (state
-    //       .responses
-    //       .responses[event.contentNum.toString()][event.questionNum.toString()]
-    //       .response
-    //       .isNotEmpty) {
-    //     String deletegsURL = state
-    //         .responses
-    //         .responses[event.contentNum.toString()]
-    //             [event.questionNum.toString()]
-    //         .response;
-    //     completionsRepository.deleteImages(gsUrl: deletegsURL);
-    //   }
-    // }
+    Map<String, String> downloadMap = Map();
+    if (state.downloadURL != null) {
+      downloadMap[event.contentNum.toString()] = downloadURL;
+    } else {
+      downloadMap = {event.contentNum.toString(): downloadURL};
+    }
+
     yield state.copyWith(
         responses: toResponses(
             state.responses,
@@ -318,7 +315,7 @@ Stream<CompletionsState> _mapUploadImageEventToState(
             event.questionNum.toString(),
             ResponseType.IMAGE,
             state.responses.id),
-        downloadURL: {event.contentNum.toString(): downloadURL});
+        downloadURL: downloadMap);
   } on BaseApplicationException catch (e) {
     yield state.copyWith(
       errorMessage: e.message,

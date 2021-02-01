@@ -56,7 +56,6 @@ class CompletionsRepository extends ICompletionsRepository {
     String completionId,
   }) async {
     try {
-      print(completionId);
       await _completionsCollection.doc(completionId).delete();
     } catch (e) {
       _firebaseFirestoreService.handleException(e);
