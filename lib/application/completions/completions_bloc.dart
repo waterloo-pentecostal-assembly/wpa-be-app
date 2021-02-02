@@ -300,7 +300,7 @@ Stream<CompletionsState> _mapUploadImageEventToState(
     final String imageLocation = 'gs://${data.ref.bucket}/${data.ref.fullPath}';
     final String downloadURL =
         await completionsRepository.getDownloadURL(gsUrl: imageLocation);
-    Map<String, String> downloadMap = Map();
+    Map<String, String> downloadMap = state.downloadURL;
     if (state.downloadURL != null) {
       downloadMap[event.contentNum.toString()] = downloadURL;
     } else {
@@ -332,15 +332,34 @@ Stream<CompletionsState> _mapDeleteImageEventToState(
     CompletionsState state,
     ICompletionsRepository completionsRepository) async* {
   try {
+    Map<String, String> downloadMap = state.downloadURL;
     if (state.responses.responses != null) {
       completionsRepository.deleteImages(gsUrl: event.gsURL);
-      if (state.isComplete || event.completionDetails != null) {
+      downloadMap.remove(event.contentNum.toString());
+      if (downloadMap.isEmpty &&
+          (state.isComplete || event.completionDetails != null)) {
         completionsRepository.markAsIncomplete(completionId: state.id);
       }
+      Map<String, Map<String, ResponseDetails>> responses =
+          state.responses.responses;
+      responses.remove(event.contentNum.toString());
 
-      Responses responses = Responses();
+      if (responses.isEmpty) {
+        Responses newResponses = Responses();
+        yield state.copyWith(
+            responses: newResponses, id: '', isComplete: false);
+      } else {
+        Responses newResponses = Responses(
+            id: state.responses.id,
+            responses: responses,
+            userId: state.responses.userId);
 
-      yield state.copyWith(responses: responses, id: '', isComplete: false);
+        yield state.copyWith(
+            responses: newResponses,
+            id: '',
+            isComplete: false,
+            downloadURL: downloadMap);
+      }
     }
   } on BaseApplicationException catch (e) {
     yield state.copyWith(

@@ -74,7 +74,11 @@ class UploadImage extends CompletionsEvent {
 class DeleteImage extends CompletionsEvent {
   final String gsURL;
   final CompletionDetails completionDetails;
-  DeleteImage({@required this.gsURL, @required this.completionDetails});
+  final int contentNum;
+  DeleteImage(
+      {@required this.gsURL,
+      @required this.completionDetails,
+      this.contentNum});
   @override
   List<Object> get props => [gsURL, completionDetails];
 }

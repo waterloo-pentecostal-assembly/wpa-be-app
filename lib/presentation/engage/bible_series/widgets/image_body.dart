@@ -50,56 +50,59 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
         if (state.uploadTask != null) {
           return imageLoading(state.uploadTask);
         } else if (state.downloadURL != null) {
-          return imageLoaded(
-              state.downloadURL[widget.contentNum.toString()],
-              widget.completionDetails,
-              state.responses.responses[widget.contentNum.toString()]['0']
-                  .response);
+          if (state.downloadURL[widget.contentNum.toString()] != null) {
+            return imageLoaded(
+                state.downloadURL[widget.contentNum.toString()],
+                widget.completionDetails,
+                state.responses.responses[widget.contentNum.toString()]['0']
+                    .response,
+                widget.contentNum);
+          }
         }
-        return Center(
-          child: Container(
-            height: 80,
-            width: 80,
-            child: GestureDetector(
-              child: Icon(
-                Icons.add_a_photo,
-                size: 40,
-              ),
-              onTap: selectImageInput,
+
+        return Container(
+          margin: const EdgeInsets.all(24),
+          height: 80,
+          width: 80,
+          child: GestureDetector(
+            child: Icon(
+              Icons.add_a_photo,
+              size: 40,
             ),
-            decoration: BoxDecoration(
-                color: Colors.grey[300],
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey[600],
-                    offset: Offset(2.0, 2.0),
-                    blurRadius: 5.0,
-                    spreadRadius: 1.0,
-                  ),
-                  BoxShadow(
-                    color: Colors.white,
-                    offset: Offset(-2.0, -2.0),
-                    blurRadius: 5.0,
-                    spreadRadius: 1.0,
-                  )
-                ],
-                gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      Colors.grey[200],
-                      Colors.grey[300],
-                      Colors.grey[400],
-                      Colors.grey[500],
-                    ],
-                    stops: [
-                      0.1,
-                      0.3,
-                      0.8,
-                      1,
-                    ])),
+            onTap: selectImageInput,
           ),
+          decoration: BoxDecoration(
+              color: Colors.grey[300],
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey[600],
+                  offset: Offset(2.0, 2.0),
+                  blurRadius: 5.0,
+                  spreadRadius: 1.0,
+                ),
+                BoxShadow(
+                  color: Colors.white,
+                  offset: Offset(-2.0, -2.0),
+                  blurRadius: 5.0,
+                  spreadRadius: 1.0,
+                )
+              ],
+              gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    Colors.grey[200],
+                    Colors.grey[300],
+                    Colors.grey[400],
+                    Colors.grey[500],
+                  ],
+                  stops: [
+                    0.1,
+                    0.3,
+                    0.8,
+                    1,
+                  ])),
         );
       },
     );
@@ -137,8 +140,8 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
         });
   }
 
-  Widget imageLoaded(
-      String downloadURL, CompletionDetails completionDetails, String gsURL) {
+  Widget imageLoaded(String downloadURL, CompletionDetails completionDetails,
+      String gsURL, int contentNum) {
     return Column(
       children: [
         Container(
@@ -149,7 +152,9 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
                 onTap: () {
                   BlocProvider.of<CompletionsBloc>(context)
                     ..add(DeleteImage(
-                        gsURL: gsURL, completionDetails: completionDetails));
+                        gsURL: gsURL,
+                        completionDetails: completionDetails,
+                        contentNum: contentNum));
                 },
                 child: Center(
                     child: Icon(
