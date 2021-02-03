@@ -66,9 +66,9 @@ class PrayerRequestsBloc extends Bloc<PrayerRequestsEvent, PrayerRequestsState>
       );
     } else if (event is NewPrayerRequestCreated) {
       yield* _mapPrayerRequestCreatedEventToState(
-        event,
-        _iPrayerRequestsRepository.createPrayerRequest,
-      );
+          event,
+          _iPrayerRequestsRepository.createPrayerRequest,
+          _iPrayerRequestsRepository.getPrayerRequests);
     } else if (event is NewPrayerRequestStarted) {
       yield* _mapNewPrayerRequestStartedEventToState();
     } else if (event is NewPrayerRequestRequestChanged) {
@@ -232,11 +232,14 @@ Stream<PrayerRequestsState> _mapPrayerRequestCreatedEventToState(
   Future<PrayerRequest> Function(
           {@required String request, @required bool isAnonymous})
       createPrayerRequest,
+  Future<List<PrayerRequest>> Function({@required int limit}) getPrayerRequests,
 ) async* {
   try {
     PrayerRequest prayerRequest = await createPrayerRequest(
         request: event.request, isAnonymous: event.isAnonymous);
-    yield NewPrayerRequestLoaded(prayerRequest: prayerRequest);
+    List<PrayerRequest> prayerRequests = await getPrayerRequests(limit: 10);
+    yield NewPrayerRequestLoaded(
+        prayerRequest: prayerRequest, prayerRequests: prayerRequests);
   } catch (e) {
     // No need to catch specific error here.
     yield NewPrayerRequestError(message: 'Unable to add prayer request.');

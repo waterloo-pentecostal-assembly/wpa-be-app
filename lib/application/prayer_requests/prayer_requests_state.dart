@@ -60,7 +60,10 @@ class MyPrayerRequestDeleteComplete extends PrayerRequestsState {
 class NewPrayerRequestLoaded extends PrayerRequestsState {
   final PrayerRequest prayerRequest;
 
-  NewPrayerRequestLoaded({@required this.prayerRequest});
+  final List<PrayerRequest> prayerRequests;
+
+  NewPrayerRequestLoaded(
+      {@required this.prayerRequest, @required this.prayerRequests});
 
   @override
   List<Object> get props => [prayerRequest];

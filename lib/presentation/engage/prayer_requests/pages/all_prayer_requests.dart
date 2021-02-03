@@ -91,7 +91,9 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
             listener: (context, state) {
           // Handle states that are common to both
           if (state is NewPrayerRequestLoaded) {
-            _insert(state.prayerRequest);
+            _allPrayerRequestsListKey = GlobalKey<AnimatedListState>();
+            _prayerRequests = state.prayerRequests;
+            setChild(createPrayerRequestAnimatedlist());
           } else if (state is MyPrayerRequestDeleteComplete) {
             int indexToDelete = getIndexToDelete(state.id);
             if (indexToDelete != null) {
@@ -130,7 +132,7 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
             } else if (state is PrayerRequestReportError) {
               ToastMessage.showErrorToast(state.message, context);
               // !!!! ONLY REMOVING AFTER 3 REPORTS ... AND ONE PERSON CAN REPORT MULTIPLE TIMES
-            }
+            } else if (state is PrayForRequestComplete) {}
           },
         ),
       ],
