@@ -69,6 +69,7 @@ class _IndexPage extends StatelessWidget {
   }
 }
 
+//Added '+ 1' to avoid deleting the home page until it has been implemented
 class NavigationBar extends StatelessWidget {
   final int tabIndex;
   final List<IIndexedPage> indexedPages;
@@ -77,7 +78,7 @@ class NavigationBar extends StatelessWidget {
       : super(key: key);
 
   void handleOnTap(BuildContext context, int index) async {
-    if (NavigationTabEnum.values[index] == NavigationTabEnum.GIVE) {
+    if (NavigationTabEnum.values[index + 1] == NavigationTabEnum.GIVE) {
       if (await canLaunch(kWpaGiveUrl)) {
         await launch(kWpaGiveUrl, forceWebView: true, enableJavaScript: true);
       } else {
@@ -107,7 +108,7 @@ class NavigationBar extends StatelessWidget {
     return WillPopScope(
       onWillPop: () async {
         NavigatorState currentNavigatorState =
-            indexedPages[tabIndex].navigatorKey.currentState;
+            indexedPages[tabIndex + 1].navigatorKey.currentState;
 
         if (currentNavigatorState.canPop()) {
           return !await currentNavigatorState.maybePop();
@@ -119,7 +120,7 @@ class NavigationBar extends StatelessWidget {
       },
       child: Scaffold(
         body: IndexedStack(
-          index: tabIndex,
+          index: tabIndex + 1,
           children: <Widget>[
             indexedPages[0],
             indexedPages[1],
@@ -139,10 +140,10 @@ class NavigationBar extends StatelessWidget {
           currentIndex: tabIndex,
           onTap: (int index) => handleOnTap(context, index),
           items: [
-            BottomNavigationBarItem(
-              icon: Icon(Icons.home),
-              label: 'HOME',
-            ),
+            // BottomNavigationBarItem(
+            //   icon: Icon(Icons.home),
+            //   label: 'HOME',
+            // ),
             BottomNavigationBarItem(
               icon: Icon(Icons.class_),
               label: 'ENGAGE',
