@@ -198,12 +198,6 @@ class PrayButton extends StatelessWidget {
     return _PrayButton(
       prayerRequest: prayerRequest,
     );
-    // return BlocProvider<AllPrayerRequestsBloc>(
-    //   create: (BuildContext context) => getIt<PrayerRequestsBloc>(),
-    //   child: _PrayButton(
-    //     prayerRequest: widget.prayerRequest,
-    //   ),
-    // );
   }
 }
 
