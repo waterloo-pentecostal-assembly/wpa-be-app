@@ -26,6 +26,7 @@ class PrayerRequestCard extends StatelessWidget {
     @required this.animation,
   }) : super(key: key);
 
+  @override
   Widget build(BuildContext context) {
     return FadeTransition(
       opacity: animation,
@@ -194,11 +195,8 @@ class PrayButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<AllPrayerRequestsBloc>(
-      create: (BuildContext context) => getIt<PrayerRequestsBloc>(),
-      child: _PrayButton(
-        prayerRequest: prayerRequest,
-      ),
+    return _PrayButton(
+      prayerRequest: prayerRequest,
     );
   }
 }
@@ -217,10 +215,16 @@ class _PrayButton extends StatelessWidget {
         }
       },
       builder: (BuildContext context, PrayerRequestsState state) {
-        if (prayerRequest.hasPrayed || state is PrayForRequestComplete) {
+        if (prayerRequest.hasPrayed) {
           return _createPrayedButton();
+        } else if (state is PrayForRequestComplete) {
+          if (state.id == prayerRequest.id) {
+            return _createPrayedButton();
+          }
         } else if (state is PrayForRequestLoading) {
-          return _createLoadingButton();
+          if (state.id == prayerRequest.id) {
+            return _createLoadingButton();
+          }
         }
         return _createPrayButton(context);
       },

@@ -7,7 +7,7 @@ class PrayerRequest {
   final String request;
   final List<String> prayedBy;
   final List<String> reportedBy;
-  final bool hasPrayed;
+  bool hasPrayed;
   final bool hasReported;
   final bool isMine;
   final Timestamp date;

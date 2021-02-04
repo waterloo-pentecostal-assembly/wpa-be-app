@@ -247,10 +247,10 @@ Stream<PrayerRequestsState> _mapPrayForRequestEventToState(
   PrayForRequest event,
   Future<void> Function({@required String id}) prayForRequest,
 ) async* {
-  yield PrayForRequestLoading();
+  yield PrayForRequestLoading(id: event.id);
   try {
     await prayForRequest(id: event.id);
-    yield PrayForRequestComplete();
+    yield PrayForRequestComplete(id: event.id);
   } catch (e) {
     yield PrayForRequestError(message: "Unable to complete request.");
   }
