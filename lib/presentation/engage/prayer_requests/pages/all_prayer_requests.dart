@@ -14,10 +14,8 @@ class AllPrayerRequests extends StatefulWidget {
   _AllPrayerRequestsState createState() => _AllPrayerRequestsState();
 }
 
-class _AllPrayerRequestsState extends State<AllPrayerRequests>
-    with AutomaticKeepAliveClientMixin {
-  GlobalKey<AnimatedListState> _allPrayerRequestsListKey =
-      GlobalKey<AnimatedListState>();
+class _AllPrayerRequestsState extends State<AllPrayerRequests> with AutomaticKeepAliveClientMixin {
+  GlobalKey<AnimatedListState> _allPrayerRequestsListKey = GlobalKey<AnimatedListState>();
   final _scrollController = ScrollController();
   final _scrollThreshold = 200.0;
   bool _isEndOfList = false;
@@ -39,8 +37,7 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
     });
   }
 
-  Widget _buildItem(
-      BuildContext context, int index, Animation<double> animation) {
+  Widget _buildItem(BuildContext context, int index, Animation<double> animation) {
     return PrayerRequestCard(
       prayerRequest: _prayerRequests[index],
       animation: animation,
@@ -48,8 +45,7 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
     );
   }
 
-  Widget _buildDeletedItem(
-      BuildContext context, PrayerRequest item, Animation<double> animation) {
+  Widget _buildDeletedItem(BuildContext context, PrayerRequest item, Animation<double> animation) {
     return PrayerRequestCard(
       prayerRequest: item,
       animation: animation,
@@ -71,13 +67,15 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
   }
 
   void _delete(int indexToDelete) {
-    PrayerRequest deletedPrayerRequest =
-        _prayerRequests.removeAt(indexToDelete);
+    PrayerRequest deletedPrayerRequest = _prayerRequests.removeAt(indexToDelete);
     _allPrayerRequestsListKey.currentState.removeItem(
       indexToDelete,
-      (context, animation) =>
-          _buildDeletedItem(context, deletedPrayerRequest, animation),
+      (context, animation) => _buildDeletedItem(context, deletedPrayerRequest, animation),
     );
+  }
+
+  void _markAsPrayed(int index) {
+    _prayerRequests[index].hasPrayed = true;
   }
 
   @override
@@ -88,25 +86,26 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
     return MultiBlocListener(
       listeners: [
         BlocListener<PrayerRequestsBloc, PrayerRequestsState>(
-            listener: (context, state) {
-          // Handle states that are common to both
-          if (state is NewPrayerRequestLoaded) {
-            _insert(state.prayerRequest);
-          } else if (state is MyPrayerRequestDeleteComplete) {
-            int indexToDelete = getIndexToDelete(state.id);
-            if (indexToDelete != null) {
-              _delete(indexToDelete);
+          listener: (context, state) {
+            // Handle states that are common to both
+            if (state is NewPrayerRequestLoaded) {
+              _insert(state.prayerRequest);
+            } else if (state is MyPrayerRequestDeleteComplete) {
+              int indexToDelete = getIndexById(state.id);
+              if (indexToDelete != null) {
+                _delete(indexToDelete);
+              }
+            } else if (state is NewPrayerRequestError) {
+              ToastMessage.showErrorToast(state.message, context);
+            } else if (state is PrayerRequestDeleteError) {
+              ToastMessage.showErrorToast(state.message, context);
             }
-          } else if (state is NewPrayerRequestError) {
-            ToastMessage.showErrorToast(state.message, context);
-          } else if (state is PrayerRequestDeleteError) {
-            ToastMessage.showErrorToast(state.message, context);
-          }
-          // No need to handle these two in MyPrayerRequests since this
-          // BlocListener will be loaded in either case. If it is also
-          // handled in MyPrayerRequests then two toasts will be shown
-          // if the error was thron from MyPrayerRequests.
-        }),
+            // No need to handle these two in MyPrayerRequests since this
+            // BlocListener will be loaded in either case. If it is also
+            // handled in MyPrayerRequests then two toasts will be shown
+            // if the error was thron from MyPrayerRequests.
+          },
+        ),
         BlocListener<AllPrayerRequestsBloc, PrayerRequestsState>(
           // Handle states that are specific to all prayer requests
           listener: (context, state) {
@@ -123,13 +122,16 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
             } else if (state is PrayerRequestsError) {
               setChild(PrayerRequestsErrorWidget(message: state.message));
             } else if (state is PrayerRequestReportedAndRemoved) {
-              int indexToDelete = getIndexToDelete(state.id);
+              int indexToDelete = getIndexById(state.id);
               if (indexToDelete != null) {
                 _delete(indexToDelete);
               }
             } else if (state is PrayerRequestReportError) {
               ToastMessage.showErrorToast(state.message, context);
               // !!!! ONLY REMOVING AFTER 3 REPORTS ... AND ONE PERSON CAN REPORT MULTIPLE TIMES
+            } else if (state is PrayForRequestComplete) {
+              int index = getIndexById(state.id);
+              _markAsPrayed(index);
             }
           },
         ),
@@ -138,7 +140,8 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
     );
   }
 
-  int getIndexToDelete(String id) {
+  int getIndexById(String id) {
+    // O(n) ... not the best. Consider passing the index in the bloc event and getting it back in the state
     int indexToDelete;
     for (PrayerRequest prayerRequest in _prayerRequests) {
       int index = _prayerRequests.indexOf(prayerRequest);
@@ -153,8 +156,7 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
   Widget createPrayerRequestAnimatedlist() {
     return RefreshIndicator(
       onRefresh: () async {
-        BlocProvider.of<AllPrayerRequestsBloc>(context)
-          ..add(PrayerRequestsRequested(amount: _amountToFetch));
+        BlocProvider.of<AllPrayerRequestsBloc>(context)..add(PrayerRequestsRequested(amount: _amountToFetch));
       },
       child: AnimatedList(
         physics: AlwaysScrollableScrollPhysics(),
@@ -176,11 +178,8 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
     final maxScroll = _scrollController.position.maxScrollExtent;
     final currentScroll = _scrollController.position.pixels;
     final int amount = _amountToFetch;
-    if (maxScroll - currentScroll <= _scrollThreshold &&
-        !_isEndOfList &&
-        !_moreRequested) {
-      BlocProvider.of<AllPrayerRequestsBloc>(context)
-        ..add(MorePrayerRequestsRequested(amount: amount));
+    if (maxScroll - currentScroll <= _scrollThreshold && !_isEndOfList && !_moreRequested) {
+      BlocProvider.of<AllPrayerRequestsBloc>(context)..add(MorePrayerRequestsRequested(amount: amount));
       _moreRequested = true; // Set _moreRequested flag
     }
   }

@@ -21,8 +21,7 @@ class PrayerRequestsBloc extends Bloc<PrayerRequestsEvent, PrayerRequestsState>
     with MyPrayerRequestsBloc, AllPrayerRequestsBloc, NewPrayerRequestsBloc {
   final IPrayerRequestsRepository _iPrayerRequestsRepository;
 
-  PrayerRequestsBloc(this._iPrayerRequestsRepository)
-      : super(PrayerRequestsLoading());
+  PrayerRequestsBloc(this._iPrayerRequestsRepository) : super(PrayerRequestsLoading());
 
   @override
   Stream<PrayerRequestsState> mapEventToState(
@@ -72,11 +71,9 @@ class PrayerRequestsBloc extends Bloc<PrayerRequestsEvent, PrayerRequestsState>
     } else if (event is NewPrayerRequestStarted) {
       yield* _mapNewPrayerRequestStartedEventToState();
     } else if (event is NewPrayerRequestRequestChanged) {
-      yield* _mapNewPrayerRequestRequestChangedEventToState(
-          state, event.prayerRequest);
+      yield* _mapNewPrayerRequestRequestChangedEventToState(state, event.prayerRequest);
     } else if (event is NewPrayerRequestAnonymousChanged) {
-      yield* _mapNewPrayerRequestAnonymousChangedEventToState(
-          state, event.isAnonymous);
+      yield* _mapNewPrayerRequestAnonymousChangedEventToState(state, event.isAnonymous);
     }
   }
 }
@@ -96,15 +93,12 @@ Stream<PrayerRequestsState> _mapNewPrayerRequestRequestChangedEventToState(
   NewPrayerRequestState newPrayerRequestState = state as NewPrayerRequestState;
   try {
     PrayerRequestBody validatedPrayerRequest = PrayerRequestBody(prayerRequest);
-    yield newPrayerRequestState.copyWith(
-        prayerRequest: validatedPrayerRequest.value, prayerRequestError: '');
+    yield newPrayerRequestState.copyWith(prayerRequest: validatedPrayerRequest.value, prayerRequestError: '');
   } on ValueObjectException catch (e) {
-    yield newPrayerRequestState.copyWith(
-        prayerRequest: prayerRequest, prayerRequestError: e.message);
+    yield newPrayerRequestState.copyWith(prayerRequest: prayerRequest, prayerRequestError: e.message);
   } catch (e) {
     // Should never reach here in normal conditions, just covering all bases.
-    yield newPrayerRequestState.copyWith(
-        prayerRequest: prayerRequest, prayerRequestError: 'Unknown Error.');
+    yield newPrayerRequestState.copyWith(prayerRequest: prayerRequest, prayerRequestError: 'Unknown Error.');
   }
 }
 
@@ -135,10 +129,8 @@ Stream<PrayerRequestsState> _mapPrayerRequestsRequestedEventToState(
   Future<List<PrayerRequest>> Function({@required int limit}) getPrayerRequests,
 ) async* {
   try {
-    List<PrayerRequest> prayerRequest =
-        await getPrayerRequests(limit: event.amount);
-    yield PrayerRequestsLoaded(
-        prayerRequests: prayerRequest, isEndOfList: prayerRequest.length == 0);
+    List<PrayerRequest> prayerRequest = await getPrayerRequests(limit: event.amount);
+    yield PrayerRequestsLoaded(prayerRequests: prayerRequest, isEndOfList: prayerRequest.length == 0);
   } on BaseApplicationException catch (e) {
     yield PrayerRequestsError(
       message: e.message,
@@ -187,12 +179,10 @@ Stream<PrayerRequestsState> _mapPrayerRequestReportedEventToState(
 Stream<PrayerRequestsState> _mapMorePrayerRequestsRequestedEventToState(
   MorePrayerRequestsRequested event,
   state,
-  Future<List<PrayerRequest>> Function({@required int limit})
-      getMorePrayerRequests,
+  Future<List<PrayerRequest>> Function({@required int limit}) getMorePrayerRequests,
 ) async* {
   try {
-    List<PrayerRequest> prayerRequests =
-        await getMorePrayerRequests(limit: event.amount);
+    List<PrayerRequest> prayerRequests = await getMorePrayerRequests(limit: event.amount);
     yield MorePrayerRequestsLoaded(
       prayerRequests: prayerRequests,
       isEndOfList: prayerRequests.length == 0,
@@ -213,8 +203,7 @@ Stream<PrayerRequestsState> _mapRecentPrayerRequestsRequestedEventToState(
   Future<List<PrayerRequest>> Function({@required int limit}) getPrayerRequests,
 ) async* {
   try {
-    List<PrayerRequest> prayerRequest =
-        await getPrayerRequests(limit: event.amount);
+    List<PrayerRequest> prayerRequest = await getPrayerRequests(limit: event.amount);
     yield RecentPrayerRequestsLoaded(prayerRequests: prayerRequest);
   } on BaseApplicationException catch (e) {
     yield PrayerRequestsError(
@@ -229,13 +218,10 @@ Stream<PrayerRequestsState> _mapRecentPrayerRequestsRequestedEventToState(
 
 Stream<PrayerRequestsState> _mapPrayerRequestCreatedEventToState(
   NewPrayerRequestCreated event,
-  Future<PrayerRequest> Function(
-          {@required String request, @required bool isAnonymous})
-      createPrayerRequest,
+  Future<PrayerRequest> Function({@required String request, @required bool isAnonymous}) createPrayerRequest,
 ) async* {
   try {
-    PrayerRequest prayerRequest = await createPrayerRequest(
-        request: event.request, isAnonymous: event.isAnonymous);
+    PrayerRequest prayerRequest = await createPrayerRequest(request: event.request, isAnonymous: event.isAnonymous);
     yield NewPrayerRequestLoaded(prayerRequest: prayerRequest);
   } catch (e) {
     // No need to catch specific error here.
@@ -247,10 +233,10 @@ Stream<PrayerRequestsState> _mapPrayForRequestEventToState(
   PrayForRequest event,
   Future<void> Function({@required String id}) prayForRequest,
 ) async* {
-  yield PrayForRequestLoading();
+  yield PrayForRequestLoading(id: event.id);
   try {
     await prayForRequest(id: event.id);
-    yield PrayForRequestComplete();
+    yield PrayForRequestComplete(id: event.id);
   } catch (e) {
     yield PrayForRequestError(message: "Unable to complete request.");
   }

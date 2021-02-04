@@ -125,17 +125,21 @@ class PrayForRequestError extends PrayerRequestsState {
 }
 
 class PrayForRequestLoading extends PrayerRequestsState {
-  PrayForRequestLoading();
+  final String id;
+
+  PrayForRequestLoading({@required this.id});
 
   @override
-  List<Object> get props => [];
+  List<Object> get props => [id];
 }
 
 class PrayForRequestComplete extends PrayerRequestsState {
-  PrayForRequestComplete();
+  final String id;
+
+  PrayForRequestComplete({@required this.id});
 
   @override
-  List<Object> get props => [];
+  List<Object> get props => [id];
 }
 
 class NewPrayerRequestState extends PrayerRequestsState {
