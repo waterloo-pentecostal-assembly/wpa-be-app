@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/app/constants.dart';
+import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/application/completions/completions_bloc.dart';
 import 'package:wpa_app/domain/bible_series/entities.dart';
 import 'package:wpa_app/domain/completions/entities.dart';
 import 'package:wpa_app/presentation/common/loader.dart';
+import 'package:wpa_app/presentation/common/text_factory.dart';
 
 import '../helper.dart';
 
@@ -39,6 +42,8 @@ class CompletionButton extends StatelessWidget {
                       Icons.check_circle,
                       size: 100,
                     ),
+                    customBorder: new CircleBorder(),
+                    splashColor: Colors.lightGreenAccent,
                   ),
                 ));
           } else if (state.isComplete) {
@@ -89,17 +94,35 @@ class ResponseCompletionButton extends StatelessWidget {
                         return showDialog(
                             context: context,
                             builder: (_) => AlertDialog(
+                                  buttonPadding: const EdgeInsets.all(20),
+                                  shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.all(
+                                          Radius.circular(16))),
                                   title: Text("No answers found"),
                                   content: Text(
                                       "Please fill out responses before marking this page as draft or complete"),
                                   actions: [
-                                    FlatButton(
+                                    ClipRRect(
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(16)),
+                                      child: FlatButton(
+                                        height: 30,
+                                        minWidth: 90,
+                                        color: kWpaBlue,
+                                        textColor: Colors.white,
+                                        padding:
+                                            EdgeInsets.fromLTRB(8, 4, 8, 4),
+                                        materialTapTargetSize:
+                                            MaterialTapTargetSize.shrinkWrap,
                                         onPressed: () {
                                           Navigator.of(context,
                                                   rootNavigator: true)
                                               .pop();
                                         },
-                                        child: Text("Ok"))
+                                        child: getIt<TextFactory>()
+                                            .regularButton('Ok'),
+                                      ),
+                                    )
                                   ],
                                 ));
                       } else if (!isResponsesFilled(
@@ -115,16 +138,33 @@ class ResponseCompletionButton extends StatelessWidget {
                         return showDialog(
                           context: context,
                           builder: (_) => AlertDialog(
+                            shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(16))),
+                            buttonPadding: const EdgeInsets.all(20),
                             title: Text("Response(s) Saved as Draft"),
                             content: Text(
                                 "You can now exit this page and work on it later"),
                             actions: [
-                              FlatButton(
+                              ClipRRect(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(16)),
+                                child: FlatButton(
+                                  height: 30,
+                                  minWidth: 90,
+                                  color: kWpaBlue,
+                                  textColor: Colors.white,
+                                  padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
                                   onPressed: () {
                                     Navigator.of(context, rootNavigator: true)
                                         .pop();
                                   },
-                                  child: Text("Ok")),
+                                  child:
+                                      getIt<TextFactory>().regularButton('Ok'),
+                                ),
+                              )
                             ],
                           ),
                         );
@@ -139,6 +179,8 @@ class ResponseCompletionButton extends StatelessWidget {
                           ..add(MarkAsComplete(completionDetails));
                       }
                     },
+                    customBorder: new CircleBorder(),
+                    splashColor: Colors.lightGreenAccent,
                     child: Icon(
                       Icons.check_circle,
                       size: 100,

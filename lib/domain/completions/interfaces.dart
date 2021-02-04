@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 
 import 'entities.dart';
@@ -32,4 +35,10 @@ abstract class ICompletionsRepository {
     @required CompletionDetails completionDetails,
     @required String completionId,
   });
+
+  UploadTask uploadImages({@required File file, @required String userId});
+
+  void deleteImages({@required String gsUrl});
+
+  Future<String> getDownloadURL({@required String gsUrl});
 }

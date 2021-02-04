@@ -1,9 +1,13 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/application/completions/helper.dart';
+import 'package:wpa_app/domain/authentication/entities.dart';
 import 'package:wpa_app/domain/common/exceptions.dart';
 import 'package:wpa_app/domain/completions/entities.dart';
 import 'package:wpa_app/domain/completions/interfaces.dart';
@@ -49,8 +53,16 @@ class CompletionsBloc extends Bloc<CompletionsEvent, CompletionsState> {
           _iCompletionsRepository.markAsComplete,
           _iCompletionsRepository.putResponses);
     } else if (event is LoadResponses) {
-      yield* _mapLoadResponsesEventToState(
-          event, state, _iCompletionsRepository.getResponses);
+      yield* _mapLoadResponsesEventToState(event, state,
+          _iCompletionsRepository.getResponses, _iCompletionsRepository);
+    } else if (event is UploadImage) {
+      yield* _mapUploadImageEventToState(
+        event,
+        state,
+        _iCompletionsRepository,
+      );
+    } else if (event is DeleteImage) {
+      yield* _mapDeleteImageEventToState(event, state, _iCompletionsRepository);
     }
   }
 }
@@ -107,9 +119,14 @@ Stream<CompletionsState> _mapMarkAsCompleteEventToState(
           await putResponses(completionId: id, responses: state.responses);
       Responses newResponse =
           Responses(id: responseId, responses: state.responses.responses);
-      yield state.copyWith(isComplete: true, id: id, responses: newResponse);
+      yield state.copyWith(
+          isComplete: true,
+          id: id,
+          responses: newResponse,
+          downloadURL: state.downloadURL);
     } else {
-      yield state.copyWith(isComplete: true, id: id);
+      yield state.copyWith(
+          isComplete: true, id: id, downloadURL: state.downloadURL);
     }
   } on BaseApplicationException catch (e) {
     yield state.copyWith(
@@ -163,7 +180,8 @@ Stream<CompletionsState> _mapMarkAsInCompleteEventToState(
         markAsIncomplete) async* {
   try {
     await markAsIncomplete(completionId: event.id);
-    yield state.copyWith(isComplete: false, id: '');
+    yield state.copyWith(
+        isComplete: false, id: '', downloadURL: state.downloadURL);
   } on BaseApplicationException catch (e) {
     yield state.copyWith(
       errorMessage: e.message,
@@ -180,10 +198,6 @@ Stream<CompletionsState> _mapQuestionResponseChangedToState(
   CompletionsState state,
 ) async* {
   try {
-    String id;
-    if (state.responses != null) {
-      id = state.responses.id;
-    }
     yield state.copyWith(
         responses: toResponses(
             state.responses,
@@ -191,7 +205,7 @@ Stream<CompletionsState> _mapQuestionResponseChangedToState(
             event.contentNum.toString(),
             event.questionNum.toString(),
             ResponseType.TEXT,
-            id));
+            state.responses.id));
   } on BaseApplicationException catch (e) {
     yield state.copyWith(
       errorMessage: e.message,
@@ -229,16 +243,123 @@ Stream<CompletionsState> _mapMarkQuestionAsCompleteEventToState(
 Stream<CompletionsState> _mapLoadResponsesEventToState(
     LoadResponses event,
     CompletionsState state,
-    Future<Responses> Function({@required String completionId})
-        getResponses) async* {
+    Future<Responses> Function({@required String completionId}) getResponses,
+    ICompletionsRepository completionsRepository) async* {
   try {
     if (event.completionDetails != null) {
       Responses responses =
           await getResponses(completionId: event.completionDetails.id);
-      yield state.copyWith(responses: responses);
+      Map<String, String> downloadURL = Map();
+
+      for (var entry1 in responses.responses.entries) {
+        for (var entry2 in entry1.value.entries) {
+          if (entry2.value.type == ResponseType.IMAGE) {
+            String url = await completionsRepository.getDownloadURL(
+                gsUrl: entry2.value.response);
+            if (downloadURL.isEmpty) {
+              downloadURL = {entry1.key: url};
+            } else {
+              downloadURL[entry1.key] = url;
+            }
+          }
+        }
+      }
+      if (downloadURL.isEmpty) {
+        yield state.copyWith(responses: responses);
+      } else {
+        yield state.copyWith(responses: responses, downloadURL: downloadURL);
+      }
     } else {
       Responses responses = Responses();
       yield state.copyWith(responses: responses);
+    }
+  } on BaseApplicationException catch (e) {
+    yield state.copyWith(
+      errorMessage: e.message,
+    );
+  } catch (e) {
+    yield state.copyWith(
+      errorMessage: 'An unknown error occured',
+    );
+  }
+}
+
+Stream<CompletionsState> _mapUploadImageEventToState(
+    UploadImage event,
+    CompletionsState state,
+    ICompletionsRepository completionsRepository) async* {
+  try {
+    final LocalUser user = getIt<LocalUser>();
+
+    UploadTask uploadTask =
+        completionsRepository.uploadImages(file: event.image, userId: user.id);
+    yield state.copyWith(uploadTask: uploadTask);
+
+    TaskSnapshot data = await uploadTask;
+
+    final String imageLocation = 'gs://${data.ref.bucket}/${data.ref.fullPath}';
+    final String downloadURL =
+        await completionsRepository.getDownloadURL(gsUrl: imageLocation);
+    Map<String, String> downloadMap = state.downloadURL;
+    if (state.downloadURL != null) {
+      downloadMap[event.contentNum.toString()] = downloadURL;
+    } else {
+      downloadMap = {event.contentNum.toString(): downloadURL};
+    }
+
+    yield state.copyWith(
+        responses: toResponses(
+            state.responses,
+            imageLocation,
+            event.contentNum.toString(),
+            event.questionNum.toString(),
+            ResponseType.IMAGE,
+            state.responses.id),
+        downloadURL: downloadMap);
+  } on BaseApplicationException catch (e) {
+    yield state.copyWith(
+      errorMessage: e.message,
+    );
+  } catch (e) {
+    yield state.copyWith(
+      errorMessage: 'An unknown error occured',
+    );
+  } // TODO: Make stream also save response as draft so gs code can be saved
+}
+
+Stream<CompletionsState> _mapDeleteImageEventToState(
+    DeleteImage event,
+    CompletionsState state,
+    ICompletionsRepository completionsRepository) async* {
+  try {
+    Map<String, String> downloadMap = state.downloadURL;
+    if (state.responses.responses != null) {
+      completionsRepository.deleteImages(gsUrl: event.gsURL);
+      downloadMap.remove(event.contentNum.toString());
+      if (downloadMap.isEmpty &&
+          (state.isComplete || event.completionDetails != null)) {
+        completionsRepository.markAsIncomplete(completionId: state.id);
+      }
+      Map<String, Map<String, ResponseDetails>> responses =
+          state.responses.responses;
+      responses.remove(event.contentNum.toString());
+
+      if (responses.isEmpty) {
+        Responses newResponses = Responses();
+        yield state.copyWith(
+            responses: newResponses, id: '', isComplete: false);
+      } else {
+        Responses newResponses = Responses(
+            id: state.responses.id,
+            responses: responses,
+            userId: state.responses.userId);
+
+        yield state.copyWith(
+            responses: newResponses,
+            id: '',
+            isComplete: false,
+            downloadURL: downloadMap);
+      }
     }
   } on BaseApplicationException catch (e) {
     yield state.copyWith(

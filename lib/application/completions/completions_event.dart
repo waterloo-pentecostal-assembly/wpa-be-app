@@ -58,3 +58,27 @@ class LoadResponses extends CompletionsEvent {
   @override
   List<Object> get props => [completionDetails];
 }
+
+class UploadImage extends CompletionsEvent {
+  final File image;
+  final int contentNum;
+  final int questionNum;
+  UploadImage(
+      {@required this.image,
+      @required this.contentNum,
+      @required this.questionNum});
+  @override
+  List<Object> get props => [image];
+}
+
+class DeleteImage extends CompletionsEvent {
+  final String gsURL;
+  final CompletionDetails completionDetails;
+  final int contentNum;
+  DeleteImage(
+      {@required this.gsURL,
+      @required this.completionDetails,
+      this.contentNum});
+  @override
+  List<Object> get props => [gsURL, completionDetails];
+}

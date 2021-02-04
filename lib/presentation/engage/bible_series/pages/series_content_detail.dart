@@ -84,6 +84,8 @@ class ContentDetailWidget extends StatelessWidget {
       } else if (body[index].type == SeriesContentBodyType.IMAGE_INPUT) {
         contentBodyList.add(ImageInputBodyWidget(
           imageInputBody: body[index],
+          contentNum: index,
+          completionDetails: completionDetails,
         ));
       }
     }
@@ -127,30 +129,31 @@ class ContentDetailWidget extends StatelessWidget {
             },
             child: SafeArea(
               child: Scaffold(
-                body: Container(
-                    padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
-                    child: Column(children: <Widget>[
-                      Container(
-                        alignment: Alignment.centerLeft,
-                        child: Row(
-                          children: [
-                            backButton(state.seriesContentDetail),
-                            SizedBox(width: 8),
-                            HeaderWidget(
-                                contentType: state
-                                    .seriesContentDetail.contentType
-                                    .toString()),
-                          ],
-                        ),
+                body: Column(children: <Widget>[
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    alignment: Alignment.centerLeft,
+                    child: Row(
+                      children: [
+                        backButton(state.seriesContentDetail),
+                        SizedBox(width: 8),
+                        HeaderWidget(
+                            contentType: state.seriesContentDetail.contentType
+                                .toString()),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
+                      child: ListView(
+                        shrinkWrap: true,
+                        children: contentDetailList(state.seriesContentDetail,
+                            state.contentCompletionDetail, context),
                       ),
-                      Expanded(
-                        child: ListView(
-                          shrinkWrap: true,
-                          children: contentDetailList(state.seriesContentDetail,
-                              state.contentCompletionDetail, context),
-                        ),
-                      ),
-                    ])),
+                    ),
+                  ),
+                ]),
               ),
             ),
           );
