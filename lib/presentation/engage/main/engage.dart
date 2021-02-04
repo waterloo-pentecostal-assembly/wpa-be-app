@@ -107,7 +107,7 @@ class EngageIndex extends StatelessWidget {
                 BlocProvider.of<AchievementsBloc>(context)
                   ..add(WatchAchievementsStarted());
                 BlocProvider.of<BibleSeriesBloc>(context)
-                  ..add(RecentBibleSeriesRequested(amount: 3));
+                  ..add(RecentBibleSeriesRequested(amount: 15));
                 BlocProvider.of<PrayerRequestsBloc>(context)
                   ..add(RecentPrayerRequestsRequested(amount: 10));
                 BlocProvider.of<MediaBloc>(context)
@@ -120,7 +120,11 @@ class EngageIndex extends StatelessWidget {
                   StreaksWidget(),
                   SizedBox(height: 16.0),
                   RecentBibleSeriesWidget(),
-                  SizedBox(height: 16.0),
+                  SizedBox(
+                    height: 16.0,
+                    child: DecoratedBox(
+                        decoration: BoxDecoration(color: Colors.grey.shade200)),
+                  ),
                   RecentPrayerRequestsWidget(),
                   SizedBox(height: 16.0),
                   MediaWidget(),

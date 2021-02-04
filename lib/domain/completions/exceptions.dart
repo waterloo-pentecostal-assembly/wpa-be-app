@@ -6,6 +6,7 @@ enum CompletionsExceptionCode {
   UNSUPPORTED_RESPONSE_TYPE,
   NO_RESPONSES,
   NO_COMPLETION_INFO,
+  UNABLE_TO_UPLOAD_IMAGE,
 }
 
 /// Implements [BaseException] to provide an exception type specific to Bible Series.
