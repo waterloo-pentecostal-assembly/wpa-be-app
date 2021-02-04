@@ -250,10 +250,6 @@ class _PrayButton extends StatelessWidget {
           BlocProvider.of<AllPrayerRequestsBloc>(context).add(PrayForRequest(
             id: prayerRequest.id,
           ));
-          // BlocProvider.of<PrayerRequestsBloc>(context)
-          //   ..add(PrayForRequest(
-          //     id: prayerRequest.id,
-          //   ));
         },
         child: getIt<TextFactory>().regular('PRAY'),
       ),
