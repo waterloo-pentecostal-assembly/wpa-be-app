@@ -137,7 +137,7 @@ extension PrayerRequestsDtoX on PrayerRequestsDto {
       "date": this.date,
       "is_anonymous": this.isAnonymous,
       "is_safe": false,
-      // Prayer Request is_safe flag initially set as true.
+      // Prayer Request is_safe flag initially set as false.
       // A backend process, automated or otherwise would have
       // to set this a true once it is a safe prayer request.
       // We would have to notify the user whether or not the
