@@ -136,11 +136,12 @@ extension PrayerRequestsDtoX on PrayerRequestsDto {
     return {
       "date": this.date,
       "is_anonymous": this.isAnonymous,
-      "is_safe": true,
-      // Prayer Request initially marked as safe. If we have a backend process
-      // running to moderate prayer requests we can set this as false and only
-      // set to true after the process deems it as safe. We would then need to
-      // notify the user whether or not the prayer request went live.
+      "is_safe": false,
+      // Prayer Request is_safe flag initially set as true.
+      // A backend process, automated or otherwise would have
+      // to set this a true once it is a safe prayer request.
+      // We would have to notify the user whether or not the
+      // prayer request went live.
       "request": this.request,
       "user_id": this.userId,
       "user_snippet": this.userSnippet.newRequestToFirestore(),

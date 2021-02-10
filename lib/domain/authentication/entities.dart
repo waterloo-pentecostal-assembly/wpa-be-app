@@ -6,6 +6,8 @@ class LocalUser {
   final int reports;
   final String profilePhotoUrl;
   final String profilePhotoGsLocation;
+  final bool isAdmin;
+  final bool isVerified;
 
   String get fullName => '$firstName $lastName';
 
@@ -17,10 +19,12 @@ class LocalUser {
     this.reports,
     this.profilePhotoUrl,
     this.profilePhotoGsLocation,
+    this.isAdmin,
+    this.isVerified,
   });
 
   @override
   String toString() {
-    return "User ID: $id, Name: $firstName $lastName, Email: $email, Reports: $reports, Photo URL: $profilePhotoUrl, Photo Location: $profilePhotoGsLocation";
+    return "isAdmin: $isAdmin, isVerified: $isVerified, ID: $id, Name: $firstName $lastName, Email: $email, Reports: $reports, Photo URL: $profilePhotoUrl, Photo Location: $profilePhotoGsLocation";
   }
 }

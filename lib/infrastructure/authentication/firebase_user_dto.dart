@@ -2,8 +2,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 import '../../domain/authentication/entities.dart';
-import '../common/helpers.dart';
 import '../../services/firebase_storage_service.dart';
+import '../common/helpers.dart';
 
 class FirebaseUserDto {
   final String id;
@@ -13,6 +13,8 @@ class FirebaseUserDto {
   final int reports;
   final String profilePhotoUrl;
   final String profilePhotoGsLocation;
+  final bool isVerified;
+  final bool isAdmin;
 
   factory FirebaseUserDto.fromJson(Map<String, dynamic> json) {
     return FirebaseUserDto._(
@@ -21,6 +23,8 @@ class FirebaseUserDto {
       email: findOrThrowException(json, 'email'),
       reports: findOrThrowException(json, 'reports'),
       profilePhotoGsLocation: json['profile_photo_gs_location'],
+      isVerified: findOrDefaultTo(json, 'is_verified', false),
+      isAdmin: findOrDefaultTo(json, 'is_admin', false),
     );
   }
 
@@ -46,6 +50,8 @@ class FirebaseUserDto {
       profilePhotoUrl: profilePhotoUrl ?? this.profilePhotoUrl,
       profilePhotoGsLocation:
           profilePhotoGsLocation ?? this.profilePhotoGsLocation,
+      isVerified: isVerified ?? this.isVerified,
+      isAdmin: isAdmin ?? this.isAdmin,
     );
   }
 
@@ -57,6 +63,8 @@ class FirebaseUserDto {
     @required this.reports,
     this.profilePhotoUrl,
     @required this.profilePhotoGsLocation,
+    @required this.isVerified,
+    @required this.isAdmin,
   });
 }
 
@@ -75,6 +83,8 @@ extension FirebaseUserDtoX on FirebaseUserDto {
       reports: this.reports,
       profilePhotoUrl: profilePhotoUrl,
       profilePhotoGsLocation: this.profilePhotoGsLocation,
+      isVerified: this.isVerified,
+      isAdmin: this.isAdmin,
     );
   }
 }

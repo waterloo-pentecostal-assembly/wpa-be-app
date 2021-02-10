@@ -37,12 +37,6 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
         code: AuthenticationExceptionCode.NOT_AUTHENTICATED,
         message: 'User not authenticated',
       );
-    } else if (!user.emailVerified) {
-      throw AuthenticationException(
-        code: AuthenticationExceptionCode.EMAIL_NOT_VERIFIED,
-        message:
-            '''Email not verified. If 24 hours has passed since you signed up, please contact us at $kWpaContactEmail''',
-      );
     }
 
     DocumentSnapshot userInfo;
@@ -60,6 +54,15 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
 
     LocalUser domainUser = await FirebaseUserDto.fromFirestore(userInfo)
         .toDomain(_firebaseStorageService);
+
+    if (!domainUser.isVerified) {
+      throw AuthenticationException(
+        code: AuthenticationExceptionCode.USER_NOT_VERIFIED,
+        message:
+            '''Account not verified. If 48 hours has passed since you signed up, please contact us at $kWpaContactEmail''',
+      );
+    }
+
     return domainUser;
   }
 
