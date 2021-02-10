@@ -113,6 +113,8 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
         'last_name': lastName.value,
         'email': emailAddress.value,
         'reports': 0,
+        'is_verified': false,
+        'is_admin': false,
       });
 
       // Add default notification settings
