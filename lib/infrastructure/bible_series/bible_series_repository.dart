@@ -33,7 +33,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
     try {
       querySnapshot = await _bibleSeriesCollection
           .orderBy("start_date", descending: true)
-          .where("is_active", isEqualTo: true)
+          .where("is_visible", isEqualTo: true)
           .limit(limit)
           .get();
     } catch (e) {
@@ -82,7 +82,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
     try {
       querySnapshot = await _bibleSeriesCollection
           .orderBy("start_date", descending: true)
-          .where("is_active", isEqualTo: true)
+          .where("is_visible", isEqualTo: true)
           .startAfterDocument(_lastBibleSeriesDocument)
           .limit(limit)
           .get();

@@ -6,6 +6,7 @@ import '../../../application/achievements/achievements_bloc.dart';
 import '../../../application/bible_series/bible_series_bloc.dart';
 import '../../../application/media/media_bloc.dart';
 import '../../../application/prayer_requests/prayer_requests_bloc.dart';
+import '../../../domain/authentication/entities.dart';
 import '../../common/interfaces.dart';
 import '../../common/text_factory.dart';
 import '../bible_series/pages/all_bible_series.dart';
@@ -13,9 +14,9 @@ import '../bible_series/pages/bible_series_detail.dart';
 import '../bible_series/pages/series_content_detail.dart';
 import '../prayer_requests/pages/prayer_requests.dart';
 import 'widgets/media_widget.dart';
+import 'widgets/progress_widget.dart';
 import 'widgets/recent_bible_series.dart';
 import 'widgets/recent_prayer_requests.dart';
-import 'widgets/streaks_widget.dart';
 
 class EngagePage extends IIndexedPage {
   final GlobalKey<NavigatorState> navigatorKey;
@@ -34,12 +35,12 @@ class EngagePage extends IIndexedPage {
             ),
         ),
         BlocProvider<PrayerRequestsBloc>(
-          create: (BuildContext context) => getIt<PrayerRequestsBloc>()
-            ..add(
-              // TODO: dynamically calculate how much recent prayer requests to get
-              RecentPrayerRequestsRequested(amount: 10),
+            create: (BuildContext context) => getIt<PrayerRequestsBloc>()
+            // ..add(
+            // TODO: dynamically calculate how much recent prayer requests to get
+            // RecentPrayerRequestsRequested(amount: 10),
+            // ),
             ),
-        ),
         BlocProvider<AchievementsBloc>(
           create: (BuildContext context) => getIt<AchievementsBloc>()
             ..add(
@@ -117,7 +118,7 @@ class EngageIndex extends StatelessWidget {
                 physics: AlwaysScrollableScrollPhysics(),
                 children: <Widget>[
                   HeaderWidget(),
-                  StreaksWidget(),
+                  ProgressWidget(),
                   SizedBox(height: 16.0),
                   RecentBibleSeriesWidget(),
                   SizedBox(
@@ -139,13 +140,15 @@ class EngageIndex extends StatelessWidget {
 }
 
 class HeaderWidget extends StatelessWidget {
+  LocalUser localUser = getIt<LocalUser>();
+
   @override
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(color: Colors.grey.shade200),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
-        child: getIt<TextFactory>().heading('Engage'),
+        child: getIt<TextFactory>().heading('Hello, ${localUser.firstName}!'),
       ),
     );
   }

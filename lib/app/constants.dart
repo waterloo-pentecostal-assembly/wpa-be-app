@@ -12,6 +12,7 @@ Color kCardGrey = Colors.grey.shade300;
 Color kCardOverlayGrey = Colors.grey.shade100;
 
 // Size Constants
+const kProgressWidgeetWidth = 150.0;
 const kRecentBibleSeriesTileWidth = 250.0;
 const kRecentBibleSeriesTileHeight = 130.0;
 const kRecentBibleSeriesTileDescriptionHeight = 60.0;
