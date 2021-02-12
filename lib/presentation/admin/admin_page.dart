@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wpa_app/application/admin/admin_bloc.dart';
-import 'package:wpa_app/presentation/admin/prayer_approval_page.dart';
-import 'package:wpa_app/presentation/admin/user_verification_page.dart';
-import 'package:wpa_app/presentation/admin/helper.dart';
 
 import '../../app/injection.dart';
+import '../../application/admin/admin_bloc.dart';
 import '../common/interfaces.dart';
 import '../common/text_factory.dart';
+import 'prayer_approval_page.dart';
+import 'user_verification_page.dart';
 
 class AdminPage extends IIndexedPage {
   final GlobalKey<NavigatorState> navigatorKey;
