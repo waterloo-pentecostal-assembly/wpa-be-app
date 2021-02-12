@@ -47,7 +47,7 @@ class OptionsList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.grey.shade100,
+      // color: Colors.grey.shade100,
       child: ListView(
         children: [
           HeaderWidget(),
@@ -57,8 +57,7 @@ class OptionsList extends StatelessWidget {
             children: [
               GestureDetector(
                 onTap: () {
-                  BlocProvider.of<AdminBloc>(context)
-                    ..add(LoadUnverifiedUsers());
+                  BlocProvider.of<AdminBloc>(context)..add(LoadUnverifiedUsers());
                   Navigator.pushNamed(context, '/user_verification');
                 },
                 child: Container(
@@ -70,10 +69,9 @@ class OptionsList extends StatelessWidget {
                       borderRadius: BorderRadius.all(Radius.circular(15)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey[500],
-                          offset: Offset(4.0, 4.0),
-                          blurRadius: 15.0,
-                          spreadRadius: 1.0,
+                          color: Colors.grey.withOpacity(0.25),
+                          blurRadius: 8.0,
+                          offset: Offset(0, 3),
                         ),
                       ]),
                   child: Column(
@@ -94,8 +92,7 @@ class OptionsList extends StatelessWidget {
               ),
               GestureDetector(
                 onTap: () {
-                  BlocProvider.of<AdminBloc>(context)
-                    ..add(LoadUnverifiedPrayerRequests());
+                  BlocProvider.of<AdminBloc>(context)..add(LoadUnverifiedPrayerRequests());
                   Navigator.pushNamed(context, '/prayer_request_approval');
                 },
                 child: Container(
@@ -107,10 +104,9 @@ class OptionsList extends StatelessWidget {
                       borderRadius: BorderRadius.all(Radius.circular(15)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey[500],
-                          offset: Offset(4.0, 4.0),
-                          blurRadius: 15.0,
-                          spreadRadius: 1.0,
+                          color: Colors.grey.withOpacity(0.25),
+                          blurRadius: 8.0,
+                          offset: Offset(0, 3),
                         ),
                       ]),
                   child: Column(
@@ -124,8 +120,7 @@ class OptionsList extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 16),
-                      getIt<TextFactory>()
-                          .subHeading3('Prayer Request Approval'),
+                      getIt<TextFactory>().subHeading3('Prayer Request Approval'),
                     ],
                   ),
                 ),
