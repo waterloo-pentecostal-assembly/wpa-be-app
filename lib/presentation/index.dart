@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:wpa_app/domain/authentication/entities.dart';
 
 import '../app/constants.dart';
 import '../app/injection.dart';
 import '../application/navigation_bar/navigation_bar_bloc.dart';
+import 'admin/admin_page.dart';
 import 'common/interfaces.dart';
 import 'common/text_factory.dart';
 import 'common/toast_message.dart';
@@ -23,6 +25,7 @@ class IndexPage extends StatelessWidget {
     GivePage(navigatorKey: GlobalKey()),
     NotificationsPage(navigatorKey: GlobalKey()),
     ProfilePage(navigatorKey: GlobalKey()),
+    AdminPage(navigatorKey: GlobalKey())
   ];
 
   @override
@@ -103,6 +106,43 @@ class NavigationBar extends StatelessWidget {
     }
   }
 
+  List<BottomNavigationBarItem> getNavBarItems() {
+    final LocalUser user = getIt<LocalUser>();
+    List<BottomNavigationBarItem> items = [
+      // BottomNavigationBarItem(
+      //   icon: Icon(Icons.home),
+      //   label: 'HOME',
+      // ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.class_),
+        label: 'ENGAGE',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.favorite),
+        label: 'GIVE',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.notifications),
+        label: 'NOTIFICATIONS',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.person),
+        label: 'PROFILE',
+      )
+    ];
+
+    if (user.isAdmin) {
+      items.add(
+        BottomNavigationBarItem(
+          icon: Icon(Icons.admin_panel_settings),
+          label: 'ADMIN',
+        ),
+      );
+    }
+
+    return items;
+  }
+
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
@@ -127,6 +167,7 @@ class NavigationBar extends StatelessWidget {
             indexedPages[2],
             indexedPages[3],
             indexedPages[4],
+            indexedPages[5],
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(
@@ -139,28 +180,7 @@ class NavigationBar extends StatelessWidget {
           type: BottomNavigationBarType.fixed,
           currentIndex: tabIndex,
           onTap: (int index) => handleOnTap(context, index),
-          items: [
-            // BottomNavigationBarItem(
-            //   icon: Icon(Icons.home),
-            //   label: 'HOME',
-            // ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.class_),
-              label: 'ENGAGE',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.favorite),
-              label: 'GIVE',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.notifications),
-              label: 'NOTIFICATIONS',
-            ),
-            BottomNavigationBarItem(
-              icon: Icon(Icons.person),
-              label: 'PROFILE',
-            ),
-          ],
+          items: getNavBarItems(),
         ),
       ),
     );

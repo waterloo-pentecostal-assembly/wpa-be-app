@@ -60,6 +60,7 @@ class _TabPrayerRequestWidgetState extends State<TabPrayerRequestWidget>
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
+            padding: const EdgeInsets.only(left: 10),
             color: Colors.transparent,
             child: TabBar(
               labelPadding: EdgeInsets.all(8),
