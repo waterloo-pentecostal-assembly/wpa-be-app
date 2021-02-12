@@ -13,6 +13,7 @@ enum NavigationTabEnum {
   GIVE,
   NOTIFICATIONS,
   PROFILE,
+  ADMIN,
 }
 
 class NavigationBarBloc extends Bloc<NavigationBarEvent, NavigationBarState> {

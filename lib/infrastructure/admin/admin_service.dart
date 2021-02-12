@@ -19,7 +19,7 @@ class AdminService implements IAdminService {
   @override
   Future<List<LocalUser>> getUnverifiedUsers() async {
     QuerySnapshot querySnapshot;
-    List<LocalUser> localUsers;
+    List<LocalUser> localUsers = [];
     try {
       querySnapshot = await _firestore
           .collection('users')
@@ -69,7 +69,7 @@ class AdminService implements IAdminService {
     final LocalUser user = getIt<LocalUser>();
 
     QuerySnapshot querySnapshot;
-    List<PrayerRequest> prayerRequests;
+    List<PrayerRequest> prayerRequests = [];
     try {
       querySnapshot = await _firestore
           .collection("prayer_requests")
@@ -96,6 +96,15 @@ class AdminService implements IAdminService {
           .collection("prayer_requests")
           .doc(prayerRequestId)
           .delete();
+    } catch (e) {
+      _firebaseFirestoreService.handleException(e);
+    }
+  }
+
+  @override
+  Future<void> deleteUnverifiedUsers({String userId}) async {
+    try {
+      await _firestore.collection('users').doc(userId).delete();
     } catch (e) {
       _firebaseFirestoreService.handleException(e);
     }

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import '../../domain/admin/interfaces.dart';
@@ -35,6 +36,9 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
     } else if (event is DeletePrayerRequest) {
       yield* _mapDeletePrayerRequestToState(
           event, _iAdminService.deletePrayerRequest);
+    } else if (event is DeleteUnverifiedUser) {
+      yield* _mapDeleteUnverifiedUserEventToState(
+          event, _iAdminService.deleteUnverifiedUsers);
     }
   }
 }
@@ -125,5 +129,20 @@ Stream<AdminState> _mapLoadUnverifiedUsersEventToState(
     yield AdminError(
       message: 'An unknown error occurred',
     );
+  }
+}
+
+Stream<AdminState> _mapDeleteUnverifiedUserEventToState(
+    DeleteUnverifiedUser event,
+    Future<void> Function({@required String userId}) deleteUser) async* {
+  try {
+    await deleteUser(userId: event.userId);
+    yield UserDeleted(userId: event.userId);
+  } on BaseApplicationException catch (e) {
+    yield AdminError(
+      message: e.message,
+    );
+  } catch (e) {
+    yield AdminError(message: 'An unknown error occurred');
   }
 }

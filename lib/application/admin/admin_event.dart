@@ -37,3 +37,12 @@ class DeletePrayerRequest extends AdminEvent {
   @override
   List<Object> get props => [prayerRequestId];
 }
+
+class DeleteUnverifiedUser extends AdminEvent {
+  final String userId;
+
+  DeleteUnverifiedUser(this.userId);
+
+  @override
+  List<Object> get props => [userId];
+}

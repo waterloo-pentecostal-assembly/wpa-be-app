@@ -54,6 +54,15 @@ class UserVerified extends AdminState {
   List<Object> get props => [userId];
 }
 
+class UserDeleted extends AdminState {
+  final String userId;
+
+  UserDeleted({@required this.userId});
+
+  @override
+  List<Object> get props => [userId];
+}
+
 class AdminError extends AdminState {
   final String message;
 

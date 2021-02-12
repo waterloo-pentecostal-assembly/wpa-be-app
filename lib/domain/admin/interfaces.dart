@@ -23,4 +23,8 @@ abstract class IAdminService {
   /// ADMIN ONLY
   /// Get unverified parayer requests
   Future<List<PrayerRequest>> getUnapprovedPrayerRequest();
+
+  ///ADMIN ONLY
+  /// Delete User
+  Future<void> deleteUnverifiedUsers({@required String userId});
 }

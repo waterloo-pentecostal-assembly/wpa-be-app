@@ -54,15 +54,6 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
 
     LocalUser domainUser = await FirebaseUserDto.fromFirestore(userInfo)
         .toDomain(_firebaseStorageService);
-
-    if (!domainUser.isVerified) {
-      throw AuthenticationException(
-        code: AuthenticationExceptionCode.USER_NOT_VERIFIED,
-        message:
-            '''Account not verified. If 48 hours has passed since you signed up, please contact us at $kWpaContactEmail''',
-      );
-    }
-
     return domainUser;
   }
 
@@ -108,13 +99,12 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
 
     try {
       // Create Document for that user in the User Collection
+
       await _firestore.collection('users').doc(userCredential.user.uid).set({
         'first_name': firstName.value,
         'last_name': lastName.value,
         'email': emailAddress.value,
         'reports': 0,
-        'is_verified': false,
-        'is_admin': false,
       });
 
       // Add default notification settings
