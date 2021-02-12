@@ -42,7 +42,7 @@ List<Widget> buildcombinedScripture(Scripture script) {
   if (script.title != '') {
     combinedScripture.add(Padding(
         padding: const EdgeInsets.only(bottom: 16),
-        child: getIt<TextFactory>().regular(script.title)));
+        child: getIt<TextFactory>().subHeading2(script.title)));
   }
   combinedScripture.add(
     ListView.builder(
@@ -70,7 +70,7 @@ Widget book(Scripture script) {
   String text = "$book $chapter: $start - $end";
   return Padding(
     padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
-    child: getIt<TextFactory>().subHeading(text),
+    child: getIt<TextFactory>().heading(text),
   );
 }
 
@@ -78,7 +78,7 @@ Widget copyright(ScriptureBody script) {
   String attribution = script.properties.attribution;
   String version = script.properties.bibleVersion;
   String text = "$version@\n$attribution";
-  return getIt<TextFactory>().lite(text);
+  return getIt<TextFactory>().liteSmall(text);
 }
 
 Widget verse(Scripture script, String key) {

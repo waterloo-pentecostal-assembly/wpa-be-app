@@ -180,7 +180,7 @@ class PrayerRequestUserAndDate extends StatelessWidget {
               }
             }(),
             getIt<TextFactory>()
-                .lite(toReadableDate(prayerRequest.date), fontSize: 9.0)
+                .lite(toReadableDate(prayerRequest.date), fontSize: 10.0)
           ],
         )
       ],
@@ -235,10 +235,10 @@ class _PrayButton extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.all(Radius.circular(20)),
       child: FlatButton(
-        height: 24,
+        height: 32,
         minWidth: 0,
         color: kCardGrey,
-        padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
+        padding: EdgeInsets.only(top: 6, bottom: 6, left: 12, right: 12),
         materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
         onPressed: () {
           BlocProvider.of<AllPrayerRequestsBloc>(context).add(PrayForRequest(

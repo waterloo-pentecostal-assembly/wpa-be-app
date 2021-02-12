@@ -79,7 +79,7 @@ class TextFactory {
     TextOverflow overflow = TextOverflow.visible,
     TextAlign textAlign = TextAlign.left,
     Color color = Colors.black87,
-    double fontSize = 12.0,
+    double fontSize = 14.0,
   }) {
     return Text(
       text,
@@ -122,7 +122,7 @@ class TextFactory {
 
   Text lite(
     String text, {
-    double fontSize = 12.0,
+    double fontSize = 14.0,
     Color color: Colors.black,
     TextOverflow overflow = TextOverflow.visible,
   }) {
@@ -156,6 +156,28 @@ class TextFactory {
   }
 
   TextStyle liteLargeTextStyle({double fontSize, Color color = Colors.black}) {
+    return TextStyle(
+      fontFamily: _fontFamily,
+      fontWeight: FontWeight.w400,
+      fontSize: fontSize,
+      color: color,
+    );
+  }
+
+  Text liteSmall(
+    String text, {
+    double fontSize = 10.0,
+    Color color: Colors.black,
+    TextOverflow overflow = TextOverflow.visible,
+  }) {
+    return Text(
+      text,
+      style: liteLargeTextStyle(fontSize: fontSize, color: color),
+      overflow: overflow,
+    );
+  }
+
+  TextStyle liteSmallTextStyle({double fontSize, Color color = Colors.black}) {
     return TextStyle(
       fontFamily: _fontFamily,
       fontWeight: FontWeight.w400,
