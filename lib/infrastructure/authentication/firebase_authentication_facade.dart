@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../../app/constants.dart';
 import '../../domain/authentication/entities.dart';
 import '../../domain/authentication/exceptions.dart';
 import '../../domain/authentication/interfaces.dart';
@@ -36,12 +35,6 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
       throw AuthenticationException(
         code: AuthenticationExceptionCode.NOT_AUTHENTICATED,
         message: 'User not authenticated',
-      );
-    } else if (!user.emailVerified) {
-      throw AuthenticationException(
-        code: AuthenticationExceptionCode.EMAIL_NOT_VERIFIED,
-        message:
-            '''Email not verified. If 24 hours has passed since you signed up, please contact us at $kWpaContactEmail''',
       );
     }
 
@@ -105,6 +98,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
 
     try {
       // Create Document for that user in the User Collection
+
       await _firestore.collection('users').doc(userCredential.user.uid).set({
         'first_name': firstName.value,
         'last_name': lastName.value,

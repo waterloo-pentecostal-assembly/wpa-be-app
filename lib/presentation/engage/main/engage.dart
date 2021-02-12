@@ -140,7 +140,7 @@ class EngageIndex extends StatelessWidget {
 }
 
 class HeaderWidget extends StatelessWidget {
-  LocalUser localUser = getIt<LocalUser>();
+  final LocalUser localUser = getIt<LocalUser>();
 
   @override
   Widget build(BuildContext context) {
