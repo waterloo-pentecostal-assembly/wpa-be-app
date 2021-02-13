@@ -40,6 +40,8 @@ class FirebaseUserDto {
     int reports,
     String profilePhotoUrl,
     String profilePhotoGsLocation,
+    bool isVerified,
+    bool isAdmin,
   }) {
     return FirebaseUserDto._(
       id: id ?? this.id,

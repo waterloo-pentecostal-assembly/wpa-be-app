@@ -75,9 +75,8 @@ class ProfilePageRoot extends StatelessWidget {
       builder: (BuildContext context, AuthenticationState state) {
         return SafeArea(
           child: Container(
-            // child: TestImagePicker(),
             child: ListView(
-              // crossAxisAlignment: CrossAxisAlignment.start,
+              physics: ClampingScrollPhysics(),
               children: <Widget>[
                 HeaderWidget(),
                 SizedBox(height: 12),

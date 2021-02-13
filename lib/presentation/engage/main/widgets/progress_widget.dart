@@ -16,7 +16,7 @@ class ProgressWidget extends StatelessWidget {
       listener: (BuildContext context, state) {},
       builder: (BuildContext context, state) {
         return Container(
-          decoration: BoxDecoration(color: Colors.grey.shade200),
+          decoration: BoxDecoration(color: Colors.grey.shade100),
           child: getChild(state),
         );
       },
@@ -45,7 +45,7 @@ class ProgressTile extends StatelessWidget {
     return Column(
       children: [
         Container(
-          height: kProgressWidgeetWidth,
+          height: kProgressWidgetWidth,
           child: SfRadialGauge(
             enableLoadingAnimation: true,
             axes: [
@@ -78,7 +78,7 @@ class ProgressTile extends StatelessWidget {
                     widget: Column(
                       children: [
                         SizedBox(
-                          height: 0.2 * kProgressWidgeetWidth,
+                          height: 0.2 * kProgressWidgetWidth,
                         ),
                         Container(
                             child: getIt<TextFactory>()

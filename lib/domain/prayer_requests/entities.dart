@@ -10,6 +10,7 @@ class PrayerRequest {
   bool hasPrayed;
   final bool hasReported;
   final bool isMine;
+  final bool isApproved;
   final Timestamp date;
   final bool isAnonymous;
   final UserSnippet userSnippet;
@@ -23,6 +24,7 @@ class PrayerRequest {
     @required this.hasPrayed,
     @required this.hasReported,
     @required this.isMine,
+    @required this.isApproved,
     @required this.date,
     @required this.isAnonymous,
     @required this.userSnippet,
@@ -32,7 +34,7 @@ class PrayerRequest {
   String toString() {
     return '''id: $id, userId: $userId, request: $request, prayedBy: $prayedBy, reportedBy: $reportedBy, 
               hasPrayed: $hasPrayed, hasReported: $hasReported, date: $date, isAnonymous: $isAnonymous, 
-              userSnippet: $userSnippet''';
+              userSnippet: $userSnippet, isApproved: $isApproved''';
   }
 }
 

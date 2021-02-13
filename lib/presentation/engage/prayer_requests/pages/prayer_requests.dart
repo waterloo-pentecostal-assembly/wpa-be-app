@@ -9,6 +9,11 @@ import 'all_prayer_requests.dart';
 import 'my_prayer_requests.dart';
 
 class PrayerRequestsPage extends StatelessWidget {
+  final int tabIndex;
+
+  const PrayerRequestsPage({Key key, @required this.tabIndex})
+      : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     final int amount = calculateFetchAmount(context);
@@ -30,7 +35,7 @@ class PrayerRequestsPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 PrayerRequestsTitleBar(),
-                TabPrayerRequestWidget(),
+                TabPrayerRequestWidget(tabIndex: tabIndex),
               ],
             ),
           ),
@@ -41,20 +46,29 @@ class PrayerRequestsPage extends StatelessWidget {
 }
 
 class TabPrayerRequestWidget extends StatefulWidget {
+  final int tabIndex;
+
+  const TabPrayerRequestWidget({Key key, @required this.tabIndex})
+      : super(key: key);
+
   @override
-  _TabPrayerRequestWidgetState createState() => _TabPrayerRequestWidgetState();
+  _TabPrayerRequestWidgetState createState() =>
+      _TabPrayerRequestWidgetState(tabIndex);
 }
 
 class _TabPrayerRequestWidgetState extends State<TabPrayerRequestWidget>
     with SingleTickerProviderStateMixin {
   TabController tabController;
+  final int tabIndex;
 
-  _TabPrayerRequestWidgetState() {
+  _TabPrayerRequestWidgetState(this.tabIndex) {
     this.tabController = TabController(length: 2, vsync: this);
   }
 
   @override
   Widget build(BuildContext context) {
+    tabController.index = tabIndex;
+
     return Expanded(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

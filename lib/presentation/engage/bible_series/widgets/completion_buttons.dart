@@ -40,7 +40,8 @@ class CompletionButton extends StatelessWidget {
                     },
                     child: Icon(
                       Icons.check_circle,
-                      size: 100,
+                      color: Colors.black87.withOpacity(0.5),
+                      size: 60,
                     ),
                     customBorder: new CircleBorder(),
                     splashColor: Colors.lightGreenAccent,
@@ -57,8 +58,8 @@ class CompletionButton extends StatelessWidget {
                     },
                     child: Icon(
                       Icons.check_circle,
-                      color: Colors.green,
-                      size: 100,
+                      color: kSuccessColor.withOpacity(0.8),
+                      size: 60,
                     ),
                   ),
                 ));
@@ -92,39 +93,39 @@ class ResponseCompletionButton extends StatelessWidget {
                     onTap: () {
                       if (state.responses.responses == null) {
                         return showDialog(
-                            context: context,
-                            builder: (_) => AlertDialog(
-                                  buttonPadding: const EdgeInsets.all(20),
-                                  shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.all(
-                                          Radius.circular(16))),
-                                  title: Text("No answers found"),
-                                  content: Text(
-                                      "Please fill out responses before marking this page as draft or complete"),
-                                  actions: [
-                                    ClipRRect(
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(16)),
-                                      child: FlatButton(
-                                        height: 30,
-                                        minWidth: 90,
-                                        color: kWpaBlue,
-                                        textColor: Colors.white,
-                                        padding:
-                                            EdgeInsets.fromLTRB(8, 4, 8, 4),
-                                        materialTapTargetSize:
-                                            MaterialTapTargetSize.shrinkWrap,
-                                        onPressed: () {
-                                          Navigator.of(context,
-                                                  rootNavigator: true)
-                                              .pop();
-                                        },
-                                        child: getIt<TextFactory>()
-                                            .regularButton('Ok'),
-                                      ),
-                                    )
-                                  ],
-                                ));
+                          context: context,
+                          builder: (_) => AlertDialog(
+                            buttonPadding: const EdgeInsets.all(20),
+                            shape: RoundedRectangleBorder(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(16))),
+                            title: getIt<TextFactory>()
+                                .subHeading2("No responses found"),
+                            content: getIt<TextFactory>().lite(
+                                "Please fill out responses before completing"),
+                            actions: [
+                              ClipRRect(
+                                borderRadius:
+                                    BorderRadius.all(Radius.circular(16)),
+                                child: FlatButton(
+                                  height: 30,
+                                  minWidth: 90,
+                                  color: kWpaBlue.withOpacity(0.8),
+                                  textColor: Colors.white,
+                                  padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
+                                  materialTapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                  onPressed: () {
+                                    Navigator.of(context, rootNavigator: true)
+                                        .pop();
+                                  },
+                                  child:
+                                      getIt<TextFactory>().regularButton('OK'),
+                                ),
+                              )
+                            ],
+                          ),
+                        );
                       } else if (!isResponsesFilled(
                           state.responses, seriesContent)) {
                         CompletionDetails completionDetails = CompletionDetails(
@@ -142,8 +143,9 @@ class ResponseCompletionButton extends StatelessWidget {
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(16))),
                             buttonPadding: const EdgeInsets.all(20),
-                            title: Text("Response(s) Saved as Draft"),
-                            content: Text(
+                            title: getIt<TextFactory>()
+                                .subHeading2("Response(s) Saved as Draft"),
+                            content: getIt<TextFactory>().lite(
                                 "You can now exit this page and work on it later"),
                             actions: [
                               ClipRRect(
@@ -152,7 +154,7 @@ class ResponseCompletionButton extends StatelessWidget {
                                 child: FlatButton(
                                   height: 30,
                                   minWidth: 90,
-                                  color: kWpaBlue,
+                                  color: kWpaBlue.withOpacity(0.8),
                                   textColor: Colors.white,
                                   padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
                                   materialTapTargetSize:
@@ -162,7 +164,7 @@ class ResponseCompletionButton extends StatelessWidget {
                                         .pop();
                                   },
                                   child:
-                                      getIt<TextFactory>().regularButton('Ok'),
+                                      getIt<TextFactory>().regularButton('OK'),
                                 ),
                               )
                             ],
@@ -183,7 +185,8 @@ class ResponseCompletionButton extends StatelessWidget {
                     splashColor: Colors.lightGreenAccent,
                     child: Icon(
                       Icons.check_circle,
-                      size: 100,
+                      color: Colors.black87.withOpacity(0.5),
+                      size: 60,
                     ),
                   ),
                 ));
@@ -198,8 +201,8 @@ class ResponseCompletionButton extends StatelessWidget {
                     },
                     child: Icon(
                       Icons.check_circle,
-                      color: Colors.green,
-                      size: 100,
+                      color: kSuccessColor.withOpacity(0.8),
+                      size: 60,
                     ),
                   ),
                 ));

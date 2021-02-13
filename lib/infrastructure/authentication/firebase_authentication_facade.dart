@@ -98,12 +98,12 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
 
     try {
       // Create Document for that user in the User Collection
-
       await _firestore.collection('users').doc(userCredential.user.uid).set({
         'first_name': firstName.value,
         'last_name': lastName.value,
         'email': emailAddress.value,
         'reports': 0,
+        'is_verified': false,
       });
 
       // Add default notification settings

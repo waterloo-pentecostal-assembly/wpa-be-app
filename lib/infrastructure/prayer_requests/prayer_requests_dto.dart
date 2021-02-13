@@ -15,6 +15,7 @@ class PrayerRequestsDto {
   final bool hasPrayed;
   final bool hasReported;
   final bool isMine;
+  final bool isApproved;
   final Timestamp date;
   final bool isAnonymous;
   final UserSnippetDto userSnippet;
@@ -47,6 +48,7 @@ class PrayerRequestsDto {
       hasPrayed: _prayedBy.contains(signedInUserId),
       hasReported: _reportedBy.contains(signedInUserId),
       isMine: _userId == signedInUserId,
+      isApproved: findOrDefaultTo(json, 'is_approved', false),
       date: findOrThrowException(json, 'date'),
       isAnonymous: findOrThrowException(json, 'is_anonymous'),
       userSnippet: UserSnippetDto.fromFirestore(
@@ -80,6 +82,7 @@ class PrayerRequestsDto {
     bool hasPrayed,
     bool hasReported,
     bool isMine,
+    bool isApproved,
     Timestamp date,
     bool isAnonymous,
     UserSnippetDto userSnippet,
@@ -93,6 +96,7 @@ class PrayerRequestsDto {
       hasPrayed: hasPrayed ?? this.hasPrayed,
       hasReported: hasReported ?? this.hasReported,
       isMine: isMine ?? this.isMine,
+      isApproved: isApproved ?? this.isApproved,
       date: date ?? this.date,
       isAnonymous: isAnonymous ?? this.isAnonymous,
       userSnippet: userSnippet ?? this.userSnippet,
@@ -108,6 +112,7 @@ class PrayerRequestsDto {
     this.hasPrayed,
     this.hasReported,
     this.isMine,
+    this.isApproved,
     @required this.date,
     @required this.isAnonymous,
     @required this.userSnippet,
@@ -126,6 +131,7 @@ extension PrayerRequestsDtoX on PrayerRequestsDto {
       hasPrayed: this.hasPrayed,
       hasReported: this.hasReported,
       isMine: this.isMine,
+      isApproved: this.isApproved,
       request: this.request,
       userId: this.userId,
       userSnippet: await this.userSnippet.toDomain(firebaseStorageService),
@@ -136,7 +142,7 @@ extension PrayerRequestsDtoX on PrayerRequestsDto {
     return {
       "date": this.date,
       "is_anonymous": this.isAnonymous,
-      "is_safe": false,
+      "is_approved": false,
       // Prayer Request is_safe flag initially set as false.
       // A backend process, automated or otherwise would have
       // to set this a true once it is a safe prayer request.

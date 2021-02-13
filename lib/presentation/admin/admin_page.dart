@@ -49,6 +49,7 @@ class OptionsList extends StatelessWidget {
     return Container(
       // color: Colors.grey.shade100,
       child: ListView(
+        physics: ClampingScrollPhysics(),
         children: [
           HeaderWidget(),
           SizedBox(height: 30),
@@ -57,7 +58,8 @@ class OptionsList extends StatelessWidget {
             children: [
               GestureDetector(
                 onTap: () {
-                  BlocProvider.of<AdminBloc>(context)..add(LoadUnverifiedUsers());
+                  BlocProvider.of<AdminBloc>(context)
+                    ..add(LoadUnverifiedUsers());
                   Navigator.pushNamed(context, '/user_verification');
                 },
                 child: Container(
@@ -92,7 +94,8 @@ class OptionsList extends StatelessWidget {
               ),
               GestureDetector(
                 onTap: () {
-                  BlocProvider.of<AdminBloc>(context)..add(LoadUnverifiedPrayerRequests());
+                  BlocProvider.of<AdminBloc>(context)
+                    ..add(LoadUnverifiedPrayerRequests());
                   Navigator.pushNamed(context, '/prayer_request_approval');
                 },
                 child: Container(
@@ -120,7 +123,8 @@ class OptionsList extends StatelessWidget {
                         ),
                       ),
                       SizedBox(height: 16),
-                      getIt<TextFactory>().subHeading3('Prayer Request Approval'),
+                      getIt<TextFactory>()
+                          .subHeading3('Prayer Request Approval'),
                     ],
                   ),
                 ),

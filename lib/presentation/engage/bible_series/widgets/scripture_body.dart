@@ -42,7 +42,7 @@ List<Widget> buildcombinedScripture(Scripture script) {
   if (script.title != '') {
     combinedScripture.add(Padding(
         padding: const EdgeInsets.only(bottom: 16),
-        child: getIt<TextFactory>().subHeading2(script.title)));
+        child: getIt<TextFactory>().subHeading3(script.title)));
   }
   combinedScripture.add(
     ListView.builder(
@@ -70,7 +70,7 @@ Widget book(Scripture script) {
   String text = "$book $chapter: $start - $end";
   return Padding(
     padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
-    child: getIt<TextFactory>().heading(text),
+    child: getIt<TextFactory>().subHeading(text),
   );
 }
 
