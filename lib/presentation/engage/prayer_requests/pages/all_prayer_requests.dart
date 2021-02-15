@@ -57,6 +57,7 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
     );
   }
 
+  // ignore: unused_element
   void _insert(PrayerRequest prayerRequest) {
     _prayerRequests.insert(0, prayerRequest);
     _allPrayerRequestsListKey.currentState.insertItem(0);
