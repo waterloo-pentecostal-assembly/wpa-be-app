@@ -20,10 +20,9 @@ abstract class IPrayerRequestsRepository {
     @required String id,
   });
 
-  /// Reports a Prayer Request. Returns a [bool] indicating whether
-  /// or not the request is still safe to display based on the
-  /// [kPrayerRequestsReportsLimit]
-  Future<bool> reportPrayerRequest({
+  /// Reports a Prayer Request. Resets is_approved to false
+  /// to reapproval
+  Future<void> reportPrayerRequest({
     @required String id,
   });
 

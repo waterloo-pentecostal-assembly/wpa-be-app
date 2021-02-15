@@ -6,6 +6,7 @@ import '../../../application/achievements/achievements_bloc.dart';
 import '../../../application/bible_series/bible_series_bloc.dart';
 import '../../../application/media/media_bloc.dart';
 import '../../../application/prayer_requests/prayer_requests_bloc.dart';
+import '../../../domain/authentication/entities.dart';
 import '../../common/interfaces.dart';
 import '../../common/text_factory.dart';
 import '../bible_series/pages/all_bible_series.dart';
@@ -13,9 +14,9 @@ import '../bible_series/pages/bible_series_detail.dart';
 import '../bible_series/pages/series_content_detail.dart';
 import '../prayer_requests/pages/prayer_requests.dart';
 import 'widgets/media_widget.dart';
-import 'widgets/recent_bible_series.dart';
-import 'widgets/recent_prayer_requests.dart';
-import 'widgets/streaks_widget.dart';
+import 'widgets/progress_widget.dart';
+import 'widgets/bible_series_widget.dart';
+import 'widgets/prayer_request_widget.dart';
 
 class EngagePage extends IIndexedPage {
   final GlobalKey<NavigatorState> navigatorKey;
@@ -34,12 +35,12 @@ class EngagePage extends IIndexedPage {
             ),
         ),
         BlocProvider<PrayerRequestsBloc>(
-          create: (BuildContext context) => getIt<PrayerRequestsBloc>()
-            ..add(
-              // TODO: dynamically calculate how much recent prayer requests to get
-              RecentPrayerRequestsRequested(amount: 10),
+            create: (BuildContext context) => getIt<PrayerRequestsBloc>()
+            // ..add(
+            // TODO: dynamically calculate how much recent prayer requests to get
+            // RecentPrayerRequestsRequested(amount: 10),
+            // ),
             ),
-        ),
         BlocProvider<AchievementsBloc>(
           create: (BuildContext context) => getIt<AchievementsBloc>()
             ..add(
@@ -72,7 +73,9 @@ class EngagePage extends IIndexedPage {
                   case '/all_bible_series':
                     return AllBibleSeriesPage();
                   case '/prayer_requests':
-                    return PrayerRequestsPage();
+                    return PrayerRequestsPage(tabIndex: 0);
+                  case '/prayer_requests/mine':
+                    return PrayerRequestsPage(tabIndex: 1);
                   case '/content_detail':
                     Map args = settings.arguments;
                     return ContentDetailPage(
@@ -96,7 +99,7 @@ class EngageIndex extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.grey.shade200,
+      color: Colors.grey.shade100,
       child: SafeArea(
         child: Scaffold(
           body: Container(
@@ -117,14 +120,10 @@ class EngageIndex extends StatelessWidget {
                 physics: AlwaysScrollableScrollPhysics(),
                 children: <Widget>[
                   HeaderWidget(),
-                  StreaksWidget(),
+                  ProgressWidget(),
                   SizedBox(height: 16.0),
                   RecentBibleSeriesWidget(),
-                  SizedBox(
-                    height: 16.0,
-                    child: DecoratedBox(
-                        decoration: BoxDecoration(color: Colors.grey.shade200)),
-                  ),
+                  SizedBox(height: 16.0),
                   RecentPrayerRequestsWidget(),
                   SizedBox(height: 16.0),
                   MediaWidget(),
@@ -139,13 +138,15 @@ class EngageIndex extends StatelessWidget {
 }
 
 class HeaderWidget extends StatelessWidget {
+  final LocalUser localUser = getIt<LocalUser>();
+
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(color: Colors.grey.shade200),
+      decoration: BoxDecoration(color: Colors.grey.shade100),
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
-        child: getIt<TextFactory>().heading('Engage'),
+        child: getIt<TextFactory>().heading('Hello, ${localUser.firstName}!'),
       ),
     );
   }

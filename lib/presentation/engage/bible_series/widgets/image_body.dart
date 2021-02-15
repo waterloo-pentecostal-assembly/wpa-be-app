@@ -60,49 +60,22 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
           }
         }
 
-        return Container(
-          margin: const EdgeInsets.all(24),
-          height: 80,
-          width: 80,
-          child: GestureDetector(
-            child: Icon(
-              Icons.add_a_photo,
-              size: 40,
-            ),
-            onTap: selectImageInput,
-          ),
-          decoration: BoxDecoration(
-              color: Colors.grey[300],
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.grey[600],
-                  offset: Offset(2.0, 2.0),
-                  blurRadius: 5.0,
-                  spreadRadius: 1.0,
+        return Column(
+          children: [
+            SizedBox(height: 4),
+            Container(
+              child: GestureDetector(
+                child: Icon(
+                  Icons.add_a_photo,
+                  size: 36,
+                  color: Colors.black87.withOpacity(0.75),
                 ),
-                BoxShadow(
-                  color: Colors.white,
-                  offset: Offset(-2.0, -2.0),
-                  blurRadius: 5.0,
-                  spreadRadius: 1.0,
-                )
-              ],
-              gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    Colors.grey[200],
-                    Colors.grey[300],
-                    Colors.grey[400],
-                    Colors.grey[500],
-                  ],
-                  stops: [
-                    0.1,
-                    0.3,
-                    0.8,
-                    1,
-                  ])),
+                onTap: selectImageInput,
+              ),
+            ),
+            SizedBox(height: 4),
+            getIt<TextFactory>().lite('Upload Photo!'),
+          ],
         );
       },
     );
@@ -113,55 +86,67 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
         await imagePicker.getImage(source: ImageSource.gallery);
     if (selected != null && selected.path != null) {
       BlocProvider.of<CompletionsBloc>(context)
-        ..add(UploadImage(
+        ..add(
+          UploadImage(
             image: File(selected.path),
             contentNum: widget.contentNum,
-            questionNum: 0));
+            questionNum: 0,
+          ),
+        );
     }
   }
 
   Widget imageLoading(UploadTask uploadTask) {
     return StreamBuilder(
-        stream: uploadTask.snapshotEvents,
-        builder: (context, AsyncSnapshot<TaskSnapshot> snapshot) {
-          int bytesTransferred = snapshot?.data?.totalBytes;
-          int totalBytes = snapshot?.data?.totalBytes;
-          int progressPercent = 0;
+      stream: uploadTask.snapshotEvents,
+      builder: (context, AsyncSnapshot<TaskSnapshot> snapshot) {
+        int bytesTransferred = snapshot?.data?.totalBytes;
+        int totalBytes = snapshot?.data?.totalBytes;
+        int progressPercent = 0;
 
-          if (bytesTransferred != null && totalBytes != null) {
-            progressPercent = ((bytesTransferred / totalBytes) * 100).ceil();
-          }
-          return Container(
-            padding: const EdgeInsets.all(16),
-            child: Center(
-                child: getIt<TextFactory>()
-                    .regular('$progressPercent%', fontSize: 12)),
-          );
-        });
+        if (bytesTransferred != null && totalBytes != null) {
+          progressPercent = ((bytesTransferred / totalBytes) * 100).ceil();
+        }
+        return Container(
+          padding: const EdgeInsets.all(16),
+          child: Center(
+              child: getIt<TextFactory>()
+                  .regular('$progressPercent%', fontSize: 12)),
+        );
+      },
+    );
   }
 
   Widget imageLoaded(String downloadURL, CompletionDetails completionDetails,
       String gsURL, int contentNum) {
     return Column(
       children: [
-        Container(
-          child: Image.network(downloadURL),
-        ),
-        Container(
-            child: GestureDetector(
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          children: [
+            Container(
+              child: GestureDetector(
                 onTap: () {
                   BlocProvider.of<CompletionsBloc>(context)
                     ..add(DeleteImage(
-                        gsURL: gsURL,
-                        completionDetails: completionDetails,
-                        contentNum: contentNum));
+                      gsURL: gsURL,
+                      completionDetails: completionDetails,
+                      contentNum: contentNum,
+                    ));
                 },
                 child: Center(
-                    child: Icon(
-                  Icons.cancel,
-                  size: 50,
-                  color: Colors.red,
-                ))))
+                  child: Icon(
+                    Icons.close,
+                    size: 30,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+        Container(
+          child: Image.network(downloadURL),
+        ),
       ],
     );
   }

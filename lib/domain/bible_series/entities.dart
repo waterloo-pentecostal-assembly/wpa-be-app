@@ -29,6 +29,7 @@ class BibleSeries {
   final Timestamp startDate;
   final Timestamp endDate;
   final bool isActive;
+  final bool isVisible;
   final List<SeriesContentSnippet> seriesContentSnippet;
 
   BibleSeries({
@@ -40,13 +41,14 @@ class BibleSeries {
     @required this.startDate,
     @required this.endDate,
     @required this.isActive,
+    @required this.isVisible,
     @required this.seriesContentSnippet,
   });
 
   @override
   String toString() {
     return '''id: $id, title: $title, subtitle: $subTitle, imageUrl: $imageUrl, 
-              startDate: $startDate, endDate: $endDate, isActive: $isActive, 
+              startDate: $startDate, endDate: $endDate, isActive: $isActive, isVisible: $isVisible, 
               seriesContentSnippet: $seriesContentSnippet''';
   }
 }

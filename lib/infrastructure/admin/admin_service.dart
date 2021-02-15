@@ -57,7 +57,7 @@ class AdminService implements IAdminService {
       await _firestore.runTransaction((transaction) async {
         DocumentReference documentReference =
             _firestore.collection("prayer_requests").doc(prayerRequestId);
-        transaction.update(documentReference, {'is_safe': true});
+        transaction.update(documentReference, {"is_approved": true});
       });
     } catch (e) {
       _firebaseFirestoreService.handleException(e);
@@ -73,7 +73,7 @@ class AdminService implements IAdminService {
     try {
       querySnapshot = await _firestore
           .collection("prayer_requests")
-          .where("is_safe", isEqualTo: false)
+          .where("is_approved", isEqualTo: false)
           .get();
     } catch (e) {
       _firebaseFirestoreService.handleException(e);

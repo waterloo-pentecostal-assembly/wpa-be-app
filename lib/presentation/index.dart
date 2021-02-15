@@ -97,8 +97,8 @@ class NavigationBar extends StatelessWidget {
     } else {
       // If the user is re-selecting the tab, the common
       // behavior is to empty the stack.
-      if (indexedPages[index].navigatorKey.currentState != null) {
-        indexedPages[index]
+      if (indexedPages[index + 1].navigatorKey.currentState != null) {
+        indexedPages[index + 1]
             .navigatorKey
             .currentState
             .popUntil((route) => route.isFirst);
@@ -114,8 +114,10 @@ class NavigationBar extends StatelessWidget {
       //   label: 'HOME',
       // ),
       BottomNavigationBarItem(
-        icon: Icon(Icons.class_),
-        label: 'ENGAGE',
+        // icon: Icon(Icons.class_),
+        // label: 'ENGAGE',
+        icon: Icon(Icons.home),
+        label: 'HOME',
       ),
       BottomNavigationBarItem(
         icon: Icon(Icons.favorite),

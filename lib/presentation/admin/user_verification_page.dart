@@ -138,7 +138,11 @@ class _UserVerificationPageState extends State<UserVerificationPage> {
                           ..add(DeleteUnverifiedUser(user.id));
                         removeItem(index);
                       },
-                      child: Icon(Icons.cancel, color: Colors.red, size: 40),
+                      child: Icon(
+                        Icons.cancel,
+                        color: kErrorColor.withOpacity(0.8),
+                        size: 40,
+                      ),
                     ),
                     SizedBox(width: 8),
                     GestureDetector(
@@ -147,8 +151,11 @@ class _UserVerificationPageState extends State<UserVerificationPage> {
                             ..add(VerifyUser(user.id));
                           removeItem(index);
                         },
-                        child: Icon(Icons.check_circle_rounded,
-                            color: Colors.green, size: 40)),
+                        child: Icon(
+                          Icons.check_circle_rounded,
+                          color: kSuccessColor.withOpacity(0.8),
+                          size: 40,
+                        )),
                   ],
                 ),
               ),

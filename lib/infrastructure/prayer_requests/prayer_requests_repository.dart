@@ -60,7 +60,6 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
     try {
       querySnapshot = await _prayerRequestsCollection
           .where("user_id", isEqualTo: user.id)
-          .where("is_safe", isEqualTo: true)
           .orderBy("date", descending: true)
           .get();
     } catch (e) {
@@ -98,7 +97,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
 
     try {
       querySnapshot = await _prayerRequestsCollection
-          .where("is_safe", isEqualTo: true)
+          .where("is_approved", isEqualTo: true)
           .orderBy("date", descending: true)
           .startAfterDocument(_lastPrayerRequestDocument)
           .limit(limit)
@@ -132,7 +131,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
 
     try {
       querySnapshot = await _prayerRequestsCollection
-          .where("is_safe", isEqualTo: true)
+          .where("is_approved", isEqualTo: true)
           .orderBy("date", descending: true)
           .limit(limit)
           .get();
@@ -191,9 +190,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
   }
 
   @override
-  Future<bool> reportPrayerRequest({String id}) async {
+  Future<void> reportPrayerRequest({String id}) async {
     final LocalUser user = getIt<LocalUser>();
-    bool isSafe = false;
 
     try {
       // Using transaction to avoid stale data
@@ -212,11 +210,10 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
         }
 
         reportedBy.add(user.id);
-        isSafe = reportedBy.length < kPrayerRequestsReportsLimit;
 
         transaction.update(documentReference, {
           "reported_by": reportedBy,
-          "is_safe": isSafe,
+          "is_approved": false,
         });
       });
     } on PrayerRequestsException catch (_) {
@@ -224,7 +221,6 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
     } catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
-    return isSafe;
   }
 
   @override
@@ -235,7 +231,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
     try {
       querySnapshot = await _prayerRequestsCollection
           .where("user_id", isEqualTo: user.id)
-          .where("is_safe", isEqualTo: true)
+          .where("is_approved", isEqualTo: true)
           .orderBy("date", descending: true)
           .get();
     } catch (e) {

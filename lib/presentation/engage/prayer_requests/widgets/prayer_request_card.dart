@@ -300,6 +300,21 @@ class PrayedByIndicator extends StatelessWidget {
   }
 }
 
+class PendingIndicator extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return FlatButton(
+      height: 24,
+      minWidth: 0,
+      padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
+      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      onPressed: null,
+      child: getIt<TextFactory>()
+          .regular('Pending Approval', color: kWarningColor.withOpacity(0.8)),
+    );
+  }
+}
+
 class MenuButtonValue {
   final String id;
   final PrayerActionOptions action;
