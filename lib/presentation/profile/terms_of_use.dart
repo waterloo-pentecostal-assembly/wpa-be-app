@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/presentation/common/text_factory.dart';
-import 'package:wpa_app/presentation/profile/helper.dart';
 
 class TermsOfUsePage extends StatelessWidget {
   @override
@@ -17,6 +16,27 @@ class TermsOfUsePage extends StatelessWidget {
                     'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Duis sit amet pulvinar odio. Duis ultrices in lacus at faucibus. Quisque quis nibh felis. Duis a est nec risus commodo elementum. Nam ut quam a diam posuere efficitur nec in urna. Praesent vulputate enim non enim luctus luctus. Quisque et ultrices sapien.'))
           ],
         ),
+      ),
+    );
+  }
+}
+
+class HeaderWidget extends StatelessWidget {
+  final String title;
+  const HeaderWidget({@required this.title});
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(8),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Icon(Icons.arrow_back),
+          ),
+          SizedBox(width: 8),
+          getIt<TextFactory>().subPageHeading(title),
+        ],
       ),
     );
   }
