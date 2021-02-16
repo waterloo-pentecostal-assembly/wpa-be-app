@@ -166,13 +166,11 @@ Stream<PrayerRequestsState> _mapMyPrayerRequestDeletedEventToState(
 
 Stream<PrayerRequestsState> _mapPrayerRequestReportedEventToState(
   PrayerRequestReported event,
-  Future<bool> Function({@required String id}) reportPrayerRequest,
+  Future<void> Function({@required String id}) reportPrayerRequest,
 ) async* {
   try {
-    bool isSafe = await reportPrayerRequest(id: event.id);
-    if (!isSafe) {
-      yield PrayerRequestReportedAndRemoved(id: event.id);
-    }
+    await reportPrayerRequest(id: event.id);
+    yield PrayerRequestReportedAndRemoved(id: event.id);
   } on PrayerRequestsException catch (e) {
     yield PrayerRequestReportError(
       message: e.message,
