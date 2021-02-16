@@ -23,25 +23,25 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cached_network_image: ^2.2.0+1
+  cached_network_image: ^2.5.0
   cloud_firestore: ^0.14.3
-  equatable: ^1.2.5
+  equatable: ^1.2.6
   firebase_auth: ^0.18.3+1
   firebase_core: ^0.5.2
   firebase_messaging: ^7.0.3
   firebase_storage: ^5.0.1
-  flutter_bloc: ^6.1.0
-  fluttertoast: ^7.1.1
-  get_it: ^4.0.4
-  google_fonts: ^1.1.0
-  image_picker: ^0.6.7+17
+  flutter_bloc: ^6.1.2
+  fluttertoast: ^7.1.6
+  get_it: ^5.0.6
+  google_fonts: ^1.1.2
+  image_picker: ^0.6.7+22
   intl: ^0.16.1
   rflutter_alert: ^1.1.0
-  rxdart: ^0.24.1
+  rxdart: ^0.25.0
   url_launcher: ^5.7.10
-  uuid: ^2.2.0
+  uuid: ^2.2.2
   audioplayers: ^0.16.0
-  syncfusion_flutter_gauges: ^18.4.42
+  syncfusion_flutter_gauges: ^18.4.43
 
 dev_dependencies:
   flutter_test:
