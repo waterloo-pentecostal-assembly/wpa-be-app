@@ -135,6 +135,8 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
               if (indexToDelete != null) {
                 _delete(indexToDelete);
               }
+              String message = 'Prayer Request has been reported';
+              ToastMessage.showInfoToast(message, context);
             } else if (state is PrayerRequestReportError) {
               ToastMessage.showErrorToast(state.message, context);
               // !!!! ONLY REMOVING AFTER 3 REPORTS ... AND ONE PERSON CAN REPORT MULTIPLE TIMES
