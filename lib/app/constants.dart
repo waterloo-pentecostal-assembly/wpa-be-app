@@ -24,6 +24,7 @@ const kPrayerRequestButtonHeight = 50.0;
 const kPrayerRequestButtonWidth = 150.0;
 const kMediaTileDescriptionHeight = 60.0;
 const kAllPrayerRequestsCardHeight = 100.0;
+const kHeadingPadding = 16.0;
 
 // Limits
 const kPrayerRequestsReportsLimit = 2;
@@ -35,8 +36,7 @@ const kProfilePhotoPlaceholder = 'assets/images/person-placeholder-image.png';
 
 // Regex
 const kPasswordRegex = r"""^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$""";
-const kEmailRegex =
-    r"""^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+""";
+const kEmailRegex = r"""^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+""";
 
 // Restrictions
 const kMaxResponseBody = 4000;

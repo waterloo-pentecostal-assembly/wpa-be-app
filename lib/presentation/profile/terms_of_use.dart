@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:wpa_app/app/injection.dart';
-import 'package:wpa_app/presentation/common/text_factory.dart';
+
+import '../../app/constants.dart';
+import '../../app/injection.dart';
+import '../common/text_factory.dart';
 
 class TermsOfUsePage extends StatelessWidget {
   @override
@@ -27,7 +29,7 @@ class HeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(kHeadingPadding),
       child: Row(
         children: [
           GestureDetector(

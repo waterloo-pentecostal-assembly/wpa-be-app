@@ -1,21 +1,22 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wpa_app/application/completions/completions_bloc.dart';
-import 'package:wpa_app/domain/bible_series/entities.dart';
-import 'package:wpa_app/domain/completions/entities.dart';
-import 'package:wpa_app/presentation/common/loader.dart';
-import 'package:wpa_app/presentation/common/text_factory.dart';
-import 'package:wpa_app/presentation/engage/bible_series/widgets/audio_body.dart';
-import 'package:wpa_app/presentation/engage/bible_series/widgets/completion_buttons.dart';
-import 'package:wpa_app/presentation/engage/bible_series/widgets/image_body.dart';
-import 'package:wpa_app/presentation/engage/bible_series/widgets/question_body.dart';
-import 'package:wpa_app/presentation/engage/bible_series/widgets/scripture_body.dart';
-import 'package:wpa_app/presentation/engage/bible_series/widgets/text_body.dart';
 
-import '../../../../application/bible_series/bible_series_bloc.dart';
+import '../../../../app/constants.dart';
 import '../../../../app/injection.dart';
+import '../../../../application/bible_series/bible_series_bloc.dart';
+import '../../../../application/completions/completions_bloc.dart';
+import '../../../../domain/bible_series/entities.dart';
+import '../../../../domain/completions/entities.dart';
+import '../../../common/loader.dart';
+import '../../../common/text_factory.dart';
 import '../helper.dart';
+import '../widgets/audio_body.dart';
+import '../widgets/completion_buttons.dart';
+import '../widgets/image_body.dart';
+import '../widgets/question_body.dart';
+import '../widgets/scripture_body.dart';
+import '../widgets/text_body.dart';
 
 class ContentDetailPage extends StatelessWidget {
   final String seriesContentId;
@@ -131,7 +132,7 @@ class ContentDetailWidget extends StatelessWidget {
               child: Scaffold(
                 body: Column(children: <Widget>[
                   Container(
-                    padding: const EdgeInsets.all(8),
+                    padding: const EdgeInsets.all(kHeadingPadding),
                     alignment: Alignment.centerLeft,
                     child: Row(
                       children: [
