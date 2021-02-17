@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:wpa_app/presentation/profile/terms_of_use.dart';
 
 import '../../app/constants.dart';
 import '../../app/injection.dart';
@@ -51,6 +52,8 @@ class ProfilePage extends IIndexedPage {
                     return ProfilePageRoot();
                   case '/privacy_policy':
                     return PrivacyPolicyPage();
+                  case '/terms_of_use':
+                    return TermsOfUsePage();
                   default:
                     return ProfilePageRoot();
                 }
@@ -386,26 +389,36 @@ class Other extends StatelessWidget {
             child: getIt<TextFactory>().regular('OTHER'),
           ),
           Divider(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              getIt<TextFactory>().lite("Privacy Policy"),
-              Icon(
-                Icons.keyboard_arrow_right,
-                color: kDarkGreyColor,
-              )
-            ],
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).pushNamed('/privacy_policy');
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                getIt<TextFactory>().lite("Privacy Policy"),
+                Icon(
+                  Icons.keyboard_arrow_right,
+                  color: kDarkGreyColor,
+                )
+              ],
+            ),
           ),
           SizedBox(height: 6),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              getIt<TextFactory>().lite("Terms of Use"),
-              Icon(
-                Icons.keyboard_arrow_right,
-                color: kDarkGreyColor,
-              )
-            ],
+          GestureDetector(
+            onTap: () {
+              Navigator.of(context).pushNamed('/terms_of_use');
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                getIt<TextFactory>().lite("Terms of Use"),
+                Icon(
+                  Icons.keyboard_arrow_right,
+                  color: kDarkGreyColor,
+                )
+              ],
+            ),
           ),
           SizedBox(height: 8),
           GestureDetector(
