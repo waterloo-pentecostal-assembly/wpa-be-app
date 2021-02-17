@@ -7,7 +7,6 @@ import '../../../../application/prayer_requests/prayer_requests_bloc.dart';
 import '../../../../domain/prayer_requests/entities.dart';
 import '../../../common/helpers.dart';
 import '../../../common/text_factory.dart';
-import '../../../common/toast_message.dart';
 
 enum PrayerActionOptions {
   MY_DELETE,
