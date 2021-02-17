@@ -29,6 +29,8 @@ class MediaWidget extends StatelessWidget {
             ),
             () {
               if (state is AvailableMediaLoaded) {
+                // return MediaWidgetLoading();
+
                 return MediaWidgetLoaded(
                   mediaList: state.media,
                 );
@@ -69,6 +71,23 @@ class MediaWidgetLoaded extends StatelessWidget {
   }
 }
 
+class MediaWidgetLoading extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    int amtOfCards =
+        (MediaQuery.of(context).size.width / kMediaTileWidth).ceil();
+    return Container(
+      height: kMediaTileHeight + kMediaTileDescriptionHeight,
+      child: ListView.builder(
+        padding: EdgeInsets.only(left: 16),
+        scrollDirection: Axis.horizontal,
+        itemCount: amtOfCards,
+        itemBuilder: (context, index) => MediaCardPlaceholder(),
+      ),
+    );
+  }
+}
+
 class MediaCard extends StatelessWidget {
   final Media media;
 
@@ -86,12 +105,7 @@ class MediaCard extends StatelessWidget {
       },
       child: Container(
         width: kMediaTileWidth,
-        padding: EdgeInsets.only(
-          right: 8,
-          left: 8,
-          top: 8,
-          bottom: 8,
-        ),
+        padding: EdgeInsets.all(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -106,7 +120,10 @@ class MediaCard extends StatelessWidget {
                   if (frame != null && frame >= 0) {
                     return child;
                   } else {
-                    return MediaCardPlaceholder();
+                    return Container(
+                      height: kMediaTileHeight,
+                      color: Colors.grey.shade200,
+                    );
                   }
                 },
               ),
@@ -131,17 +148,20 @@ class MediaCardPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: kMediaTileHeight,
-      color: Colors.grey.shade200,
-    );
-  }
-}
-
-class MediaWidgetLoading extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      child: Text('media widget loading'),
+      width: kMediaTileWidth,
+      padding: EdgeInsets.all(8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(15.0),
+            child: Container(
+              height: kMediaTileHeight,
+              color: Colors.grey.shade200,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

@@ -51,8 +51,8 @@ const kDailyEngagementReminderTopic = 'daily_engagement_reminder';
 
 // Help/Reporting
 const kWpaContactEmail = 'dan@wpa.church';
-const kHelpEmailSubject = '[WPA BE APP] Help Request';
-const kReportEmailSubject = '[WPA BE APP] Problem Report';
+const kHelpEmailSubject = 'WPA_BE_APP_Help_Request';
+const kReportEmailSubject = 'WPA_BE_APP_Problem_Report';
 
 //QuestionBody Widget Padding
 const kTopPaddingQuestionBody = 8.0;

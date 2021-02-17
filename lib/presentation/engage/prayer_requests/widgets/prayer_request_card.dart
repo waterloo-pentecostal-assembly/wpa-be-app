@@ -304,7 +304,7 @@ class PendingIndicator extends StatelessWidget {
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       onPressed: null,
       child: getIt<TextFactory>()
-          .regular('Pending Approval', color: kWarningColor.withOpacity(0.8)),
+          .regular('Pending', color: kWarningColor.withOpacity(0.8)),
     );
   }
 }
