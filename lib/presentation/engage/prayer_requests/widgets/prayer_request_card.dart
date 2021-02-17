@@ -208,12 +208,7 @@ class _PrayButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<AllPrayerRequestsBloc, PrayerRequestsState>(
-      listener: (BuildContext context, PrayerRequestsState state) {
-        if (state is PrayForRequestError) {
-          ToastMessage.showErrorToast(state.message, context);
-        }
-      },
+    return BlocBuilder<AllPrayerRequestsBloc, PrayerRequestsState>(
       builder: (BuildContext context, PrayerRequestsState state) {
         if (prayerRequest.hasPrayed) {
           return _createPrayedButton();
