@@ -8,13 +8,13 @@ import '../../../../app/constants.dart';
 import '../../../../app/injection.dart';
 import '../../../../application/bible_series/bible_series_bloc.dart';
 import '../../../../domain/bible_series/entities.dart';
-import '../../../common/loader.dart';
 import '../../../common/text_factory.dart';
 
 class BibleSeriesDetailPage extends StatelessWidget {
   final String bibleSeriesId;
 
-  const BibleSeriesDetailPage({Key key, @required this.bibleSeriesId}) : super(key: key);
+  const BibleSeriesDetailPage({Key key, @required this.bibleSeriesId})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +37,8 @@ class BibleSeriesWidget extends StatefulWidget {
   State<StatefulWidget> createState() => new _BibleSeriesState();
 }
 
-class _BibleSeriesState extends State<BibleSeriesWidget> with TickerProviderStateMixin {
+class _BibleSeriesState extends State<BibleSeriesWidget>
+    with TickerProviderStateMixin {
   TabController _tabController;
   int tabLength;
 
@@ -52,10 +53,14 @@ class _BibleSeriesState extends State<BibleSeriesWidget> with TickerProviderStat
       listener: (context, state) {},
       builder: (BuildContext context, BibleSeriesState state) {
         if (state is BibleSeriesDetail) {
-          List<SeriesContentSnippet> snippet = state.bibleSeriesDetail.seriesContentSnippet;
+          List<SeriesContentSnippet> snippet =
+              state.bibleSeriesDetail.seriesContentSnippet;
 
           tabLength = state.bibleSeriesDetail.seriesContentSnippet.length;
-          _tabController = new TabController(length: tabLength, vsync: this, initialIndex: _getInitialIndex(snippet));
+          _tabController = new TabController(
+              length: tabLength,
+              vsync: this,
+              initialIndex: _getInitialIndex(snippet));
 
           return Scaffold(
             body: Column(
@@ -113,7 +118,8 @@ class _BibleSeriesState extends State<BibleSeriesWidget> with TickerProviderStat
                     indicatorSize: TabBarIndicatorSize.label,
                     unselectedLabelColor: Colors.black54,
                     labelColor: Colors.black87,
-                    tabs: _buildContentTabs(state.bibleSeriesDetail.seriesContentSnippet),
+                    tabs: _buildContentTabs(
+                        state.bibleSeriesDetail.seriesContentSnippet),
                   ),
                 ),
                 Expanded(
@@ -133,15 +139,96 @@ class _BibleSeriesState extends State<BibleSeriesWidget> with TickerProviderStat
             ),
           );
         } else if (state is BibleSeriesError) {
-          return Scaffold(body: SafeArea(child: Text('Error: ${state.message}')));
+          return Scaffold(
+              body: SafeArea(child: Text('Error: ${state.message}')));
         }
-        return Loader();
+        return SeriesDetailPlaceholder();
       },
     );
   }
 }
 
-List<Widget> _buildContentTabs(List<SeriesContentSnippet> seriesContentSnippets) {
+class SeriesDetailPlaceholder extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    int amtOfCards = (MediaQuery.of(context).size.width / 70).ceil();
+    return Scaffold(
+      body: Column(
+        children: [
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(30.0),
+                  bottomRight: Radius.circular(30.0),
+                ),
+                child: Container(
+                  height: 0.35 * MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  color: Colors.grey.shade200,
+                ),
+              ),
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(kHeadingPadding),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.arrow_back),
+                        onPressed: () => Navigator.pop(context),
+                        color: Colors.white,
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Container(
+            height: 148,
+            padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
+            child: ListView.builder(
+              padding: EdgeInsets.only(left: 16),
+              scrollDirection: Axis.horizontal,
+              itemCount: amtOfCards,
+              itemBuilder: (context, index) => Container(
+                width: 70,
+                margin: EdgeInsets.all(8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10.0),
+                      child: Container(
+                        height: 108,
+                        color: Colors.grey.shade200,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.only(top: 0, bottom: 15),
+            height: 60,
+            child: Container(
+              width: 0.9 * MediaQuery.of(context).size.width,
+              padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                color: Colors.grey.shade200,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+List<Widget> _buildContentTabs(
+    List<SeriesContentSnippet> seriesContentSnippets) {
   List<Widget> tabs = [];
   seriesContentSnippets.forEach((element) {
     tabs.add(
@@ -153,7 +240,8 @@ List<Widget> _buildContentTabs(List<SeriesContentSnippet> seriesContentSnippets)
             padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
-              color: _getStatusColor(element.isCompleted, element.isDraft, element.date),
+              color: _getStatusColor(
+                  element.isCompleted, element.isDraft, element.date),
               boxShadow: [
                 BoxShadow(
                   color: Colors.grey.withOpacity(0.2),
@@ -199,11 +287,13 @@ List<Widget> _buildContentChildren(
           height: 60,
           child: Tab(
             child: GestureDetector(
-              onTap: () async {
-                await Navigator.pushNamed(context, '/content_detail', arguments: {
+              onTap: () {
+                Navigator.pushNamed(context, '/content_detail', arguments: {
                   'bibleSeriesId': bibleSeriesId,
                   'seriesContentId': element.contentId,
-                  'getCompletionDetails': element.isCompleted || element.isDraft,
+                  'getCompletionDetails':
+                      element.isCompleted || element.isDraft,
+                  'seriesContentType': element.seriesContentType,
                 }).then((value) => {onGoBack(context, bibleSeriesId)});
               },
               child: Container(
@@ -224,7 +314,8 @@ List<Widget> _buildContentChildren(
                   alignment: Alignment.center,
                   child: Row(
                     children: [
-                      getIt<TextFactory>().subHeading(element.seriesContentType.toString().split('.')[1]),
+                      getIt<TextFactory>().subHeading(
+                          element.seriesContentType.toString().split('.')[1]),
                       _getStatusIndicator(element.isCompleted, element.isDraft)
                     ],
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -248,7 +339,20 @@ List<Widget> _buildContentChildren(
 }
 
 String _getMonth(Timestamp date) {
-  List<String> months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  List<String> months = [
+    'JAN',
+    'FEB',
+    'MAR',
+    'APR',
+    'MAY',
+    'JUN',
+    'JUL',
+    'AUG',
+    'SEP',
+    'OCT',
+    'NOV',
+    'DEC'
+  ];
   int monthNumber = int.parse(date.toDate().toString().substring(5, 7)) - 1;
   return months[monthNumber];
 }
@@ -280,7 +384,10 @@ Color _getStatusColor(bool isCompleted, bool isDraft, Timestamp date) {
     return Colors.green.withOpacity(0.25);
   } else if (isDraft) {
     return Colors.grey.shade100;
-  } else if (date.toDate().isBefore(DateTime.now().subtract(Duration(days: 1))) && !isCompleted) {
+  } else if (date
+          .toDate()
+          .isBefore(DateTime.now().subtract(Duration(days: 1))) &&
+      !isCompleted) {
     return Colors.amber.withOpacity(0.25);
   }
   return Colors.grey.shade100;
@@ -298,5 +405,6 @@ int _getInitialIndex(List<SeriesContentSnippet> snippet) {
 }
 
 FutureOr onGoBack(BuildContext context, String bibleSeriesId) {
-  BlocProvider.of<BibleSeriesBloc>(context)..add(BibleSeriesDetailRequested(bibleSeriesId: bibleSeriesId));
+  BlocProvider.of<BibleSeriesBloc>(context)
+    ..add(BibleSeriesDetailRequested(bibleSeriesId: bibleSeriesId));
 }
