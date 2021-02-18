@@ -130,7 +130,7 @@ Widget questionContainer(
                   ));
             }
           } else {
-            return Loader();
+            return Text('...');
           }
         },
       ),
