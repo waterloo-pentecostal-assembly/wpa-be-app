@@ -4,6 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:photo_view/photo_view.dart';
 import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/application/completions/completions_bloc.dart';
 import 'package:wpa_app/domain/bible_series/entities.dart';
@@ -119,6 +120,7 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
 
   Widget imageLoaded(String downloadURL, CompletionDetails completionDetails,
       String gsURL, int contentNum) {
+    print(NetworkImage(downloadURL).scale);
     return Column(
       children: [
         Row(
@@ -145,7 +147,15 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
           ],
         ),
         Container(
-          child: Image.network(downloadURL),
+          width: MediaQuery.of(context).size.width,
+          height: MediaQuery.of(context).size.width,
+          child: PhotoView(
+            imageProvider: NetworkImage(downloadURL),
+            minScale: PhotoViewComputedScale.contained * 0.8,
+            maxScale: PhotoViewComputedScale.covered * 2,
+            backgroundDecoration:
+                BoxDecoration(color: Theme.of(context).canvasColor),
+          ),
         ),
       ],
     );
