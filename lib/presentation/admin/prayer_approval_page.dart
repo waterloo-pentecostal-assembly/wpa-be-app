@@ -40,7 +40,7 @@ class _PrayerApprovalPageState extends State<PrayerApprovalPage> {
                 Expanded(
                     child: AnimatedList(
                   key: key,
-                  physics: ClampingScrollPhysics(),
+                  physics: AlwaysScrollableScrollPhysics(),
                   shrinkWrap: true,
                   initialItemCount: prayerRequestCards.length,
                   itemBuilder: (context, index, animation) =>
