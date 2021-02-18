@@ -40,7 +40,7 @@ class _UserVerificationPageState extends State<UserVerificationPage> {
                     child: Container(
                       child: AnimatedList(
                         key: key,
-                        physics: ClampingScrollPhysics(),
+                        physics: AlwaysScrollableScrollPhysics(),
                         shrinkWrap: true,
                         initialItemCount: userCards.length,
                         itemBuilder: (context, index, animation) =>

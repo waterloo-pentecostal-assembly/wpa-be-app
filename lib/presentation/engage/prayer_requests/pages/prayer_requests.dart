@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../app/constants.dart';
 import '../../../../app/injection.dart';
 import '../../../../application/prayer_requests/prayer_requests_bloc.dart';
 import '../../../common/text_factory.dart';
@@ -116,7 +117,7 @@ class PrayerRequestsTitleBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(kHeadingPadding),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [

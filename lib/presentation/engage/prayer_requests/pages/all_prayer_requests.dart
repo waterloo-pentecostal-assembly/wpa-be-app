@@ -139,10 +139,11 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
               ToastMessage.showInfoToast(message, context);
             } else if (state is PrayerRequestReportError) {
               ToastMessage.showErrorToast(state.message, context);
-              // !!!! ONLY REMOVING AFTER 3 REPORTS ... AND ONE PERSON CAN REPORT MULTIPLE TIMES
             } else if (state is PrayForRequestComplete) {
               int index = getIndexById(state.id);
               _markAsPrayed(index);
+            } else if (state is PrayForRequestError) {
+              ToastMessage.showErrorToast(state.message, context);
             }
           },
         ),

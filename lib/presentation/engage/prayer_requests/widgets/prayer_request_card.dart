@@ -7,7 +7,6 @@ import '../../../../application/prayer_requests/prayer_requests_bloc.dart';
 import '../../../../domain/prayer_requests/entities.dart';
 import '../../../common/helpers.dart';
 import '../../../common/text_factory.dart';
-import '../../../common/toast_message.dart';
 
 enum PrayerActionOptions {
   MY_DELETE,
@@ -208,12 +207,7 @@ class _PrayButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<AllPrayerRequestsBloc, PrayerRequestsState>(
-      listener: (BuildContext context, PrayerRequestsState state) {
-        if (state is PrayForRequestError) {
-          ToastMessage.showErrorToast(state.message, context);
-        }
-      },
+    return BlocBuilder<AllPrayerRequestsBloc, PrayerRequestsState>(
       builder: (BuildContext context, PrayerRequestsState state) {
         if (prayerRequest.hasPrayed) {
           return _createPrayedButton();
@@ -310,7 +304,7 @@ class PendingIndicator extends StatelessWidget {
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
       onPressed: null,
       child: getIt<TextFactory>()
-          .regular('Pending Approval', color: kWarningColor.withOpacity(0.8)),
+          .regular('Pending', color: kWarningColor.withOpacity(0.8)),
     );
   }
 }
