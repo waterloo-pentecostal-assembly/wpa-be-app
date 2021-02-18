@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
+import 'package:wpa_app/app/injection.dart';
+import 'package:wpa_app/presentation/common/text_factory.dart';
 
 import '../../../app/constants.dart';
 import '../../../application/authentication/password_reset/password_reset_bloc.dart';
@@ -100,9 +102,8 @@ class PasswordResetForm extends StatelessWidget {
                                         decoration: InputDecoration(
                                           border: InputBorder.none,
                                           hintText: "Email Address",
-                                          hintStyle: TextStyle(
-                                            color: Colors.grey[400],
-                                          ),
+                                          hintStyle: getIt<TextFactory>()
+                                              .hintStyle(fontSize: 16),
                                         ),
                                       ),
                                     ),
@@ -137,12 +138,9 @@ class PasswordResetForm extends StatelessWidget {
                                               ResetPassword(),
                                             ),
                                     child: Center(
-                                      child: Text(
-                                        "RESET PASSWORD",
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 16),
-                                      ),
-                                    ),
+                                        child: getIt<TextFactory>()
+                                            .authenticationButton(
+                                                'RESET PASSWORD')),
                                   ),
                                 ),
                               ),
