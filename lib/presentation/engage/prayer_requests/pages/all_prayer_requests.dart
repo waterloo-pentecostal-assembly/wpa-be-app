@@ -97,7 +97,7 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
             // Handle states that are common to both
             if (state is NewPrayerRequestLoaded) {
               ToastMessage.showInfoToast(
-                  'Request Submitted for Approval', context);
+                  'Prayer Request has been Submitted', context);
               // _insert(state.prayerRequest);
             } else if (state is MyPrayerRequestDeleteComplete) {
               int indexToDelete = getIndexById(state.id);
