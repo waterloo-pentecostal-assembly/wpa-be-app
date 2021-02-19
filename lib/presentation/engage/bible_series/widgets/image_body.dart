@@ -4,6 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:overlay_screen/overlay_screen.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/application/completions/completions_bloc.dart';
@@ -43,8 +44,55 @@ class ImageInputBodyState extends StatefulWidget {
 
 class _ImageInputBodyState extends State<ImageInputBodyState> {
   ImagePicker imagePicker = ImagePicker();
+  String stateDownloadURL = '';
   @override
   Widget build(BuildContext context) {
+    OverlayScreen().saveScreens({
+      'imagePop': CustomOverlayScreen(
+        backgroundColor: Colors.transparent,
+        content: WillPopScope(
+          onWillPop: () {
+            OverlayScreen().pop();
+            return Future.value(false);
+          },
+          child: Stack(children: [
+            Center(
+              child: Container(
+                color: Colors.transparent,
+                width: MediaQuery.of(context).size.width * 0.9,
+                height: MediaQuery.of(context).size.width * 1.6,
+                child: PhotoView(
+                  backgroundDecoration:
+                      BoxDecoration(color: Colors.transparent),
+                  imageProvider: NetworkImage(stateDownloadURL),
+                  minScale: PhotoViewComputedScale.contained * 0.8,
+                  maxScale: PhotoViewComputedScale.covered * 2,
+                  loadingBuilder: (context, event) => Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+              ),
+            ),
+            Positioned(
+              left: 30,
+              top: 30,
+              child: GestureDetector(
+                onTap: () {
+                  OverlayScreen().pop();
+                },
+                child: Center(
+                  child: Icon(
+                    Icons.close,
+                    size: 30,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+          ]),
+        ),
+      )
+    });
     return BlocConsumer<CompletionsBloc, CompletionsState>(
       listener: (context, state) {},
       builder: (BuildContext context, CompletionsState state) {
@@ -120,7 +168,6 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
 
   Widget imageLoaded(String downloadURL, CompletionDetails completionDetails,
       String gsURL, int contentNum) {
-    print(NetworkImage(downloadURL).scale);
     return Column(
       children: [
         Row(
@@ -135,6 +182,9 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
                       completionDetails: completionDetails,
                       contentNum: contentNum,
                     ));
+                  setState(() {
+                    stateDownloadURL = '';
+                  });
                 },
                 child: Center(
                   child: Icon(
@@ -146,15 +196,16 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
             ),
           ],
         ),
-        Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.width,
-          child: PhotoView(
-            imageProvider: NetworkImage(downloadURL),
-            minScale: PhotoViewComputedScale.contained * 0.8,
-            maxScale: PhotoViewComputedScale.covered * 2,
-            backgroundDecoration:
-                BoxDecoration(color: Theme.of(context).canvasColor),
+        GestureDetector(
+          onTap: () async {
+            setState(() {
+              stateDownloadURL = downloadURL;
+            });
+            await Future.delayed(Duration(milliseconds: 100));
+            OverlayScreen().show(context, identifier: 'imagePop');
+          },
+          child: Container(
+            child: Image.network(downloadURL),
           ),
         ),
       ],
