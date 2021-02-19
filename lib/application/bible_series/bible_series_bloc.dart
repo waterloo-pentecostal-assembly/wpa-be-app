@@ -58,7 +58,6 @@ Stream<BibleSeriesState> _mapContentDetailRequestedEventToState(
   })
       getCompletionDetails,
 ) async* {
-  yield FetchingBibleSeries();
   try {
     SeriesContent seriesContentDetail = await getContentDetails(
       seriesContentId: event.seriesContentId.toString(),
@@ -113,8 +112,6 @@ Stream<BibleSeriesState> _mapBibleSeriesDetailRequestedEventToState(
           {@required String bibleSeriesId})
       getAllCompletionDetailsFunction,
 ) async* {
-  yield FetchingBibleSeries();
-
   try {
     BibleSeries bibleSeries = await getBibleSeriesDetailsFunction(
       bibleSeriesId: event.bibleSeriesId.toString(),
