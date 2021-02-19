@@ -34,3 +34,17 @@ bool isResponsesFilled(Responses responses, SeriesContent seriesContent) {
   }
   return check;
 }
+
+bool isResponseEmpty(Responses responses) {
+  bool check = true;
+  if (responses.responses != null) {
+    responses.responses.forEach((key, value) {
+      value.forEach((key, value) {
+        if (value.response.isNotEmpty) {
+          check = false;
+        }
+      });
+    });
+  }
+  return check;
+}
