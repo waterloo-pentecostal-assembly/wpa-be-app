@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/app/injection.dart';
+import 'package:wpa_app/presentation/common/text_factory.dart';
 
 import '../../../app/constants.dart';
 import '../../../application/authentication/sign_in/sign_in_bloc.dart';
@@ -112,9 +114,8 @@ class SignInForm extends StatelessWidget {
                                         decoration: InputDecoration(
                                           border: InputBorder.none,
                                           hintText: "Email Address",
-                                          hintStyle: TextStyle(
-                                            color: Colors.grey[400],
-                                          ),
+                                          hintStyle: getIt<TextFactory>()
+                                              .hintStyle(fontSize: 16),
                                         ),
                                       ),
                                     ),
@@ -141,9 +142,8 @@ class SignInForm extends StatelessWidget {
                                         decoration: InputDecoration(
                                           border: InputBorder.none,
                                           hintText: "Password",
-                                          hintStyle: TextStyle(
-                                            color: Colors.grey[400],
-                                          ),
+                                          hintStyle: getIt<TextFactory>()
+                                              .hintStyle(fontSize: 16),
                                         ),
                                       ),
                                     ),
@@ -156,12 +156,8 @@ class SignInForm extends StatelessWidget {
                               Align(
                                 alignment: Alignment.topRight,
                                 child: GestureDetector(
-                                  child: Text(
-                                    "Forgot Password?",
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
+                                  child: getIt<TextFactory>()
+                                      .lite2('Forgot Password?'),
                                   onTap: () {
                                     Navigator.pushNamed(
                                         context, '/password_reset');
@@ -195,11 +191,8 @@ class SignInForm extends StatelessWidget {
                                               SignInWithEmailAndPassword(),
                                             ),
                                     child: Center(
-                                      child: Text(
-                                        "LOGIN",
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 16),
-                                      ),
+                                      child: getIt<TextFactory>()
+                                          .authenticationButton('LOGIN'),
                                     ),
                                   ),
                                 ),
@@ -210,22 +203,14 @@ class SignInForm extends StatelessWidget {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
-                                  Text(
-                                    'Don\'t have an account?',
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
+                                  getIt<TextFactory>()
+                                      .lite2('Don\'t have an account?'),
                                   SizedBox(
                                     width: 3,
                                   ),
                                   GestureDetector(
-                                    child: Text(
-                                      'Sign Up',
-                                      style: TextStyle(
-                                        color: kWpaBlue,
-                                      ),
-                                    ),
+                                    child: getIt<TextFactory>()
+                                        .linkLite('Sign Up'),
                                     onTap: () {
                                       Navigator.pushNamed(context, '/sign_up');
                                     },
