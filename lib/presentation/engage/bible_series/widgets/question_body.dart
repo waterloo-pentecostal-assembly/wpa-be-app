@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:wpa_app/app/constants.dart';
-import 'package:wpa_app/app/injection.dart';
-import 'package:wpa_app/application/completions/completions_bloc.dart';
-import 'package:wpa_app/domain/completions/entities.dart';
-import 'package:wpa_app/presentation/common/loader.dart';
-
-import 'package:wpa_app/presentation/common/text_factory.dart';
-
+import '../../../../app/constants.dart';
+import '../../../../app/injection.dart';
+import '../../../../application/completions/completions_bloc.dart';
 import '../../../../domain/bible_series/entities.dart';
+import '../../../../domain/completions/entities.dart';
+import '../../../common/text_factory.dart';
 
 class QuestionContentBodyWidget extends StatelessWidget {
   final CompletionDetails completionDetails;
