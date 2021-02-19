@@ -36,7 +36,8 @@ const kProfilePhotoPlaceholder = 'assets/images/person-placeholder-image.png';
 
 // Regex
 const kPasswordRegex = r"""^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$""";
-const kEmailRegex = r"""^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+""";
+const kEmailRegex =
+    r"""^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+""";
 
 // Restrictions
 const kMaxResponseBody = 4000;

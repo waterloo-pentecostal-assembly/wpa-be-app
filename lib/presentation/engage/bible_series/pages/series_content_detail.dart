@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -8,7 +10,6 @@ import '../../../../application/bible_series/bible_series_bloc.dart';
 import '../../../../application/completions/completions_bloc.dart';
 import '../../../../domain/bible_series/entities.dart';
 import '../../../../domain/completions/entities.dart';
-import '../../../common/loader.dart';
 import '../../../common/text_factory.dart';
 import '../helper.dart';
 import '../widgets/audio_body.dart';
@@ -21,6 +22,7 @@ import '../widgets/text_body.dart';
 class ContentDetailPage extends StatelessWidget {
   final String seriesContentId;
   final String bibleSeriesId;
+  final SeriesContentType seriesContentType;
   final bool getCompletionDetails;
 
   const ContentDetailPage({
@@ -28,6 +30,7 @@ class ContentDetailPage extends StatelessWidget {
     @required this.seriesContentId,
     @required this.bibleSeriesId,
     @required this.getCompletionDetails,
+    @required this.seriesContentType,
   }) : super(key: key);
 
   @override
@@ -47,18 +50,23 @@ class ContentDetailPage extends StatelessWidget {
         BlocProvider<CompletionsBloc>(
             create: (context) => getIt<CompletionsBloc>()),
       ],
-      child: ContentDetailWidget(bibleSeriesId),
+      child: ContentDetailWidget(bibleSeriesId, seriesContentType),
     );
   }
 }
 
 class ContentDetailWidget extends StatelessWidget {
   final String bibleSeriesId;
-  ContentDetailWidget(this.bibleSeriesId);
+  final SeriesContentType seriesContentType;
+
+  ContentDetailWidget(this.bibleSeriesId, this.seriesContentType);
   final GlobalKey<AudioSliderState> keyChild = GlobalKey();
 
-  List<Widget> contentDetailList(SeriesContent seriesContent,
-      CompletionDetails completionDetails, BuildContext context) {
+  List<Widget> contentDetailList(
+    SeriesContent seriesContent,
+    CompletionDetails completionDetails,
+    BuildContext context,
+  ) {
     List<ISeriesContentBody> body = seriesContent.body;
     List<Widget> contentBodyList = [];
 
@@ -111,26 +119,28 @@ class ContentDetailWidget extends StatelessWidget {
           BlocProvider.of<CompletionsBloc>(context)
             ..add(CompletionDetailRequested(state.contentCompletionDetail));
           return WillPopScope(
-            onWillPop: () {
-              if (keyChild.currentState != null) {
-                keyChild.currentState.stopAudio();
-              }
-              if (state.seriesContentDetail.isResponsePossible) {
-                CompletionDetails completionDetails = CompletionDetails(
-                    seriesId: bibleSeriesId,
-                    contentId: state.seriesContentDetail.id,
-                    isDraft: true,
-                    isOnTime: isOnTime(state.seriesContentDetail.date),
-                    completionDate: Timestamp.fromDate(DateTime.now()));
-                BlocProvider.of<CompletionsBloc>(context)
-                  ..add(MarkAsDraft(completionDetails));
-              }
-              Navigator.pop(context);
-              return Future.value(false);
-            },
-            child: SafeArea(
-              child: Scaffold(
-                body: Column(children: <Widget>[
+            onWillPop: Platform.isIOS
+                ? null
+                : () {
+                    if (keyChild.currentState != null) {
+                      keyChild.currentState.stopAudio();
+                    }
+                    if (state.seriesContentDetail.isResponsePossible) {
+                      CompletionDetails completionDetails = CompletionDetails(
+                          seriesId: bibleSeriesId,
+                          contentId: state.seriesContentDetail.id,
+                          isDraft: true,
+                          isOnTime: isOnTime(state.seriesContentDetail.date),
+                          completionDate: Timestamp.fromDate(DateTime.now()));
+                      BlocProvider.of<CompletionsBloc>(context)
+                        ..add(MarkAsDraft(completionDetails));
+                    }
+                    Navigator.pop(context);
+                    return Future.value(false);
+                  },
+            child: Scaffold(
+              body: SafeArea(
+                child: Column(children: <Widget>[
                   Container(
                     padding: const EdgeInsets.all(kHeadingPadding),
                     alignment: Alignment.centerLeft,
@@ -164,7 +174,9 @@ class ContentDetailWidget extends StatelessWidget {
             child: Text('Error: ${state.message}'),
           ));
         }
-        return Loader();
+        return SeriesContentDetailPlaceholder(
+          seriesContentType: seriesContentType,
+        );
       },
     );
   }
@@ -174,6 +186,7 @@ class ContentDetailWidget extends StatelessWidget {
       listener: (context, state) {},
       builder: (context, state) {
         return GestureDetector(
+          // onTap: () => Navigator.pop(context),
           onTap: () => {backFunction(state, context, seriesContent)},
           child: Icon(
             Icons.arrow_back,
@@ -201,6 +214,39 @@ class ContentDetailWidget extends StatelessWidget {
       }
       Navigator.pop(context);
     }
+  }
+}
+
+class SeriesContentDetailPlaceholder extends StatelessWidget {
+  final SeriesContentType seriesContentType;
+
+  const SeriesContentDetailPlaceholder({Key key, this.seriesContentType})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Column(children: <Widget>[
+          Container(
+            padding: const EdgeInsets.all(kHeadingPadding),
+            alignment: Alignment.centerLeft,
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Icon(
+                    Icons.arrow_back,
+                  ),
+                ),
+                SizedBox(width: 8),
+                HeaderWidget(contentType: seriesContentType.toString()),
+              ],
+            ),
+          ),
+        ]),
+      ),
+    );
   }
 }
 
