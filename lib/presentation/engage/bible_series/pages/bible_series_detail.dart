@@ -39,8 +39,8 @@ class BibleSeriesWidget extends StatefulWidget {
 
 class _BibleSeriesState extends State<BibleSeriesWidget>
     with TickerProviderStateMixin {
-  TabController _tabController;
   int tabLength;
+  TabController _tabController;
 
   @override
   void initState() {
@@ -50,18 +50,20 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<BibleSeriesBloc, BibleSeriesState>(
-      listener: (context, state) {},
-      builder: (BuildContext context, BibleSeriesState state) {
+      listener: (context, state) {
         if (state is BibleSeriesDetail) {
           List<SeriesContentSnippet> snippet =
               state.bibleSeriesDetail.seriesContentSnippet;
-
           tabLength = state.bibleSeriesDetail.seriesContentSnippet.length;
           _tabController = new TabController(
-              length: tabLength,
-              vsync: this,
-              initialIndex: _getInitialIndex(snippet));
-
+            length: tabLength,
+            vsync: this,
+            initialIndex: _getInitialIndex(snippet),
+          );
+        }
+      },
+      builder: (BuildContext context, BibleSeriesState state) {
+        if (state is BibleSeriesDetail) {
           return Scaffold(
             body: Column(
               children: [
@@ -116,7 +118,7 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                     isScrollable: true,
                     indicator: BoxDecoration(),
                     indicatorSize: TabBarIndicatorSize.label,
-                    unselectedLabelColor: Colors.black54,
+                    unselectedLabelColor: Colors.black45,
                     labelColor: Colors.black87,
                     tabs: _buildContentTabs(
                         state.bibleSeriesDetail.seriesContentSnippet),
@@ -140,7 +142,10 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
           );
         } else if (state is BibleSeriesError) {
           return Scaffold(
-              body: SafeArea(child: Text('Error: ${state.message}')));
+            body: SafeArea(
+              child: Text('Error: ${state.message}'),
+            ),
+          );
         }
         return SeriesDetailPlaceholder();
       },
@@ -294,7 +299,8 @@ List<Widget> _buildContentChildren(
                   'getCompletionDetails':
                       element.isCompleted || element.isDraft,
                   'seriesContentType': element.seriesContentType,
-                }).then((value) => {onGoBack(context, bibleSeriesId)});
+                });
+                //.then((value) => {onGoBack(context, bibleSeriesId)});
               },
               child: Container(
                 width: 0.9 * MediaQuery.of(context).size.width,
