@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wpa_app/app/constants.dart';
 
 class TextFactory {
   final String _fontFamily;
@@ -142,20 +143,41 @@ class TextFactory {
     );
   }
 
-  Text liteLarge(
+  Text lite2(
     String text, {
     double fontSize = 14.0,
-    Color color: Colors.black,
     TextOverflow overflow = TextOverflow.visible,
   }) {
     return Text(
       text,
-      style: liteLargeTextStyle(fontSize: fontSize, color: color),
+      style: lite2TextStyle(fontSize: fontSize),
       overflow: overflow,
     );
   }
 
-  TextStyle liteLargeTextStyle({double fontSize, Color color = Colors.black}) {
+  TextStyle lite2TextStyle({double fontSize}) {
+    return TextStyle(
+      fontFamily: _fontFamily,
+      fontWeight: FontWeight.w400,
+      fontSize: fontSize,
+      color: Colors.grey[600],
+    );
+  }
+
+  Text linkLite(
+    String text, {
+    double fontSize = 14.0,
+    Color color: kWpaBlue,
+    TextOverflow overflow = TextOverflow.visible,
+  }) {
+    return Text(
+      text,
+      style: linkLiteTextStyle(fontSize: fontSize, color: color),
+      overflow: overflow,
+    );
+  }
+
+  TextStyle linkLiteTextStyle({double fontSize, Color color = Colors.black}) {
     return TextStyle(
       fontFamily: _fontFamily,
       fontWeight: FontWeight.w400,
@@ -172,7 +194,7 @@ class TextFactory {
   }) {
     return Text(
       text,
-      style: liteLargeTextStyle(fontSize: fontSize, color: color),
+      style: liteSmallTextStyle(fontSize: fontSize, color: color),
       overflow: overflow,
     );
   }
@@ -192,6 +214,38 @@ class TextFactory {
       fontWeight: FontWeight.bold,
       fontSize: fontSize,
       color: color,
+    );
+  }
+
+  Text authenticationButton(
+    String text, {
+    double fontSize = 16.0,
+    Color color: Colors.white,
+    TextOverflow overflow = TextOverflow.visible,
+  }) {
+    return Text(
+      text,
+      style: authenticationButtonTextStyle(fontSize: fontSize, color: color),
+      overflow: overflow,
+    );
+  }
+
+  TextStyle authenticationButtonTextStyle(
+      {double fontSize, Color color = Colors.black}) {
+    return TextStyle(
+      fontFamily: _fontFamily,
+      fontWeight: FontWeight.w600,
+      fontSize: fontSize,
+      color: color,
+    );
+  }
+
+  TextStyle hintStyle({double fontSize}) {
+    return TextStyle(
+      fontFamily: _fontFamily,
+      fontWeight: FontWeight.w400,
+      fontSize: fontSize,
+      color: Colors.grey[400],
     );
   }
 }
