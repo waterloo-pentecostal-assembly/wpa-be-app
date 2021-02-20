@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:wpa_app/domain/common/exceptions.dart';
 
 import '../../domain/authentication/entities.dart';
 import '../../domain/prayer_requests/entities.dart';
@@ -194,8 +195,12 @@ extension UserSnippetDtoX on UserSnippetDto {
   Future<UserSnippet> toDomain(
       FirebaseStorageService firebaseStorageService) async {
     // Convert GS Location to Download URL
-    String profilePhotoUrl = await firebaseStorageService
-        .getDownloadUrl(this.profilePhotoGsLocation);
+    String profilePhotoUrl;
+
+    try {
+      profilePhotoUrl = await firebaseStorageService
+          .getDownloadUrl(this.profilePhotoGsLocation);
+    } catch (e) {}
 
     return UserSnippet(
       firstName: this.firstName,
