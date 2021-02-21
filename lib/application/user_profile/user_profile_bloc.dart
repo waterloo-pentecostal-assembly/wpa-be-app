@@ -32,7 +32,6 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
   ) async* {
     try {
       final LocalUser user = getIt<LocalUser>();
-
       UploadTask uploadTask =
           userProfileRepository.uploadProfilePhoto(event.profilePhoto, user.id);
       yield NewProfilePhotoUploadStarted(uploadTask: uploadTask);
@@ -59,7 +58,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
       await userProfileRepository.updateLocalUser();
 
       // yield complete
-      yield NewProfilePhotoUploadComplete();
+      yield NewProfilePhotoUploadComplete(profilePhoto: event.profilePhoto);
     } catch (e) {
       yield UploadProfilePhotoError(message: "Error uploading photo");
     }
