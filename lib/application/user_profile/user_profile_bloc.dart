@@ -39,14 +39,18 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
 
       TaskSnapshot data = await uploadTask;
 
-      // build profile_photo_gs_location
-      final String profilePhotoGsLocation =
+      // build thumbnail
+      final String profilePhoto =
           'gs://${data.ref.bucket}/${data.ref.fullPath}';
+      final String thumbnail = 'gs://${data.ref.bucket}/${data.ref.fullPath}'
+          .replaceAll('profile_photo', 'profile_photo/thumbs')
+          .replaceAll('image', 'image_200x200');
 
       // Update user collection
       await userProfileRepository.updateUserCollection(
         {
-          "profile_photo_gs_location": profilePhotoGsLocation,
+          "thumbnail": thumbnail,
+          "profile_photo": profilePhoto,
         },
         user.id,
       );

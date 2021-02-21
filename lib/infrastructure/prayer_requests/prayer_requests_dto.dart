@@ -1,11 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:wpa_app/domain/common/exceptions.dart';
 
 import '../../domain/authentication/entities.dart';
 import '../../domain/prayer_requests/entities.dart';
-import '../common/helpers.dart';
 import '../../services/firebase_storage_service.dart';
+import '../common/helpers.dart';
 
 class PrayerRequestsDto {
   final String id;
@@ -159,14 +158,14 @@ extension PrayerRequestsDtoX on PrayerRequestsDto {
 class UserSnippetDto {
   final String firstName;
   final String lastName;
-  final String profilePhotoUrl;
-  final String profilePhotoGsLocation;
+  final String thumbnailUrl;
+  final String thumbnail;
 
   factory UserSnippetDto.fromJson(Map<String, dynamic> json) {
     return UserSnippetDto._(
       firstName: findOrThrowException(json, 'first_name'),
       lastName: findOrThrowException(json, 'last_name'),
-      profilePhotoGsLocation: json['profile_photo_gs_location'],
+      thumbnail: json['thumbnail'],
     );
   }
 
@@ -174,8 +173,8 @@ class UserSnippetDto {
     return UserSnippetDto._(
       firstName: user.firstName,
       lastName: user.lastName,
-      profilePhotoUrl: user.profilePhotoUrl,
-      profilePhotoGsLocation: user.profilePhotoGsLocation,
+      thumbnailUrl: user.thumbnailUrl,
+      thumbnail: user.thumbnail,
     );
   }
 
@@ -186,8 +185,8 @@ class UserSnippetDto {
   const UserSnippetDto._({
     @required this.firstName,
     @required this.lastName,
-    this.profilePhotoUrl,
-    this.profilePhotoGsLocation,
+    this.thumbnailUrl,
+    this.thumbnail,
   });
 }
 
@@ -195,18 +194,18 @@ extension UserSnippetDtoX on UserSnippetDto {
   Future<UserSnippet> toDomain(
       FirebaseStorageService firebaseStorageService) async {
     // Convert GS Location to Download URL
-    String profilePhotoUrl;
+    String thumbnailUrl;
 
     try {
-      profilePhotoUrl = await firebaseStorageService
-          .getDownloadUrl(this.profilePhotoGsLocation);
+      thumbnailUrl =
+          await firebaseStorageService.getDownloadUrl(this.thumbnail);
     } catch (e) {}
 
     return UserSnippet(
       firstName: this.firstName,
       lastName: this.lastName,
-      profilePhotoUrl: profilePhotoUrl,
-      profilePhotoGsLocation: this.profilePhotoGsLocation,
+      thumbnailUrl: thumbnailUrl,
+      thumbnail: this.thumbnail,
     );
   }
 
@@ -214,7 +213,7 @@ extension UserSnippetDtoX on UserSnippetDto {
     return {
       "first_name": this.firstName,
       "last_name": this.lastName,
-      "profile_photo_gs_location": this.profilePhotoGsLocation,
+      "thumbnail": this.thumbnail,
     };
   }
 }
