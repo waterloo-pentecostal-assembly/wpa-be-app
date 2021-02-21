@@ -33,13 +33,15 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
     try {
       final LocalUser user = getIt<LocalUser>();
 
-      UploadTask uploadTask = userProfileRepository.uploadProfilePhoto(event.profilePhoto, user.id);
+      UploadTask uploadTask =
+          userProfileRepository.uploadProfilePhoto(event.profilePhoto, user.id);
       yield NewProfilePhotoUploadStarted(uploadTask: uploadTask);
 
       TaskSnapshot data = await uploadTask;
 
       // build profile_photo_gs_location
-      final String profilePhotoGsLocation = 'gs://${data.ref.bucket}/${data.ref.fullPath}';
+      final String profilePhotoGsLocation =
+          'gs://${data.ref.bucket}/${data.ref.fullPath}';
 
       // Update user collection
       await userProfileRepository.updateUserCollection(
