@@ -14,6 +14,9 @@ abstract class ICompletionsRepository {
     @required String seriesContentId,
   });
 
+  Future<CompletionDetails> getCompletionOrNull(
+      {@required String seriesContentId});
+
   Future<Responses> getResponses({
     @required String completionId,
   });

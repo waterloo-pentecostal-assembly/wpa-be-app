@@ -141,6 +141,29 @@ class CompletionsRepository extends ICompletionsRepository {
   }
 
   @override
+  Future<CompletionDetails> getCompletionOrNull(
+      {String seriesContentId}) async {
+    QuerySnapshot snapshot;
+    final LocalUser user = getIt<LocalUser>();
+    try {
+      snapshot = await _completionsCollection
+          .where("user_id", isEqualTo: user.id)
+          .where("content_id", isEqualTo: seriesContentId)
+          .get();
+    } catch (e) {
+      _firebaseFirestoreService.handleException(e);
+    }
+    if (snapshot.docs.length > 0) {
+      DocumentSnapshot document = snapshot.docs[0];
+      final CompletionDetails seriesContent =
+          CompletionsDto.fromFirestore(document).toDomain();
+      return seriesContent;
+    } else {
+      return null;
+    }
+  }
+
+  @override
   Future<Responses> getResponses({
     String completionId,
   }) async {

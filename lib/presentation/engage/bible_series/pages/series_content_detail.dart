@@ -39,8 +39,6 @@ class ContentDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(scsNum);
-    print(actNum);
     return MultiBlocProvider(
       providers: [
         BlocProvider<BibleSeriesBloc>(
