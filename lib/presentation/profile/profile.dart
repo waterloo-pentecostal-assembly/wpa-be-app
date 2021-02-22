@@ -182,16 +182,18 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
         } else {
           LocalUser localUser = getIt<LocalUser>();
           String photoUrl = localUser.thumbnailUrl;
-          Widget imageWidget = FadeInImage.assetNetwork(
-            fit: BoxFit.cover,
-            placeholder: kProfilePhotoPlaceholder,
-            image: photoUrl,
-          );
+          Widget imageWidget;
 
           if (state is NewProfilePhotoUploadComplete) {
             imageWidget = Image.file(
               state.profilePhoto,
               fit: BoxFit.cover,
+            );
+          } else {
+            imageWidget = FadeInImage.assetNetwork(
+              fit: BoxFit.cover,
+              placeholder: kProfilePhotoPlaceholder,
+              image: photoUrl,
             );
           }
 
