@@ -41,6 +41,7 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
     with TickerProviderStateMixin {
   int tabLength;
   TabController _tabController;
+  List<SeriesContentSnippet> seriesContentSnippet;
 
   @override
   void initState() {
@@ -52,13 +53,12 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
     return BlocConsumer<BibleSeriesBloc, BibleSeriesState>(
       listener: (context, state) {
         if (state is BibleSeriesDetail) {
-          List<SeriesContentSnippet> snippet =
-              state.bibleSeriesDetail.seriesContentSnippet;
+          seriesContentSnippet = state.bibleSeriesDetail.seriesContentSnippet;
           tabLength = state.bibleSeriesDetail.seriesContentSnippet.length;
           _tabController = new TabController(
             length: tabLength,
             vsync: this,
-            initialIndex: _getInitialIndex(snippet),
+            initialIndex: _getInitialIndex(seriesContentSnippet),
           );
         }
       },
@@ -120,8 +120,7 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                     indicatorSize: TabBarIndicatorSize.label,
                     unselectedLabelColor: Colors.black45,
                     labelColor: Colors.black87,
-                    tabs: _buildContentTabs(
-                        state.bibleSeriesDetail.seriesContentSnippet),
+                    tabs: _buildContentTabs(seriesContentSnippet),
                   ),
                 ),
                 Expanded(
@@ -131,7 +130,7 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                       controller: _tabController,
                       children: _buildContentChildren(
                         context,
-                        state.bibleSeriesDetail.seriesContentSnippet,
+                        seriesContentSnippet,
                         state.bibleSeriesDetail.id,
                       ),
                     ),
@@ -282,10 +281,11 @@ List<Widget> _buildContentChildren(
   String bibleSeriesId,
 ) {
   List<Widget> contentChildren = [];
-  seriesContentSnippets.forEach((_element) {
+
+  seriesContentSnippets.asMap().forEach((i, _element) {
     List<Widget> listChildren = [];
 
-    _element.availableContentTypes.forEach((element) {
+    _element.availableContentTypes.asMap().forEach((j, element) {
       listChildren.add(
         Container(
           margin: EdgeInsets.only(top: 0, bottom: 15),
@@ -299,6 +299,8 @@ List<Widget> _buildContentChildren(
                   'getCompletionDetails':
                       element.isCompleted || element.isDraft,
                   'seriesContentType': element.seriesContentType,
+                  'scsNum': i,
+                  'actNum': j,
                 });
                 //.then((value) => {onGoBack(context, bibleSeriesId)});
               },
