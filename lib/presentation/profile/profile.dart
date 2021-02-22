@@ -181,6 +181,20 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
           );
         } else {
           LocalUser localUser = getIt<LocalUser>();
+          String photoUrl = localUser.thumbnailUrl;
+          Widget imageWidget = FadeInImage.assetNetwork(
+            fit: BoxFit.cover,
+            placeholder: kProfilePhotoPlaceholder,
+            image: photoUrl,
+          );
+
+          if (state is NewProfilePhotoUploadComplete) {
+            imageWidget = Image.file(
+              state.profilePhoto,
+              fit: BoxFit.cover,
+            );
+          }
+
           return Column(
             children: [
               ClipOval(
@@ -190,13 +204,9 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
                     Container(
                       height: profilePhotoDiameter,
                       width: profilePhotoDiameter,
-                      child: (localUser.profilePhotoUrl == null)
+                      child: (photoUrl == null)
                           ? Image.asset(kProfilePhotoPlaceholder)
-                          : FadeInImage.assetNetwork(
-                              fit: BoxFit.cover,
-                              placeholder: kProfilePhotoPlaceholder,
-                              image: localUser.profilePhotoUrl,
-                            ),
+                          : imageWidget,
                     ),
                     GestureDetector(
                       onTap: selectNewProfileImage,

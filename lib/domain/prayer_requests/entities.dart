@@ -41,18 +41,18 @@ class PrayerRequest {
 class UserSnippet {
   final String firstName;
   final String lastName;
-  final String profilePhotoUrl;
-  final String profilePhotoGsLocation;
+  final String thumbnailUrl;
+  final String thumbnail;
 
   UserSnippet({
     @required this.firstName,
     @required this.lastName,
-    @required this.profilePhotoUrl,
-    @required this.profilePhotoGsLocation,
+    @required this.thumbnailUrl,
+    @required this.thumbnail,
   });
 
   @override
   String toString() {
-    return '''firstName: $firstName, lastName: $lastName, profilePhotoUrl: $profilePhotoUrl''';
+    return '''firstName: $firstName, lastName: $lastName, thumbnailUrl: $thumbnailUrl''';
   }
 }

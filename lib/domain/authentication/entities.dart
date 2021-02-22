@@ -4,8 +4,10 @@ class LocalUser {
   final String lastName;
   final String email;
   final int reports;
+  final String thumbnailUrl;
+  final String thumbnail;
   final String profilePhotoUrl;
-  final String profilePhotoGsLocation;
+  final String profilePhoto;
   final bool isAdmin;
   final bool isVerified;
 
@@ -17,14 +19,20 @@ class LocalUser {
     this.lastName,
     this.email,
     this.reports,
+    this.thumbnailUrl,
+    this.thumbnail,
     this.profilePhotoUrl,
-    this.profilePhotoGsLocation,
+    this.profilePhoto,
     this.isAdmin,
     this.isVerified,
   });
 
   @override
   String toString() {
-    return "isAdmin: $isAdmin, isVerified: $isVerified, ID: $id, Name: $firstName $lastName, Email: $email, Reports: $reports, Photo URL: $profilePhotoUrl, Photo Location: $profilePhotoGsLocation";
+    return '''isAdmin: $isAdmin, isVerified: $isVerified, 
+    ID: $id, Name: $firstName $lastName, 
+    Email: $email, Reports: $reports, 
+    Thumbnail URL: $thumbnailUrl, Thumbnail Location: $thumbnail
+    Thumbnail URL: $profilePhotoUrl, Photo Location: $profilePhoto''';
   }
 }
