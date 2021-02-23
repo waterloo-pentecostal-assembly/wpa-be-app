@@ -83,8 +83,6 @@ class EngagePage extends IIndexedPage {
                       bibleSeriesId: args['bibleSeriesId'],
                       getCompletionDetails: args['getCompletionDetails'],
                       seriesContentType: args['seriesContentType'],
-                      scsNum: args['scsNum'],
-                      actNum: args['actNum'],
                     );
                 }
                 // Handles case where no routes match
