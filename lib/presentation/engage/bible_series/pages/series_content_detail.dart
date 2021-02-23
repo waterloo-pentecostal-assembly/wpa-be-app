@@ -24,18 +24,14 @@ class ContentDetailPage extends StatelessWidget {
   final String bibleSeriesId;
   final SeriesContentType seriesContentType;
   final bool getCompletionDetails;
-  final int scsNum;
-  final int actNum;
 
-  const ContentDetailPage(
-      {Key key,
-      @required this.seriesContentId,
-      @required this.bibleSeriesId,
-      @required this.getCompletionDetails,
-      @required this.seriesContentType,
-      @required this.scsNum,
-      @required this.actNum})
-      : super(key: key);
+  const ContentDetailPage({
+    Key key,
+    @required this.seriesContentId,
+    @required this.bibleSeriesId,
+    @required this.getCompletionDetails,
+    @required this.seriesContentType,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

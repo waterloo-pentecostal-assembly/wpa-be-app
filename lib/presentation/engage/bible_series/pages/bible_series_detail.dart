@@ -298,8 +298,6 @@ List<Widget> _buildContentChildren(
                   'getCompletionDetails':
                       element.isCompleted || element.isDraft,
                   'seriesContentType': element.seriesContentType,
-                  'scsNum': i,
-                  'actNum': j,
                 }).then((value) => {onGoBack(context, i, j, bibleSeries)});
               },
               child: Container(
