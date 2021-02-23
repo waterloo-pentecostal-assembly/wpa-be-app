@@ -82,8 +82,13 @@ extension FirebaseUserDtoX on FirebaseUserDto {
   Future<LocalUser> toDomain(
       FirebaseStorageService firebaseStorageService) async {
     // Convert GS Location to Download URL
-    String thumbnailUrl =
-        await firebaseStorageService.getDownloadUrl(this.thumbnail);
+    String thumbnailUrl;
+    try {
+      thumbnailUrl =
+          await firebaseStorageService.getDownloadUrl(this.thumbnail);
+    } catch (e) {
+      thumbnailUrl = null;
+    }
     String profilePhotoUrl =
         await firebaseStorageService.getDownloadUrl(this.profilePhoto);
 
