@@ -190,11 +190,15 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
               fit: BoxFit.cover,
             );
           } else {
-            imageWidget = FadeInImage.assetNetwork(
-              fit: BoxFit.cover,
-              placeholder: kProfilePhotoPlaceholder,
-              image: photoUrl,
-            );
+            if (photoUrl == null) {
+              imageWidget = Image.asset(kProfilePhotoPlaceholder);
+            } else {
+              imageWidget = FadeInImage.assetNetwork(
+                fit: BoxFit.cover,
+                placeholder: kProfilePhotoPlaceholder,
+                image: photoUrl,
+              );
+            }
           }
 
           return Column(
@@ -206,9 +210,7 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
                     Container(
                       height: profilePhotoDiameter,
                       width: profilePhotoDiameter,
-                      child: (photoUrl == null)
-                          ? Image.asset(kProfilePhotoPlaceholder)
-                          : imageWidget,
+                      child: imageWidget,
                     ),
                     GestureDetector(
                       onTap: selectNewProfileImage,
