@@ -101,7 +101,7 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
     return StreamBuilder(
       stream: uploadTask.snapshotEvents,
       builder: (context, AsyncSnapshot<TaskSnapshot> snapshot) {
-        int bytesTransferred = snapshot?.data?.totalBytes;
+        int bytesTransferred = snapshot?.data?.bytesTransferred;
         int totalBytes = snapshot?.data?.totalBytes;
         int progressPercent = 0;
 
@@ -120,7 +120,6 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
 
   Widget imageLoaded(String downloadURL, CompletionDetails completionDetails,
       String gsURL, int contentNum) {
-    print(NetworkImage(downloadURL).scale);
     return Column(
       children: [
         Row(
@@ -146,15 +145,56 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
             ),
           ],
         ),
-        Container(
-          width: MediaQuery.of(context).size.width,
-          height: MediaQuery.of(context).size.width,
-          child: PhotoView(
-            imageProvider: NetworkImage(downloadURL),
-            minScale: PhotoViewComputedScale.contained * 0.8,
-            maxScale: PhotoViewComputedScale.covered * 2,
-            backgroundDecoration:
-                BoxDecoration(color: Theme.of(context).canvasColor),
+        GestureDetector(
+          onTap: () {
+            return showDialog(
+                context: context,
+                builder: (context) {
+                  return WillPopScope(
+                    onWillPop: () {
+                      Navigator.of(context, rootNavigator: true).pop();
+                      return Future.value(false);
+                    },
+                    child: Stack(children: [
+                      Center(
+                        child: Container(
+                          color: Colors.transparent,
+                          width: MediaQuery.of(context).size.width * 0.9,
+                          height: MediaQuery.of(context).size.width * 1.6,
+                          child: PhotoView(
+                            backgroundDecoration:
+                                BoxDecoration(color: Colors.transparent),
+                            imageProvider: NetworkImage(downloadURL),
+                            minScale: PhotoViewComputedScale.contained * 0.8,
+                            maxScale: PhotoViewComputedScale.covered * 2,
+                            loadingBuilder: (context, event) => Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Positioned(
+                        left: 30,
+                        top: 30,
+                        child: GestureDetector(
+                          onTap: () {
+                            Navigator.of(context, rootNavigator: true).pop();
+                          },
+                          child: Center(
+                            child: Icon(
+                              Icons.close,
+                              size: 30,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ]),
+                  );
+                });
+          },
+          child: Container(
+            child: Image.network(downloadURL),
           ),
         ),
       ],
