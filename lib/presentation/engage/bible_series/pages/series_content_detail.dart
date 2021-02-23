@@ -199,14 +199,19 @@ class ContentDetailWidget extends StatelessWidget {
   void backFunction(CompletionsState state, BuildContext context,
       SeriesContent seriesContent) {
     if (seriesContent.isResponsePossible) {
-      CompletionDetails completionDetails = CompletionDetails(
-          seriesId: bibleSeriesId,
-          contentId: seriesContent.id,
-          isDraft: true,
-          isOnTime: isOnTime(seriesContent.date),
-          completionDate: Timestamp.fromDate(DateTime.now()));
-      BlocProvider.of<CompletionsBloc>(context)
-        ..add(MarkAsDraft(completionDetails));
+      if (!isResponseEmpty(state.responses)) {
+        CompletionDetails completionDetails = CompletionDetails(
+            seriesId: bibleSeriesId,
+            contentId: seriesContent.id,
+            isDraft: true,
+            isOnTime: isOnTime(seriesContent.date),
+            completionDate: Timestamp.fromDate(DateTime.now()));
+        BlocProvider.of<CompletionsBloc>(context)
+          ..add(MarkAsDraft(completionDetails));
+      } else if (state.responses.responses != null && state.id.isNotEmpty) {
+        BlocProvider.of<CompletionsBloc>(context)
+          ..add(MarkAsInComplete(state.id));
+      }
       Navigator.pop(context);
     } else {
       if (keyChild.currentState != null) {

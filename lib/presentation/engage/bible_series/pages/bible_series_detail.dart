@@ -41,6 +41,7 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
     with TickerProviderStateMixin {
   int tabLength;
   TabController _tabController;
+  BibleSeries bibleSeries;
 
   @override
   void initState() {
@@ -52,18 +53,21 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
     return BlocConsumer<BibleSeriesBloc, BibleSeriesState>(
       listener: (context, state) {
         if (state is BibleSeriesDetail) {
-          List<SeriesContentSnippet> snippet =
-              state.bibleSeriesDetail.seriesContentSnippet;
-          tabLength = state.bibleSeriesDetail.seriesContentSnippet.length;
-          _tabController = new TabController(
-            length: tabLength,
-            vsync: this,
-            initialIndex: _getInitialIndex(snippet),
-          );
+          bibleSeries = state.bibleSeriesDetail;
+          tabLength = bibleSeries.seriesContentSnippet.length;
+          if (_tabController == null) {
+            _tabController = new TabController(
+              length: tabLength,
+              vsync: this,
+              initialIndex: _getInitialIndex(bibleSeries.seriesContentSnippet),
+            );
+          }
+        } else if (state is UpdatedBibleSeries) {
+          bibleSeries = state.bibleSeriesDetail;
         }
       },
       builder: (BuildContext context, BibleSeriesState state) {
-        if (state is BibleSeriesDetail) {
+        if (state is BibleSeriesDetail || state is UpdatedBibleSeries) {
           return Scaffold(
             body: Column(
               children: [
@@ -88,7 +92,7 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                             bottomRight: Radius.circular(30.0),
                           ),
                           child: Image.network(
-                            state.bibleSeriesDetail.imageUrl,
+                            bibleSeries.imageUrl,
                             fit: BoxFit.cover,
                           ),
                         ),
@@ -120,8 +124,7 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                     indicatorSize: TabBarIndicatorSize.label,
                     unselectedLabelColor: Colors.black45,
                     labelColor: Colors.black87,
-                    tabs: _buildContentTabs(
-                        state.bibleSeriesDetail.seriesContentSnippet),
+                    tabs: _buildContentTabs(bibleSeries.seriesContentSnippet),
                   ),
                 ),
                 Expanded(
@@ -129,11 +132,7 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                     padding: EdgeInsets.all(0),
                     child: TabBarView(
                       controller: _tabController,
-                      children: _buildContentChildren(
-                        context,
-                        state.bibleSeriesDetail.seriesContentSnippet,
-                        state.bibleSeriesDetail.id,
-                      ),
+                      children: _buildContentChildren(context, bibleSeries),
                     ),
                   ),
                 )
@@ -277,15 +276,13 @@ List<Widget> _buildContentTabs(
 }
 
 List<Widget> _buildContentChildren(
-  BuildContext context,
-  List<SeriesContentSnippet> seriesContentSnippets,
-  String bibleSeriesId,
-) {
+    BuildContext context, BibleSeries bibleSeries) {
   List<Widget> contentChildren = [];
-  seriesContentSnippets.forEach((_element) {
+
+  bibleSeries.seriesContentSnippet.asMap().forEach((i, _element) {
     List<Widget> listChildren = [];
 
-    _element.availableContentTypes.forEach((element) {
+    _element.availableContentTypes.asMap().forEach((j, element) {
       listChildren.add(
         Container(
           margin: EdgeInsets.only(top: 0, bottom: 15),
@@ -293,14 +290,15 @@ List<Widget> _buildContentChildren(
           child: Tab(
             child: GestureDetector(
               onTap: () {
+                BlocProvider.of<BibleSeriesBloc>(context)
+                  ..add(RestoreState(bibleSeries));
                 Navigator.pushNamed(context, '/content_detail', arguments: {
-                  'bibleSeriesId': bibleSeriesId,
+                  'bibleSeriesId': bibleSeries.id,
                   'seriesContentId': element.contentId,
                   'getCompletionDetails':
                       element.isCompleted || element.isDraft,
                   'seriesContentType': element.seriesContentType,
-                });
-                //.then((value) => {onGoBack(context, bibleSeriesId)});
+                }).then((value) => {onGoBack(context, i, j, bibleSeries)});
               },
               child: Container(
                 width: 0.9 * MediaQuery.of(context).size.width,
@@ -410,7 +408,9 @@ int _getInitialIndex(List<SeriesContentSnippet> snippet) {
   return 0;
 }
 
-FutureOr onGoBack(BuildContext context, String bibleSeriesId) {
+FutureOr onGoBack(
+    BuildContext context, int scsNum, int actNum, BibleSeries bibleSeries) {
   BlocProvider.of<BibleSeriesBloc>(context)
-    ..add(BibleSeriesDetailRequested(bibleSeriesId: bibleSeriesId));
+    ..add(UpdateCompletionDetail(
+        bibleSeries: bibleSeries, actNum: actNum, scsNum: scsNum));
 }
