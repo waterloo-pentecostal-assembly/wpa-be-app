@@ -176,10 +176,16 @@ Stream<CompletionsState> _mapMarkAsDraftToState(
 Stream<CompletionsState> _mapMarkAsInCompleteEventToState(
     MarkAsInComplete event,
     CompletionsState state,
-    Future<void> Function({@required String completionId})
+    Future<void> Function(
+            {@required String completionId, bool isResponsePossible})
         markAsIncomplete) async* {
   try {
-    await markAsIncomplete(completionId: event.id);
+    if (state.responses != null) {
+      await markAsIncomplete(completionId: event.id, isResponsePossible: true);
+    } else {
+      await markAsIncomplete(completionId: event.id, isResponsePossible: false);
+    }
+
     yield state.copyWith(
         isComplete: false, id: '', downloadURL: state.downloadURL);
   } on BaseApplicationException catch (e) {
@@ -338,7 +344,8 @@ Stream<CompletionsState> _mapDeleteImageEventToState(
       downloadMap.remove(event.contentNum.toString());
       if (downloadMap.isEmpty &&
           (state.isComplete || event.completionDetails != null)) {
-        completionsRepository.markAsIncomplete(completionId: state.id);
+        completionsRepository.markAsIncomplete(
+            completionId: state.id, isResponsePossible: true);
       }
       Map<String, Map<String, ResponseDetails>> responses =
           state.responses.responses;

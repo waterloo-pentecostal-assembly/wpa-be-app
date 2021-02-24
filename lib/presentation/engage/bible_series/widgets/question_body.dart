@@ -136,11 +136,13 @@ Widget questionContainer(
 }
 
 String getResponse(CompletionsState state, int contentNum, int questionNum) {
-  if (state.responses.responses[contentNum.toString()]
-          [questionNum.toString()] !=
-      null) {
-    return state.responses
-        .responses[contentNum.toString()][questionNum.toString()].response;
+  if (state.responses.responses[contentNum.toString()] != null) {
+    if (state.responses.responses[contentNum.toString()]
+            [questionNum.toString()] !=
+        null) {
+      return state.responses
+          .responses[contentNum.toString()][questionNum.toString()].response;
+    }
   } else {
     return '';
   }

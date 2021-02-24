@@ -32,6 +32,7 @@ abstract class ICompletionsRepository {
 
   Future<void> markAsIncomplete({
     @required String completionId,
+    @required bool isResponsePossible,
   });
 
   Future<String> updateComplete({
