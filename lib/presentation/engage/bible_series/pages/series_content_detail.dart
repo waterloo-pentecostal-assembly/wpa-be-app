@@ -95,6 +95,8 @@ class ContentDetailWidget extends StatelessWidget {
           imageInputBody: body[index],
           contentNum: index,
           completionDetails: completionDetails,
+          bibleSeriesId: bibleSeriesId,
+          seriesContent: seriesContent,
         ));
       }
     }
@@ -209,6 +211,11 @@ class ContentDetailWidget extends StatelessWidget {
         BlocProvider.of<CompletionsBloc>(context)
           ..add(MarkAsDraft(completionDetails));
       } else if (state.responses.responses != null && state.id.isNotEmpty) {
+        BlocProvider.of<CompletionsBloc>(context)
+          ..add(MarkAsInComplete(state.id));
+      } else if (seriesContent.responseContainImage &&
+          state.responses.responses == null &&
+          state.id.isNotEmpty) {
         BlocProvider.of<CompletionsBloc>(context)
           ..add(MarkAsInComplete(state.id));
       }

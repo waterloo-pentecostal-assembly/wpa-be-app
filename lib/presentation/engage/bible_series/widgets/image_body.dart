@@ -16,8 +16,15 @@ class ImageInputBodyWidget extends StatelessWidget {
   final ImageInputBody imageInputBody;
   final int contentNum;
   final CompletionDetails completionDetails;
+  final String bibleSeriesId;
+  final SeriesContent seriesContent;
   const ImageInputBodyWidget(
-      {Key key, this.imageInputBody, this.contentNum, this.completionDetails})
+      {Key key,
+      this.imageInputBody,
+      this.contentNum,
+      this.completionDetails,
+      this.bibleSeriesId,
+      this.seriesContent})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -26,6 +33,8 @@ class ImageInputBodyWidget extends StatelessWidget {
     return ImageInputBodyState(
       contentNum: contentNum,
       completionDetails: completionDetails,
+      bibleSeriesId: bibleSeriesId,
+      seriesContent: seriesContent,
     );
   }
 }
@@ -33,8 +42,14 @@ class ImageInputBodyWidget extends StatelessWidget {
 class ImageInputBodyState extends StatefulWidget {
   final int contentNum;
   final CompletionDetails completionDetails;
+  final String bibleSeriesId;
+  final SeriesContent seriesContent;
   ImageInputBodyState(
-      {Key key, @required this.contentNum, @required this.completionDetails})
+      {Key key,
+      @required this.contentNum,
+      @required this.completionDetails,
+      @required this.bibleSeriesId,
+      @required this.seriesContent})
       : super(key: key);
 
   @override
@@ -53,7 +68,7 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
         } else if (state.downloadURL != null) {
           if (state.downloadURL[widget.contentNum.toString()] != null) {
             return imageLoaded(
-                state.downloadURL[widget.contentNum.toString()],
+                state.downloadURL[widget.contentNum.toString()][0],
                 widget.completionDetails,
                 state.responses.responses[widget.contentNum.toString()]['0']
                     .response,
@@ -92,6 +107,8 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
             image: File(selected.path),
             contentNum: widget.contentNum,
             questionNum: 0,
+            bibleSeriesId: widget.bibleSeriesId,
+            seriesContent: widget.seriesContent,
           ),
         );
     }

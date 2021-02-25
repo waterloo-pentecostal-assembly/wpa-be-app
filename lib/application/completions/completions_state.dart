@@ -7,7 +7,7 @@ class CompletionsState extends Equatable {
   final Responses responses;
   final bool isComplete;
   final UploadTask uploadTask;
-  final Map<String, String> downloadURL;
+  final Map<String, List<String>> downloadURL;
 
   CompletionsState(
       {this.errorMessage,
@@ -34,7 +34,7 @@ class CompletionsState extends Equatable {
     Responses responses,
     bool isComplete,
     UploadTask uploadTask,
-    Map<String, String> downloadURL,
+    Map<String, List<String>> downloadURL,
   }) {
     return CompletionsState(
       errorMessage: errorMessage ?? this.errorMessage,

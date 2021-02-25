@@ -63,12 +63,17 @@ class UploadImage extends CompletionsEvent {
   final File image;
   final int contentNum;
   final int questionNum;
+  final String bibleSeriesId;
+  final SeriesContent seriesContent;
   UploadImage(
       {@required this.image,
       @required this.contentNum,
-      @required this.questionNum});
+      @required this.questionNum,
+      @required this.bibleSeriesId,
+      @required this.seriesContent});
   @override
-  List<Object> get props => [image];
+  List<Object> get props =>
+      [image, contentNum, seriesContent, questionNum, bibleSeriesId];
 }
 
 class DeleteImage extends CompletionsEvent {
