@@ -65,13 +65,13 @@ class CompletionsRepository extends ICompletionsRepository {
             .collection('responses')
             .where('user_id', isEqualTo: user.id)
             .get();
-        responsesSubCollection.docs.forEach((element) async {
+        for (int i = 0; i < responsesSubCollection.docs.length; i++) {
           await _completionsCollection
               .doc(completionId)
               .collection('responses')
-              .doc(element.id)
+              .doc(responsesSubCollection.docs[i].id)
               .delete();
-        });
+        }
       } else {
         await _completionsCollection.doc(completionId).delete();
       }

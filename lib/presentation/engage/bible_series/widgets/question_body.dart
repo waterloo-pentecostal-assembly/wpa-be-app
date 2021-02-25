@@ -143,7 +143,6 @@ String getResponse(CompletionsState state, int contentNum, int questionNum) {
       return state.responses
           .responses[contentNum.toString()][questionNum.toString()].response;
     }
-  } else {
-    return '';
   }
+  return '';
 }
