@@ -54,9 +54,27 @@ class CompletionsRepository extends ICompletionsRepository {
   @override
   Future<void> markAsIncomplete({
     String completionId,
+    bool isResponsePossible,
   }) async {
     try {
-      await _completionsCollection.doc(completionId).delete();
+      if (isResponsePossible) {
+        final LocalUser user = getIt<LocalUser>();
+        await _completionsCollection.doc(completionId).delete();
+        QuerySnapshot responsesSubCollection = await _completionsCollection
+            .doc(completionId)
+            .collection('responses')
+            .where('user_id', isEqualTo: user.id)
+            .get();
+        for (int i = 0; i < responsesSubCollection.docs.length; i++) {
+          await _completionsCollection
+              .doc(completionId)
+              .collection('responses')
+              .doc(responsesSubCollection.docs[i].id)
+              .delete();
+        }
+      } else {
+        await _completionsCollection.doc(completionId).delete();
+      }
     } catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
