@@ -195,18 +195,20 @@ class CompletionsRepository extends ICompletionsRepository {
           .where("user_id", isEqualTo: user.id)
           .get();
     } catch (e) {
-      print(e);
       _firebaseFirestoreService.handleException(e);
     }
 
     if (querySnapshot.docs.isNotEmpty) {
       DocumentSnapshot document = querySnapshot.docs[0];
       return ResponsesDto.fromFirestore(document).toDomain();
+    } else {
+      return Responses();
     }
-    throw CompletionsException(
-      code: CompletionsExceptionCode.NO_RESPONSES,
-      message: 'Cannot find completion details',
-    );
+    //TODO: change to include throwing exception while still returning empty response for image responses
+    // throw CompletionsException(
+    //   code: CompletionsExceptionCode.NO_RESPONSES,
+    //   message: 'Cannot find completion details',
+    // );
   }
 
   @override

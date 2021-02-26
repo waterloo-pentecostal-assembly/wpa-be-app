@@ -145,6 +145,16 @@ class SeriesContent {
     return check;
   }
 
+  bool get responseContainImage {
+    bool check = false;
+    this.body.forEach((element) {
+      if (element.type == SeriesContentBodyType.IMAGE_INPUT) {
+        check = true;
+      }
+    });
+    return check;
+  }
+
   SeriesContent({
     @required this.id,
     @required this.contentType,

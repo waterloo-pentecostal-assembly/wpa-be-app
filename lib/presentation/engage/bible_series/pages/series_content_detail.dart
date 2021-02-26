@@ -95,11 +95,14 @@ class ContentDetailWidget extends StatelessWidget {
           imageInputBody: body[index],
           contentNum: index,
           completionDetails: completionDetails,
+          bibleSeriesId: bibleSeriesId,
+          seriesContent: seriesContent,
         ));
       }
     }
 
-    if (seriesContent.isResponsePossible) {
+    if (seriesContent.isResponsePossible &&
+        !seriesContent.responseContainImage) {
       contentBodyList.add(ResponseCompletionButton(
           seriesContent, completionDetails, bibleSeriesId));
     } else {
