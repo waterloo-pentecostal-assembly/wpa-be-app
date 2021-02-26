@@ -195,7 +195,6 @@ class CompletionsRepository extends ICompletionsRepository {
           .where("user_id", isEqualTo: user.id)
           .get();
     } catch (e) {
-      print(e);
       _firebaseFirestoreService.handleException(e);
     }
 

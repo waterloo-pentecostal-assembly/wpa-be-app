@@ -189,7 +189,6 @@ class ContentDetailWidget extends StatelessWidget {
       listener: (context, state) {},
       builder: (context, state) {
         return GestureDetector(
-          // onTap: () => Navigator.pop(context),
           onTap: () => {backFunction(state, context, seriesContent)},
           child: Icon(
             Icons.arrow_back,
@@ -215,12 +214,6 @@ class ContentDetailWidget extends StatelessWidget {
         BlocProvider.of<CompletionsBloc>(context)
           ..add(MarkAsInComplete(state.id));
       }
-      // else if (seriesContent.responseContainImage &&
-      //     state.responses.responses == null &&
-      //     state.id.isNotEmpty) {
-      //   BlocProvider.of<CompletionsBloc>(context)
-      //     ..add(MarkAsInComplete(state.id));
-      // }
       Navigator.pop(context);
     } else {
       if (keyChild.currentState != null) {

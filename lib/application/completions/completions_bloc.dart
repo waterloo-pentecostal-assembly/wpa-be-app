@@ -351,12 +351,10 @@ Stream<CompletionsState> _mapUploadImageEventToState(
         id: '',
         isComplete: false);
   } on BaseApplicationException catch (e) {
-    print(e);
     yield state.copyWith(
       errorMessage: e.message,
     );
   } catch (e) {
-    print(e);
     yield state.copyWith(
       errorMessage: 'An unknown error occured',
     );
@@ -414,12 +412,10 @@ Stream<CompletionsState> _mapDeleteImageEventToState(
       }
     }
   } on BaseApplicationException catch (e) {
-    print(e);
     yield state.copyWith(
       errorMessage: e.message,
     );
   } catch (e) {
-    print(e);
     yield state.copyWith(
       errorMessage: 'An unknown error occured',
     );
