@@ -82,10 +82,12 @@ class ProgressTile extends StatelessWidget {
                         SizedBox(
                           height: 0.2 * kProgressWidgetWidth,
                         ),
-                        Container(child: getIt<TextFactory>().subHeading('${achievements.seriesProgress}%')),
                         Container(
-                            child:
-                                getIt<TextFactory>().regular('${getProgressBarPhrase(achievements.seriesProgress)}')),
+                            child: getIt<TextFactory>()
+                                .subHeading('${achievements.seriesProgress}%')),
+                        Container(
+                            child: getIt<TextFactory>().regular(
+                                '${getProgressBarPhrase(achievements.seriesProgress)}')),
                       ],
                     ),
                   ),
