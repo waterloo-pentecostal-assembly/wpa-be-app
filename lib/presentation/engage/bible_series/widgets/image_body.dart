@@ -63,8 +63,9 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
     return BlocConsumer<CompletionsBloc, CompletionsState>(
       listener: (context, state) {},
       builder: (BuildContext context, CompletionsState state) {
-        if (state.uploadTask != null) {
-          return imageLoading(state.uploadTask);
+        if (state.uploadTask != null &&
+            state.uploadTask[widget.contentNum.toString()] != null) {
+          return imageLoading(state.uploadTask[widget.contentNum.toString()]);
         } else if (state.downloadURL != null) {
           if (state.downloadURL[widget.contentNum.toString()] != null) {
             return imageLoaded(

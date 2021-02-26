@@ -6,8 +6,9 @@ class CompletionsState extends Equatable {
   final String id;
   final Responses responses;
   final bool isComplete;
-  final UploadTask uploadTask;
+  final Map<String, UploadTask> uploadTask;
   final Map<String, List<String>> downloadURL;
+  final Map<String, List<String>> thumbnailURL;
 
   CompletionsState(
       {this.errorMessage,
@@ -15,7 +16,8 @@ class CompletionsState extends Equatable {
       this.responses,
       this.isComplete,
       this.uploadTask,
-      this.downloadURL});
+      this.downloadURL,
+      this.thumbnailURL});
 
   factory CompletionsState.initial() {
     return CompletionsState(
@@ -25,6 +27,7 @@ class CompletionsState extends Equatable {
       isComplete: null,
       uploadTask: null,
       downloadURL: null,
+      thumbnailURL: null,
     );
   }
 
@@ -33,8 +36,9 @@ class CompletionsState extends Equatable {
     String id,
     Responses responses,
     bool isComplete,
-    UploadTask uploadTask,
+    Map<String, UploadTask> uploadTask,
     Map<String, List<String>> downloadURL,
+    Map<String, List<String>> thumbnailURL,
   }) {
     return CompletionsState(
       errorMessage: errorMessage ?? this.errorMessage,
@@ -43,7 +47,8 @@ class CompletionsState extends Equatable {
       isComplete: isComplete ?? this.isComplete,
       uploadTask: uploadTask ??
           null, //null to ensure upload task is only present in state during upload
-      downloadURL: downloadURL ?? null,
+      downloadURL: downloadURL ?? this.downloadURL,
+      thumbnailURL: thumbnailURL ?? this.thumbnailURL,
     );
   }
 

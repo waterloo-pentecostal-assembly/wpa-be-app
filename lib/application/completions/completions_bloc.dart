@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:bloc/bloc.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
@@ -13,8 +12,6 @@ import 'package:wpa_app/domain/bible_series/entities.dart';
 import 'package:wpa_app/domain/common/exceptions.dart';
 import 'package:wpa_app/domain/completions/entities.dart';
 import 'package:wpa_app/domain/completions/interfaces.dart';
-import 'package:wpa_app/infrastructure/completions/completions_repository.dart';
-import 'package:wpa_app/presentation/engage/bible_series/helper.dart';
 
 part 'completions_event.dart';
 part 'completions_state.dart';
@@ -118,7 +115,7 @@ Stream<CompletionsState> _mapMarkAsCompleteEventToState(
       id = await updateComplete(
           completionDetails: event.completionDetails, completionId: id);
     }
-    if (state.responses != null) {
+    if (state.responses != null && state.responses.responses != null) {
       String responseId =
           await putResponses(completionId: id, responses: state.responses);
       Responses newResponse =
@@ -260,18 +257,25 @@ Stream<CompletionsState> _mapLoadResponsesEventToState(
       Responses responses =
           await getResponses(completionId: event.completionDetails.id);
       Map<String, List<String>> downloadURL = Map();
-      List<String> downloadURLList = List();
-
-      for (var entry1 in responses.responses.entries) {
-        for (var entry2 in entry1.value.entries) {
-          if (entry2.value.type == ResponseType.IMAGE) {
-            String url = await completionsRepository.getDownloadURL(
-                gsUrl: entry2.value.response);
-            downloadURLList.add(url);
-            if (downloadURL.isEmpty) {
-              downloadURL = {entry1.key: downloadURLList};
-            } else {
-              downloadURL[entry1.key] = downloadURLList;
+      Map<String, List<String>> thumbnailURL = Map();
+      if (responses.responses != null) {
+        for (var entry1 in responses.responses.entries) {
+          for (var entry2 in entry1.value.entries) {
+            if (entry2.value.type == ResponseType.IMAGE) {
+              List<String> downloadURLList = List();
+              List<String> thumbnailURLList = List();
+              String thumbnail = toThumbnail(entry2.value.response);
+              String thumbnailURL =
+                  await completionsRepository.getDownloadURL(gsUrl: thumbnail);
+              String url = await completionsRepository.getDownloadURL(
+                  gsUrl: entry2.value.response);
+              thumbnailURLList.add(thumbnailURL);
+              downloadURLList.add(url);
+              if (downloadURL.isEmpty) {
+                downloadURL = {entry1.key: downloadURLList};
+              } else {
+                downloadURL[entry1.key] = downloadURLList;
+              }
             }
           }
         }
@@ -279,7 +283,10 @@ Stream<CompletionsState> _mapLoadResponsesEventToState(
       if (downloadURL.isEmpty) {
         yield state.copyWith(responses: responses);
       } else {
-        yield state.copyWith(responses: responses, downloadURL: downloadURL);
+        yield state.copyWith(
+            responses: responses,
+            downloadURL: downloadURL,
+            thumbnailURL: thumbnailURL);
       }
     } else {
       Responses responses = Responses();
@@ -302,12 +309,14 @@ Stream<CompletionsState> _mapUploadImageEventToState(
     ICompletionsRepository completionsRepository) async* {
   try {
     final LocalUser user = getIt<LocalUser>();
-
-    UploadTask uploadTask =
-        completionsRepository.uploadImages(file: event.image, userId: user.id);
+    Map<String, UploadTask> uploadTask = Map();
+    uploadTask = {
+      event.contentNum.toString():
+          completionsRepository.uploadImages(file: event.image, userId: user.id)
+    };
     yield state.copyWith(uploadTask: uploadTask);
 
-    TaskSnapshot data = await uploadTask;
+    TaskSnapshot data = await uploadTask[event.contentNum.toString()];
 
     final String imageLocation = 'gs://${data.ref.bucket}/${data.ref.fullPath}';
     final String downloadURL =
@@ -323,23 +332,10 @@ Stream<CompletionsState> _mapUploadImageEventToState(
       downloadURLList.add(downloadURL);
       downloadMap = {event.contentNum.toString(): downloadURLList};
     }
-    //TODO:
-    // CompletionDetails completionDetails = CompletionDetails(
-    //     id: state.id,
-    //     seriesId: event.bibleSeriesId,
-    //     contentId: event.seriesContent.id,
-    //     isDraft: true,
-    //     isOnTime: isOnTime(event.seriesContent.date),
-    //     completionDate: Timestamp.fromDate(DateTime.now()));
-
-    // String id = state.id;
-    // if (id == null || id == '') {
-    //   id = await completionsRepository.markAsComplete(
-    //       completionDetails: completionDetails);
-    // }
-
-    // String responseId = await completionsRepository.putResponses(
-    //     completionId: state.id, responses: state.responses);
+    if (state.id != null && state.id.isNotEmpty) {
+      await completionsRepository.markAsIncomplete(
+          completionId: state.id, isResponsePossible: true);
+    }
 
     String responsesIndex = (downloadURLList.length - 1).toString();
 
@@ -351,7 +347,9 @@ Stream<CompletionsState> _mapUploadImageEventToState(
             responsesIndex,
             ResponseType.IMAGE,
             state.responses.id),
-        downloadURL: downloadMap);
+        downloadURL: downloadMap,
+        id: '',
+        isComplete: false);
   } on BaseApplicationException catch (e) {
     print(e);
     yield state.copyWith(
@@ -371,19 +369,19 @@ Stream<CompletionsState> _mapDeleteImageEventToState(
     ICompletionsRepository completionsRepository) async* {
   try {
     Map<String, List<String>> downloadMap = state.downloadURL;
+    //Map<String, List<String>> thumbnailMap = state.thumbnailURL;
     if (state.responses.responses != null) {
       completionsRepository.deleteImages(gsUrl: event.gsURL);
+      //final String thumbnailgsURL = toThumbnail(event.gsURL);
+      //completionsRepository.deleteImages(gsUrl: thumbnailgsURL);
       downloadMap[event.contentNum.toString()].removeLast();
+      //thumbnailMap[event.contentNum.toString()].removeLast();
       String responsesIndex =
           downloadMap[event.contentNum.toString()].length.toString();
       if (downloadMap[event.contentNum.toString()].isEmpty) {
         downloadMap.remove(event.contentNum.toString());
+        // thumbnailMap.remove(event.contentNum.toString());
       }
-      // if (downloadMap.isEmpty &&
-      //     (state.isComplete || event.completionDetails != null)) {
-      //   completionsRepository.markAsIncomplete(
-      //       completionId: state.id, isResponsePossible: true);
-      // }
 
       Map<String, Map<String, ResponseDetails>> responses =
           state.responses.responses;
@@ -391,11 +389,15 @@ Stream<CompletionsState> _mapDeleteImageEventToState(
       if (responses[event.contentNum.toString()].isEmpty) {
         responses.remove(event.contentNum.toString());
       }
+      if (state.id != null && state.id.isNotEmpty) {
+        await completionsRepository.markAsIncomplete(
+            completionId: state.id, isResponsePossible: true);
+      }
 
       if (responses.isEmpty) {
         Responses newResponses = Responses();
         yield state.copyWith(
-            responses: newResponses, id: state.id, isComplete: false);
+            responses: newResponses, id: '', isComplete: false);
       } else {
         Responses newResponses = Responses(
             id: state.responses.id,
@@ -403,10 +405,12 @@ Stream<CompletionsState> _mapDeleteImageEventToState(
             userId: state.responses.userId);
 
         yield state.copyWith(
-            responses: newResponses,
-            id: state.id,
-            isComplete: false,
-            downloadURL: downloadMap);
+          responses: newResponses,
+          id: '',
+          isComplete: false,
+          downloadURL: downloadMap,
+          //thumbnailURL: thumbnailMap
+        );
       }
     }
   } on BaseApplicationException catch (e) {

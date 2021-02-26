@@ -101,7 +101,8 @@ class ContentDetailWidget extends StatelessWidget {
       }
     }
 
-    if (seriesContent.isResponsePossible) {
+    if (seriesContent.isResponsePossible &&
+        !seriesContent.responseContainImage) {
       contentBodyList.add(ResponseCompletionButton(
           seriesContent, completionDetails, bibleSeriesId));
     } else {
@@ -213,12 +214,13 @@ class ContentDetailWidget extends StatelessWidget {
       } else if (state.responses.responses != null && state.id.isNotEmpty) {
         BlocProvider.of<CompletionsBloc>(context)
           ..add(MarkAsInComplete(state.id));
-      } else if (seriesContent.responseContainImage &&
-          state.responses.responses == null &&
-          state.id.isNotEmpty) {
-        BlocProvider.of<CompletionsBloc>(context)
-          ..add(MarkAsInComplete(state.id));
       }
+      // else if (seriesContent.responseContainImage &&
+      //     state.responses.responses == null &&
+      //     state.id.isNotEmpty) {
+      //   BlocProvider.of<CompletionsBloc>(context)
+      //     ..add(MarkAsInComplete(state.id));
+      // }
       Navigator.pop(context);
     } else {
       if (keyChild.currentState != null) {
