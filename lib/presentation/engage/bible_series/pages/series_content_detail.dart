@@ -122,25 +122,26 @@ class ContentDetailWidget extends StatelessWidget {
           BlocProvider.of<CompletionsBloc>(context)
             ..add(CompletionDetailRequested(state.contentCompletionDetail));
           return WillPopScope(
-            onWillPop: Platform.isIOS
-                ? null
-                : () {
-                    if (keyChild.currentState != null) {
-                      keyChild.currentState.stopAudio();
-                    }
-                    if (state.seriesContentDetail.isResponsePossible) {
-                      CompletionDetails completionDetails = CompletionDetails(
-                          seriesId: bibleSeriesId,
-                          contentId: state.seriesContentDetail.id,
-                          isDraft: true,
-                          isOnTime: isOnTime(state.seriesContentDetail.date),
-                          completionDate: Timestamp.fromDate(DateTime.now()));
-                      BlocProvider.of<CompletionsBloc>(context)
-                        ..add(MarkAsDraft(completionDetails));
-                    }
-                    Navigator.pop(context);
-                    return Future.value(false);
-                  },
+            // onWillPop: Platform.isIOS
+            // ? null
+            // : () {
+            onWillPop: () {
+              if (keyChild.currentState != null) {
+                keyChild.currentState.stopAudio();
+              }
+              if (state.seriesContentDetail.isResponsePossible) {
+                CompletionDetails completionDetails = CompletionDetails(
+                    seriesId: bibleSeriesId,
+                    contentId: state.seriesContentDetail.id,
+                    isDraft: true,
+                    isOnTime: isOnTime(state.seriesContentDetail.date),
+                    completionDate: Timestamp.fromDate(DateTime.now()));
+                BlocProvider.of<CompletionsBloc>(context)
+                  ..add(MarkAsDraft(completionDetails));
+              }
+              Navigator.pop(context);
+              return Future.value(false);
+            },
             child: Scaffold(
               body: SafeArea(
                 child: Column(children: <Widget>[

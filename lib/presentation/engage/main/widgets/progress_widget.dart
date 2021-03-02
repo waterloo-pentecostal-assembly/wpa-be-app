@@ -60,7 +60,9 @@ class ProgressTile extends StatelessWidget {
                   thickness: 0.2,
                   color: kWpaBlue.withOpacity(0.15),
                   thicknessUnit: GaugeSizeUnit.factor,
-                  cornerStyle: CornerStyle.bothCurve,
+                  // cornerStyle: CornerStyle.bothCurve,
+                  // remove bothCurve because of this bug
+                  // https://github.com/syncfusion/flutter-widgets/issues/99
                 ),
                 pointers: <GaugePointer>[
                   RangePointer(
@@ -68,8 +70,8 @@ class ProgressTile extends StatelessWidget {
                     value: achievements.seriesProgress.toDouble(),
                     width: 0.2,
                     sizeUnit: GaugeSizeUnit.factor,
-                    cornerStyle: CornerStyle.bothCurve,
-                  )
+                    // cornerStyle: CornerStyle.bothCurve,
+                  ),
                 ],
                 annotations: [
                   GaugeAnnotation(
