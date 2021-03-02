@@ -122,10 +122,11 @@ class ContentDetailWidget extends StatelessWidget {
           BlocProvider.of<CompletionsBloc>(context)
             ..add(CompletionDetailRequested(state.contentCompletionDetail));
           return WillPopScope(
-            // onWillPop: Platform.isIOS
-            // ? null
-            // : () {
-            onWillPop: () {
+            onWillPop:
+                // Platform.isIOS
+                //     ? null
+                //     :
+                () {
               if (keyChild.currentState != null) {
                 keyChild.currentState.stopAudio();
               }
