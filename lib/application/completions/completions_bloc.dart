@@ -256,8 +256,8 @@ Stream<CompletionsState> _mapLoadResponsesEventToState(
     if (event.completionDetails != null) {
       Responses responses =
           await getResponses(completionId: event.completionDetails.id);
-      Map<String, List<String>> downloadURL = Map();
-      Map<String, List<String>> thumbnailURL = Map();
+      Map<String, List<String>> downloadMap = Map();
+      Map<String, List<String>> thumbnailMap = Map();
       if (responses.responses != null) {
         for (var entry1 in responses.responses.entries) {
           for (var entry2 in entry1.value.entries) {
@@ -271,22 +271,24 @@ Stream<CompletionsState> _mapLoadResponsesEventToState(
                   gsUrl: entry2.value.response);
               thumbnailURLList.add(thumbnailURL);
               downloadURLList.add(url);
-              if (downloadURL.isEmpty) {
-                downloadURL = {entry1.key: downloadURLList};
+              if (downloadMap.isEmpty) {
+                downloadMap = {entry1.key: downloadURLList};
+                thumbnailMap = {entry1.key: thumbnailURLList};
               } else {
-                downloadURL[entry1.key] = downloadURLList;
+                downloadMap[entry1.key] = downloadURLList;
+                thumbnailMap[entry1.key] = thumbnailURLList;
               }
             }
           }
         }
       }
-      if (downloadURL.isEmpty) {
+      if (downloadMap.isEmpty) {
         yield state.copyWith(responses: responses);
       } else {
         yield state.copyWith(
             responses: responses,
-            downloadURL: downloadURL,
-            thumbnailURL: thumbnailURL);
+            downloadURL: downloadMap,
+            thumbnailURL: thumbnailMap);
       }
     } else {
       Responses responses = Responses();
@@ -339,6 +341,20 @@ Stream<CompletionsState> _mapUploadImageEventToState(
 
     String responsesIndex = (downloadURLList.length - 1).toString();
 
+    Map<String, List<File>> localImage = Map();
+    List<File> localImageList = List();
+    if (state.localImage != null &&
+        state.localImage[event.contentNum.toString()] != null) {
+      localImageList = state.localImage[event.contentNum.toString()];
+    }
+    localImageList.add(event.image);
+    if (state.localImage != null) {
+      localImage = state.localImage;
+      localImage[event.contentNum.toString()] = localImageList;
+    } else {
+      localImage = {event.contentNum.toString(): localImageList};
+    }
+
     yield state.copyWith(
         responses: toResponses(
             state.responses,
@@ -349,7 +365,8 @@ Stream<CompletionsState> _mapUploadImageEventToState(
             state.responses.id),
         downloadURL: downloadMap,
         id: '',
-        isComplete: false);
+        isComplete: false,
+        localImage: localImage);
   } on BaseApplicationException catch (e) {
     yield state.copyWith(
       errorMessage: e.message,
@@ -367,18 +384,32 @@ Stream<CompletionsState> _mapDeleteImageEventToState(
     ICompletionsRepository completionsRepository) async* {
   try {
     Map<String, List<String>> downloadMap = state.downloadURL;
-    //Map<String, List<String>> thumbnailMap = state.thumbnailURL;
+    Map<String, List<String>> thumbnailMap = state.thumbnailURL;
+    Map<String, List<File>> localImage = state.localImage;
     if (state.responses.responses != null) {
       completionsRepository.deleteImages(gsUrl: event.gsURL);
-      //final String thumbnailgsURL = toThumbnail(event.gsURL);
-      //completionsRepository.deleteImages(gsUrl: thumbnailgsURL);
+      final String thumbnailgsURL = toThumbnail(event.gsURL);
+      completionsRepository.deleteImages(gsUrl: thumbnailgsURL);
       downloadMap[event.contentNum.toString()].removeLast();
-      //thumbnailMap[event.contentNum.toString()].removeLast();
+      if (thumbnailMap != null &&
+          thumbnailMap[event.contentNum.toString()] != null) {
+        thumbnailMap[event.contentNum.toString()].removeLast();
+      } else {
+        localImage[event.contentNum.toString()].removeLast();
+      }
+
       String responsesIndex =
           downloadMap[event.contentNum.toString()].length.toString();
       if (downloadMap[event.contentNum.toString()].isEmpty) {
         downloadMap.remove(event.contentNum.toString());
-        // thumbnailMap.remove(event.contentNum.toString());
+      }
+      if (thumbnailMap != null &&
+          thumbnailMap[event.contentNum.toString()].isEmpty) {
+        thumbnailMap.remove(event.contentNum.toString());
+      }
+      if (localImage != null &&
+          localImage[event.contentNum.toString()].isEmpty) {
+        localImage.remove(event.contentNum.toString());
       }
 
       Map<String, Map<String, ResponseDetails>> responses =
