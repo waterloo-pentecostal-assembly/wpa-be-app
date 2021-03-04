@@ -17,7 +17,8 @@ enum NavigationTabEnum {
 }
 
 class NavigationBarBloc extends Bloc<NavigationBarEvent, NavigationBarState> {
-  NavigationBarBloc() : super(NavigationBarState(tab: NavigationTabEnum.ENGAGE));
+  NavigationBarBloc()
+      : super(NavigationBarState(tab: NavigationTabEnum.ENGAGE));
 
   @override
   Stream<NavigationBarState> mapEventToState(
