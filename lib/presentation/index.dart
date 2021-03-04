@@ -12,7 +12,6 @@ import 'common/text_factory.dart';
 import 'common/toast_message.dart';
 import 'engage/main/engage.dart';
 import 'give/give_page.dart';
-import 'home/home_page.dart';
 import 'notifications/notifications_page.dart';
 import 'profile/profile.dart';
 
@@ -20,7 +19,7 @@ import 'profile/profile.dart';
 
 class IndexPage extends StatelessWidget {
   final List<IIndexedPage> indexedPages = [
-    HomePage(navigatorKey: GlobalKey()),
+    //HomePage(navigatorKey: GlobalKey()),
     EngagePage(navigatorKey: GlobalKey()),
     GivePage(navigatorKey: GlobalKey()),
     NotificationsPage(navigatorKey: GlobalKey()),
@@ -56,11 +55,16 @@ class _IndexPage extends StatelessWidget {
             // clear navigation stack before going to new route
             routeNavigatorState.popUntil((route) => route.isFirst);
           }
-
-          indexedPages[state.tab.index]
-              .navigatorKey
-              .currentState
-              .pushNamed(state.route);
+          if (state.route == '/bible_series') {
+            indexedPages[state.tab.index].navigatorKey.currentState.pushNamed(
+                state.route,
+                arguments: {'bibleSeriesId': state.argument});
+          } else {
+            indexedPages[state.tab.index]
+                .navigatorKey
+                .currentState
+                .pushNamed(state.route);
+          }
         }
 
         return NavigationBar(
@@ -81,7 +85,7 @@ class NavigationBar extends StatelessWidget {
       : super(key: key);
 
   void handleOnTap(BuildContext context, int index) async {
-    if (NavigationTabEnum.values[index + 1] == NavigationTabEnum.GIVE) {
+    if (NavigationTabEnum.values[index] == NavigationTabEnum.GIVE) {
       if (await canLaunch(kWpaGiveUrl)) {
         await launch(kWpaGiveUrl, forceWebView: true, enableJavaScript: true);
       } else {
@@ -97,8 +101,8 @@ class NavigationBar extends StatelessWidget {
     } else {
       // If the user is re-selecting the tab, the common
       // behavior is to empty the stack.
-      if (indexedPages[index + 1].navigatorKey.currentState != null) {
-        indexedPages[index + 1]
+      if (indexedPages[index].navigatorKey.currentState != null) {
+        indexedPages[index]
             .navigatorKey
             .currentState
             .popUntil((route) => route.isFirst);
@@ -150,7 +154,7 @@ class NavigationBar extends StatelessWidget {
     return WillPopScope(
       onWillPop: () async {
         NavigatorState currentNavigatorState =
-            indexedPages[tabIndex + 1].navigatorKey.currentState;
+            indexedPages[tabIndex].navigatorKey.currentState;
 
         if (currentNavigatorState.canPop()) {
           return !await currentNavigatorState.maybePop();
@@ -162,14 +166,14 @@ class NavigationBar extends StatelessWidget {
       },
       child: Scaffold(
         body: IndexedStack(
-          index: tabIndex + 1,
+          index: tabIndex,
           children: <Widget>[
             indexedPages[0],
             indexedPages[1],
             indexedPages[2],
             indexedPages[3],
             indexedPages[4],
-            indexedPages[5],
+            //indexedPages[5],
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(

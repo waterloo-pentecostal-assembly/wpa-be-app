@@ -18,7 +18,7 @@ class SignInForm extends StatelessWidget {
           BlocProvider.of<NavigationBarBloc>(context)
             ..add(
               NavigationBarEvent(
-                tab: NavigationTabEnum.HOME,
+                tab: NavigationTabEnum.ENGAGE,
               ),
             );
           Navigator.pushNamed(context, '/index');

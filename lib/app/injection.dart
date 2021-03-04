@@ -159,7 +159,7 @@ void initializeInjections({
     () => UserProfileBloc(getIt<IUserProfileRepository>()),
   );
 
-  getIt.registerFactory<NavigationBarBloc>(
+  getIt.registerLazySingleton<NavigationBarBloc>(
     () => NavigationBarBloc(),
   );
 
