@@ -8,7 +8,7 @@ part 'navigation_bar_event.dart';
 part 'navigation_bar_state.dart';
 
 enum NavigationTabEnum {
-  HOME,
+  // HOME,
   ENGAGE,
   GIVE,
   NOTIFICATIONS,
@@ -17,7 +17,7 @@ enum NavigationTabEnum {
 }
 
 class NavigationBarBloc extends Bloc<NavigationBarEvent, NavigationBarState> {
-  NavigationBarBloc() : super(NavigationBarState(tab: NavigationTabEnum.HOME));
+  NavigationBarBloc() : super(NavigationBarState(tab: NavigationTabEnum.ENGAGE));
 
   @override
   Stream<NavigationBarState> mapEventToState(

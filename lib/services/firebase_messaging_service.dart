@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:wpa_app/app/injection.dart';
+import 'package:wpa_app/application/navigation_bar/navigation_bar_bloc.dart';
 
 class FirebaseMessagingService {
   final FirebaseMessaging _firebaseMessaging;
@@ -25,8 +27,7 @@ class FirebaseMessagingService {
 
   Future<void> initialize() async {
     if (Platform.isIOS) {
-      _firebaseMessaging
-          .requestNotificationPermissions(IosNotificationSettings());
+      _firebaseMessaging.requestNotificationPermissions(IosNotificationSettings());
     }
 
     // If you want to test the push notification locally,
@@ -50,6 +51,10 @@ class FirebaseMessagingService {
 
   Future onMessageHanlder(Map<String, dynamic> message) async {
     print("onMessage: $message");
+    getIt<NavigationBarBloc>()
+      ..add(
+        NavigationBarEvent(tab: NavigationTabEnum.NOTIFICATIONS),
+      );
     // String _message;
     // TODO: we may need to handle the message by platform.
     // if (Platform.isIOS) {

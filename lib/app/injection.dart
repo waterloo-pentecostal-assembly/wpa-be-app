@@ -100,12 +100,9 @@ void initializeInjections({
   });
 
   // Services
-  getIt.registerLazySingleton<FirebaseStorageService>(
-      () => FirebaseStorageService(getIt<FirebaseStorage>()));
-  getIt.registerLazySingleton<FirebaseMessagingService>(
-      () => FirebaseMessagingService(getIt<FirebaseMessaging>()));
-  getIt.registerLazySingleton<FirebaseFirestoreService>(
-      () => FirebaseFirestoreService());
+  getIt.registerLazySingleton<FirebaseStorageService>(() => FirebaseStorageService(getIt<FirebaseStorage>()));
+  getIt.registerLazySingleton<FirebaseMessagingService>(() => FirebaseMessagingService(getIt<FirebaseMessaging>()));
+  getIt.registerLazySingleton<FirebaseFirestoreService>(() => FirebaseFirestoreService());
 
   // Blocs
   getIt.registerFactory<AuthenticationBloc>(
@@ -159,7 +156,7 @@ void initializeInjections({
     () => UserProfileBloc(getIt<IUserProfileRepository>()),
   );
 
-  getIt.registerFactory<NavigationBarBloc>(
+  getIt.registerLazySingleton<NavigationBarBloc>(
     () => NavigationBarBloc(),
   );
 
