@@ -9,9 +9,9 @@ import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/application/completions/completions_bloc.dart';
 import 'package:wpa_app/domain/bible_series/entities.dart';
 import 'package:wpa_app/domain/completions/entities.dart';
+import 'package:wpa_app/presentation/common/loader.dart';
 import 'package:wpa_app/presentation/common/text_factory.dart';
 
-//Used Stateful so that bloc and states can be implemented later
 class ImageInputBodyWidget extends StatelessWidget {
   final ImageInputBody imageInputBody;
   final int contentNum;
@@ -69,11 +69,7 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
         } else if (state.downloadURL != null) {
           if (state.downloadURL[widget.contentNum.toString()] != null) {
             return imageLoaded(
-                state.downloadURL[widget.contentNum.toString()][0],
-                widget.completionDetails,
-                state.responses.responses[widget.contentNum.toString()]['0']
-                    .response,
-                widget.contentNum);
+                state, widget.completionDetails, widget.contentNum);
           }
         }
 
@@ -136,8 +132,8 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
     );
   }
 
-  Widget imageLoaded(String downloadURL, CompletionDetails completionDetails,
-      String gsURL, int contentNum) {
+  Widget imageLoaded(CompletionsState state,
+      CompletionDetails completionDetails, int contentNum) {
     return Column(
       children: [
         Row(
@@ -148,7 +144,10 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
                 onTap: () {
                   BlocProvider.of<CompletionsBloc>(context)
                     ..add(DeleteImage(
-                      gsURL: gsURL,
+                      gsURL: state
+                          .responses
+                          .responses[widget.contentNum.toString()]['0']
+                          .response,
                       completionDetails: completionDetails,
                       contentNum: contentNum,
                     ));
@@ -164,58 +163,72 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
           ],
         ),
         GestureDetector(
-          onTap: () {
-            return showDialog(
-                context: context,
-                builder: (context) {
-                  return WillPopScope(
-                    onWillPop: () {
-                      Navigator.of(context, rootNavigator: true).pop();
-                      return Future.value(false);
-                    },
-                    child: Stack(children: [
-                      Center(
-                        child: Container(
-                          color: Colors.transparent,
-                          width: MediaQuery.of(context).size.width * 0.9,
-                          height: MediaQuery.of(context).size.width * 1.6,
-                          child: PhotoView(
-                            backgroundDecoration:
-                                BoxDecoration(color: Colors.transparent),
-                            imageProvider: NetworkImage(downloadURL),
-                            minScale: PhotoViewComputedScale.contained * 0.8,
-                            maxScale: PhotoViewComputedScale.covered * 2,
-                            loadingBuilder: (context, event) => Center(
-                              child: CircularProgressIndicator(),
+            onTap: () {
+              return showDialog(
+                  context: context,
+                  builder: (context) {
+                    return WillPopScope(
+                      onWillPop: () {
+                        Navigator.of(context, rootNavigator: true).pop();
+                        return Future.value(false);
+                      },
+                      child: Stack(children: [
+                        Center(
+                          child: Container(
+                            color: Colors.transparent,
+                            width: MediaQuery.of(context).size.width * 0.9,
+                            height: MediaQuery.of(context).size.width * 1.6,
+                            child: PhotoView(
+                              backgroundDecoration:
+                                  BoxDecoration(color: Colors.transparent),
+                              imageProvider: NetworkImage(state
+                                      .downloadURL[widget.contentNum.toString()]
+                                  [0]),
+                              minScale: PhotoViewComputedScale.contained * 0.8,
+                              maxScale: PhotoViewComputedScale.covered * 2,
+                              loadingBuilder: (context, event) => Center(
+                                child: CircularProgressIndicator(),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      Positioned(
-                        left: 30,
-                        top: 30,
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.of(context, rootNavigator: true).pop();
-                          },
-                          child: Center(
-                            child: Icon(
-                              Icons.close,
-                              size: 30,
-                              color: Colors.white,
+                        Positioned(
+                          left: 30,
+                          top: 30,
+                          child: GestureDetector(
+                            onTap: () {
+                              Navigator.of(context, rootNavigator: true).pop();
+                            },
+                            child: Center(
+                              child: Icon(
+                                Icons.close,
+                                size: 30,
+                                color: Colors.white,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ]),
-                  );
-                });
-          },
-          child: Container(
-            child: Image.network(downloadURL),
-          ),
-        ),
+                      ]),
+                    );
+                  });
+            },
+            child: Container(
+                width: MediaQuery.of(context).size.width * 0.8,
+                child: imageWidget(state, contentNum.toString()))),
       ],
     );
+  }
+}
+
+Widget imageWidget(CompletionsState state, String contentNum) {
+  if (state.thumbnailURL != null && state.thumbnailURL[contentNum] != null) {
+    return Image.network(
+      state.thumbnailURL[contentNum][0],
+      fit: BoxFit.fill,
+    );
+  } else if (state.localImage != null && state.localImage[contentNum] != null) {
+    return Image.file(state.localImage[contentNum][0]);
+  } else {
+    return Loader();
   }
 }

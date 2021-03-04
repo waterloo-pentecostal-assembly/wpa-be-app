@@ -120,10 +120,11 @@ class ContentDetailWidget extends StatelessWidget {
           BlocProvider.of<CompletionsBloc>(context)
             ..add(CompletionDetailRequested(state.contentCompletionDetail));
           return WillPopScope(
-            // onWillPop: Platform.isIOS
-            // ? null
-            // : () {
-            onWillPop: () {
+            onWillPop:
+                // Platform.isIOS
+                //     ? null
+                //     :
+                () {
               if (keyChild.currentState != null) {
                 keyChild.currentState.stopAudio();
               }
@@ -199,26 +200,58 @@ class ContentDetailWidget extends StatelessWidget {
 
   void backFunction(CompletionsState state, BuildContext context,
       SeriesContent seriesContent) {
-    if (seriesContent.isResponsePossible) {
-      if (!isResponseEmpty(state.responses)) {
-        CompletionDetails completionDetails = CompletionDetails(
-            seriesId: bibleSeriesId,
-            contentId: seriesContent.id,
-            isDraft: true,
-            isOnTime: isOnTime(seriesContent.date),
-            completionDate: Timestamp.fromDate(DateTime.now()));
-        BlocProvider.of<CompletionsBloc>(context)
-          ..add(MarkAsDraft(completionDetails));
-      } else if (state.responses.responses != null && state.id.isNotEmpty) {
-        BlocProvider.of<CompletionsBloc>(context)
-          ..add(MarkAsInComplete(state.id));
-      }
-      Navigator.pop(context);
+    if (state.uploadTask != null) {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          buttonPadding: const EdgeInsets.all(20),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(16))),
+          title:
+              getIt<TextFactory>().subHeading2("Uploading Image in Progress"),
+          content: getIt<TextFactory>()
+              .lite("Must wait for image to uplaod before exiting this page"),
+          actions: [
+            ClipRRect(
+              borderRadius: BorderRadius.all(Radius.circular(16)),
+              child: FlatButton(
+                height: 30,
+                minWidth: 90,
+                color: kWpaBlue.withOpacity(0.8),
+                textColor: Colors.white,
+                padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                onPressed: () {
+                  Navigator.of(context, rootNavigator: true).pop();
+                },
+                child: getIt<TextFactory>().regularButton('OK'),
+              ),
+            )
+          ],
+        ),
+      );
     } else {
-      if (keyChild.currentState != null) {
-        keyChild.currentState.stopAudio();
+      if (seriesContent.isResponsePossible && state.responses != null) {
+        if (!isResponseEmpty(state.responses)) {
+          CompletionDetails completionDetails = CompletionDetails(
+              seriesId: bibleSeriesId,
+              contentId: seriesContent.id,
+              isDraft: true,
+              isOnTime: isOnTime(seriesContent.date),
+              completionDate: Timestamp.fromDate(DateTime.now()));
+          BlocProvider.of<CompletionsBloc>(context)
+            ..add(MarkAsDraft(completionDetails));
+        } else if (state.responses.responses != null && state.id.isNotEmpty) {
+          BlocProvider.of<CompletionsBloc>(context)
+            ..add(MarkAsInComplete(state.id));
+        }
+        Navigator.pop(context);
+      } else {
+        if (keyChild.currentState != null) {
+          keyChild.currentState.stopAudio();
+        }
+        Navigator.pop(context);
       }
-      Navigator.pop(context);
     }
   }
 }
