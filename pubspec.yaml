@@ -24,24 +24,24 @@ dependencies:
   flutter:
     sdk: flutter
   cached_network_image: ^2.5.0
-  cloud_firestore: ^0.14.3
-  equatable: ^1.2.6
-  firebase_analytics: ^6.0.0
-  firebase_auth: ^0.18.3+1
-  firebase_core: ^0.5.2
-  firebase_messaging: ^7.0.3
-  firebase_storage: ^5.0.1
+  cloud_firestore: ^0.16.0+1
+  equatable: ^2.0.0
+  firebase_analytics: ^7.0.1
+  firebase_auth: ^0.20.1
+  firebase_core: ^0.7.0
+  firebase_messaging: ^8.0.0-dev.15
+  firebase_storage: ^7.0.0
   flutter_bloc: ^6.1.2
   fluttertoast: ^7.1.6
-  get_it: ^5.0.6
+  get_it: ^6.0.0
   google_fonts: ^1.1.2
   image_picker: ^0.6.7+22
   intl: ^0.16.1
   rflutter_alert: ^1.1.0
   rxdart: ^0.25.0
-  url_launcher: ^5.7.10
+  url_launcher: ^6.0.2
   uuid: ^2.2.2
-  audioplayers: ^0.16.0
+  audioplayers: ^0.17.4
   syncfusion_flutter_gauges: ^18.4.43
   photo_view: ^0.10.3
 

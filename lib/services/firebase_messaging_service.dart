@@ -25,28 +25,28 @@ class FirebaseMessagingService {
   }
 
   Future<void> initialize() async {
-    if (Platform.isIOS) {
-      _firebaseMessaging.requestNotificationPermissions(IosNotificationSettings());
-    }
+    // if (Platform.isIOS) {
+    //   _firebaseMessaging.requestNotificationPermissions(IosNotificationSettings());
+    // }
 
-    // If you want to test the push notification locally,
-    // you need to get the token and input to the Firebase console
-    // String token = await _firebaseMessaging.getToken();
-    // print("FirebaseMessaging token: $token");
+    // // If you want to test the push notification locally,
+    // // you need to get the token and input to the Firebase console
+    // // String token = await _firebaseMessaging.getToken();
+    // // print("FirebaseMessaging token: $token");
     
-    _firebaseMessaging.configure(
-      //when the app is running in the foreground and the notification is clicked
-      onMessage: onMessageHanlder,
+    // _firebaseMessaging(
+    //   //when the app is running in the foreground and the notification is clicked
+    //   onMessage: onMessageHanlder,
 
-      //when clicking on a notification and the application is not running at all
-      onLaunch: onLaunchHanlder,
+    //   //when clicking on a notification and the application is not running at all
+    //   onLaunch: onLaunchHanlder,
 
-      //when clicking on a notification and the application is running in the background
-      onResume: onResumehHanlder,
+    //   //when clicking on a notification and the application is running in the background
+    //   onResume: onResumehHanlder,
 
-      //Not needed for now, causes error
-      //onBackgroundMessage: onBackgroundMessageHandler,
-    );
+    //   //Not needed for now, causes error
+    //   //onBackgroundMessage: onBackgroundMessageHandler,
+    // );
   }
 
   Future onMessageHanlder(Map<String, dynamic> message) async {
