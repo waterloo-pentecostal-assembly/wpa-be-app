@@ -65,7 +65,8 @@ void initializeInjections({
   getIt.registerLazySingleton<AppConfig>(() => appConfig);
 
   getIt.registerLazySingleton<FirebaseStorage>(() => FirebaseStorage.instance);
-  getIt.registerLazySingleton<FirebaseMessaging>(() => FirebaseMessaging());
+  getIt.registerLazySingleton<FirebaseMessaging>(
+      () => FirebaseMessaging.instance);
   getIt.registerLazySingleton<FirebaseAnalytics>(() => FirebaseAnalytics());
 
   getIt.registerLazySingleton<FirebaseFirestore>(() {
