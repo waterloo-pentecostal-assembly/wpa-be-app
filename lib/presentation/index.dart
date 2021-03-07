@@ -12,17 +12,13 @@ import 'common/text_factory.dart';
 import 'common/toast_message.dart';
 import 'engage/main/engage.dart';
 import 'give/give_page.dart';
-import 'notifications/notifications_page.dart';
 import 'profile/profile.dart';
-
-// See here to custom icons: https://medium.com/codechai/how-to-use-custom-icons-in-flutter-834a079d977
 
 class IndexPage extends StatelessWidget {
   final List<IIndexedPage> indexedPages = [
-    //HomePage(navigatorKey: GlobalKey()),
     EngagePage(navigatorKey: GlobalKey()),
     GivePage(navigatorKey: GlobalKey()),
-    NotificationsPage(navigatorKey: GlobalKey()),
+    // NotificationsPage(navigatorKey: GlobalKey()),
     ProfilePage(navigatorKey: GlobalKey()),
     AdminPage(navigatorKey: GlobalKey())
   ];
@@ -48,23 +44,17 @@ class _IndexPage extends StatelessWidget {
     return BlocBuilder<NavigationBarBloc, NavigationBarState>(
       builder: (BuildContext context, NavigationBarState state) {
         if (state.route != null) {
-          NavigatorState routeNavigatorState =
-              indexedPages[state.tab.index].navigatorKey.currentState;
+          NavigatorState routeNavigatorState = indexedPages[state.tab.index].navigatorKey.currentState;
 
           if (routeNavigatorState.canPop()) {
             // clear navigation stack before going to new route
             routeNavigatorState.popUntil((route) => route.isFirst);
           }
-          if (state.route == '/bible_series') {
-            indexedPages[state.tab.index].navigatorKey.currentState.pushNamed(
+
+          indexedPages[state.tab.index].navigatorKey.currentState.pushNamed(
                 state.route,
-                arguments: {'bibleSeriesId': state.argument});
-          } else {
-            indexedPages[state.tab.index]
-                .navigatorKey
-                .currentState
-                .pushNamed(state.route);
-          }
+                arguments: state.arguments,
+              );
         }
 
         return NavigationBar(
@@ -76,13 +66,11 @@ class _IndexPage extends StatelessWidget {
   }
 }
 
-//Added '+ 1' to avoid deleting the home page until it has been implemented
 class NavigationBar extends StatelessWidget {
   final int tabIndex;
   final List<IIndexedPage> indexedPages;
 
-  const NavigationBar({Key key, this.tabIndex, this.indexedPages})
-      : super(key: key);
+  const NavigationBar({Key key, this.tabIndex, this.indexedPages}) : super(key: key);
 
   void handleOnTap(BuildContext context, int index) async {
     if (NavigationTabEnum.values[index] == NavigationTabEnum.GIVE) {
@@ -102,10 +90,7 @@ class NavigationBar extends StatelessWidget {
       // If the user is re-selecting the tab, the common
       // behavior is to empty the stack.
       if (indexedPages[index].navigatorKey.currentState != null) {
-        indexedPages[index]
-            .navigatorKey
-            .currentState
-            .popUntil((route) => route.isFirst);
+        indexedPages[index].navigatorKey.currentState.popUntil((route) => route.isFirst);
       }
     }
   }
@@ -113,24 +98,20 @@ class NavigationBar extends StatelessWidget {
   List<BottomNavigationBarItem> getNavBarItems() {
     final LocalUser user = getIt<LocalUser>();
     List<BottomNavigationBarItem> items = [
-      // BottomNavigationBarItem(
-      //   icon: Icon(Icons.home),
-      //   label: 'HOME',
-      // ),
       BottomNavigationBarItem(
         // icon: Icon(Icons.class_),
         // label: 'ENGAGE',
         icon: Icon(Icons.home),
-        label: 'HOME',
+        label: 'HOME', // Really the engage page that we are using as "HOME" in phase 1
       ),
       BottomNavigationBarItem(
         icon: Icon(Icons.favorite),
         label: 'GIVE',
       ),
-      BottomNavigationBarItem(
-        icon: Icon(Icons.notifications),
-        label: 'NOTIFICATIONS',
-      ),
+      // BottomNavigationBarItem(
+      //   icon: Icon(Icons.notifications),
+      //   label: 'NOTIFICATIONS',
+      // ),
       BottomNavigationBarItem(
         icon: Icon(Icons.person),
         label: 'PROFILE',
@@ -153,8 +134,7 @@ class NavigationBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        NavigatorState currentNavigatorState =
-            indexedPages[tabIndex].navigatorKey.currentState;
+        NavigatorState currentNavigatorState = indexedPages[tabIndex].navigatorKey.currentState;
 
         if (currentNavigatorState.canPop()) {
           return !await currentNavigatorState.maybePop();
@@ -172,17 +152,13 @@ class NavigationBar extends StatelessWidget {
             indexedPages[1],
             indexedPages[2],
             indexedPages[3],
-            indexedPages[4],
-            //indexedPages[5],
           ],
         ),
         bottomNavigationBar: BottomNavigationBar(
           selectedItemColor: kWpaBlue.withOpacity(0.6),
           unselectedItemColor: Colors.grey[500],
-          selectedLabelStyle:
-              getIt<TextFactory>().regularTextStyle(fontSize: 11),
-          unselectedLabelStyle:
-              getIt<TextFactory>().liteTextStyle(fontSize: 10),
+          selectedLabelStyle: getIt<TextFactory>().regularTextStyle(fontSize: 11),
+          unselectedLabelStyle: getIt<TextFactory>().liteTextStyle(fontSize: 10),
           type: BottomNavigationBarType.fixed,
           currentIndex: tabIndex,
           onTap: (int index) => handleOnTap(context, index),

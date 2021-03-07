@@ -3,10 +3,10 @@ part of 'navigation_bar_bloc.dart';
 class NavigationBarEvent extends Equatable {
   final NavigationTabEnum tab;
   final String route;
-  final String argument;
+  final Map<String, dynamic> arguments;
 
-  NavigationBarEvent({@required this.tab, this.route, this.argument});
+  NavigationBarEvent({@required this.tab, this.route, this.arguments = const {}});
 
   @override
-  List<Object> get props => [tab, route, argument];
+  List<Object> get props => [tab, route, arguments];
 }

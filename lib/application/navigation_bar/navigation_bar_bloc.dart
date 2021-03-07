@@ -8,10 +8,9 @@ part 'navigation_bar_event.dart';
 part 'navigation_bar_state.dart';
 
 enum NavigationTabEnum {
-  //HOME,
   ENGAGE,
   GIVE,
-  NOTIFICATIONS,
+  // NOTIFICATIONS,
   PROFILE,
   ADMIN,
 }
@@ -25,6 +24,6 @@ class NavigationBarBloc extends Bloc<NavigationBarEvent, NavigationBarState> {
     NavigationBarEvent event,
   ) async* {
     yield NavigationBarState(
-        tab: event.tab, route: event.route, argument: event.argument);
+        tab: event.tab, route: event.route, arguments: event.arguments);
   }
 }

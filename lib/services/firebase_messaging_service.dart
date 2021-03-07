@@ -26,15 +26,14 @@ class FirebaseMessagingService {
 
   Future<void> initialize() async {
     if (Platform.isIOS) {
-      _firebaseMessaging
-          .requestNotificationPermissions(IosNotificationSettings());
+      _firebaseMessaging.requestNotificationPermissions(IosNotificationSettings());
     }
 
     // If you want to test the push notification locally,
     // you need to get the token and input to the Firebase console
     // String token = await _firebaseMessaging.getToken();
     // print("FirebaseMessaging token: $token");
-    //Future.delayed(Duration(seconds: 1), () {
+    
     _firebaseMessaging.configure(
       //when the app is running in the foreground and the notification is clicked
       onMessage: onMessageHanlder,
@@ -48,79 +47,61 @@ class FirebaseMessagingService {
       //Not needed for now, causes error
       //onBackgroundMessage: onBackgroundMessageHandler,
     );
-    // });
   }
 
   Future onMessageHanlder(Map<String, dynamic> message) async {
-    print("onMessage");
-    // String _message;
-    // TODO: we may need to handle the message by platform.
-    // if (Platform.isIOS) {
-    //   //hanle ios
-    // } else {
-    //   // handle android
-    // }
-    // GlobalKey<NavigatorState> navigatorKey = GlobalKey();
-    // navigatorKey.currentState.push(
-    //     MaterialPageRoute(builder: (_) => PrayerRequestsPage(tabIndex: 0)));
+    print("onMessage: $message");
+    /*
+      We would have to handle ios and android differently here. For exampple:
+      if(message.isNotEmpty) {
+          var messageData;
+          bool isIOS = Theme.of(context).platform == TargetPlatform.iOS;
+          if(isIOS) { //ios
+            messageData = message;
+          } else { //android
+            messageData = message['data'];
+          }
+          processClickOnNotification(messageData);
+        }
+     */
   }
 
   Future onLaunchHanlder(Map<String, dynamic> message) async {
-    if (message.containsKey("data")) {
-      if (message['data']['notificationType'] == 'dailyEngagementReminder') {
-        getIt<NavigationBarBloc>()
-          ..add(
-            NavigationBarEvent(
-                tab: NavigationTabEnum.ENGAGE,
-                route: '/bible_series',
-                argument: message['data']['bibleSeriesId']),
-          );
-      } else if (message['data']['notificationType'] == 'prayerRequestPrayed') {
-        getIt<NavigationBarBloc>()
-          ..add(
-            NavigationBarEvent(
-                tab: NavigationTabEnum.ENGAGE, route: '/prayer_requests/mine'),
-          );
-      }
-    }
+    print("onLaunch: $message");
+    navigationHandler(message);
   }
 
   Future onResumehHanlder(Map<String, dynamic> message) async {
-    if (message.containsKey("data")) {
-      if (message['data']['notificationType'] == 'dailyEngagementReminder') {
-        getIt<NavigationBarBloc>()
-          ..add(
-            NavigationBarEvent(
-                tab: NavigationTabEnum.ENGAGE,
-                route: '/bible_series',
-                argument: message['data']['bibleSeriesId']),
-          );
-      } else if (message['data']['notificationType'] == 'prayerRequestPrayed') {
-        getIt<NavigationBarBloc>()
-          ..add(
-            NavigationBarEvent(
-                tab: NavigationTabEnum.ENGAGE, route: '/prayer_requests/mine'),
-          );
-      }
-    }
+    print("onResume: $message");
+    navigationHandler(message);
   }
 
   Future onBackgroundMessageHandler(Map<String, dynamic> message) async {
     // Note: the protocol of data and notification are in line with the fields defined by a RemoteMessage.
     // https://firebase.google.com/docs/reference/android/com/google/firebase/messaging/RemoteMessage
-    print("background");
-    // if (message.containsKey('data')) {
-    //   // Handle data message
-    //   final dynamic data = message['data'];
-    //   print("backgroundMessageHandler data: $data");
-    // }
+    print("onBackgroundMessageHandler: $message");
+  }
 
-    // if (message.containsKey('notification')) {
-    //   // Handle notification message
-    //   final dynamic notification = message['notification'];
-    //   print("backgroundMessageHandler data: $notification");
-    // }
-
-    // Or do other work.
+  void navigationHandler(Map<String, dynamic> payload) {
+    if (payload['notificationType'] == 'dailyEngagementReminder') {
+        getIt<NavigationBarBloc>()
+          ..add(
+            NavigationBarEvent(
+              tab: NavigationTabEnum.ENGAGE,
+              route: '/bible_series',
+              arguments: {
+                'bibleSeriesId': payload['bibleSeriesId'],
+              },
+            ),
+          );
+      } else if (payload['notificationType'] == 'prayerRequestPrayed') {
+        getIt<NavigationBarBloc>()
+          ..add(
+            NavigationBarEvent(
+              tab: NavigationTabEnum.ENGAGE,
+              route: '/prayer_requests/mine',
+            ),
+          );
+      }
   }
 }
