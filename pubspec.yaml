@@ -43,7 +43,7 @@ dependencies:
   uuid: ^2.2.2
   syncfusion_flutter_gauges: ^18.4.43
   photo_view: ^0.10.3
-  audioplayers: ^0.17.4
+  audioplayers: ^0.16.0
   
 
 dev_dependencies:
