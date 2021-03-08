@@ -33,7 +33,7 @@ dependencies:
   firebase_storage: ^7.0.0
   flutter_bloc: ^6.1.2
   fluttertoast: ^7.1.6
-  get_it: ^6.0.0
+  get_it: ^5.0.6
   google_fonts: ^1.1.2
   image_picker: ^0.6.7+22
   intl: ^0.16.1
