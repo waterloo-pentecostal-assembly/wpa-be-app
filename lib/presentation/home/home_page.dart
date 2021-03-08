@@ -59,7 +59,7 @@ class HomeIndex extends StatelessWidget {
             Container(
               child: Text('HOME'),
             ),
-            RaisedButton(
+            ElevatedButton(
               child: Text('Engage'),
               onPressed: () {
                 BlocProvider.of<NavigationBarBloc>(context)

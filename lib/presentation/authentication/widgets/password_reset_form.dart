@@ -126,8 +126,16 @@ class PasswordResetForm extends StatelessWidget {
                                       ],
                                     ),
                                   ),
-                                  child: FlatButton(
-                                    disabledColor: Colors.grey[400],
+                                  child: TextButton(
+                                    style: ButtonStyle(backgroundColor:
+                                        MaterialStateProperty.resolveWith<
+                                            Color>((states) {
+                                      if (states
+                                          .contains(MaterialState.disabled)) {
+                                        return Colors.grey[400];
+                                      }
+                                      return null;
+                                    })),
                                     onPressed: state.submitting ||
                                             !state.ispasswordResetFormValid
                                         ? null

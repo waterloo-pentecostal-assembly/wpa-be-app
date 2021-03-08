@@ -214,13 +214,13 @@ class ContentDetailWidget extends StatelessWidget {
           actions: [
             ClipRRect(
               borderRadius: BorderRadius.all(Radius.circular(16)),
-              child: FlatButton(
-                height: 30,
-                minWidth: 90,
-                color: kWpaBlue.withOpacity(0.8),
-                textColor: Colors.white,
-                padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
-                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              child: TextButton(
+                style: TextButton.styleFrom(
+                    minimumSize: Size(90, 30),
+                    backgroundColor: kWpaBlue.withOpacity(0.8),
+                    primary: Colors.white,
+                    padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                 onPressed: () {
                   Navigator.of(context, rootNavigator: true).pop();
                 },

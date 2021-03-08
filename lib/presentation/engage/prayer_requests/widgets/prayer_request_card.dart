@@ -226,41 +226,44 @@ class _PrayButton extends StatelessWidget {
   }
 
   Widget _createPrayButton(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.all(Radius.circular(20)),
-      child: FlatButton(
-        height: 32,
-        minWidth: 0,
-        color: kCardGrey,
-        padding: EdgeInsets.only(top: 6, bottom: 6, left: 12, right: 12),
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        onPressed: () {
-          BlocProvider.of<AllPrayerRequestsBloc>(context).add(PrayForRequest(
-            id: prayerRequest.id,
-          ));
-        },
-        child: getIt<TextFactory>().regular('PRAY'),
+    return Container(
+      child: ClipRRect(
+        borderRadius: BorderRadius.all(Radius.circular(20)),
+        child: TextButton(
+          style: TextButton.styleFrom(
+              padding: EdgeInsets.only(top: 6, bottom: 6, left: 12, right: 12),
+              minimumSize: Size(0, 32),
+              backgroundColor: kCardGrey,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+          onPressed: () {
+            BlocProvider.of<AllPrayerRequestsBloc>(context).add(PrayForRequest(
+              id: prayerRequest.id,
+            ));
+          },
+          child: getIt<TextFactory>().regular('PRAY'),
+        ),
       ),
     );
   }
 
   Widget _createPrayedButton() {
-    return FlatButton(
-      height: 24,
-      minWidth: 0,
-      padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    return TextButton(
+      style: TextButton.styleFrom(
+        minimumSize: Size(0, 24),
+        padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
       onPressed: null,
       child: getIt<TextFactory>().regular('PRAYED!', color: Colors.black54),
     );
   }
 
   Widget _createLoadingButton() {
-    return FlatButton(
-      height: 24,
-      minWidth: 0,
-      padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    return TextButton(
+      style: TextButton.styleFrom(
+          minimumSize: Size(0, 24),
+          padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap),
       onPressed: null,
       child: getIt<TextFactory>().regular('...'),
     );
@@ -274,11 +277,11 @@ class PrayedByIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FlatButton(
-      height: 24,
-      minWidth: 0,
-      padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    return TextButton(
+      style: TextButton.styleFrom(
+          minimumSize: Size(0, 24),
+          padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap),
       onPressed: null,
       child: getIt<TextFactory>().regular(
           'Prayed by $amount other${getS(amount)}',
@@ -297,11 +300,11 @@ class PrayedByIndicator extends StatelessWidget {
 class PendingIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return FlatButton(
-      height: 24,
-      minWidth: 0,
-      padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    return TextButton(
+      style: TextButton.styleFrom(
+          minimumSize: Size(0, 24),
+          padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap),
       onPressed: null,
       child: getIt<TextFactory>()
           .regular('Pending', color: kWarningColor.withOpacity(0.8)),

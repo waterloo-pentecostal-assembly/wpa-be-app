@@ -75,7 +75,7 @@ class NotificationDetail extends StatelessWidget {
         child: Column(
           children: <Widget>[
             Text('Example notification details'),
-            RaisedButton(
+            ElevatedButton(
               child: Text('Back'),
               onPressed: () {
                 Navigator.pop(context);
