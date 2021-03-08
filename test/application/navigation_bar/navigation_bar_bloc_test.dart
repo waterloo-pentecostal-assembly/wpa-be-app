@@ -14,10 +14,12 @@ void main() {
       build: () => NavigationBarBloc(),
       act: (NavigationBarBloc bloc) => bloc
         ..add(NavigationBarEvent(tab: testTab, route: testRoute))
-        ..add((NavigationBarEvent(tab: testTab2, route: testRoute2, arguments: {'test': 'arg'}))),
+        ..add((NavigationBarEvent(
+            tab: testTab2, route: testRoute2, arguments: {'test': 'arg'}))),
       expect: [
         NavigationBarState(tab: testTab, route: testRoute, arguments: {}),
-        NavigationBarState(tab: testTab2, route: testRoute2, arguments: {'test': 'arg'})
+        NavigationBarState(
+            tab: testTab2, route: testRoute2, arguments: {'test': 'arg'})
       ],
     );
   });
