@@ -18,7 +18,7 @@ class SignInForm extends StatelessWidget {
           BlocProvider.of<NavigationBarBloc>(context)
             ..add(
               NavigationBarEvent(
-                tab: NavigationTabEnum.HOME,
+                tab: NavigationTabEnum.ENGAGE,
               ),
             );
           Navigator.pushNamed(context, '/index');
@@ -180,8 +180,16 @@ class SignInForm extends StatelessWidget {
                                       ],
                                     ),
                                   ),
-                                  child: FlatButton(
-                                    disabledColor: Colors.grey[400],
+                                  child: TextButton(
+                                    style: ButtonStyle(backgroundColor:
+                                        MaterialStateProperty.resolveWith<
+                                            Color>((states) {
+                                      if (states
+                                          .contains(MaterialState.disabled)) {
+                                        return Colors.grey[400];
+                                      }
+                                      return null;
+                                    })),
                                     onPressed: state.submitting ||
                                             !state.isSignInFormValid
                                         ? null

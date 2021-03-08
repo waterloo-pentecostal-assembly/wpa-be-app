@@ -262,8 +262,8 @@ Stream<CompletionsState> _mapLoadResponsesEventToState(
         for (var entry1 in responses.responses.entries) {
           for (var entry2 in entry1.value.entries) {
             if (entry2.value.type == ResponseType.IMAGE) {
-              List<String> downloadURLList = List();
-              List<String> thumbnailURLList = List();
+              List<String> downloadURLList = [];
+              List<String> thumbnailURLList = [];
               String thumbnail = toThumbnail(entry2.value.response);
               String thumbnailURL =
                   await completionsRepository.getDownloadURL(gsUrl: thumbnail);
@@ -324,7 +324,7 @@ Stream<CompletionsState> _mapUploadImageEventToState(
     final String downloadURL =
         await completionsRepository.getDownloadURL(gsUrl: imageLocation);
     Map<String, List<String>> downloadMap = state.downloadURL;
-    List<String> downloadURLList = List();
+    List<String> downloadURLList = [];
     if (state.downloadURL != null) {
       downloadURLList =
           state.downloadURL[event.contentNum.toString()] ?? downloadURLList;
@@ -342,7 +342,7 @@ Stream<CompletionsState> _mapUploadImageEventToState(
     String responsesIndex = (downloadURLList.length - 1).toString();
 
     Map<String, List<File>> localImage = Map();
-    List<File> localImageList = List();
+    List<File> localImageList = [];
     if (state.localImage != null &&
         state.localImage[event.contentNum.toString()] != null) {
       localImageList = state.localImage[event.contentNum.toString()];

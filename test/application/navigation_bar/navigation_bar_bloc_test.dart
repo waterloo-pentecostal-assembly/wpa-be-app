@@ -4,7 +4,7 @@ import 'package:wpa_app/application/navigation_bar/navigation_bar_bloc.dart';
 
 void main() {
   group('NavigationBarEvent', () {
-    NavigationTabEnum testTab = NavigationTabEnum.HOME;
+    NavigationTabEnum testTab = NavigationTabEnum.PROFILE;
     NavigationTabEnum testTab2 = NavigationTabEnum.ENGAGE;
     String testRoute = '/test/route';
     String testRoute2 = '/test/route2';
@@ -14,10 +14,12 @@ void main() {
       build: () => NavigationBarBloc(),
       act: (NavigationBarBloc bloc) => bloc
         ..add(NavigationBarEvent(tab: testTab, route: testRoute))
-        ..add((NavigationBarEvent(tab: testTab2, route: testRoute2))),
+        ..add((NavigationBarEvent(
+            tab: testTab2, route: testRoute2, arguments: {'test': 'arg'}))),
       expect: [
-        NavigationBarState(tab: testTab, route: testRoute),
-        NavigationBarState(tab: testTab2, route: testRoute2)
+        NavigationBarState(tab: testTab, route: testRoute, arguments: {}),
+        NavigationBarState(
+            tab: testTab2, route: testRoute2, arguments: {'test': 'arg'})
       ],
     );
   });

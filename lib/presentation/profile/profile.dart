@@ -536,7 +536,7 @@ class _TestImagePickerState extends State<TestImagePicker> {
           child:
               _image == null ? Text('No image selected.') : Image.file(_image),
         ),
-        FlatButton(
+        TextButton(
           onPressed: getImage,
           child: Icon(Icons.add_a_photo),
         ),
