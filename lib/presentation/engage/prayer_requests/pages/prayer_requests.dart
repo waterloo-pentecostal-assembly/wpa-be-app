@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/presentation/engage/prayer_requests/pages/my_answered_prayer_request.dart';
 
 import '../../../../app/constants.dart';
 import '../../../../app/injection.dart';
@@ -28,6 +29,10 @@ class PrayerRequestsPage extends StatelessWidget {
           create: (BuildContext context) =>
               getIt<PrayerRequestsBloc>()..add(MyPrayerRequestsRequested()),
         ),
+        BlocProvider<MyAnsweredPrayerRequestsBloc>(
+          create: (BuildContext context) => getIt<PrayerRequestsBloc>()
+            ..add(MyAnsweredPrayerRequestsRequested()),
+        )
       ],
       child: Scaffold(
         body: SafeArea(
@@ -63,7 +68,7 @@ class _TabPrayerRequestWidgetState extends State<TabPrayerRequestWidget>
   final int tabIndex;
 
   _TabPrayerRequestWidgetState(this.tabIndex) {
-    this.tabController = TabController(length: 2, vsync: this);
+    this.tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -87,7 +92,8 @@ class _TabPrayerRequestWidgetState extends State<TabPrayerRequestWidget>
               labelColor: Colors.black87,
               tabs: [
                 getIt<TextFactory>().subHeading2('All'),
-                getIt<TextFactory>().subHeading2('Mine'),
+                getIt<TextFactory>().subHeading2('My Open Requests'),
+                getIt<TextFactory>().subHeading2('My Answered Prayers')
               ],
             ),
           ),
@@ -99,6 +105,7 @@ class _TabPrayerRequestWidgetState extends State<TabPrayerRequestWidget>
                 children: [
                   AllPrayerRequests(),
                   MyPrayerRequests(),
+                  MyAnsweredPrayerRequest(),
                 ],
               ),
             ),

@@ -10,6 +10,7 @@ import '../../../common/text_factory.dart';
 
 enum PrayerActionOptions {
   MY_DELETE,
+  MY_CLOSE,
   REPORT,
 }
 
@@ -105,6 +106,9 @@ class PrayerRequestMenuButton extends StatelessWidget {
     } else if (menuButtonValue.action == PrayerActionOptions.REPORT) {
       BlocProvider.of<AllPrayerRequestsBloc>(context)
         ..add(PrayerRequestReported(id: menuButtonValue.id));
+    } else if (menuButtonValue.action == PrayerActionOptions.MY_CLOSE) {
+      BlocProvider.of<PrayerRequestsBloc>(context)
+        ..add(ClosePrayerRequest(id: menuButtonValue.id));
     }
   }
 
@@ -124,6 +128,19 @@ class PrayerRequestMenuButton extends StatelessWidget {
           ],
         ),
       ));
+      if (!prayerRequest.isAnswered) {
+        popupMenuItems.add(PopupMenuItem(
+          value: MenuButtonValue(
+              id: prayerRequest.id, action: PrayerActionOptions.MY_CLOSE),
+          child: Row(
+            children: [
+              Icon(Icons.check),
+              SizedBox(width: 4),
+              getIt<TextFactory>().lite('PRAYER ANSWERED'),
+            ],
+          ),
+        ));
+      }
     } else {
       popupMenuItems.add(PopupMenuItem(
         value: MenuButtonValue(

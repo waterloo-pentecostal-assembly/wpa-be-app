@@ -107,6 +107,11 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
               ToastMessage.showErrorToast(state.message, context);
             } else if (state is PrayerRequestDeleteError) {
               ToastMessage.showErrorToast(state.message, context);
+            } else if (state is MyPrayerRequestAnsweredComplete) {
+              int indexToDelete = getIndexById(state.id);
+              if (indexToDelete != null) {
+                _delete(indexToDelete);
+              }
             }
             // No need to handle these two in MyPrayerRequests since this
             // BlocListener will be loaded in either case. If it is also

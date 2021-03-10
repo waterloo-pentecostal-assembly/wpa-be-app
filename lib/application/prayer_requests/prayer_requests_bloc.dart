@@ -18,9 +18,15 @@ part 'prayer_requests_state.dart';
 mixin MyPrayerRequestsBloc on Bloc<PrayerRequestsEvent, PrayerRequestsState> {}
 mixin AllPrayerRequestsBloc on Bloc<PrayerRequestsEvent, PrayerRequestsState> {}
 mixin NewPrayerRequestsBloc on Bloc<PrayerRequestsEvent, PrayerRequestsState> {}
+mixin MyAnsweredPrayerRequestsBloc
+    on Bloc<PrayerRequestsEvent, PrayerRequestsState> {}
 
 class PrayerRequestsBloc extends Bloc<PrayerRequestsEvent, PrayerRequestsState>
-    with MyPrayerRequestsBloc, AllPrayerRequestsBloc, NewPrayerRequestsBloc {
+    with
+        MyPrayerRequestsBloc,
+        AllPrayerRequestsBloc,
+        NewPrayerRequestsBloc,
+        MyAnsweredPrayerRequestsBloc {
   final IPrayerRequestsRepository _iPrayerRequestsRepository;
 
   PrayerRequestsBloc(this._iPrayerRequestsRepository)
@@ -79,6 +85,12 @@ class PrayerRequestsBloc extends Bloc<PrayerRequestsEvent, PrayerRequestsState>
     } else if (event is NewPrayerRequestAnonymousChanged) {
       yield* _mapNewPrayerRequestAnonymousChangedEventToState(
           state, event.isAnonymous);
+    } else if (event is MyAnsweredPrayerRequestsRequested) {
+      yield* _mapAnsweredPrayerRequestRequestedEventToState(
+          event, _iPrayerRequestsRepository.getMyAnsweredPrayerRequests);
+    } else if (event is ClosePrayerRequest) {
+      yield* _mapClosePrayerRequestEventToState(
+          event, _iPrayerRequestsRepository.closePrayerRequest);
     }
   }
 }
@@ -132,6 +144,23 @@ Stream<PrayerRequestsState> _mapMyPrayerRequestsRequestedEventToState(
   }
 }
 
+Stream<PrayerRequestsState> _mapAnsweredPrayerRequestRequestedEventToState(
+    MyAnsweredPrayerRequestsRequested event,
+    Future<List<PrayerRequest>> Function() getMyAnsweredPrayerRequests) async* {
+  try {
+    List<PrayerRequest> prayerRequests = await getMyAnsweredPrayerRequests();
+    yield MyAnsweredPrayerRequestsLoaded(prayerRequests: prayerRequests);
+  } on BaseApplicationException catch (e) {
+    yield PrayerRequestsError(
+      message: e.message,
+    );
+  } catch (e) {
+    yield PrayerRequestsError(
+      message: 'An unknown error occurred',
+    );
+  }
+}
+
 Stream<PrayerRequestsState> _mapPrayerRequestsRequestedEventToState(
   PrayerRequestsRequested event,
   Future<List<PrayerRequest>> Function({@required int limit}) getPrayerRequests,
@@ -163,6 +192,26 @@ Stream<PrayerRequestsState> _mapMyPrayerRequestDeletedEventToState(
   } catch (e) {
     yield PrayerRequestDeleteError(
       message: 'Unable to delete prayer request',
+    );
+  }
+}
+
+Stream<PrayerRequestsState> _mapClosePrayerRequestEventToState(
+    ClosePrayerRequest event,
+    Future<PrayerRequest> Function({@required String id})
+        closePrayerRequest) async* {
+  try {
+    PrayerRequest prayerRequest = await closePrayerRequest(id: event.id);
+    getIt<FirebaseAnalytics>().logEvent(name: 'prayer_request_closed');
+    yield MyPrayerRequestAnsweredComplete(
+        id: event.id, prayerRequest: prayerRequest);
+  } on PrayerRequestsException catch (e) {
+    yield PrayerRequestReportError(
+      message: e.message,
+    );
+  } catch (e) {
+    yield PrayerRequestReportError(
+      message: 'Unable to close prayer request',
     );
   }
 }

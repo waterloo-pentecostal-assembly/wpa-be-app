@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/application/prayer_requests/prayer_requests_bloc.dart';
+import 'package:wpa_app/domain/prayer_requests/entities.dart';
+import 'package:wpa_app/presentation/common/loader.dart';
+import 'package:wpa_app/presentation/engage/prayer_requests/widgets/prayer_request_card.dart';
+import 'package:wpa_app/presentation/engage/prayer_requests/widgets/prayer_request_error.dart';
 
-import '../../../../application/prayer_requests/prayer_requests_bloc.dart';
-import '../../../../domain/prayer_requests/entities.dart';
-import '../../../common/loader.dart';
-import '../widgets/prayer_request_card.dart';
-import '../widgets/prayer_request_error.dart';
-
-class MyPrayerRequests extends StatefulWidget {
+class MyAnsweredPrayerRequest extends StatefulWidget {
   @override
-  _MyPrayerRequestsState createState() => _MyPrayerRequestsState();
+  _MyAnsweredPrayerRequestState createState() =>
+      _MyAnsweredPrayerRequestState();
 }
 
-class _MyPrayerRequestsState extends State<MyPrayerRequests>
+class _MyAnsweredPrayerRequestState extends State<MyAnsweredPrayerRequest>
     with AutomaticKeepAliveClientMixin {
   final GlobalKey<AnimatedListState> _myPrayerRequestsListKey =
       GlobalKey<AnimatedListState>();
@@ -87,19 +87,14 @@ class _MyPrayerRequestsState extends State<MyPrayerRequests>
               if (indexToDelete != null) {
                 _delete(indexToDelete);
               }
-            } else if (state is NewPrayerRequestLoaded) {
-              _insertAtTop(state.prayerRequest);
             } else if (state is MyPrayerRequestAnsweredComplete) {
-              int indexToDelete = getIndexToDelete(state.id);
-              if (indexToDelete != null) {
-                _delete(indexToDelete);
-              }
+              _insertAtTop(state.prayerRequest);
             }
           },
         ),
-        BlocListener<MyPrayerRequestsBloc, PrayerRequestsState>(
+        BlocListener<MyAnsweredPrayerRequestsBloc, PrayerRequestsState>(
           listener: (context, state) {
-            if (state is MyPrayerRequestsLoaded) {
+            if (state is MyAnsweredPrayerRequestsLoaded) {
               _prayerRequests = state.prayerRequests;
               setChild(createPrayerRequestAnimatedlist(state));
             } else if (state is PrayerRequestsError) {
@@ -124,11 +119,11 @@ class _MyPrayerRequestsState extends State<MyPrayerRequests>
     return indexToDelete;
   }
 
-  Widget createPrayerRequestAnimatedlist(MyPrayerRequestsLoaded state) {
+  Widget createPrayerRequestAnimatedlist(MyAnsweredPrayerRequestsLoaded state) {
     return RefreshIndicator(
       onRefresh: () async {
-        BlocProvider.of<MyPrayerRequestsBloc>(context)
-          ..add(MyPrayerRequestsRequested());
+        BlocProvider.of<MyAnsweredPrayerRequestsBloc>(context)
+          ..add(MyAnsweredPrayerRequestsRequested());
       },
       child: AnimatedList(
         physics: AlwaysScrollableScrollPhysics(),
@@ -139,17 +134,3 @@ class _MyPrayerRequestsState extends State<MyPrayerRequests>
     );
   }
 }
-
-/* 
-both:
-  - my request deleted 
-  - NewPrayerRequestLoaded
-
-all 
-  - requests requested 
-  - request reported and removed 
-  - more requests requested 
-
-my 
-  - my requests requested 
-*/
