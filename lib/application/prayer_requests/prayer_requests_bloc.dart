@@ -202,7 +202,7 @@ Stream<PrayerRequestsState> _mapClosePrayerRequestEventToState(
         closePrayerRequest) async* {
   try {
     PrayerRequest prayerRequest = await closePrayerRequest(id: event.id);
-    getIt<FirebaseAnalytics>().logEvent(name: 'prayer_request_closed');
+    getIt<FirebaseAnalytics>().logEvent(name: 'prayer_request_answered');
     yield MyPrayerRequestAnsweredComplete(
         id: event.id, prayerRequest: prayerRequest);
   } on PrayerRequestsException catch (e) {
