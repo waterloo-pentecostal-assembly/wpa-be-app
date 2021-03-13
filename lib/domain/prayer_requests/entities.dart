@@ -14,6 +14,7 @@ class PrayerRequest {
   final Timestamp date;
   final bool isAnonymous;
   final UserSnippet userSnippet;
+  final bool isAnswered;
 
   PrayerRequest({
     @required this.id,
@@ -28,6 +29,7 @@ class PrayerRequest {
     @required this.date,
     @required this.isAnonymous,
     @required this.userSnippet,
+    @required this.isAnswered,
   });
 
   @override

@@ -60,6 +60,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
     try {
       querySnapshot = await _prayerRequestsCollection
           .where("user_id", isEqualTo: user.id)
+          .where("is_answered", isEqualTo: false)
           .orderBy("date", descending: true)
           .get();
     } catch (e) {
@@ -76,6 +77,49 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
     }
 
     return myPrayerRequests;
+  }
+
+  @override
+  Future<List<PrayerRequest>> getMyAnsweredPrayerRequests() async {
+    final LocalUser user = getIt<LocalUser>();
+    QuerySnapshot querySnapshot;
+
+    try {
+      querySnapshot = await _prayerRequestsCollection
+          .where("user_id", isEqualTo: user.id)
+          .where("is_answered", isEqualTo: true)
+          .orderBy("date", descending: true)
+          .get();
+    } catch (e) {
+      _firebaseFirestoreService.handleException(e);
+    }
+
+    List<PrayerRequest> myPrayerRequests = [];
+
+    for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+      PrayerRequest prayerRequest =
+          await PrayerRequestsDto.fromFirestore(doc, user.id)
+              .toDomain(_firebaseStorageService);
+      myPrayerRequests.add(prayerRequest);
+    }
+
+    return myPrayerRequests;
+  }
+
+  @override
+  Future<PrayerRequest> closePrayerRequest({String id}) async {
+    final LocalUser user = getIt<LocalUser>();
+    DocumentReference prayerRequestReference;
+    DocumentSnapshot prayerRequestSnapshot;
+    try {
+      prayerRequestReference = _prayerRequestsCollection.doc(id);
+      await prayerRequestReference.update({"is_answered": true});
+      prayerRequestSnapshot = await prayerRequestReference.get();
+    } catch (e) {
+      _firebaseFirestoreService.handleException(e);
+    }
+    return PrayerRequestsDto.fromFirestore(prayerRequestSnapshot, user.id)
+        .toDomain(_firebaseStorageService);
   }
 
   @override
@@ -98,6 +142,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
     try {
       querySnapshot = await _prayerRequestsCollection
           .where("is_approved", isEqualTo: true)
+          .where("is_answered", isEqualTo: false)
           .orderBy("date", descending: true)
           .startAfterDocument(_lastPrayerRequestDocument)
           .limit(limit)
@@ -132,6 +177,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
     try {
       querySnapshot = await _prayerRequestsCollection
           .where("is_approved", isEqualTo: true)
+          .where("is_answered", isEqualTo: false)
           .orderBy("date", descending: true)
           .limit(limit)
           .get();
