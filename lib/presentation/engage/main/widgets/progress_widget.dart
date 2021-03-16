@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
+import 'package:wpa_app/application/bible_series/bible_series_bloc.dart';
 
 import '../../../../app/constants.dart';
 import '../../../../app/injection.dart';
@@ -45,6 +46,7 @@ class ProgressTile extends StatelessWidget {
     return Column(
       children: [
         Container(
+          padding: const EdgeInsets.only(bottom: 8),
           height: kProgressWidgetWidth,
           child: SfRadialGauge(
             enableLoadingAnimation: true,
@@ -88,6 +90,10 @@ class ProgressTile extends StatelessWidget {
                         Container(
                             child: getIt<TextFactory>().regular(
                                 '${getProgressBarPhrase(achievements.seriesProgress)}')),
+                        SizedBox(
+                          height: 10,
+                        ),
+                        ProgressWidgetTitle()
                       ],
                     ),
                   ),
@@ -139,6 +145,33 @@ class ProgressError extends StatelessWidget {
         alignment: Alignment.center,
         child: Text('Unable to load Progress'),
       ),
+    );
+  }
+}
+
+class ProgressWidgetTitle extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<BibleSeriesBloc, BibleSeriesState>(
+      listener: (context, state) {},
+      builder: (context, state) {
+        if (state is RecentBibleSeries) {
+          return Center(
+            child: RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                    style: getIt<TextFactory>().liteTextStyle(),
+                    children: [
+                      TextSpan(text: "Your Progress for "),
+                      TextSpan(
+                          text: state.bibleSeriesList[0].title,
+                          style: getIt<TextFactory>().regularTextStyle())
+                    ])),
+          );
+        } else {
+          return Container();
+        }
+      },
     );
   }
 }

@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:wpa_app/app/injection.dart';
+import 'package:wpa_app/domain/authentication/entities.dart';
 
 import '../../domain/bible_series/entities.dart';
 import '../../domain/bible_series/exceptions.dart';
@@ -31,11 +33,19 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
     QuerySnapshot querySnapshot;
 
     try {
-      querySnapshot = await _bibleSeriesCollection
-          .orderBy("start_date", descending: true)
-          .where("is_visible", isEqualTo: true)
-          .limit(limit)
-          .get();
+      final LocalUser user = getIt<LocalUser>();
+      if (user.isAdmin) {
+        querySnapshot = await _bibleSeriesCollection
+            .orderBy("start_date", descending: true)
+            .limit(limit)
+            .get();
+      } else {
+        querySnapshot = await _bibleSeriesCollection
+            .orderBy("start_date", descending: true)
+            .where("is_visible", isEqualTo: true)
+            .limit(limit)
+            .get();
+      }
     } catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
