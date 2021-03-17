@@ -183,7 +183,19 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
   }
 
   @override
-  Future<void> signOut() {
+  Future<void> signOut() async {
+    try {
+      String uid = _firebaseAuth.currentUser.uid;
+      String token = await _firebaseMessagingService.getToken();
+      await _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('devices')
+          .doc(token)
+          .delete();
+    } catch (e) {
+      _firebaseFirestoreService.handleException(e);
+    }
     return _firebaseAuth.signOut();
   }
 
