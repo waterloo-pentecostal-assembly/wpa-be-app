@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:wpa_app/application/bible_series/bible_series_bloc.dart';
+import 'package:wpa_app/domain/bible_series/entities.dart';
 
 import '../../../../app/constants.dart';
 import '../../../../app/injection.dart';
@@ -164,7 +165,7 @@ class ProgressWidgetTitle extends StatelessWidget {
                     children: [
                       TextSpan(text: "Your Progress for "),
                       TextSpan(
-                          text: state.bibleSeriesList[0].title,
+                          text: getLastestActive(state.bibleSeriesList),
                           style: getIt<TextFactory>().regularTextStyle())
                     ])),
           );
@@ -173,5 +174,14 @@ class ProgressWidgetTitle extends StatelessWidget {
         }
       },
     );
+  }
+
+  String getLastestActive(List<BibleSeries> bibleSeriesList) {
+    for (int i = 0; i < bibleSeriesList.length; i++) {
+      if (bibleSeriesList[i].isActive) {
+        return bibleSeriesList[i].title;
+      }
+    }
+    return '';
   }
 }
