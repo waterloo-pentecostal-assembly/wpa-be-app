@@ -69,6 +69,14 @@ class FirebaseMessagingService {
             route: '/prayer_requests/mine',
           ),
         );
+    } else if (payload['notificationType'] == 'userSignUp') {
+      getIt<NavigationBarBloc>()
+        ..add(
+          NavigationBarEvent(
+            tab: NavigationTabEnum.ADMIN,
+            route: '/user_verification',
+          ),
+        );
     }
   }
 }
