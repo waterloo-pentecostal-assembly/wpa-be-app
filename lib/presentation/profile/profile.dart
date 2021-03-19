@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:wpa_app/application/links/links_bloc.dart';
 import 'package:wpa_app/presentation/profile/terms_of_use.dart';
 
 import '../../app/constants.dart';
@@ -394,108 +395,137 @@ class _NotificationSettingsState extends State<NotificationSettings> {
 class Other extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 12.0, right: 12.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            child: getIt<TextFactory>().regular('OTHER'),
-          ),
-          Divider(),
-          GestureDetector(
-            onTap: () {
-              Navigator.of(context).pushNamed('/privacy_policy');
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return BlocConsumer<LinksBloc, LinksState>(
+      listener: (context, state) {
+        // TODO: implement listener
+      },
+      builder: (context, state) {
+        if (state is LinksLoaded) {
+          return Padding(
+            padding: const EdgeInsets.only(left: 12.0, right: 12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                getIt<TextFactory>().lite("Privacy Policy"),
-                Icon(
-                  Icons.keyboard_arrow_right,
-                  color: kDarkGreyColor,
-                )
-              ],
-            ),
-          ),
-          SizedBox(height: 6),
-          GestureDetector(
-            onTap: () {
-              Navigator.of(context).pushNamed('/terms_of_use');
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                getIt<TextFactory>().lite("Terms of Use"),
-                Icon(
-                  Icons.keyboard_arrow_right,
-                  color: kDarkGreyColor,
-                )
-              ],
-            ),
-          ),
-          SizedBox(height: 8),
-          GestureDetector(
-            onTap: () async {
-              final Uri _emailLaunchUri = Uri(
-                scheme: 'mailto',
-                path: kWpaContactEmail,
-                queryParameters: {'subject': kHelpEmailSubject},
-              );
+                Container(
+                  child: getIt<TextFactory>().regular('OTHER'),
+                ),
+                Divider(),
+                GestureDetector(
+                  onTap: () async {
+                    String url = state.linkMap['privacy_policy_link'];
+                    if (await canLaunch(url)) {
+                      await launch(url);
+                    } else {
+                      ToastMessage.showErrorToast(
+                          "Error opening page", context);
+                    }
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      getIt<TextFactory>().lite("Privacy Policy"),
+                      Icon(
+                        Icons.keyboard_arrow_right,
+                        color: kDarkGreyColor,
+                      )
+                    ],
+                  ),
+                ),
+                SizedBox(height: 6),
+                GestureDetector(
+                  onTap: () async {
+                    String url = state.linkMap['terms_of_use_link'];
+                    if (await canLaunch(url)) {
+                      await launch(url);
+                    } else {
+                      ToastMessage.showErrorToast(
+                          "Error opening page", context);
+                    }
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      getIt<TextFactory>().lite("Terms of Use"),
+                      Icon(
+                        Icons.keyboard_arrow_right,
+                        color: kDarkGreyColor,
+                      )
+                    ],
+                  ),
+                ),
+                SizedBox(height: 8),
+                GestureDetector(
+                  onTap: () async {
+                    final Uri _emailLaunchUri = Uri(
+                      scheme: 'mailto',
+                      path: state.linkMap['help_email'],
+                      queryParameters: {'subject': kHelpEmailSubject},
+                    );
 
-              if (await canLaunch(_emailLaunchUri.toString())) {
-                await launch(_emailLaunchUri.toString());
-              } else {
-                ToastMessage.showErrorToast("Error opening page", context);
-              }
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                getIt<TextFactory>().lite("Help"),
-                Icon(
-                  Icons.keyboard_arrow_right,
-                  color: kDarkGreyColor,
-                )
-              ],
-            ),
-          ),
-          SizedBox(height: 8),
-          GestureDetector(
-            onTap: () async {
-              final Uri _emailLaunchUri = Uri(
-                scheme: 'mailto',
-                path: kWpaContactEmail,
-                queryParameters: {'subject': kReportEmailSubject},
-              );
+                    if (await canLaunch(_emailLaunchUri.toString())) {
+                      await launch(_emailLaunchUri.toString());
+                    } else {
+                      ToastMessage.showErrorToast(
+                          "Error opening page", context);
+                    }
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      getIt<TextFactory>().lite("Help"),
+                      Icon(
+                        Icons.keyboard_arrow_right,
+                        color: kDarkGreyColor,
+                      )
+                    ],
+                  ),
+                ),
+                SizedBox(height: 8),
+                GestureDetector(
+                  onTap: () async {
+                    final Uri _emailLaunchUri = Uri(
+                      scheme: 'mailto',
+                      path: state.linkMap['report_email'],
+                      queryParameters: {'subject': kReportEmailSubject},
+                    );
 
-              if (await canLaunch(_emailLaunchUri.toString())) {
-                await launch(_emailLaunchUri.toString());
-              } else {
-                ToastMessage.showErrorToast("Error opening page", context);
-              }
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                getIt<TextFactory>().lite("Report a Problem"),
-                Icon(
-                  Icons.keyboard_arrow_right,
-                  color: kDarkGreyColor,
-                )
+                    if (await canLaunch(_emailLaunchUri.toString())) {
+                      await launch(_emailLaunchUri.toString());
+                    } else {
+                      ToastMessage.showErrorToast(
+                          "Error opening page", context);
+                    }
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      getIt<TextFactory>().lite("Report a Problem"),
+                      Icon(
+                        Icons.keyboard_arrow_right,
+                        color: kDarkGreyColor,
+                      )
+                    ],
+                  ),
+                ),
+                SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    getIt<TextFactory>().lite("Version 0.1.0 Beta 2"),
+                  ],
+                ),
+                Divider(),
               ],
             ),
-          ),
-          SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              getIt<TextFactory>().lite("Version 0.1.0 Beta 2"),
-            ],
-          ),
-          Divider(),
-        ],
-      ),
+          );
+        } else if (state is LinksError) {
+          return Container(
+            child: Text(state.message),
+          );
+        } else {
+          return Container();
+        }
+      },
     );
   }
 }
