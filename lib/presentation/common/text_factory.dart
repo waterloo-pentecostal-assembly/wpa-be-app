@@ -143,6 +143,17 @@ class TextFactory {
     );
   }
 
+  SelectableText selectLite(String text,
+      {double fontSize = 14.0,
+      Color color: Colors.black,
+      TextOverflow overflow = TextOverflow.visible}) {
+    return SelectableText(
+      text,
+      style: liteTextStyle(fontSize: fontSize, color: color),
+      //selectable text does not have an overflow parameter, may cause issue
+    );
+  }
+
   Text lite2(
     String text, {
     double fontSize = 14.0,

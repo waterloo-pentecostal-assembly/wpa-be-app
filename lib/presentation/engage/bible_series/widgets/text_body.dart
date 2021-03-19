@@ -22,7 +22,7 @@ class TextContentBodyWidget extends StatelessWidget {
             return Padding(
                 padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
                 child: getIt<TextFactory>()
-                    .lite(textContentBody.properties.paragraphs[index]));
+                    .selectLite(textContentBody.properties.paragraphs[index]));
           },
         ));
   }
