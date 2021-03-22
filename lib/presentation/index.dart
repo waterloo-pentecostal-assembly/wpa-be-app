@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:wpa_app/application/links/links_bloc.dart';
 import 'package:wpa_app/domain/authentication/entities.dart';
 
 import '../app/constants.dart';
@@ -25,12 +26,26 @@ class IndexPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (BuildContext context) => getIt<NavigationBarBloc>(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(
+          create: (BuildContext context) => getIt<NavigationBarBloc>(),
+        ),
+        BlocProvider(
+            create: (BuildContext context) =>
+                getIt<LinksBloc>()..add(LinksRequested()))
+      ],
       child: _IndexPage(
         indexedPages: indexedPages,
       ),
     );
+
+    // BlocProvider(
+    //   create: (BuildContext context) => getIt<NavigationBarBloc>(),
+    //   child: _IndexPage(
+    //     indexedPages: indexedPages,
+    //   ),
+    // );
   }
 }
 
@@ -74,10 +89,10 @@ class NavigationBar extends StatelessWidget {
   const NavigationBar({Key key, this.tabIndex, this.indexedPages})
       : super(key: key);
 
-  void handleOnTap(BuildContext context, int index) async {
+  void handleOnTap(BuildContext context, int index, String url) async {
     if (NavigationTabEnum.values[index] == NavigationTabEnum.GIVE) {
-      if (await canLaunch(kWpaGiveUrl)) {
-        await launch(kWpaGiveUrl, forceWebView: true, enableJavaScript: true);
+      if (await canLaunch(url)) {
+        await launch(url);
       } else {
         ToastMessage.showErrorToast("Error opening page", context);
       }
@@ -138,42 +153,53 @@ class NavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        NavigatorState currentNavigatorState =
-            indexedPages[tabIndex].navigatorKey.currentState;
-
-        if (currentNavigatorState.canPop()) {
-          return !await currentNavigatorState.maybePop();
-        } else {
-          // return true;
-          // TODO: return true to exit the app. Return false for testing
-          return false;
-        }
+    return BlocConsumer<LinksBloc, LinksState>(
+      listener: (context, state) {
+        // TODO: implement listener
       },
-      child: Scaffold(
-        body: IndexedStack(
-          index: tabIndex,
-          children: <Widget>[
-            indexedPages[0],
-            indexedPages[1],
-            indexedPages[2],
-            indexedPages[3],
-          ],
-        ),
-        bottomNavigationBar: BottomNavigationBar(
-          selectedItemColor: kWpaBlue.withOpacity(0.6),
-          unselectedItemColor: Colors.grey[500],
-          selectedLabelStyle:
-              getIt<TextFactory>().regularTextStyle(fontSize: 11),
-          unselectedLabelStyle:
-              getIt<TextFactory>().liteTextStyle(fontSize: 10),
-          type: BottomNavigationBarType.fixed,
-          currentIndex: tabIndex,
-          onTap: (int index) => handleOnTap(context, index),
-          items: getNavBarItems(),
-        ),
-      ),
+      builder: (context, state) {
+        String url = '';
+        if (state is LinksLoaded) {
+          url = state.linkMap['give_link'];
+        }
+        return WillPopScope(
+          onWillPop: () async {
+            NavigatorState currentNavigatorState =
+                indexedPages[tabIndex].navigatorKey.currentState;
+
+            if (currentNavigatorState.canPop()) {
+              return !await currentNavigatorState.maybePop();
+            } else {
+              // return true;
+              // TODO: return true to exit the app. Return false for testing
+              return false;
+            }
+          },
+          child: Scaffold(
+            body: IndexedStack(
+              index: tabIndex,
+              children: <Widget>[
+                indexedPages[0],
+                indexedPages[1],
+                indexedPages[2],
+                indexedPages[3],
+              ],
+            ),
+            bottomNavigationBar: BottomNavigationBar(
+              selectedItemColor: kWpaBlue.withOpacity(0.6),
+              unselectedItemColor: Colors.grey[500],
+              selectedLabelStyle:
+                  getIt<TextFactory>().regularTextStyle(fontSize: 11),
+              unselectedLabelStyle:
+                  getIt<TextFactory>().liteTextStyle(fontSize: 10),
+              type: BottomNavigationBarType.fixed,
+              currentIndex: tabIndex,
+              onTap: (int index) => handleOnTap(context, index, url),
+              items: getNavBarItems(),
+            ),
+          ),
+        );
+      },
     );
   }
 }
