@@ -84,10 +84,9 @@ Widget copyright(ScriptureBody script) {
 Widget verse(Scripture script, String key) {
   String verseNum = "$key ";
   String verse = script.verses[key];
-  return RichText(
-      text: TextSpan(
-          style: getIt<TextFactory>().liteTextStyle(),
-          children: <TextSpan>[
+  return SelectableText.rich(TextSpan(
+      style: getIt<TextFactory>().liteTextStyle(),
+      children: <TextSpan>[
         TextSpan(
             text: verseNum,
             style: getIt<TextFactory>().smallBoldTextStyle(fontSize: 10.0)),
