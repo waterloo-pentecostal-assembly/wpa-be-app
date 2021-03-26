@@ -149,7 +149,7 @@ class PrayerRequestMenuButton extends StatelessWidget {
           children: [
             Icon(Icons.error),
             SizedBox(width: 4),
-            getIt<TextFactory>().lite('REPORT'),
+            getIt<TextFactory>().lite('REPORT AS INAPPROPRIATE'),
           ],
         ),
       ));
