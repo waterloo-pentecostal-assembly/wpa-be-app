@@ -33,12 +33,16 @@ class ScriptureContentBodyWidget extends StatelessWidget {
 }
 
 Widget scripture(Scripture script) {
-  return Column(children: buildcombinedScripture(script));
+  List<String> verses = [];
+  List<int> sortedVerses = [];
+  verses = script.verses.keys.toList();
+  sortedVerses = verses.map((e) => int.parse(e)).toList()..sort();
+  return Column(children: buildcombinedScripture(script, sortedVerses));
 }
 
-List<Widget> buildcombinedScripture(Scripture script) {
+List<Widget> buildcombinedScripture(Scripture script, List<int> sortedVerses) {
   List<Widget> combinedScripture = [];
-  combinedScripture.add(book(script));
+  combinedScripture.add(book(script, sortedVerses));
   if (script.title != '') {
     combinedScripture.add(Padding(
         padding: const EdgeInsets.only(bottom: 16),
@@ -48,10 +52,10 @@ List<Widget> buildcombinedScripture(Scripture script) {
     ListView.builder(
       padding: const EdgeInsets.only(top: 0),
       shrinkWrap: true,
-      itemCount: script.verses.length,
+      itemCount: sortedVerses.length,
       physics: ClampingScrollPhysics(),
       itemBuilder: (BuildContext context, int index) {
-        String key = script.verses.keys.elementAt(index);
+        String key = sortedVerses[index].toString();
         return Padding(
           padding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
           child: verse(script, key),
@@ -62,9 +66,9 @@ List<Widget> buildcombinedScripture(Scripture script) {
   return combinedScripture;
 }
 
-Widget book(Scripture script) {
-  String start = script.verses.keys.elementAt(0);
-  String end = script.verses.keys.elementAt(script.verses.length - 1);
+Widget book(Scripture script, List<int> sortedVerses) {
+  String start = sortedVerses.first.toString();
+  String end = sortedVerses.last.toString();
   String book = script.book;
   String chapter = script.chapter;
   String text = "$book $chapter: $start - $end";

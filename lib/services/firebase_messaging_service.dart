@@ -74,7 +74,6 @@ class FirebaseMessagingService {
         ..add(
           NavigationBarEvent(
             tab: NavigationTabEnum.ADMIN,
-            route: '/user_verification',
           ),
         );
     }
