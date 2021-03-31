@@ -222,6 +222,7 @@ Stream<PrayerRequestsState> _mapPrayerRequestReportedEventToState(
 ) async* {
   try {
     await reportPrayerRequest(id: event.id);
+    getIt<FirebaseAnalytics>().logEvent(name: 'prayer_request_reported');
     yield PrayerRequestReportedAndRemoved(id: event.id);
   } on PrayerRequestsException catch (e) {
     yield PrayerRequestReportError(

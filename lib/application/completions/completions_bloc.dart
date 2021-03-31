@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:wpa_app/app/injection.dart';
@@ -115,6 +116,7 @@ Stream<CompletionsState> _mapMarkAsCompleteEventToState(
       id = await updateComplete(
           completionDetails: event.completionDetails, completionId: id);
     }
+    getIt<FirebaseAnalytics>().logEvent(name: 'engagement_completed');
     if (state.responses != null && state.responses.responses != null) {
       String responseId =
           await putResponses(completionId: id, responses: state.responses);
