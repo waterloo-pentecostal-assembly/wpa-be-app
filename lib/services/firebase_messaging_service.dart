@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/application/navigation_bar/navigation_bar_bloc.dart';
@@ -51,6 +52,8 @@ class FirebaseMessagingService {
 
   void navigationHandler(Map<String, dynamic> payload) {
     if (payload['notificationType'] == 'dailyEngagementReminder') {
+      getIt<FirebaseAnalytics>()
+          .logEvent(name: 'daily_engagement_notification_clicked');
       getIt<NavigationBarBloc>()
         ..add(
           NavigationBarEvent(

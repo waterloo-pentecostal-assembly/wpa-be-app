@@ -1,3 +1,4 @@
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -66,6 +67,8 @@ class EngagePage extends IIndexedPage {
                   case '/':
                     return EngageIndex();
                   case '/bible_series':
+                    getIt<FirebaseAnalytics>()
+                        .logEvent(name: 'bible_series_viewed');
                     Map args = settings.arguments;
                     return BibleSeriesDetailPage(
                       bibleSeriesId: args['bibleSeriesId'],
@@ -77,6 +80,8 @@ class EngagePage extends IIndexedPage {
                   case '/prayer_requests/mine':
                     return PrayerRequestsPage(tabIndex: 1);
                   case '/content_detail':
+                    getIt<FirebaseAnalytics>()
+                        .logEvent(name: 'engagement_viewed');
                     Map args = settings.arguments;
                     return ContentDetailPage(
                       seriesContentId: args['seriesContentId'],
