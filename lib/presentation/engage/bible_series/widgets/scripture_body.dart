@@ -82,7 +82,7 @@ Widget copyright(ScriptureBody script) {
   String attribution = script.properties.attribution;
   String version = script.properties.bibleVersion;
   String text =
-      "Scripture quotations taken from $version\n$attribution\nUsed by permission. All rights reserved worldwide";
+      "$version\n$attribution\nUsed by permission. All rights reserved worldwide";
   return getIt<TextFactory>().liteSmall(text);
 }
 
