@@ -31,13 +31,13 @@ class TextFactory {
     );
   }
 
-  Text subHeading(String text) {
+  Text subHeading(String text, {double fontSize = 18}) {
     return Text(
       text,
       style: TextStyle(
         fontFamily: _fontFamily,
         fontWeight: FontWeight.w700,
-        fontSize: 18.0,
+        fontSize: fontSize,
       ),
     );
   }

@@ -74,27 +74,26 @@ Widget book(Scripture script, List<int> sortedVerses) {
   String text = "$book $chapter: $start - $end";
   return Padding(
     padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
-    child: getIt<TextFactory>().subHeading(text),
+    child: getIt<TextFactory>().subHeading(text, fontSize: 22),
   );
 }
 
 Widget copyright(ScriptureBody script) {
   String attribution = script.properties.attribution;
   String version = script.properties.bibleVersion;
-  String text =
-      "$version\n$attribution\nUsed by permission. All rights reserved worldwide";
-  return getIt<TextFactory>().liteSmall(text);
+  String text = "$version\n$attribution";
+  return getIt<TextFactory>().liteSmall(text, fontSize: 12);
 }
 
 Widget verse(Scripture script, String key) {
   String verseNum = "$key ";
   String verse = script.verses[key];
   return SelectableText.rich(TextSpan(
-      style: getIt<TextFactory>().liteTextStyle(),
+      style: getIt<TextFactory>().liteTextStyle(fontSize: 16),
       children: <TextSpan>[
         TextSpan(
             text: verseNum,
-            style: getIt<TextFactory>().smallBoldTextStyle(fontSize: 10.0)),
+            style: getIt<TextFactory>().smallBoldTextStyle(fontSize: 12.0)),
         TextSpan(text: verse),
       ]));
 }
