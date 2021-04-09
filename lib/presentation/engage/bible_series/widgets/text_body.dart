@@ -21,8 +21,9 @@ class TextContentBodyWidget extends StatelessWidget {
           itemBuilder: (BuildContext context, int index) {
             return Padding(
                 padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
-                child: getIt<TextFactory>()
-                    .selectLite(textContentBody.properties.paragraphs[index]));
+                child: getIt<TextFactory>().selectLite(
+                    textContentBody.properties.paragraphs[index],
+                    fontSize: 16));
           },
         ));
   }

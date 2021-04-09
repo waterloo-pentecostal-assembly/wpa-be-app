@@ -71,12 +71,14 @@ Widget questionContainer(
                 alignment: Alignment.topLeft,
                 width: 14,
                 child: getIt<TextFactory>().textFormFieldInput(
-                    (question.location[1] + 1).toString() + ".")),
+                    (question.location[1] + 1).toString() + ".",
+                    fontSize: 16)),
             Expanded(
                 child: Padding(
               padding:
                   const EdgeInsets.fromLTRB(2, kTopPaddingQuestionBody, 2, 8),
-              child: getIt<TextFactory>().textFormFieldInput(question.question),
+              child: getIt<TextFactory>()
+                  .textFormFieldInput(question.question, fontSize: 16),
             ))
           ],
         ),
@@ -95,7 +97,7 @@ Widget questionContainer(
                     initialValue: getResponse(state, contentNum, questionNum),
                     decoration: const InputDecoration.collapsed(
                       hintText: "Share your thoughts ...",
-                      hintStyle: TextStyle(fontSize: 12),
+                      hintStyle: TextStyle(fontSize: 16),
                       border: UnderlineInputBorder(),
                     ),
                     onChanged: (value) {
@@ -116,7 +118,7 @@ Widget questionContainer(
                     initialValue: '',
                     decoration: const InputDecoration.collapsed(
                       hintText: "Share your thoughts ...",
-                      hintStyle: TextStyle(fontSize: 12),
+                      hintStyle: TextStyle(fontSize: 14),
                       border: UnderlineInputBorder(),
                     ),
                     onChanged: (value) {
