@@ -132,16 +132,17 @@ class ProgressTile extends StatelessWidget {
   }
 
   GaugePointer getExpectedIndicator(BibleSeriesState state) {
+    double seriesValue = 0;
     if (state is RecentBibleSeries) {
-      return MarkerPointer(
-          value: getExpectedProgress(state.bibleSeriesList),
-          enableDragging: false,
-          enableAnimation: true,
-          markerHeight: 15,
-          markerOffset: -20,
-          color: Colors.black);
+      seriesValue = getExpectedProgress(state.bibleSeriesList);
     }
-    return MarkerPointer(value: 0);
+    return MarkerPointer(
+        value: seriesValue,
+        enableDragging: false,
+        enableAnimation: true,
+        markerHeight: 15,
+        markerOffset: -20,
+        color: Colors.black);
   }
 }
 
