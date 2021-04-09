@@ -218,7 +218,6 @@ double getExpectedProgress(List<BibleSeries> bibleSeriesList) {
         }
         totalDays++;
       });
-      print(totalDays);
       return (finishedDays / totalDays * 100);
     }
   }
