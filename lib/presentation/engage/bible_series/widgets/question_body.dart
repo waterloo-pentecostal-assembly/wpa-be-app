@@ -77,7 +77,8 @@ Widget questionContainer(
                 child: Padding(
               padding:
                   const EdgeInsets.fromLTRB(2, kTopPaddingQuestionBody, 2, 8),
-              child: getIt<TextFactory>().textFormFieldInput(question.question),
+              child: getIt<TextFactory>()
+                  .textFormFieldInput(question.question, fontSize: 16),
             ))
           ],
         ),
@@ -96,7 +97,7 @@ Widget questionContainer(
                     initialValue: getResponse(state, contentNum, questionNum),
                     decoration: const InputDecoration.collapsed(
                       hintText: "Share your thoughts ...",
-                      hintStyle: TextStyle(fontSize: 14),
+                      hintStyle: TextStyle(fontSize: 16),
                       border: UnderlineInputBorder(),
                     ),
                     onChanged: (value) {
