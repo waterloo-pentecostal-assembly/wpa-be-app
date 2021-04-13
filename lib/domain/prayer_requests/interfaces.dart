@@ -13,12 +13,16 @@ abstract class IPrayerRequestsRepository {
 
   Future<List<PrayerRequest>> getMyPrayerRequests();
 
+  Future<List<PrayerRequest>> getMyAnsweredPrayerRequests();
+
   /// Checks if the signed in user is within the prayer request limit
   Future<bool> canAddPrayerRequest();
 
   Future<void> deletePrayerRequest({
     @required String id,
   });
+
+  Future<void> closePrayerRequest({@required String id});
 
   /// Reports a Prayer Request. Resets is_approved to false
   /// to reapproval

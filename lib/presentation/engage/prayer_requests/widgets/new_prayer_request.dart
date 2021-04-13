@@ -254,13 +254,24 @@ class PostButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.all(Radius.circular(16)),
-      child: FlatButton(
-        height: 30,
-        minWidth: 90,
-        color: kWpaBlue.withOpacity(0.75),
-        textColor: Colors.white,
-        padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      child: TextButton(
+        style: ButtonStyle(
+            minimumSize: MaterialStateProperty.all(Size(90, 30)),
+            backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+              if (states.contains(MaterialState.disabled)) {
+                return kWpaBlue.withOpacity(0.25);
+              }
+              return kWpaBlue.withOpacity(0.75);
+            }),
+            foregroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+              if (states.contains(MaterialState.disabled)) {
+                return Colors.white;
+              }
+              return Colors.white;
+            }),
+            padding: MaterialStateProperty.all(
+                EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8)),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap),
         onPressed: !isValid
             ? null
             : () {
@@ -271,8 +282,6 @@ class PostButton extends StatelessWidget {
                   ));
                 entry.remove();
               },
-        disabledColor: kWpaBlue.withOpacity(0.25),
-        disabledTextColor: Colors.white,
         child: getIt<TextFactory>().regularButton('POST'),
       ),
     );
@@ -287,12 +296,14 @@ class CancelButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return ClipRRect(
       borderRadius: BorderRadius.all(Radius.circular(16)),
-      child: FlatButton(
-        height: 30,
-        minWidth: 90,
-        color: kCardGrey,
-        padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      child: TextButton(
+        style: TextButton.styleFrom(
+          primary: Colors.black,
+          minimumSize: Size(90, 30),
+          backgroundColor: kCardGrey,
+          padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
         onPressed: () => entry.remove(),
         child: getIt<TextFactory>().regularButton('CANCEL'),
       ),

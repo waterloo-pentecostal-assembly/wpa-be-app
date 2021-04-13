@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:wpa_app/app/constants.dart';
-import 'package:wpa_app/app/injection.dart';
-import 'package:wpa_app/application/completions/completions_bloc.dart';
-import 'package:wpa_app/domain/completions/entities.dart';
-import 'package:wpa_app/presentation/common/loader.dart';
-
-import 'package:wpa_app/presentation/common/text_factory.dart';
-
+import '../../../../app/constants.dart';
+import '../../../../app/injection.dart';
+import '../../../../application/completions/completions_bloc.dart';
 import '../../../../domain/bible_series/entities.dart';
+import '../../../../domain/completions/entities.dart';
+import '../../../common/text_factory.dart';
 
 class QuestionContentBodyWidget extends StatelessWidget {
   final CompletionDetails completionDetails;
@@ -74,12 +71,14 @@ Widget questionContainer(
                 alignment: Alignment.topLeft,
                 width: 14,
                 child: getIt<TextFactory>().textFormFieldInput(
-                    (question.location[1] + 1).toString() + ".")),
+                    (question.location[1] + 1).toString() + ".",
+                    fontSize: 16)),
             Expanded(
                 child: Padding(
               padding:
                   const EdgeInsets.fromLTRB(2, kTopPaddingQuestionBody, 2, 8),
-              child: getIt<TextFactory>().textFormFieldInput(question.question),
+              child: getIt<TextFactory>()
+                  .textFormFieldInput(question.question, fontSize: 16),
             ))
           ],
         ),
@@ -98,7 +97,7 @@ Widget questionContainer(
                     initialValue: getResponse(state, contentNum, questionNum),
                     decoration: const InputDecoration.collapsed(
                       hintText: "Share your thoughts ...",
-                      hintStyle: TextStyle(fontSize: 12),
+                      hintStyle: TextStyle(fontSize: 16),
                       border: UnderlineInputBorder(),
                     ),
                     onChanged: (value) {
@@ -119,7 +118,7 @@ Widget questionContainer(
                     initialValue: '',
                     decoration: const InputDecoration.collapsed(
                       hintText: "Share your thoughts ...",
-                      hintStyle: TextStyle(fontSize: 12),
+                      hintStyle: TextStyle(fontSize: 14),
                       border: UnderlineInputBorder(),
                     ),
                     onChanged: (value) {
@@ -130,7 +129,7 @@ Widget questionContainer(
                   ));
             }
           } else {
-            return Loader();
+            return Text('...');
           }
         },
       ),
@@ -139,12 +138,13 @@ Widget questionContainer(
 }
 
 String getResponse(CompletionsState state, int contentNum, int questionNum) {
-  if (state.responses.responses[contentNum.toString()]
-          [questionNum.toString()] !=
-      null) {
-    return state.responses
-        .responses[contentNum.toString()][questionNum.toString()].response;
-  } else {
-    return '';
+  if (state.responses.responses[contentNum.toString()] != null) {
+    if (state.responses.responses[contentNum.toString()]
+            [questionNum.toString()] !=
+        null) {
+      return state.responses
+          .responses[contentNum.toString()][questionNum.toString()].response;
+    }
   }
+  return '';
 }

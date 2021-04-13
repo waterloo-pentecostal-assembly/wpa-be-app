@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
+import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/domain/prayer_requests/exceptions.dart';
 
 import '../../domain/common/exceptions.dart';
@@ -16,9 +18,15 @@ part 'prayer_requests_state.dart';
 mixin MyPrayerRequestsBloc on Bloc<PrayerRequestsEvent, PrayerRequestsState> {}
 mixin AllPrayerRequestsBloc on Bloc<PrayerRequestsEvent, PrayerRequestsState> {}
 mixin NewPrayerRequestsBloc on Bloc<PrayerRequestsEvent, PrayerRequestsState> {}
+mixin MyAnsweredPrayerRequestsBloc
+    on Bloc<PrayerRequestsEvent, PrayerRequestsState> {}
 
 class PrayerRequestsBloc extends Bloc<PrayerRequestsEvent, PrayerRequestsState>
-    with MyPrayerRequestsBloc, AllPrayerRequestsBloc, NewPrayerRequestsBloc {
+    with
+        MyPrayerRequestsBloc,
+        AllPrayerRequestsBloc,
+        NewPrayerRequestsBloc,
+        MyAnsweredPrayerRequestsBloc {
   final IPrayerRequestsRepository _iPrayerRequestsRepository;
 
   PrayerRequestsBloc(this._iPrayerRequestsRepository)
@@ -77,6 +85,12 @@ class PrayerRequestsBloc extends Bloc<PrayerRequestsEvent, PrayerRequestsState>
     } else if (event is NewPrayerRequestAnonymousChanged) {
       yield* _mapNewPrayerRequestAnonymousChangedEventToState(
           state, event.isAnonymous);
+    } else if (event is MyAnsweredPrayerRequestsRequested) {
+      yield* _mapAnsweredPrayerRequestRequestedEventToState(
+          event, _iPrayerRequestsRepository.getMyAnsweredPrayerRequests);
+    } else if (event is ClosePrayerRequest) {
+      yield* _mapClosePrayerRequestEventToState(
+          event, _iPrayerRequestsRepository.closePrayerRequest);
     }
   }
 }
@@ -130,6 +144,23 @@ Stream<PrayerRequestsState> _mapMyPrayerRequestsRequestedEventToState(
   }
 }
 
+Stream<PrayerRequestsState> _mapAnsweredPrayerRequestRequestedEventToState(
+    MyAnsweredPrayerRequestsRequested event,
+    Future<List<PrayerRequest>> Function() getMyAnsweredPrayerRequests) async* {
+  try {
+    List<PrayerRequest> prayerRequests = await getMyAnsweredPrayerRequests();
+    yield MyAnsweredPrayerRequestsLoaded(prayerRequests: prayerRequests);
+  } on BaseApplicationException catch (e) {
+    yield PrayerRequestsError(
+      message: e.message,
+    );
+  } catch (e) {
+    yield PrayerRequestsError(
+      message: 'An unknown error occurred',
+    );
+  }
+}
+
 Stream<PrayerRequestsState> _mapPrayerRequestsRequestedEventToState(
   PrayerRequestsRequested event,
   Future<List<PrayerRequest>> Function({@required int limit}) getPrayerRequests,
@@ -156,6 +187,7 @@ Stream<PrayerRequestsState> _mapMyPrayerRequestDeletedEventToState(
 ) async* {
   try {
     await deletePrayerRequest(id: event.id);
+    getIt<FirebaseAnalytics>().logEvent(name: 'prayer_request_deleted');
     yield MyPrayerRequestDeleteComplete(id: event.id);
   } catch (e) {
     yield PrayerRequestDeleteError(
@@ -164,15 +196,34 @@ Stream<PrayerRequestsState> _mapMyPrayerRequestDeletedEventToState(
   }
 }
 
+Stream<PrayerRequestsState> _mapClosePrayerRequestEventToState(
+    ClosePrayerRequest event,
+    Future<PrayerRequest> Function({@required String id})
+        closePrayerRequest) async* {
+  try {
+    PrayerRequest prayerRequest = await closePrayerRequest(id: event.id);
+    getIt<FirebaseAnalytics>().logEvent(name: 'prayer_request_answered');
+    yield MyPrayerRequestAnsweredComplete(
+        id: event.id, prayerRequest: prayerRequest);
+  } on PrayerRequestsException catch (e) {
+    yield PrayerRequestReportError(
+      message: e.message,
+    );
+  } catch (e) {
+    yield PrayerRequestReportError(
+      message: 'Unable to close prayer request',
+    );
+  }
+}
+
 Stream<PrayerRequestsState> _mapPrayerRequestReportedEventToState(
   PrayerRequestReported event,
-  Future<bool> Function({@required String id}) reportPrayerRequest,
+  Future<void> Function({@required String id}) reportPrayerRequest,
 ) async* {
   try {
-    bool isSafe = await reportPrayerRequest(id: event.id);
-    if (!isSafe) {
-      yield PrayerRequestReportedAndRemoved(id: event.id);
-    }
+    await reportPrayerRequest(id: event.id);
+    getIt<FirebaseAnalytics>().logEvent(name: 'prayer_request_reported');
+    yield PrayerRequestReportedAndRemoved(id: event.id);
   } on PrayerRequestsException catch (e) {
     yield PrayerRequestReportError(
       message: e.message,
@@ -236,6 +287,7 @@ Stream<PrayerRequestsState> _mapPrayerRequestCreatedEventToState(
   try {
     PrayerRequest prayerRequest = await createPrayerRequest(
         request: event.request, isAnonymous: event.isAnonymous);
+    getIt<FirebaseAnalytics>().logEvent(name: 'prayer_request_created');
     yield NewPrayerRequestLoaded(prayerRequest: prayerRequest);
   } catch (e) {
     // No need to catch specific error here.
@@ -250,6 +302,7 @@ Stream<PrayerRequestsState> _mapPrayForRequestEventToState(
   yield PrayForRequestLoading(id: event.id);
   try {
     await prayForRequest(id: event.id);
+    getIt<FirebaseAnalytics>().logEvent(name: 'prayer_request_prayed');
     yield PrayForRequestComplete(id: event.id);
   } catch (e) {
     yield PrayForRequestError(message: "Unable to complete request.");

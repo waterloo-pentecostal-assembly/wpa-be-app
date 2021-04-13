@@ -1,11 +1,15 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:wpa_app/application/links/links_bloc.dart';
+import 'package:wpa_app/domain/links/interface.dart';
+import 'package:wpa_app/infrastructure/links/links_repository.dart';
 
 import '../application/achievements/achievements_bloc.dart';
 import '../application/admin/admin_bloc.dart';
@@ -64,7 +68,9 @@ void initializeInjections({
   getIt.registerLazySingleton<AppConfig>(() => appConfig);
 
   getIt.registerLazySingleton<FirebaseStorage>(() => FirebaseStorage.instance);
-  getIt.registerLazySingleton<FirebaseMessaging>(() => FirebaseMessaging());
+  getIt.registerLazySingleton<FirebaseMessaging>(
+      () => FirebaseMessaging.instance);
+  getIt.registerLazySingleton<FirebaseAnalytics>(() => FirebaseAnalytics());
 
   getIt.registerLazySingleton<FirebaseFirestore>(() {
     FirebaseFirestore firebaseFirestoreInstance = FirebaseFirestore.instance;
@@ -159,7 +165,9 @@ void initializeInjections({
     () => UserProfileBloc(getIt<IUserProfileRepository>()),
   );
 
-  getIt.registerFactory<NavigationBarBloc>(
+  getIt.registerFactory<LinksBloc>(() => LinksBloc(getIt<ILinksRepository>()));
+
+  getIt.registerLazySingleton<NavigationBarBloc>(
     () => NavigationBarBloc(),
   );
 
@@ -236,6 +244,9 @@ void initializeInjections({
       getIt<FirebaseStorageService>(),
     ),
   );
+
+  getIt.registerLazySingleton<ILinksRepository>(() => LinksRepository(
+      getIt<FirebaseFirestore>(), getIt<FirebaseFirestoreService>()));
 
   // Factories
   getIt.registerLazySingleton<TextFactory>(() => TextFactory('Montserrat'));

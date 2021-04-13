@@ -8,7 +8,6 @@ import '../presentation/authentication/password_reset_page.dart';
 import '../presentation/authentication/sign_in_page.dart';
 import '../presentation/authentication/sign_up_page.dart';
 import '../presentation/common/layout_factory.dart';
-import '../presentation/common/loader.dart';
 import '../presentation/index.dart';
 import '../presentation/splash/splash_page.dart';
 import '../services/firebase_messaging_service.dart';
@@ -38,7 +37,7 @@ class App extends StatelessWidget {
                 create: (context) => getIt<NavigationBarBloc>()
                   ..add(
                     NavigationBarEvent(
-                      tab: NavigationTabEnum.HOME,
+                      tab: NavigationTabEnum.ENGAGE,
                     ),
                   ),
               ),
@@ -55,7 +54,7 @@ class App extends StatelessWidget {
             ),
           );
         } else {
-          return Loader();
+          return CircularProgressIndicator();
         }
       },
     );

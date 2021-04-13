@@ -4,10 +4,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../app/constants.dart';
+import '../../../../app/injection.dart';
 import '../../../../application/bible_series/bible_series_bloc.dart';
 import '../../../../domain/bible_series/entities.dart';
-import '../../../../app/injection.dart';
-import '../../../common/loader.dart';
 import '../../../common/text_factory.dart';
 
 class BibleSeriesDetailPage extends StatelessWidget {
@@ -39,8 +39,9 @@ class BibleSeriesWidget extends StatefulWidget {
 
 class _BibleSeriesState extends State<BibleSeriesWidget>
     with TickerProviderStateMixin {
-  TabController _tabController;
   int tabLength;
+  TabController _tabController;
+  BibleSeries bibleSeries;
 
   @override
   void initState() {
@@ -50,18 +51,23 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<BibleSeriesBloc, BibleSeriesState>(
-      listener: (context, state) {},
-      builder: (BuildContext context, BibleSeriesState state) {
+      listener: (context, state) {
         if (state is BibleSeriesDetail) {
-          List<SeriesContentSnippet> snippet =
-              state.bibleSeriesDetail.seriesContentSnippet;
-
-          tabLength = state.bibleSeriesDetail.seriesContentSnippet.length;
-          _tabController = new TabController(
+          bibleSeries = state.bibleSeriesDetail;
+          tabLength = bibleSeries.seriesContentSnippet.length;
+          if (_tabController == null) {
+            _tabController = new TabController(
               length: tabLength,
               vsync: this,
-              initialIndex: _getInitialIndex(snippet));
-
+              initialIndex: _getInitialIndex(bibleSeries.seriesContentSnippet),
+            );
+          }
+        } else if (state is UpdatedBibleSeries) {
+          bibleSeries = state.bibleSeriesDetail;
+        }
+      },
+      builder: (BuildContext context, BibleSeriesState state) {
+        if (state is BibleSeriesDetail || state is UpdatedBibleSeries) {
           return Scaffold(
             body: Column(
               children: [
@@ -86,24 +92,23 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                             bottomRight: Radius.circular(30.0),
                           ),
                           child: Image.network(
-                            state.bibleSeriesDetail.imageUrl,
+                            bibleSeries.imageUrl,
                             fit: BoxFit.cover,
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10.0,
-                          vertical: 40.0,
-                        ),
-                        child: Row(
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.arrow_back),
-                              onPressed: () => Navigator.pop(context),
-                              color: Colors.white,
-                            )
-                          ],
+                      SafeArea(
+                        child: Padding(
+                          padding: const EdgeInsets.all(kHeadingPadding),
+                          child: Row(
+                            children: [
+                              IconButton(
+                                icon: Icon(Icons.arrow_back),
+                                onPressed: () => Navigator.pop(context),
+                                color: Colors.white,
+                              )
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -117,10 +122,9 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                     isScrollable: true,
                     indicator: BoxDecoration(),
                     indicatorSize: TabBarIndicatorSize.label,
-                    unselectedLabelColor: Colors.black54,
+                    unselectedLabelColor: Colors.black45,
                     labelColor: Colors.black87,
-                    tabs: _buildContentTabs(
-                        state.bibleSeriesDetail.seriesContentSnippet),
+                    tabs: _buildContentTabs(bibleSeries.seriesContentSnippet),
                   ),
                 ),
                 Expanded(
@@ -128,11 +132,7 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                     padding: EdgeInsets.all(0),
                     child: TabBarView(
                       controller: _tabController,
-                      children: _buildContentChildren(
-                        context,
-                        state.bibleSeriesDetail.seriesContentSnippet,
-                        state.bibleSeriesDetail.id,
-                      ),
+                      children: _buildContentChildren(context, bibleSeries),
                     ),
                   ),
                 )
@@ -141,10 +141,92 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
           );
         } else if (state is BibleSeriesError) {
           return Scaffold(
-              body: SafeArea(child: Text('Error: ${state.message}')));
+            body: SafeArea(
+              child: Text('Error: ${state.message}'),
+            ),
+          );
         }
-        return Loader();
+        return SeriesDetailPlaceholder();
       },
+    );
+  }
+}
+
+class SeriesDetailPlaceholder extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    int amtOfCards = (MediaQuery.of(context).size.width / 70).ceil();
+    return Scaffold(
+      body: Column(
+        children: [
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(30.0),
+                  bottomRight: Radius.circular(30.0),
+                ),
+                child: Container(
+                  height: 0.35 * MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  color: Colors.grey.shade200,
+                ),
+              ),
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(kHeadingPadding),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(Icons.arrow_back),
+                        onPressed: () => Navigator.pop(context),
+                        color: Colors.white,
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Container(
+            height: 148,
+            padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
+            child: ListView.builder(
+              padding: EdgeInsets.only(left: 16),
+              scrollDirection: Axis.horizontal,
+              itemCount: amtOfCards,
+              itemBuilder: (context, index) => Container(
+                width: 70,
+                margin: EdgeInsets.all(8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10.0),
+                      child: Container(
+                        height: 108,
+                        color: Colors.grey.shade200,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.only(top: 0, bottom: 15),
+            height: 60,
+            child: Container(
+              width: 0.9 * MediaQuery.of(context).size.width,
+              padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                color: Colors.grey.shade200,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -194,29 +276,29 @@ List<Widget> _buildContentTabs(
 }
 
 List<Widget> _buildContentChildren(
-  BuildContext context,
-  List<SeriesContentSnippet> seriesContentSnippets,
-  String bibleSeriesId,
-) {
+    BuildContext context, BibleSeries bibleSeries) {
   List<Widget> contentChildren = [];
-  seriesContentSnippets.forEach((_element) {
+
+  bibleSeries.seriesContentSnippet.asMap().forEach((i, _element) {
     List<Widget> listChildren = [];
 
-    _element.availableContentTypes.forEach((element) {
+    _element.availableContentTypes.asMap().forEach((j, element) {
       listChildren.add(
         Container(
           margin: EdgeInsets.only(top: 0, bottom: 15),
           height: 60,
           child: Tab(
             child: GestureDetector(
-              onTap: () async {
-                await Navigator.pushNamed(context, '/content_detail',
-                    arguments: {
-                      'bibleSeriesId': bibleSeriesId,
-                      'seriesContentId': element.contentId,
-                      'getCompletionDetails':
-                          element.isCompleted || element.isDraft,
-                    }).then((value) => {onGoBack(context, bibleSeriesId)});
+              onTap: () {
+                BlocProvider.of<BibleSeriesBloc>(context)
+                  ..add(RestoreState(bibleSeries));
+                Navigator.pushNamed(context, '/content_detail', arguments: {
+                  'bibleSeriesId': bibleSeries.id,
+                  'seriesContentId': element.contentId,
+                  'getCompletionDetails':
+                      element.isCompleted || element.isDraft,
+                  'seriesContentType': element.seriesContentType,
+                }).then((value) => {onGoBack(context, i, j, bibleSeries)});
               },
               child: Container(
                 width: 0.9 * MediaQuery.of(context).size.width,
@@ -326,7 +408,9 @@ int _getInitialIndex(List<SeriesContentSnippet> snippet) {
   return 0;
 }
 
-FutureOr onGoBack(BuildContext context, String bibleSeriesId) {
+FutureOr onGoBack(
+    BuildContext context, int scsNum, int actNum, BibleSeries bibleSeries) {
   BlocProvider.of<BibleSeriesBloc>(context)
-    ..add(BibleSeriesDetailRequested(bibleSeriesId: bibleSeriesId));
+    ..add(UpdateCompletionDetail(
+        bibleSeries: bibleSeries, actNum: actNum, scsNum: scsNum));
 }

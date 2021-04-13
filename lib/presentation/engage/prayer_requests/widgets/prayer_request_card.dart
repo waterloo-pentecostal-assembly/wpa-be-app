@@ -7,10 +7,10 @@ import '../../../../application/prayer_requests/prayer_requests_bloc.dart';
 import '../../../../domain/prayer_requests/entities.dart';
 import '../../../common/helpers.dart';
 import '../../../common/text_factory.dart';
-import '../../../common/toast_message.dart';
 
 enum PrayerActionOptions {
   MY_DELETE,
+  MY_CLOSE,
   REPORT,
 }
 
@@ -106,6 +106,9 @@ class PrayerRequestMenuButton extends StatelessWidget {
     } else if (menuButtonValue.action == PrayerActionOptions.REPORT) {
       BlocProvider.of<AllPrayerRequestsBloc>(context)
         ..add(PrayerRequestReported(id: menuButtonValue.id));
+    } else if (menuButtonValue.action == PrayerActionOptions.MY_CLOSE) {
+      BlocProvider.of<PrayerRequestsBloc>(context)
+        ..add(ClosePrayerRequest(id: menuButtonValue.id));
     }
   }
 
@@ -125,6 +128,19 @@ class PrayerRequestMenuButton extends StatelessWidget {
           ],
         ),
       ));
+      if (!prayerRequest.isAnswered) {
+        popupMenuItems.add(PopupMenuItem(
+          value: MenuButtonValue(
+              id: prayerRequest.id, action: PrayerActionOptions.MY_CLOSE),
+          child: Row(
+            children: [
+              Icon(Icons.check),
+              SizedBox(width: 4),
+              getIt<TextFactory>().lite('PRAYER ANSWERED'),
+            ],
+          ),
+        ));
+      }
     } else {
       popupMenuItems.add(PopupMenuItem(
         value: MenuButtonValue(
@@ -133,7 +149,7 @@ class PrayerRequestMenuButton extends StatelessWidget {
           children: [
             Icon(Icons.error),
             SizedBox(width: 4),
-            getIt<TextFactory>().lite('REPORT'),
+            getIt<TextFactory>().lite('REPORT AS INAPPROPRIATE'),
           ],
         ),
       ));
@@ -157,13 +173,13 @@ class PrayerRequestUserAndDate extends StatelessWidget {
           child: Container(
             height: 30,
             width: 30,
-            child: (prayerRequest.userSnippet.profilePhotoUrl == null ||
+            child: (prayerRequest.userSnippet.thumbnailUrl == null ||
                     prayerRequest.isAnonymous)
                 ? Image.asset(kProfilePhotoPlaceholder)
                 : FadeInImage.assetNetwork(
                     fit: BoxFit.cover,
                     placeholder: kProfilePhotoPlaceholder,
-                    image: prayerRequest.userSnippet.profilePhotoUrl,
+                    image: prayerRequest.userSnippet.thumbnailUrl,
                   ),
           ),
         ),
@@ -208,12 +224,7 @@ class _PrayButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<AllPrayerRequestsBloc, PrayerRequestsState>(
-      listener: (BuildContext context, PrayerRequestsState state) {
-        if (state is PrayForRequestError) {
-          ToastMessage.showErrorToast(state.message, context);
-        }
-      },
+    return BlocBuilder<AllPrayerRequestsBloc, PrayerRequestsState>(
       builder: (BuildContext context, PrayerRequestsState state) {
         if (prayerRequest.hasPrayed) {
           return _createPrayedButton();
@@ -232,41 +243,44 @@ class _PrayButton extends StatelessWidget {
   }
 
   Widget _createPrayButton(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.all(Radius.circular(20)),
-      child: FlatButton(
-        height: 32,
-        minWidth: 0,
-        color: kCardGrey,
-        padding: EdgeInsets.only(top: 6, bottom: 6, left: 12, right: 12),
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        onPressed: () {
-          BlocProvider.of<AllPrayerRequestsBloc>(context).add(PrayForRequest(
-            id: prayerRequest.id,
-          ));
-        },
-        child: getIt<TextFactory>().regular('PRAY'),
+    return Container(
+      child: ClipRRect(
+        borderRadius: BorderRadius.all(Radius.circular(20)),
+        child: TextButton(
+          style: TextButton.styleFrom(
+              padding: EdgeInsets.only(top: 6, bottom: 6, left: 12, right: 12),
+              minimumSize: Size(0, 32),
+              backgroundColor: kCardGrey,
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+          onPressed: () {
+            BlocProvider.of<AllPrayerRequestsBloc>(context).add(PrayForRequest(
+              id: prayerRequest.id,
+            ));
+          },
+          child: getIt<TextFactory>().regular('PRAY'),
+        ),
       ),
     );
   }
 
   Widget _createPrayedButton() {
-    return FlatButton(
-      height: 24,
-      minWidth: 0,
-      padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    return TextButton(
+      style: TextButton.styleFrom(
+        minimumSize: Size(0, 24),
+        padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
+        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      ),
       onPressed: null,
       child: getIt<TextFactory>().regular('PRAYED!', color: Colors.black54),
     );
   }
 
   Widget _createLoadingButton() {
-    return FlatButton(
-      height: 24,
-      minWidth: 0,
-      padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    return TextButton(
+      style: TextButton.styleFrom(
+          minimumSize: Size(0, 24),
+          padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap),
       onPressed: null,
       child: getIt<TextFactory>().regular('...'),
     );
@@ -280,11 +294,11 @@ class PrayedByIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FlatButton(
-      height: 24,
-      minWidth: 0,
-      padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    return TextButton(
+      style: TextButton.styleFrom(
+          minimumSize: Size(0, 24),
+          padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap),
       onPressed: null,
       child: getIt<TextFactory>().regular(
           'Prayed by $amount other${getS(amount)}',
@@ -303,14 +317,14 @@ class PrayedByIndicator extends StatelessWidget {
 class PendingIndicator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return FlatButton(
-      height: 24,
-      minWidth: 0,
-      padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
-      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+    return TextButton(
+      style: TextButton.styleFrom(
+          minimumSize: Size(0, 24),
+          padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap),
       onPressed: null,
       child: getIt<TextFactory>()
-          .regular('Pending Approval', color: kWarningColor.withOpacity(0.8)),
+          .regular('Pending', color: kWarningColor.withOpacity(0.8)),
     );
   }
 }

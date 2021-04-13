@@ -6,6 +6,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:wpa_app/application/links/links_bloc.dart';
+import 'package:wpa_app/presentation/profile/terms_of_use.dart';
 
 import '../../app/constants.dart';
 import '../../app/injection.dart';
@@ -51,6 +53,8 @@ class ProfilePage extends IIndexedPage {
                     return ProfilePageRoot();
                   case '/privacy_policy':
                     return PrivacyPolicyPage();
+                  case '/terms_of_use':
+                    return TermsOfUsePage();
                   default:
                     return ProfilePageRoot();
                 }
@@ -178,6 +182,26 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
           );
         } else {
           LocalUser localUser = getIt<LocalUser>();
+          String photoUrl = localUser.thumbnailUrl;
+          Widget imageWidget;
+
+          if (state is NewProfilePhotoUploadComplete) {
+            imageWidget = Image.file(
+              state.profilePhoto,
+              fit: BoxFit.cover,
+            );
+          } else {
+            if (photoUrl == null) {
+              imageWidget = Image.asset(kProfilePhotoPlaceholder);
+            } else {
+              imageWidget = FadeInImage.assetNetwork(
+                fit: BoxFit.cover,
+                placeholder: kProfilePhotoPlaceholder,
+                image: photoUrl,
+              );
+            }
+          }
+
           return Column(
             children: [
               ClipOval(
@@ -187,13 +211,7 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
                     Container(
                       height: profilePhotoDiameter,
                       width: profilePhotoDiameter,
-                      child: (localUser.profilePhotoUrl == null)
-                          ? Image.asset(kProfilePhotoPlaceholder)
-                          : FadeInImage.assetNetwork(
-                              fit: BoxFit.cover,
-                              placeholder: kProfilePhotoPlaceholder,
-                              image: localUser.profilePhotoUrl,
-                            ),
+                      child: imageWidget,
                     ),
                     GestureDetector(
                       onTap: selectNewProfileImage,
@@ -377,98 +395,137 @@ class _NotificationSettingsState extends State<NotificationSettings> {
 class Other extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 12.0, right: 12.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            child: getIt<TextFactory>().regular('OTHER'),
-          ),
-          Divider(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              getIt<TextFactory>().lite("Privacy Policy"),
-              Icon(
-                Icons.keyboard_arrow_right,
-                color: kDarkGreyColor,
-              )
-            ],
-          ),
-          SizedBox(height: 6),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              getIt<TextFactory>().lite("Terms of Use"),
-              Icon(
-                Icons.keyboard_arrow_right,
-                color: kDarkGreyColor,
-              )
-            ],
-          ),
-          SizedBox(height: 8),
-          GestureDetector(
-            onTap: () async {
-              final Uri _emailLaunchUri = Uri(
-                scheme: 'mailto',
-                path: kWpaContactEmail,
-                queryParameters: {'subject': kHelpEmailSubject},
-              );
-
-              if (await canLaunch(_emailLaunchUri.toString())) {
-                await launch(_emailLaunchUri.toString());
-              } else {
-                ToastMessage.showErrorToast("Error opening page", context);
-              }
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return BlocConsumer<LinksBloc, LinksState>(
+      listener: (context, state) {
+        // TODO: implement listener
+      },
+      builder: (context, state) {
+        if (state is LinksLoaded) {
+          return Padding(
+            padding: const EdgeInsets.only(left: 12.0, right: 12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                getIt<TextFactory>().lite("Help"),
-                Icon(
-                  Icons.keyboard_arrow_right,
-                  color: kDarkGreyColor,
-                )
+                Container(
+                  child: getIt<TextFactory>().regular('OTHER'),
+                ),
+                Divider(),
+                GestureDetector(
+                  onTap: () async {
+                    String url = state.linkMap['privacy_policy_link'];
+                    if (await canLaunch(url)) {
+                      await launch(url);
+                    } else {
+                      ToastMessage.showErrorToast(
+                          "Error opening page", context);
+                    }
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      getIt<TextFactory>().lite("Privacy Policy"),
+                      Icon(
+                        Icons.keyboard_arrow_right,
+                        color: kDarkGreyColor,
+                      )
+                    ],
+                  ),
+                ),
+                SizedBox(height: 6),
+                GestureDetector(
+                  onTap: () async {
+                    String url = state.linkMap['terms_of_use_link'];
+                    if (await canLaunch(url)) {
+                      await launch(url);
+                    } else {
+                      ToastMessage.showErrorToast(
+                          "Error opening page", context);
+                    }
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      getIt<TextFactory>().lite("Terms of Use"),
+                      Icon(
+                        Icons.keyboard_arrow_right,
+                        color: kDarkGreyColor,
+                      )
+                    ],
+                  ),
+                ),
+                SizedBox(height: 8),
+                GestureDetector(
+                  onTap: () async {
+                    final Uri _emailLaunchUri = Uri(
+                      scheme: 'mailto',
+                      path: state.linkMap['help_email'],
+                      queryParameters: {'subject': kHelpEmailSubject},
+                    );
+
+                    if (await canLaunch(_emailLaunchUri.toString())) {
+                      await launch(_emailLaunchUri.toString());
+                    } else {
+                      ToastMessage.showErrorToast(
+                          "Error opening page", context);
+                    }
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      getIt<TextFactory>().lite("Help"),
+                      Icon(
+                        Icons.keyboard_arrow_right,
+                        color: kDarkGreyColor,
+                      )
+                    ],
+                  ),
+                ),
+                SizedBox(height: 8),
+                GestureDetector(
+                  onTap: () async {
+                    final Uri _emailLaunchUri = Uri(
+                      scheme: 'mailto',
+                      path: state.linkMap['report_email'],
+                      queryParameters: {'subject': kReportEmailSubject},
+                    );
+
+                    if (await canLaunch(_emailLaunchUri.toString())) {
+                      await launch(_emailLaunchUri.toString());
+                    } else {
+                      ToastMessage.showErrorToast(
+                          "Error opening page", context);
+                    }
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      getIt<TextFactory>().lite("Report a Problem"),
+                      Icon(
+                        Icons.keyboard_arrow_right,
+                        color: kDarkGreyColor,
+                      )
+                    ],
+                  ),
+                ),
+                SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    getIt<TextFactory>().lite("Version 1.0.0"),
+                  ],
+                ),
+                Divider(),
               ],
             ),
-          ),
-          SizedBox(height: 8),
-          GestureDetector(
-            onTap: () async {
-              final Uri _emailLaunchUri = Uri(
-                scheme: 'mailto',
-                path: kWpaContactEmail,
-                queryParameters: {'subject': kReportEmailSubject},
-              );
-
-              if (await canLaunch(_emailLaunchUri.toString())) {
-                await launch(_emailLaunchUri.toString());
-              } else {
-                ToastMessage.showErrorToast("Error opening page", context);
-              }
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                getIt<TextFactory>().lite("Report a Problem"),
-                Icon(
-                  Icons.keyboard_arrow_right,
-                  color: kDarkGreyColor,
-                )
-              ],
-            ),
-          ),
-          SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              getIt<TextFactory>().lite("Version 0.0.1"),
-            ],
-          ),
-          Divider(),
-        ],
-      ),
+          );
+        } else if (state is LinksError) {
+          return Container(
+            child: Text(state.message),
+          );
+        } else {
+          return Container();
+        }
+      },
     );
   }
 }
@@ -509,7 +566,7 @@ class _TestImagePickerState extends State<TestImagePicker> {
           child:
               _image == null ? Text('No image selected.') : Image.file(_image),
         ),
-        FlatButton(
+        TextButton(
           onPressed: getImage,
           child: Icon(Icons.add_a_photo),
         ),

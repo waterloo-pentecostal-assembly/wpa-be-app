@@ -54,9 +54,27 @@ class CompletionsRepository extends ICompletionsRepository {
   @override
   Future<void> markAsIncomplete({
     String completionId,
+    bool isResponsePossible,
   }) async {
     try {
-      await _completionsCollection.doc(completionId).delete();
+      if (isResponsePossible) {
+        final LocalUser user = getIt<LocalUser>();
+        await _completionsCollection.doc(completionId).delete();
+        QuerySnapshot responsesSubCollection = await _completionsCollection
+            .doc(completionId)
+            .collection('responses')
+            .where('user_id', isEqualTo: user.id)
+            .get();
+        for (int i = 0; i < responsesSubCollection.docs.length; i++) {
+          await _completionsCollection
+              .doc(completionId)
+              .collection('responses')
+              .doc(responsesSubCollection.docs[i].id)
+              .delete();
+        }
+      } else {
+        await _completionsCollection.doc(completionId).delete();
+      }
     } catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
@@ -141,15 +159,40 @@ class CompletionsRepository extends ICompletionsRepository {
   }
 
   @override
+  Future<CompletionDetails> getCompletionOrNull(
+      {String seriesContentId}) async {
+    QuerySnapshot snapshot;
+    final LocalUser user = getIt<LocalUser>();
+    try {
+      snapshot = await _completionsCollection
+          .where("user_id", isEqualTo: user.id)
+          .where("content_id", isEqualTo: seriesContentId)
+          .get();
+    } catch (e) {
+      _firebaseFirestoreService.handleException(e);
+    }
+    if (snapshot.docs.length > 0) {
+      DocumentSnapshot document = snapshot.docs[0];
+      final CompletionDetails seriesContent =
+          CompletionsDto.fromFirestore(document).toDomain();
+      return seriesContent;
+    } else {
+      return null;
+    }
+  }
+
+  @override
   Future<Responses> getResponses({
     String completionId,
   }) async {
     QuerySnapshot querySnapshot;
+    final LocalUser user = getIt<LocalUser>();
 
     try {
       querySnapshot = await _completionsCollection
           .doc(completionId)
           .collection("responses")
+          .where("user_id", isEqualTo: user.id)
           .get();
     } catch (e) {
       _firebaseFirestoreService.handleException(e);
@@ -158,11 +201,14 @@ class CompletionsRepository extends ICompletionsRepository {
     if (querySnapshot.docs.isNotEmpty) {
       DocumentSnapshot document = querySnapshot.docs[0];
       return ResponsesDto.fromFirestore(document).toDomain();
+    } else {
+      return Responses();
     }
-    throw CompletionsException(
-      code: CompletionsExceptionCode.NO_RESPONSES,
-      message: 'Cannot find completion details',
-    );
+    //TODO: change to include throwing exception while still returning empty response for image responses
+    // throw CompletionsException(
+    //   code: CompletionsExceptionCode.NO_RESPONSES,
+    //   message: 'Cannot find completion details',
+    // );
   }
 
   @override

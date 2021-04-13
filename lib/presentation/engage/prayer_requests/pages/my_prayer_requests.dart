@@ -89,6 +89,11 @@ class _MyPrayerRequestsState extends State<MyPrayerRequests>
               }
             } else if (state is NewPrayerRequestLoaded) {
               _insertAtTop(state.prayerRequest);
+            } else if (state is MyPrayerRequestAnsweredComplete) {
+              int indexToDelete = getIndexToDelete(state.id);
+              if (indexToDelete != null) {
+                _delete(indexToDelete);
+              }
             }
           },
         ),

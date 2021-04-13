@@ -57,3 +57,12 @@ class SeriesContentDetail extends BibleSeriesState {
   @override
   List<Object> get props => [_seriesContentDetail, _completionDetail];
 }
+
+class UpdatedBibleSeries extends BibleSeriesState {
+  final BibleSeries _bibleSeriesDetail;
+  UpdatedBibleSeries(this._bibleSeriesDetail);
+  BibleSeries get bibleSeriesDetail => _bibleSeriesDetail;
+
+  @override
+  List<Object> get props => [_bibleSeriesDetail];
+}

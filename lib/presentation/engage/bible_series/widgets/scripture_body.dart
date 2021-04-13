@@ -33,12 +33,16 @@ class ScriptureContentBodyWidget extends StatelessWidget {
 }
 
 Widget scripture(Scripture script) {
-  return Column(children: buildcombinedScripture(script));
+  List<String> verses = [];
+  List<int> sortedVerses = [];
+  verses = script.verses.keys.toList();
+  sortedVerses = verses.map((e) => int.parse(e)).toList()..sort();
+  return Column(children: buildcombinedScripture(script, sortedVerses));
 }
 
-List<Widget> buildcombinedScripture(Scripture script) {
+List<Widget> buildcombinedScripture(Scripture script, List<int> sortedVerses) {
   List<Widget> combinedScripture = [];
-  combinedScripture.add(book(script));
+  combinedScripture.add(book(script, sortedVerses));
   if (script.title != '') {
     combinedScripture.add(Padding(
         padding: const EdgeInsets.only(bottom: 16),
@@ -48,10 +52,10 @@ List<Widget> buildcombinedScripture(Scripture script) {
     ListView.builder(
       padding: const EdgeInsets.only(top: 0),
       shrinkWrap: true,
-      itemCount: script.verses.length,
+      itemCount: sortedVerses.length,
       physics: ClampingScrollPhysics(),
       itemBuilder: (BuildContext context, int index) {
-        String key = script.verses.keys.elementAt(index);
+        String key = sortedVerses[index].toString();
         return Padding(
           padding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
           child: verse(script, key),
@@ -62,35 +66,34 @@ List<Widget> buildcombinedScripture(Scripture script) {
   return combinedScripture;
 }
 
-Widget book(Scripture script) {
-  String start = script.verses.keys.elementAt(0);
-  String end = script.verses.keys.elementAt(script.verses.length - 1);
+Widget book(Scripture script, List<int> sortedVerses) {
+  String start = sortedVerses.first.toString();
+  String end = sortedVerses.last.toString();
   String book = script.book;
   String chapter = script.chapter;
   String text = "$book $chapter: $start - $end";
   return Padding(
     padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
-    child: getIt<TextFactory>().subHeading(text),
+    child: getIt<TextFactory>().subHeading(text, fontSize: 22),
   );
 }
 
 Widget copyright(ScriptureBody script) {
   String attribution = script.properties.attribution;
   String version = script.properties.bibleVersion;
-  String text = "$version@\n$attribution";
-  return getIt<TextFactory>().liteSmall(text);
+  String text = "$version\n$attribution";
+  return getIt<TextFactory>().liteSmall(text, fontSize: 12);
 }
 
 Widget verse(Scripture script, String key) {
   String verseNum = "$key ";
   String verse = script.verses[key];
-  return RichText(
-      text: TextSpan(
-          style: getIt<TextFactory>().liteTextStyle(),
-          children: <TextSpan>[
+  return SelectableText.rich(TextSpan(
+      style: getIt<TextFactory>().liteTextStyle(fontSize: 16),
+      children: <TextSpan>[
         TextSpan(
             text: verseNum,
-            style: getIt<TextFactory>().smallBoldTextStyle(fontSize: 10.0)),
+            style: getIt<TextFactory>().smallBoldTextStyle(fontSize: 12.0)),
         TextSpan(text: verse),
       ]));
 }

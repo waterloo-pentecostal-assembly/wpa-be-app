@@ -96,8 +96,7 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
           listener: (context, state) {
             // Handle states that are common to both
             if (state is NewPrayerRequestLoaded) {
-              ToastMessage.showInfoToast(
-                  'Request Submitted for Approval', context);
+              ToastMessage.showInfoToast('Prayer Request Submitted', context);
               // _insert(state.prayerRequest);
             } else if (state is MyPrayerRequestDeleteComplete) {
               int indexToDelete = getIndexById(state.id);
@@ -108,6 +107,11 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
               ToastMessage.showErrorToast(state.message, context);
             } else if (state is PrayerRequestDeleteError) {
               ToastMessage.showErrorToast(state.message, context);
+            } else if (state is MyPrayerRequestAnsweredComplete) {
+              int indexToDelete = getIndexById(state.id);
+              if (indexToDelete != null) {
+                _delete(indexToDelete);
+              }
             }
             // No need to handle these two in MyPrayerRequests since this
             // BlocListener will be loaded in either case. If it is also
@@ -135,12 +139,15 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
               if (indexToDelete != null) {
                 _delete(indexToDelete);
               }
+              String message = 'Prayer Request has been reported';
+              ToastMessage.showInfoToast(message, context);
             } else if (state is PrayerRequestReportError) {
               ToastMessage.showErrorToast(state.message, context);
-              // !!!! ONLY REMOVING AFTER 3 REPORTS ... AND ONE PERSON CAN REPORT MULTIPLE TIMES
             } else if (state is PrayForRequestComplete) {
               int index = getIndexById(state.id);
               _markAsPrayed(index);
+            } else if (state is PrayForRequestError) {
+              ToastMessage.showErrorToast(state.message, context);
             }
           },
         ),

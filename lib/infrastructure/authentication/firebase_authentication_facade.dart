@@ -50,9 +50,24 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
         message: 'User details not found',
       );
     }
-
     LocalUser domainUser = await FirebaseUserDto.fromFirestore(userInfo)
         .toDomain(_firebaseStorageService);
+
+    if (!domainUser.isVerified) {
+      throw AuthenticationException(
+        code: AuthenticationExceptionCode.USER_NOT_VERIFIED,
+        message: 'User not verified',
+      );
+    } else {
+      if (!user.emailVerified) {
+        await user.sendEmailVerification();
+        throw AuthenticationException(
+          code: AuthenticationExceptionCode.USER_NOT_VERIFIED,
+          message:
+              'Email not verified. See verification email sent to ${domainUser.email}',
+        );
+      }
+    }
     return domainUser;
   }
 
@@ -104,6 +119,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
         'email': emailAddress.value,
         'reports': 0,
         'is_verified': false,
+        'is_admin': false,
       });
 
       // Add default notification settings
@@ -167,7 +183,19 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
   }
 
   @override
-  Future<void> signOut() {
+  Future<void> signOut() async {
+    try {
+      String uid = _firebaseAuth.currentUser.uid;
+      String token = await _firebaseMessagingService.getToken();
+      await _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('devices')
+          .doc(token)
+          .delete();
+    } catch (e) {
+      _firebaseFirestoreService.handleException(e);
+    }
     return _firebaseAuth.signOut();
   }
 

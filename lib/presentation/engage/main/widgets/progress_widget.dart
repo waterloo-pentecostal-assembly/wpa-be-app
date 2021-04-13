@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
+import 'package:wpa_app/application/bible_series/bible_series_bloc.dart';
+import 'package:wpa_app/domain/bible_series/entities.dart';
 
 import '../../../../app/constants.dart';
 import '../../../../app/injection.dart';
@@ -42,59 +44,74 @@ class ProgressTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Container(
-          height: kProgressWidgetWidth,
-          child: SfRadialGauge(
-            enableLoadingAnimation: true,
-            axes: [
-              RadialAxis(
-                showLabels: false,
-                showTicks: false,
-                startAngle: 180,
-                endAngle: 0,
-                radiusFactor: 1,
-                canScaleToFit: true,
-                axisLineStyle: AxisLineStyle(
-                  thickness: 0.2,
-                  color: kWpaBlue.withOpacity(0.15),
-                  thicknessUnit: GaugeSizeUnit.factor,
-                  cornerStyle: CornerStyle.bothCurve,
-                ),
-                pointers: <GaugePointer>[
-                  RangePointer(
-                    color: kWpaBlue.withOpacity(0.5),
-                    value: achievements.seriesProgress.toDouble(),
-                    width: 0.2,
-                    sizeUnit: GaugeSizeUnit.factor,
-                    cornerStyle: CornerStyle.bothCurve,
+    return BlocConsumer<BibleSeriesBloc, BibleSeriesState>(
+      listener: (context, state) {
+        // TODO: implement listener
+      },
+      builder: (context, state) {
+        return Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.only(bottom: 8),
+              height: kProgressWidgetWidth,
+              child: SfRadialGauge(
+                enableLoadingAnimation: true,
+                axes: [
+                  RadialAxis(
+                    showLabels: false,
+                    showTicks: false,
+                    startAngle: 180,
+                    endAngle: 0,
+                    radiusFactor: 1,
+                    canScaleToFit: true,
+                    axisLineStyle: AxisLineStyle(
+                      thickness: 0.2,
+                      color: kWpaBlue.withOpacity(0.15),
+                      thicknessUnit: GaugeSizeUnit.factor,
+                      // cornerStyle: CornerStyle.bothCurve,
+                      // remove bothCurve because of this bug
+                      // https://github.com/syncfusion/flutter-widgets/issues/99
+                    ),
+                    pointers: <GaugePointer>[
+                      RangePointer(
+                        color: kWpaBlue.withOpacity(0.5),
+                        value: achievements.seriesProgress.toDouble(),
+                        width: 0.2,
+                        sizeUnit: GaugeSizeUnit.factor,
+                        // cornerStyle: CornerStyle.bothCurve,
+                      ),
+                      getExpectedIndicator(state)
+                    ],
+                    annotations: [
+                      GaugeAnnotation(
+                        positionFactor: 0.1,
+                        angle: 270,
+                        widget: Column(
+                          children: [
+                            SizedBox(
+                              height: 0.2 * kProgressWidgetWidth,
+                            ),
+                            Container(
+                                child: getIt<TextFactory>().subHeading(
+                                    '${achievements.seriesProgress}%')),
+                            Container(
+                                child: getIt<TextFactory>().regular(
+                                    '${getProgressBarPhrase(achievements.seriesProgress)}')),
+                            SizedBox(
+                              height: 10,
+                            ),
+                            ProgressWidgetTitle()
+                          ],
+                        ),
+                      ),
+                    ],
                   )
                 ],
-                annotations: [
-                  GaugeAnnotation(
-                    positionFactor: 0.1,
-                    angle: 270,
-                    widget: Column(
-                      children: [
-                        SizedBox(
-                          height: 0.2 * kProgressWidgetWidth,
-                        ),
-                        Container(
-                            child: getIt<TextFactory>()
-                                .subHeading('${achievements.seriesProgress}%')),
-                        Container(
-                            child: getIt<TextFactory>().regular(
-                                '${getProgressBarPhrase(achievements.seriesProgress)}')),
-                      ],
-                    ),
-                  ),
-                ],
-              )
-            ],
-          ),
-        ),
-      ],
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -112,6 +129,20 @@ class ProgressTile extends StatelessWidget {
     } else {
       return "You did it!";
     }
+  }
+
+  GaugePointer getExpectedIndicator(BibleSeriesState state) {
+    double seriesValue = 0;
+    if (state is RecentBibleSeries) {
+      seriesValue = getExpectedProgress(state.bibleSeriesList);
+    }
+    return MarkerPointer(
+        value: seriesValue,
+        enableDragging: false,
+        enableAnimation: true,
+        markerHeight: 15,
+        markerOffset: -20,
+        color: Colors.black);
   }
 }
 
@@ -139,4 +170,57 @@ class ProgressError extends StatelessWidget {
       ),
     );
   }
+}
+
+class ProgressWidgetTitle extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<BibleSeriesBloc, BibleSeriesState>(
+      listener: (context, state) {},
+      builder: (context, state) {
+        if (state is RecentBibleSeries) {
+          return Center(
+            child: RichText(
+                textAlign: TextAlign.center,
+                text: TextSpan(
+                    style: getIt<TextFactory>().liteTextStyle(),
+                    children: [
+                      TextSpan(text: "Your Progress for "),
+                      TextSpan(
+                          text: getLastestActive(state.bibleSeriesList),
+                          style: getIt<TextFactory>().regularTextStyle())
+                    ])),
+          );
+        } else {
+          return Container();
+        }
+      },
+    );
+  }
+}
+
+String getLastestActive(List<BibleSeries> bibleSeriesList) {
+  for (int i = 0; i < bibleSeriesList.length; i++) {
+    if (bibleSeriesList[i].isActive) {
+      return bibleSeriesList[i].title;
+    }
+  }
+  return '';
+}
+
+double getExpectedProgress(List<BibleSeries> bibleSeriesList) {
+  for (int i = 0; i < bibleSeriesList.length; i++) {
+    if (bibleSeriesList[i].isActive) {
+      int totalDays = 0;
+      int finishedDays = 0;
+      bibleSeriesList[i].seriesContentSnippet.forEach((element) {
+        if (!element.date.toDate().isAfter(DateTime.now())) {
+          finishedDays++;
+        }
+        totalDays++;
+      });
+      return (finishedDays / totalDays * 100);
+    }
+  }
+  return 0;
 }

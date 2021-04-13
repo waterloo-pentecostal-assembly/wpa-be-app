@@ -19,6 +19,9 @@ class NewProfilePhotoUploadStarted extends UserProfileState {
 }
 
 class NewProfilePhotoUploadComplete extends UserProfileState {
+  final File profilePhoto;
+
+  NewProfilePhotoUploadComplete({@required this.profilePhoto});
   @override
   List<Object> get props => [];
 }

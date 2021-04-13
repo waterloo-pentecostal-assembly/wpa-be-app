@@ -24,6 +24,7 @@ const kPrayerRequestButtonHeight = 50.0;
 const kPrayerRequestButtonWidth = 150.0;
 const kMediaTileDescriptionHeight = 60.0;
 const kAllPrayerRequestsCardHeight = 100.0;
+const kHeadingPadding = 16.0;
 
 // Limits
 const kPrayerRequestsReportsLimit = 2;
@@ -51,8 +52,8 @@ const kDailyEngagementReminderTopic = 'daily_engagement_reminder';
 
 // Help/Reporting
 const kWpaContactEmail = 'dan@wpa.church';
-const kHelpEmailSubject = '[WPA BE APP] Help Request';
-const kReportEmailSubject = '[WPA BE APP] Problem Report';
+const kHelpEmailSubject = 'WPA_BE_APP_Help_Request';
+const kReportEmailSubject = 'WPA_BE_APP_Problem_Report';
 
 //QuestionBody Widget Padding
 const kTopPaddingQuestionBody = 8.0;
