@@ -142,7 +142,8 @@ class _UserVerificationPageState extends State<UserVerificationPage> {
                       child: Icon(
                         Icons.cancel,
                         color: kErrorColor.withOpacity(0.8),
-                        size: 40 * getIt<LayoutFactory>().conversion(),
+                        size: getIt<LayoutFactory>()
+                            .getDimension(baseDimension: 40.0),
                       ),
                     ),
                     SizedBox(width: 8),
@@ -155,7 +156,8 @@ class _UserVerificationPageState extends State<UserVerificationPage> {
                         child: Icon(
                           Icons.check_circle_rounded,
                           color: kSuccessColor.withOpacity(0.8),
-                          size: 40 * getIt<LayoutFactory>().conversion(),
+                          size: getIt<LayoutFactory>()
+                              .getDimension(baseDimension: 40.0),
                         )),
                   ],
                 ),

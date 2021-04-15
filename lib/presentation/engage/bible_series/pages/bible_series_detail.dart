@@ -106,8 +106,8 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                               IconButton(
                                 icon: Icon(
                                   Icons.arrow_back,
-                                  size:
-                                      24 * getIt<LayoutFactory>().conversion(),
+                                  size: getIt<LayoutFactory>()
+                                      .getDimension(baseDimension: 24.0),
                                 ),
                                 onPressed: () => Navigator.pop(context),
                                 color: Colors.white,
@@ -185,7 +185,8 @@ class SeriesDetailPlaceholder extends StatelessWidget {
                       IconButton(
                         icon: Icon(
                           Icons.arrow_back,
-                          size: 24 * getIt<LayoutFactory>().conversion(),
+                          size: getIt<LayoutFactory>()
+                              .getDimension(baseDimension: 24.0),
                         ),
                         onPressed: () => Navigator.pop(context),
                         color: Colors.white,
@@ -197,15 +198,15 @@ class SeriesDetailPlaceholder extends StatelessWidget {
             ],
           ),
           Container(
-            height: 148 * getIt<LayoutFactory>().conversion(),
+            height: getIt<LayoutFactory>().getDimension(baseDimension: 148.0),
             padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
             child: ListView.builder(
               padding: EdgeInsets.only(left: 16),
               scrollDirection: Axis.horizontal,
               itemCount: amtOfCards,
               itemBuilder: (context, index) => Container(
-                width: getIt<LayoutFactory>()
-                    .getDimension(LayoutDimension.CONTENT_TAB_WIDTH),
+                width: getIt<LayoutFactory>().getDimension(
+                    layoutDimension: LayoutDimension.CONTENT_TAB_WIDTH),
                 margin: EdgeInsets.all(8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -213,8 +214,9 @@ class SeriesDetailPlaceholder extends StatelessWidget {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(10.0),
                       child: Container(
-                        height: getIt<LayoutFactory>()
-                            .getDimension(LayoutDimension.CONTENT_TAB_HEIGHT),
+                        height: getIt<LayoutFactory>().getDimension(
+                            layoutDimension:
+                                LayoutDimension.CONTENT_TAB_HEIGHT),
                         color: Colors.grey.shade200,
                       ),
                     ),
@@ -225,7 +227,7 @@ class SeriesDetailPlaceholder extends StatelessWidget {
           ),
           Container(
             margin: EdgeInsets.only(top: 0, bottom: 15),
-            height: 60 * getIt<LayoutFactory>().conversion(),
+            height: getIt<LayoutFactory>().getDimension(baseDimension: 60.0),
             child: Container(
               width: 0.9 * MediaQuery.of(context).size.width,
               padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
@@ -248,9 +250,9 @@ List<Widget> _buildContentTabs(
     tabs.add(
       Container(
         height: getIt<LayoutFactory>()
-            .getDimension(LayoutDimension.CONTENT_TAB_HEIGHT),
+            .getDimension(layoutDimension: LayoutDimension.CONTENT_TAB_HEIGHT),
         width: getIt<LayoutFactory>()
-            .getDimension(LayoutDimension.CONTENT_TAB_WIDTH),
+            .getDimension(layoutDimension: LayoutDimension.CONTENT_TAB_WIDTH),
         child: Tab(
           child: Container(
             padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
@@ -298,7 +300,8 @@ List<Widget> _buildContentChildren(
       listChildren.add(
         Container(
           margin: EdgeInsets.only(top: 0, bottom: 15),
-          height: kContentChildrenHeight * getIt<LayoutFactory>().conversion(),
+          height: getIt<LayoutFactory>()
+              .getDimension(baseDimension: kContentChildrenHeight),
           child: Tab(
             child: GestureDetector(
               onTap: () {
@@ -333,7 +336,7 @@ List<Widget> _buildContentChildren(
                       getIt<TextFactory>().subHeading(
                           element.seriesContentType.toString().split('.')[1]),
                       _getStatusIndicator(element.isCompleted, element.isDraft,
-                          getIt<LayoutFactory>().conversion())
+                          getIt<LayoutFactory>().conversionVal)
                     ],
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   ),

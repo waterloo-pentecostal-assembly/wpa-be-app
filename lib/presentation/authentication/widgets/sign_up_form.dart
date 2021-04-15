@@ -88,6 +88,8 @@ class SignUpForm extends StatelessWidget {
                                         ),
                                       ),
                                       child: TextFormField(
+                                        style: getIt<TextFactory>()
+                                            .liteTextStyle(fontSize: 16),
                                         validator: (_) {
                                           String firstNameError =
                                               BlocProvider.of<SignUpBloc>(
@@ -107,15 +109,16 @@ class SignUpForm extends StatelessWidget {
                                         decoration: InputDecoration(
                                           border: InputBorder.none,
                                           hintText: "First Name",
-                                          hintStyle: TextStyle(
-                                            color: Colors.grey[400],
-                                          ),
+                                          hintStyle: getIt<TextFactory>()
+                                              .hintStyle(fontSize: 16),
                                         ),
                                       ),
                                     ),
                                     Container(
                                       padding: EdgeInsets.all(4.0),
                                       child: TextFormField(
+                                        style: getIt<TextFactory>()
+                                            .liteTextStyle(fontSize: 16),
                                         validator: (_) {
                                           String lastNameError =
                                               BlocProvider.of<SignUpBloc>(
@@ -135,9 +138,8 @@ class SignUpForm extends StatelessWidget {
                                         decoration: InputDecoration(
                                           border: InputBorder.none,
                                           hintText: "Last Name",
-                                          hintStyle: TextStyle(
-                                            color: Colors.grey[400],
-                                          ),
+                                          hintStyle: getIt<TextFactory>()
+                                              .hintStyle(fontSize: 16),
                                         ),
                                       ),
                                       decoration: BoxDecoration(
@@ -151,6 +153,8 @@ class SignUpForm extends StatelessWidget {
                                     Container(
                                       padding: EdgeInsets.all(4.0),
                                       child: TextFormField(
+                                        style: getIt<TextFactory>()
+                                            .liteTextStyle(fontSize: 16),
                                         validator: (_) {
                                           String emailAddressError =
                                               BlocProvider.of<SignUpBloc>(
@@ -184,6 +188,8 @@ class SignUpForm extends StatelessWidget {
                                     Container(
                                       padding: EdgeInsets.all(4.0),
                                       child: TextFormField(
+                                          style: getIt<TextFactory>()
+                                              .liteTextStyle(fontSize: 16),
                                           validator: (_) {
                                             String passwordError =
                                                 BlocProvider.of<SignUpBloc>(

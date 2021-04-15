@@ -70,7 +70,7 @@ Widget questionContainer(
                 padding:
                     const EdgeInsets.fromLTRB(0, kTopPaddingQuestionBody, 0, 0),
                 alignment: Alignment.topLeft,
-                width: 14 * getIt<LayoutFactory>().conversion(),
+                width: getIt<LayoutFactory>().getDimension(baseDimension: 14.0),
                 child: getIt<TextFactory>().textFormFieldInput(
                     (question.location[1] + 1).toString() + ".",
                     fontSize: 16)),

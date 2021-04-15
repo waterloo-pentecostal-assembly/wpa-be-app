@@ -96,6 +96,8 @@ class SignInForm extends StatelessWidget {
                                         ),
                                       ),
                                       child: TextFormField(
+                                        style: getIt<TextFactory>()
+                                            .liteTextStyle(fontSize: 16),
                                         validator: (_) {
                                           String emailAddressError =
                                               BlocProvider.of<SignInBloc>(
@@ -122,6 +124,8 @@ class SignInForm extends StatelessWidget {
                                     Container(
                                       padding: EdgeInsets.all(4.0),
                                       child: TextFormField(
+                                        style: getIt<TextFactory>()
+                                            .liteTextStyle(fontSize: 16),
                                         validator: (_) {
                                           String passwordError =
                                               BlocProvider.of<SignInBloc>(

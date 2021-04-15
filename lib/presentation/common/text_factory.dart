@@ -18,7 +18,7 @@ class TextFactory {
       style: TextStyle(
         fontFamily: _fontFamily,
         fontWeight: fontWeight,
-        fontSize: 30.0 * getIt<LayoutFactory>().conversion(),
+        fontSize: getIt<LayoutFactory>().getDimension(baseDimension: 30.0),
       ),
     );
   }
@@ -29,7 +29,7 @@ class TextFactory {
       style: TextStyle(
         fontFamily: _fontFamily,
         fontWeight: FontWeight.w700,
-        fontSize: 24.0 * getIt<LayoutFactory>().conversion(),
+        fontSize: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
       ),
     );
   }
@@ -40,7 +40,7 @@ class TextFactory {
       style: TextStyle(
         fontFamily: _fontFamily,
         fontWeight: FontWeight.w700,
-        fontSize: fontSize * getIt<LayoutFactory>().conversion(),
+        fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
       ),
     );
   }
@@ -51,7 +51,7 @@ class TextFactory {
       style: TextStyle(
         fontFamily: _fontFamily,
         fontWeight: FontWeight.w600,
-        fontSize: 16.0 * getIt<LayoutFactory>().conversion(),
+        fontSize: getIt<LayoutFactory>().getDimension(baseDimension: 16.0),
       ),
     );
   }
@@ -62,7 +62,7 @@ class TextFactory {
       style: TextStyle(
         fontFamily: _fontFamily,
         fontWeight: FontWeight.w600,
-        fontSize: fontSize * getIt<LayoutFactory>().conversion(),
+        fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
       ),
     );
   }
@@ -73,7 +73,7 @@ class TextFactory {
       style: TextStyle(
         fontFamily: _fontFamily,
         fontWeight: FontWeight.w600,
-        fontSize: 13.0 * getIt<LayoutFactory>().conversion(),
+        fontSize: getIt<LayoutFactory>().getDimension(baseDimension: 13.0),
       ),
     );
   }
@@ -98,7 +98,7 @@ class TextFactory {
     return TextStyle(
       fontFamily: _fontFamily,
       fontWeight: FontWeight.w600,
-      fontSize: fontSize * getIt<LayoutFactory>().conversion(),
+      fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
       color: color,
     );
   }
@@ -121,7 +121,7 @@ class TextFactory {
     return TextStyle(
         fontFamily: _fontFamily,
         fontWeight: FontWeight.w500,
-        fontSize: fontSize * getIt<LayoutFactory>().conversion(),
+        fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
         color: color);
   }
 
@@ -143,7 +143,7 @@ class TextFactory {
     return TextStyle(
       fontFamily: _fontFamily,
       fontWeight: FontWeight.w400,
-      fontSize: fontSize * getIt<LayoutFactory>().conversion(),
+      fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
       color: color,
     );
   }
@@ -175,7 +175,7 @@ class TextFactory {
     return TextStyle(
       fontFamily: _fontFamily,
       fontWeight: FontWeight.w400,
-      fontSize: fontSize * getIt<LayoutFactory>().conversion(),
+      fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
       color: Colors.grey[600],
     );
   }
@@ -198,7 +198,7 @@ class TextFactory {
     return TextStyle(
       fontFamily: _fontFamily,
       fontWeight: FontWeight.w400,
-      fontSize: fontSize * getIt<LayoutFactory>().conversion(),
+      fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
       color: color,
     );
   }
@@ -221,7 +221,7 @@ class TextFactory {
     return TextStyle(
       fontFamily: _fontFamily,
       fontWeight: FontWeight.w400,
-      fontSize: fontSize * getIt<LayoutFactory>().conversion(),
+      fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
       color: color,
     );
   }
@@ -231,7 +231,7 @@ class TextFactory {
     return TextStyle(
       fontFamily: _fontFamily,
       fontWeight: FontWeight.bold,
-      fontSize: fontSize * getIt<LayoutFactory>().conversion(),
+      fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
       color: color,
     );
   }
@@ -254,7 +254,7 @@ class TextFactory {
     return TextStyle(
       fontFamily: _fontFamily,
       fontWeight: FontWeight.w600,
-      fontSize: fontSize * getIt<LayoutFactory>().conversion(),
+      fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
       color: color,
     );
   }
@@ -263,7 +263,7 @@ class TextFactory {
     return TextStyle(
       fontFamily: _fontFamily,
       fontWeight: FontWeight.w400,
-      fontSize: fontSize * getIt<LayoutFactory>().conversion(),
+      fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
       color: Colors.grey[400],
     );
   }

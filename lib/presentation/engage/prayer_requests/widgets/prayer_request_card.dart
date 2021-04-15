@@ -96,7 +96,7 @@ class PrayerRequestMenuButton extends StatelessWidget {
       itemBuilder: (BuildContext context) =>
           getPrayerRequestCardMenuItems(prayerRequest),
       child: Icon(Icons.more_horiz,
-          size: 24 * getIt<LayoutFactory>().conversion()),
+          size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0)),
     );
   }
 
@@ -126,7 +126,7 @@ class PrayerRequestMenuButton extends StatelessWidget {
           children: [
             Icon(
               Icons.delete,
-              size: 24 * getIt<LayoutFactory>().conversion(),
+              size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
             ),
             SizedBox(width: 4),
             Expanded(
@@ -143,7 +143,7 @@ class PrayerRequestMenuButton extends StatelessWidget {
             children: [
               Icon(
                 Icons.check,
-                size: 24 * getIt<LayoutFactory>().conversion(),
+                size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
               ),
               SizedBox(width: 4),
               Expanded(
@@ -162,7 +162,7 @@ class PrayerRequestMenuButton extends StatelessWidget {
           children: [
             Icon(
               Icons.error,
-              size: 24 * getIt<LayoutFactory>().conversion(),
+              size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
             ),
             SizedBox(width: 4),
             Expanded(
@@ -262,16 +262,19 @@ class _PrayButton extends StatelessWidget {
   Widget _createPrayButton(BuildContext context) {
     return Container(
       child: ClipRRect(
-        borderRadius: BorderRadius.all(
-            Radius.circular(20 * getIt<LayoutFactory>().conversion())),
+        borderRadius: BorderRadius.all(Radius.circular(
+            getIt<LayoutFactory>().getDimension(baseDimension: 20.0))),
         child: TextButton(
           style: TextButton.styleFrom(
               padding: EdgeInsets.only(
                   top: 6,
                   bottom: 6,
-                  left: 12 * getIt<LayoutFactory>().conversion(),
-                  right: 12 * getIt<LayoutFactory>().conversion()),
-              minimumSize: Size(0, 32 * getIt<LayoutFactory>().conversion()),
+                  left:
+                      getIt<LayoutFactory>().getDimension(baseDimension: 12.0),
+                  right:
+                      getIt<LayoutFactory>().getDimension(baseDimension: 12.0)),
+              minimumSize: Size(
+                  0, getIt<LayoutFactory>().getDimension(baseDimension: 32.0)),
               backgroundColor: kCardGrey,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap),
           onPressed: () {

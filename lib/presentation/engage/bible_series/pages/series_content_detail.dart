@@ -193,7 +193,7 @@ class ContentDetailWidget extends StatelessWidget {
           onTap: () => {backFunction(state, context, seriesContent)},
           child: Icon(
             Icons.arrow_back,
-            size: 24 * getIt<LayoutFactory>().conversion(),
+            size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
           ),
         );
       },
@@ -278,7 +278,8 @@ class SeriesContentDetailPlaceholder extends StatelessWidget {
                   onTap: () => Navigator.pop(context),
                   child: Icon(
                     Icons.arrow_back,
-                    size: 24 * getIt<LayoutFactory>().conversion(),
+                    size: getIt<LayoutFactory>()
+                        .getDimension(baseDimension: 24.0),
                   ),
                 ),
                 SizedBox(width: 8),

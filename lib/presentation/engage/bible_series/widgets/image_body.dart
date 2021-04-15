@@ -81,7 +81,8 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
               child: GestureDetector(
                 child: Icon(
                   Icons.add_a_photo,
-                  size: 36 * getIt<LayoutFactory>().conversion(),
+                  size:
+                      getIt<LayoutFactory>().getDimension(baseDimension: 36.0),
                   color: Colors.black87.withOpacity(0.75),
                 ),
                 onTap: selectImageInput,
@@ -156,7 +157,8 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
                 child: Center(
                   child: Icon(
                     Icons.close,
-                    size: 30 * getIt<LayoutFactory>().conversion(),
+                    size: getIt<LayoutFactory>()
+                        .getDimension(baseDimension: 30.0),
                   ),
                 ),
               ),
@@ -203,7 +205,8 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
                             child: Center(
                               child: Icon(
                                 Icons.close,
-                                size: 30 * getIt<LayoutFactory>().conversion(),
+                                size: getIt<LayoutFactory>()
+                                    .getDimension(baseDimension: 30.0),
                                 color: Colors.white,
                               ),
                             ),

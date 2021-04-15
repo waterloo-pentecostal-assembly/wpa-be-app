@@ -42,7 +42,8 @@ class CompletionButton extends StatelessWidget {
                     child: Icon(
                       Icons.check_circle,
                       color: Colors.black87.withOpacity(0.5),
-                      size: 60 * getIt<LayoutFactory>().conversion(),
+                      size: getIt<LayoutFactory>()
+                          .getDimension(baseDimension: 60.0),
                     ),
                     customBorder: new CircleBorder(),
                     splashColor: Colors.lightGreenAccent,
@@ -60,7 +61,8 @@ class CompletionButton extends StatelessWidget {
                     child: Icon(
                       Icons.check_circle,
                       color: kSuccessColor.withOpacity(0.8),
-                      size: 60 * getIt<LayoutFactory>().conversion(),
+                      size: getIt<LayoutFactory>()
+                          .getDimension(baseDimension: 60.0),
                     ),
                   ),
                 ));
@@ -189,7 +191,8 @@ class ResponseCompletionButton extends StatelessWidget {
                     child: Icon(
                       Icons.check_circle,
                       color: Colors.black87.withOpacity(0.5),
-                      size: 60 * getIt<LayoutFactory>().conversion(),
+                      size: getIt<LayoutFactory>()
+                          .getDimension(baseDimension: 60.0),
                     ),
                   ),
                 ));
@@ -205,7 +208,8 @@ class ResponseCompletionButton extends StatelessWidget {
                     child: Icon(
                       Icons.check_circle,
                       color: kSuccessColor.withOpacity(0.8),
-                      size: 60 * getIt<LayoutFactory>().conversion(),
+                      size: getIt<LayoutFactory>()
+                          .getDimension(baseDimension: 60.0),
                     ),
                   ),
                 ));

@@ -135,7 +135,8 @@ class PrayerRequestsTitleBar extends StatelessWidget {
                 onTap: () => Navigator.pop(context),
                 child: Icon(
                   Icons.arrow_back,
-                  size: 24 * getIt<LayoutFactory>().conversion(),
+                  size:
+                      getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
                 ),
               ),
               SizedBox(width: 8),
@@ -157,7 +158,8 @@ class PrayerRequestsTitleBar extends StatelessWidget {
               child: Container(
                 color: Colors.grey.shade300,
                 child: Icon(Icons.add,
-                    size: 24 * getIt<LayoutFactory>().conversion()),
+                    size: getIt<LayoutFactory>()
+                        .getDimension(baseDimension: 24.0)),
               ),
             ),
           ),

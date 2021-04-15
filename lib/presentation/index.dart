@@ -124,14 +124,15 @@ class NavigationBar extends StatelessWidget {
         // label: 'ENGAGE',
         icon: Icon(
           Icons.home,
-          size: 24 * getIt<LayoutFactory>().conversion(),
+          size: getIt<LayoutFactory>().getDimension(baseDimension: 24),
+          // size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
         ),
         label:
             'HOME', // Really the engage page that we are using as "HOME" in phase 1
       ),
       BottomNavigationBarItem(
         icon: Icon(Icons.favorite,
-            size: 24 * getIt<LayoutFactory>().conversion()),
+            size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0)),
         label: 'GIVE',
       ),
       // BottomNavigationBarItem(
@@ -139,8 +140,8 @@ class NavigationBar extends StatelessWidget {
       //   label: 'NOTIFICATIONS',
       // ),
       BottomNavigationBarItem(
-        icon:
-            Icon(Icons.person, size: 24 * getIt<LayoutFactory>().conversion()),
+        icon: Icon(Icons.person,
+            size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0)),
         label: 'PROFILE',
       )
     ];
@@ -149,7 +150,7 @@ class NavigationBar extends StatelessWidget {
       items.add(
         BottomNavigationBarItem(
           icon: Icon(Icons.admin_panel_settings,
-              size: 24 * getIt<LayoutFactory>().conversion()),
+              size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0)),
           label: 'ADMIN',
         ),
       );

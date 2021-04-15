@@ -343,7 +343,8 @@ class _NotificationSettingsState extends State<NotificationSettings> {
             children: [
               getIt<TextFactory>().lite("Prayers"),
               Container(
-                height: 30 * getIt<LayoutFactory>().conversion(),
+                height:
+                    getIt<LayoutFactory>().getDimension(baseDimension: 30.0),
                 child: BlocConsumer<NotificationSettingsBloc,
                     NotificationSettingsState>(
                   listener: (context, NotificationSettingsState state) {
@@ -428,7 +429,8 @@ class Other extends StatelessWidget {
                       Icon(
                         Icons.keyboard_arrow_right,
                         color: kDarkGreyColor,
-                        size: 24 * getIt<LayoutFactory>().conversion(),
+                        size: getIt<LayoutFactory>()
+                            .getDimension(baseDimension: 24.0),
                       )
                     ],
                   ),
@@ -451,7 +453,8 @@ class Other extends StatelessWidget {
                       Icon(
                         Icons.keyboard_arrow_right,
                         color: kDarkGreyColor,
-                        size: 24 * getIt<LayoutFactory>().conversion(),
+                        size: getIt<LayoutFactory>()
+                            .getDimension(baseDimension: 24.0),
                       )
                     ],
                   ),
@@ -479,7 +482,8 @@ class Other extends StatelessWidget {
                       Icon(
                         Icons.keyboard_arrow_right,
                         color: kDarkGreyColor,
-                        size: 24 * getIt<LayoutFactory>().conversion(),
+                        size: getIt<LayoutFactory>()
+                            .getDimension(baseDimension: 24.0),
                       )
                     ],
                   ),
@@ -507,7 +511,8 @@ class Other extends StatelessWidget {
                       Icon(
                         Icons.keyboard_arrow_right,
                         color: kDarkGreyColor,
-                        size: 24 * getIt<LayoutFactory>().conversion(),
+                        size: getIt<LayoutFactory>()
+                            .getDimension(baseDimension: 24.0),
                       )
                     ],
                   ),

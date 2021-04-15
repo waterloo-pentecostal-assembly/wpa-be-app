@@ -59,8 +59,8 @@ class MediaWidgetLoaded extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: (kMediaTileHeight + kMediaTileDescriptionHeight) *
-          getIt<LayoutFactory>().conversion(),
+      height: getIt<LayoutFactory>().getDimension(
+          baseDimension: kMediaTileHeight + kMediaTileDescriptionHeight),
       child: ListView.builder(
         padding: EdgeInsets.only(left: 16),
         scrollDirection: Axis.horizontal,
@@ -77,11 +77,12 @@ class MediaWidgetLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     int amtOfCards = (MediaQuery.of(context).size.width /
-            (kMediaTileWidth * getIt<LayoutFactory>().conversion()))
+            (getIt<LayoutFactory>()
+                .getDimension(baseDimension: kMediaTileWidth)))
         .ceil();
     return Container(
-      height: (kMediaTileHeight + kMediaTileDescriptionHeight) *
-          getIt<LayoutFactory>().conversion(),
+      height: getIt<LayoutFactory>().getDimension(
+          baseDimension: kMediaTileHeight + kMediaTileDescriptionHeight),
       child: ListView.builder(
         padding: EdgeInsets.only(left: 16),
         scrollDirection: Axis.horizontal,
@@ -108,7 +109,8 @@ class MediaCard extends StatelessWidget {
         }
       },
       child: Container(
-        width: kMediaTileWidth * getIt<LayoutFactory>().conversion(),
+        width:
+            getIt<LayoutFactory>().getDimension(baseDimension: kMediaTileWidth),
         padding: EdgeInsets.all(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -117,7 +119,8 @@ class MediaCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(15.0),
               child: Image.network(
                 media.thumbnailUrl,
-                height: kMediaTileHeight * getIt<LayoutFactory>().conversion(),
+                height: getIt<LayoutFactory>()
+                    .getDimension(baseDimension: kMediaTileHeight),
                 fit: BoxFit.fill,
                 frameBuilder: (BuildContext context, Widget child, int frame,
                     bool wasSynchronouslyLoaded) {
@@ -125,8 +128,8 @@ class MediaCard extends StatelessWidget {
                     return child;
                   } else {
                     return Container(
-                      height: kMediaTileHeight *
-                          getIt<LayoutFactory>().conversion(),
+                      height: getIt<LayoutFactory>()
+                          .getDimension(baseDimension: kMediaTileHeight),
                       color: Colors.grey.shade200,
                     );
                   }
@@ -153,7 +156,8 @@ class MediaCardPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: kMediaTileWidth * getIt<LayoutFactory>().conversion(),
+      width:
+          getIt<LayoutFactory>().getDimension(baseDimension: kMediaTileWidth),
       padding: EdgeInsets.all(8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,7 +165,8 @@ class MediaCardPlaceholder extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(15.0),
             child: Container(
-              height: kMediaTileHeight * getIt<LayoutFactory>().conversion(),
+              height: getIt<LayoutFactory>()
+                  .getDimension(baseDimension: kMediaTileHeight),
               color: Colors.grey.shade200,
             ),
           ),

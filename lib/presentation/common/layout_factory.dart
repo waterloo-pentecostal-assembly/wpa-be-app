@@ -12,8 +12,8 @@ enum LayoutDimension {
 class LayoutFactory {
   final DeviceType deviceType;
 
-  //General Conversion Value
-  double conversionVal = 5 / 3;
+  // General Conversion Value
+  double conversionVal = 1.2;
 
   // Mobile Dimensions
   double mContentTabHeight = 108;
@@ -24,16 +24,16 @@ class LayoutFactory {
   double mAdminIconSize = 50;
 
   // Tablet dimensions
-  double tContentTabHeight = 144;
-  double tContentTabWidth = 93;
-  double tAdminTileHeight = 300;
-  double tAdminTileWidth = 375;
+  double tContentTabHeight = 120;
+  double tContentTabWidth = 90;
+  double tAdminTileHeight = 150;
+  double tAdminTileWidth = 200;
   double tAdminTileFontSize = 14.0;
-  double tAdminIconSize = 110;
+  double tAdminIconSize = 70;
 
   LayoutFactory(this.deviceType);
 
-  double getDimension(LayoutDimension layoutDimension) {
+  double getDimension({LayoutDimension layoutDimension, double baseDimension}) {
     switch (layoutDimension) {
       case LayoutDimension.CONTENT_TAB_HEIGHT:
         {
@@ -84,17 +84,13 @@ class LayoutFactory {
         }
         break;
       default:
-        {
-          throw Exception('Invalid LayoutDimension type');
+        if (deviceType == DeviceType.TABLET) {
+          if (baseDimension != null) {
+            return conversionVal * baseDimension;
+          }
         }
+        return baseDimension;
         break;
     }
-  }
-
-  double conversion() {
-    if (deviceType == DeviceType.TABLET) {
-      return conversionVal;
-    }
-    return 1.0;
   }
 }

@@ -64,10 +64,10 @@ class OptionsList extends StatelessWidget {
                 },
                 child: Container(
                   padding: const EdgeInsets.all(8),
-                  width: getIt<LayoutFactory>()
-                      .getDimension(LayoutDimension.ADMIN_TILE_WIDTH),
-                  height: getIt<LayoutFactory>()
-                      .getDimension(LayoutDimension.ADMIN_TILE_HEIGHT),
+                  width: getIt<LayoutFactory>().getDimension(
+                      layoutDimension: LayoutDimension.ADMIN_TILE_WIDTH),
+                  height: getIt<LayoutFactory>().getDimension(
+                      layoutDimension: LayoutDimension.ADMIN_TILE_HEIGHT),
                   decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.all(Radius.circular(15)),
@@ -85,8 +85,8 @@ class OptionsList extends StatelessWidget {
                         child: Icon(
                           Icons.supervised_user_circle,
                           color: Colors.amber[300],
-                          size: getIt<LayoutFactory>()
-                              .getDimension(LayoutDimension.ADMIN_ICON_SIZE),
+                          size: getIt<LayoutFactory>().getDimension(
+                              layoutDimension: LayoutDimension.ADMIN_ICON_SIZE),
                         ),
                       ),
                       SizedBox(height: 20),
@@ -103,10 +103,10 @@ class OptionsList extends StatelessWidget {
                 },
                 child: Container(
                   padding: const EdgeInsets.all(8),
-                  width: getIt<LayoutFactory>()
-                      .getDimension(LayoutDimension.ADMIN_TILE_WIDTH),
-                  height: getIt<LayoutFactory>()
-                      .getDimension(LayoutDimension.ADMIN_TILE_HEIGHT),
+                  width: getIt<LayoutFactory>().getDimension(
+                      layoutDimension: LayoutDimension.ADMIN_TILE_WIDTH),
+                  height: getIt<LayoutFactory>().getDimension(
+                      layoutDimension: LayoutDimension.ADMIN_TILE_HEIGHT),
                   decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.all(Radius.circular(15)),
@@ -124,15 +124,16 @@ class OptionsList extends StatelessWidget {
                         child: Icon(
                           Icons.verified_user,
                           color: Colors.greenAccent[400],
-                          size: getIt<LayoutFactory>()
-                              .getDimension(LayoutDimension.ADMIN_ICON_SIZE),
+                          size: getIt<LayoutFactory>().getDimension(
+                              layoutDimension: LayoutDimension.ADMIN_ICON_SIZE),
                         ),
                       ),
                       SizedBox(height: 16),
                       getIt<TextFactory>().subHeading3(
                           'Prayer Request Approval',
                           fontSize: getIt<LayoutFactory>().getDimension(
-                              LayoutDimension.ADMIN_TILE_FONT_SIZE)),
+                              layoutDimension:
+                                  LayoutDimension.ADMIN_TILE_FONT_SIZE)),
                     ],
                   ),
                 ),
