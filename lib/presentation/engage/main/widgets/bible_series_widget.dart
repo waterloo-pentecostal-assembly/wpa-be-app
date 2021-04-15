@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/presentation/common/layout_factory.dart';
 
 import '../../../../app/constants.dart';
 import '../../../../app/injection.dart';
@@ -55,8 +56,9 @@ class RecentBibleSeriesList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: kRecentBibleSeriesTileHeight +
-          kRecentBibleSeriesTileDescriptionHeight,
+      height: (kRecentBibleSeriesTileHeight +
+              kRecentBibleSeriesTileDescriptionHeight) *
+          getIt<LayoutFactory>().conversion(),
       child: ListView.builder(
         padding: EdgeInsets.only(left: 16),
         scrollDirection: Axis.horizontal,
@@ -83,7 +85,8 @@ class BibleSeriesCard extends StatelessWidget {
             arguments: {'bibleSeriesId': bibleSeries.id});
       },
       child: Container(
-        width: kRecentBibleSeriesTileWidth,
+        width:
+            kRecentBibleSeriesTileWidth * getIt<LayoutFactory>().conversion(),
         padding: EdgeInsets.only(
           right: 8,
           left: 8,
@@ -98,7 +101,8 @@ class BibleSeriesCard extends StatelessWidget {
               // child: FadeInImage.assetNetwork(placeholder: kWpaLogoLoc, image: bibleSeries.imageUrl),
               child: Image.network(
                 bibleSeries.imageUrl,
-                height: kRecentBibleSeriesTileHeight,
+                height: kRecentBibleSeriesTileHeight *
+                    getIt<LayoutFactory>().conversion(),
                 fit: BoxFit.fill,
                 frameBuilder: (BuildContext context, Widget child, int frame,
                     bool wasSynchronouslyLoaded) {
@@ -130,7 +134,8 @@ class BibleSeriesCardPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: kRecentBibleSeriesTileHeight,
+      height:
+          kRecentBibleSeriesTileHeight * getIt<LayoutFactory>().conversion(),
       color: Colors.grey.shade200,
     );
   }
@@ -140,13 +145,15 @@ class RecentBibleSeriesListPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: kRecentBibleSeriesTileHeight,
+      height:
+          kRecentBibleSeriesTileHeight * getIt<LayoutFactory>().conversion(),
       child: ListView.builder(
         padding: EdgeInsets.only(left: 16),
         scrollDirection: Axis.horizontal,
-        itemCount:
-            (MediaQuery.of(context).size.width / kRecentBibleSeriesTileWidth)
-                .ceil(),
+        itemCount: (MediaQuery.of(context).size.width /
+                (kRecentBibleSeriesTileWidth *
+                    getIt<LayoutFactory>().conversion()))
+            .ceil(),
         itemBuilder: (_, __) {
           return ClipRRect(
             borderRadius: BorderRadius.circular(15.0),

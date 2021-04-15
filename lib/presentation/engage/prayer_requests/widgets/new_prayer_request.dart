@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/presentation/common/layout_factory.dart';
 
 import '../../../../app/constants.dart';
 import '../../../../app/injection.dart';
@@ -253,10 +254,13 @@ class PostButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.all(Radius.circular(16)),
+      borderRadius: BorderRadius.all(
+          Radius.circular(16 * getIt<LayoutFactory>().conversion())),
       child: TextButton(
         style: ButtonStyle(
-            minimumSize: MaterialStateProperty.all(Size(90, 30)),
+            minimumSize: MaterialStateProperty.all(Size(
+                90 * getIt<LayoutFactory>().conversion(),
+                30 * getIt<LayoutFactory>().conversion())),
             backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
               if (states.contains(MaterialState.disabled)) {
                 return kWpaBlue.withOpacity(0.25);
@@ -295,11 +299,13 @@ class CancelButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.all(Radius.circular(16)),
+      borderRadius: BorderRadius.all(
+          Radius.circular(16 * getIt<LayoutFactory>().conversion())),
       child: TextButton(
         style: TextButton.styleFrom(
           primary: Colors.black,
-          minimumSize: Size(90, 30),
+          minimumSize: Size(90 * getIt<LayoutFactory>().conversion(),
+              30 * getIt<LayoutFactory>().conversion()),
           backgroundColor: kCardGrey,
           padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,

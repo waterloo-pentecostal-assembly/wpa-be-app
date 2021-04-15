@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/presentation/common/layout_factory.dart';
 
 import '../../../../app/constants.dart';
 import '../../../../app/injection.dart';
@@ -103,7 +104,11 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                           child: Row(
                             children: [
                               IconButton(
-                                icon: Icon(Icons.arrow_back),
+                                icon: Icon(
+                                  Icons.arrow_back,
+                                  size:
+                                      24 * getIt<LayoutFactory>().conversion(),
+                                ),
                                 onPressed: () => Navigator.pop(context),
                                 color: Colors.white,
                               )
@@ -178,7 +183,10 @@ class SeriesDetailPlaceholder extends StatelessWidget {
                   child: Row(
                     children: [
                       IconButton(
-                        icon: Icon(Icons.arrow_back),
+                        icon: Icon(
+                          Icons.arrow_back,
+                          size: 24 * getIt<LayoutFactory>().conversion(),
+                        ),
                         onPressed: () => Navigator.pop(context),
                         color: Colors.white,
                       )
@@ -189,14 +197,15 @@ class SeriesDetailPlaceholder extends StatelessWidget {
             ],
           ),
           Container(
-            height: 148,
+            height: 148 * getIt<LayoutFactory>().conversion(),
             padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
             child: ListView.builder(
               padding: EdgeInsets.only(left: 16),
               scrollDirection: Axis.horizontal,
               itemCount: amtOfCards,
               itemBuilder: (context, index) => Container(
-                width: 70,
+                width: getIt<LayoutFactory>()
+                    .getDimension(LayoutDimension.CONTENT_TAB_WIDTH),
                 margin: EdgeInsets.all(8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -204,7 +213,8 @@ class SeriesDetailPlaceholder extends StatelessWidget {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(10.0),
                       child: Container(
-                        height: 108,
+                        height: getIt<LayoutFactory>()
+                            .getDimension(LayoutDimension.CONTENT_TAB_HEIGHT),
                         color: Colors.grey.shade200,
                       ),
                     ),
@@ -215,7 +225,7 @@ class SeriesDetailPlaceholder extends StatelessWidget {
           ),
           Container(
             margin: EdgeInsets.only(top: 0, bottom: 15),
-            height: 60,
+            height: 60 * getIt<LayoutFactory>().conversion(),
             child: Container(
               width: 0.9 * MediaQuery.of(context).size.width,
               padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
@@ -237,8 +247,10 @@ List<Widget> _buildContentTabs(
   seriesContentSnippets.forEach((element) {
     tabs.add(
       Container(
-        height: 108,
-        width: 70,
+        height: getIt<LayoutFactory>()
+            .getDimension(LayoutDimension.CONTENT_TAB_HEIGHT),
+        width: getIt<LayoutFactory>()
+            .getDimension(LayoutDimension.CONTENT_TAB_WIDTH),
         child: Tab(
           child: Container(
             padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
@@ -263,7 +275,7 @@ List<Widget> _buildContentTabs(
                   SizedBox(height: 3),
                   getIt<TextFactory>().heading('${_getDate(element.date)}'),
                   SizedBox(height: 3),
-                  _getStatusIndicator(element.isCompleted, element.isDraft)
+                  _getStatusIndicator(element.isCompleted, element.isDraft, 1)
                 ],
               ),
             ),
@@ -286,7 +298,7 @@ List<Widget> _buildContentChildren(
       listChildren.add(
         Container(
           margin: EdgeInsets.only(top: 0, bottom: 15),
-          height: 60,
+          height: kContentChildrenHeight * getIt<LayoutFactory>().conversion(),
           child: Tab(
             child: GestureDetector(
               onTap: () {
@@ -320,7 +332,8 @@ List<Widget> _buildContentChildren(
                     children: [
                       getIt<TextFactory>().subHeading(
                           element.seriesContentType.toString().split('.')[1]),
-                      _getStatusIndicator(element.isCompleted, element.isDraft)
+                      _getStatusIndicator(element.isCompleted, element.isDraft,
+                          getIt<LayoutFactory>().conversion())
                     ],
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   ),
@@ -374,11 +387,11 @@ Text _getTodayIndicator(Timestamp date) {
   return Text('');
 }
 
-Widget _getStatusIndicator(bool isCompleted, bool isDraft) {
+Widget _getStatusIndicator(bool isCompleted, bool isDraft, double conversion) {
   if (isCompleted) {
-    return Icon(Icons.done, size: 15);
+    return Icon(Icons.done, size: 15 * conversion);
   } else if (isDraft) {
-    return Icon(Icons.edit, size: 15);
+    return Icon(Icons.edit, size: 15 * conversion);
   }
   return Text('');
 }

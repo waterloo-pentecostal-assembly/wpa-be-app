@@ -25,6 +25,9 @@ const kPrayerRequestButtonWidth = 150.0;
 const kMediaTileDescriptionHeight = 60.0;
 const kAllPrayerRequestsCardHeight = 100.0;
 const kHeadingPadding = 16.0;
+const kAdminTileHeight = 125.0;
+const kAdminTileWidth = 150.0;
+const kContentChildrenHeight = 60;
 
 // Limits
 const kPrayerRequestsReportsLimit = 2;

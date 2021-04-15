@@ -6,6 +6,7 @@ import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/application/completions/completions_bloc.dart';
 import 'package:wpa_app/domain/bible_series/entities.dart';
 import 'package:wpa_app/domain/completions/entities.dart';
+import 'package:wpa_app/presentation/common/layout_factory.dart';
 import 'package:wpa_app/presentation/common/loader.dart';
 import 'package:wpa_app/presentation/common/text_factory.dart';
 
@@ -41,7 +42,7 @@ class CompletionButton extends StatelessWidget {
                     child: Icon(
                       Icons.check_circle,
                       color: Colors.black87.withOpacity(0.5),
-                      size: 60,
+                      size: 60 * getIt<LayoutFactory>().conversion(),
                     ),
                     customBorder: new CircleBorder(),
                     splashColor: Colors.lightGreenAccent,
@@ -59,7 +60,7 @@ class CompletionButton extends StatelessWidget {
                     child: Icon(
                       Icons.check_circle,
                       color: kSuccessColor.withOpacity(0.8),
-                      size: 60,
+                      size: 60 * getIt<LayoutFactory>().conversion(),
                     ),
                   ),
                 ));
@@ -188,7 +189,7 @@ class ResponseCompletionButton extends StatelessWidget {
                     child: Icon(
                       Icons.check_circle,
                       color: Colors.black87.withOpacity(0.5),
-                      size: 60,
+                      size: 60 * getIt<LayoutFactory>().conversion(),
                     ),
                   ),
                 ));
@@ -204,7 +205,7 @@ class ResponseCompletionButton extends StatelessWidget {
                     child: Icon(
                       Icons.check_circle,
                       color: kSuccessColor.withOpacity(0.8),
-                      size: 60,
+                      size: 60 * getIt<LayoutFactory>().conversion(),
                     ),
                   ),
                 ));

@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:wpa_app/application/links/links_bloc.dart';
+import 'package:wpa_app/presentation/common/layout_factory.dart';
 import 'package:wpa_app/presentation/profile/terms_of_use.dart';
 
 import '../../app/constants.dart';
@@ -342,7 +343,7 @@ class _NotificationSettingsState extends State<NotificationSettings> {
             children: [
               getIt<TextFactory>().lite("Prayers"),
               Container(
-                height: 30,
+                height: 30 * getIt<LayoutFactory>().conversion(),
                 child: BlocConsumer<NotificationSettingsBloc,
                     NotificationSettingsState>(
                   listener: (context, NotificationSettingsState state) {
@@ -427,6 +428,7 @@ class Other extends StatelessWidget {
                       Icon(
                         Icons.keyboard_arrow_right,
                         color: kDarkGreyColor,
+                        size: 24 * getIt<LayoutFactory>().conversion(),
                       )
                     ],
                   ),
@@ -449,6 +451,7 @@ class Other extends StatelessWidget {
                       Icon(
                         Icons.keyboard_arrow_right,
                         color: kDarkGreyColor,
+                        size: 24 * getIt<LayoutFactory>().conversion(),
                       )
                     ],
                   ),
@@ -476,6 +479,7 @@ class Other extends StatelessWidget {
                       Icon(
                         Icons.keyboard_arrow_right,
                         color: kDarkGreyColor,
+                        size: 24 * getIt<LayoutFactory>().conversion(),
                       )
                     ],
                   ),
@@ -503,6 +507,7 @@ class Other extends StatelessWidget {
                       Icon(
                         Icons.keyboard_arrow_right,
                         color: kDarkGreyColor,
+                        size: 24 * getIt<LayoutFactory>().conversion(),
                       )
                     ],
                   ),

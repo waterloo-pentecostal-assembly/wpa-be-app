@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/presentation/common/layout_factory.dart';
 
 import '../../../../app/constants.dart';
 import '../../../../app/injection.dart';
@@ -94,7 +95,8 @@ class PrayerRequestMenuButton extends StatelessWidget {
       color: kCardOverlayGrey,
       itemBuilder: (BuildContext context) =>
           getPrayerRequestCardMenuItems(prayerRequest),
-      child: Icon(Icons.more_horiz),
+      child: Icon(Icons.more_horiz,
+          size: 24 * getIt<LayoutFactory>().conversion()),
     );
   }
 
@@ -122,9 +124,14 @@ class PrayerRequestMenuButton extends StatelessWidget {
             id: prayerRequest.id, action: PrayerActionOptions.MY_DELETE),
         child: Row(
           children: [
-            Icon(Icons.delete),
+            Icon(
+              Icons.delete,
+              size: 24 * getIt<LayoutFactory>().conversion(),
+            ),
             SizedBox(width: 4),
-            getIt<TextFactory>().lite('DELETE'),
+            Expanded(
+              child: getIt<TextFactory>().lite('DELETE'),
+            )
           ],
         ),
       ));
@@ -134,9 +141,14 @@ class PrayerRequestMenuButton extends StatelessWidget {
               id: prayerRequest.id, action: PrayerActionOptions.MY_CLOSE),
           child: Row(
             children: [
-              Icon(Icons.check),
+              Icon(
+                Icons.check,
+                size: 24 * getIt<LayoutFactory>().conversion(),
+              ),
               SizedBox(width: 4),
-              getIt<TextFactory>().lite('PRAYER ANSWERED'),
+              Expanded(
+                child: getIt<TextFactory>().lite('PRAYER ANSWERED'),
+              )
             ],
           ),
         ));
@@ -146,10 +158,15 @@ class PrayerRequestMenuButton extends StatelessWidget {
         value: MenuButtonValue(
             id: prayerRequest.id, action: PrayerActionOptions.REPORT),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Icon(Icons.error),
+            Icon(
+              Icons.error,
+              size: 24 * getIt<LayoutFactory>().conversion(),
+            ),
             SizedBox(width: 4),
-            getIt<TextFactory>().lite('REPORT AS INAPPROPRIATE'),
+            Expanded(
+                child: getIt<TextFactory>().lite('REPORT AS INAPPROPRIATE'))
           ],
         ),
       ));
@@ -245,11 +262,16 @@ class _PrayButton extends StatelessWidget {
   Widget _createPrayButton(BuildContext context) {
     return Container(
       child: ClipRRect(
-        borderRadius: BorderRadius.all(Radius.circular(20)),
+        borderRadius: BorderRadius.all(
+            Radius.circular(20 * getIt<LayoutFactory>().conversion())),
         child: TextButton(
           style: TextButton.styleFrom(
-              padding: EdgeInsets.only(top: 6, bottom: 6, left: 12, right: 12),
-              minimumSize: Size(0, 32),
+              padding: EdgeInsets.only(
+                  top: 6,
+                  bottom: 6,
+                  left: 12 * getIt<LayoutFactory>().conversion(),
+                  right: 12 * getIt<LayoutFactory>().conversion()),
+              minimumSize: Size(0, 32 * getIt<LayoutFactory>().conversion()),
               backgroundColor: kCardGrey,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap),
           onPressed: () {

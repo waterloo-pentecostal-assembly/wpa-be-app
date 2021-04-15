@@ -9,6 +9,7 @@ import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/application/completions/completions_bloc.dart';
 import 'package:wpa_app/domain/bible_series/entities.dart';
 import 'package:wpa_app/domain/completions/entities.dart';
+import 'package:wpa_app/presentation/common/layout_factory.dart';
 import 'package:wpa_app/presentation/common/loader.dart';
 import 'package:wpa_app/presentation/common/text_factory.dart';
 
@@ -80,7 +81,7 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
               child: GestureDetector(
                 child: Icon(
                   Icons.add_a_photo,
-                  size: 36,
+                  size: 36 * getIt<LayoutFactory>().conversion(),
                   color: Colors.black87.withOpacity(0.75),
                 ),
                 onTap: selectImageInput,
@@ -155,7 +156,7 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
                 child: Center(
                   child: Icon(
                     Icons.close,
-                    size: 30,
+                    size: 30 * getIt<LayoutFactory>().conversion(),
                   ),
                 ),
               ),
@@ -202,7 +203,7 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
                             child: Center(
                               child: Icon(
                                 Icons.close,
-                                size: 30,
+                                size: 30 * getIt<LayoutFactory>().conversion(),
                                 color: Colors.white,
                               ),
                             ),
