@@ -18,6 +18,7 @@ enum SeriesContentBodyType {
   SCRIPTURE,
   QUESTION,
   IMAGE_INPUT,
+  LINK
 }
 
 class BibleSeries {
@@ -180,6 +181,22 @@ class ISeriesContentBody {
     @required this.type,
     @required this.properties,
   });
+}
+
+class LinkBody implements ISeriesContentBody {
+  final SeriesContentBodyType type;
+  final LinkBodyProperties properties;
+
+  LinkBody({
+    @required this.type,
+    @required this.properties,
+  });
+}
+
+class LinkBodyProperties {
+  String link;
+  String title;
+  String text;
 }
 
 class AudioBody implements ISeriesContentBody {

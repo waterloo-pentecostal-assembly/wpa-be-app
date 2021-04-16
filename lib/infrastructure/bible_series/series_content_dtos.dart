@@ -106,6 +106,10 @@ class SeriesContentBodyDto {
       _properties['attribution'] = findOrThrowException(json, 'attribution');
       _properties['scriptures'] = findOrThrowException(json, 'scriptures');
     } else if (_bodyType == 'image_input') {
+    } else if (_bodyType == 'link') {
+      _properties['title'] = findOrThrowException(json, 'title');
+      _properties['text'] = findOrThrowException(json, 'text');
+      _properties['link'] = findOrThrowException(json, 'link');
     } else {
       throw BibleSeriesException(
         message: 'Invalid body_type: $_bodyType',
@@ -208,6 +212,12 @@ extension SeriesContentBodyDtoX on SeriesContentBodyDto {
       );
     } else if (this.bodyType == 'image_input') {
       return ImageInputBody(type: SeriesContentBodyType.IMAGE_INPUT);
+    } else if (this.bodyType == 'link') {
+      LinkBodyProperties properties = LinkBodyProperties();
+      properties.title = this.properties['title'];
+      properties.text = this.properties['text'];
+      properties.link = this.properties['link'];
+      return LinkBody(type: SeriesContentBodyType.LINK, properties: properties);
     }
   }
 }
