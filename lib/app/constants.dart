@@ -22,6 +22,7 @@ const kMediaTileWidth = 150.0;
 const kMediaTileHeight = 75.0;
 const kPrayerRequestButtonHeight = 50.0;
 const kPrayerRequestButtonWidth = 150.0;
+const kLinkButtonWidth = 100.0;
 const kMediaTileDescriptionHeight = 60.0;
 const kAllPrayerRequestsCardHeight = 100.0;
 const kHeadingPadding = 16.0;
