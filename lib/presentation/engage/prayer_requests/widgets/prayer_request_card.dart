@@ -158,7 +158,6 @@ class PrayerRequestMenuButton extends StatelessWidget {
         value: MenuButtonValue(
             id: prayerRequest.id, action: PrayerActionOptions.REPORT),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Icon(
               Icons.error,
