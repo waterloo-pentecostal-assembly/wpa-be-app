@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/app/constants.dart';
+import 'package:wpa_app/presentation/common/layout_factory.dart';
 import 'package:wpa_app/presentation/engage/prayer_requests/widgets/new_prayer_request.dart';
 
 import '../../../../app/injection.dart';
@@ -41,7 +42,8 @@ class PrayerRequestOptionsSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: kPrayerRequestButtonHeight,
+      height: getIt<LayoutFactory>()
+          .getDimension(baseDimension: kPrayerRequestButtonHeight),
       child: ListView(
         padding: EdgeInsets.only(left: 16, right: 16),
         scrollDirection: Axis.horizontal,
@@ -51,7 +53,8 @@ class PrayerRequestOptionsSlider extends StatelessWidget {
               Navigator.pushNamed(context, '/prayer_requests');
             },
             child: Container(
-              width: kPrayerRequestButtonWidth,
+              width: getIt<LayoutFactory>()
+                  .getDimension(baseDimension: kPrayerRequestButtonWidth),
               margin: EdgeInsets.fromLTRB(8, 0, 8, 0),
               decoration: BoxDecoration(
                 color: Colors.grey[300],
@@ -81,7 +84,8 @@ class PrayerRequestOptionsSlider extends StatelessWidget {
               Navigator.pushNamed(context, '/prayer_requests/mine');
             },
             child: Container(
-              width: kPrayerRequestButtonWidth,
+              width: getIt<LayoutFactory>()
+                  .getDimension(baseDimension: kPrayerRequestButtonWidth),
               margin: EdgeInsets.fromLTRB(8, 0, 8, 0),
               decoration: BoxDecoration(
                 color: Colors.grey[300],
@@ -119,7 +123,8 @@ class PrayerRequestOptionsSlider extends StatelessWidget {
               );
             },
             child: Container(
-              width: kPrayerRequestButtonHeight,
+              width: getIt<LayoutFactory>()
+                  .getDimension(baseDimension: kPrayerRequestButtonHeight),
               margin: EdgeInsets.fromLTRB(8, 0, 8, 0),
               decoration: BoxDecoration(
                 color: Colors.black38,
@@ -142,7 +147,8 @@ class PrayerRequestOptions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: kPrayerRequestButtonHeight,
+      height: getIt<LayoutFactory>()
+          .getDimension(baseDimension: kPrayerRequestButtonHeight),
       child: Container(
         margin: EdgeInsets.fromLTRB(8, 0, 8, 0),
         child: Row(

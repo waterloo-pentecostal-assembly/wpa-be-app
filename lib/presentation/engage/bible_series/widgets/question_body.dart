@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/presentation/common/layout_factory.dart';
 
 import '../../../../app/constants.dart';
 import '../../../../app/injection.dart';
@@ -69,7 +70,7 @@ Widget questionContainer(
                 padding:
                     const EdgeInsets.fromLTRB(0, kTopPaddingQuestionBody, 0, 0),
                 alignment: Alignment.topLeft,
-                width: 14,
+                width: getIt<LayoutFactory>().getDimension(baseDimension: 14.0),
                 child: getIt<TextFactory>().textFormFieldInput(
                     (question.location[1] + 1).toString() + ".",
                     fontSize: 16)),
@@ -93,11 +94,11 @@ Widget questionContainer(
               return Padding(
                   padding: const EdgeInsets.fromLTRB(18, 0, 24, 8),
                   child: TextFormField(
+                    style: getIt<TextFactory>().liteTextStyle(fontSize: 16),
                     maxLines: null,
                     initialValue: getResponse(state, contentNum, questionNum),
                     decoration: const InputDecoration.collapsed(
                       hintText: "Share your thoughts ...",
-                      hintStyle: TextStyle(fontSize: 16),
                       border: UnderlineInputBorder(),
                     ),
                     onChanged: (value) {
@@ -114,11 +115,11 @@ Widget questionContainer(
               return Padding(
                   padding: const EdgeInsets.fromLTRB(18, 0, 24, 8),
                   child: TextFormField(
+                    style: getIt<TextFactory>().liteTextStyle(fontSize: 16),
                     maxLines: null,
                     initialValue: '',
                     decoration: const InputDecoration.collapsed(
                       hintText: "Share your thoughts ...",
-                      hintStyle: TextStyle(fontSize: 14),
                       border: UnderlineInputBorder(),
                     ),
                     onChanged: (value) {

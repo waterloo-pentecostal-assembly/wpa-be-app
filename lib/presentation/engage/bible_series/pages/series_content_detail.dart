@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/presentation/common/layout_factory.dart';
 
 import '../../../../app/constants.dart';
 import '../../../../app/injection.dart';
@@ -192,6 +193,7 @@ class ContentDetailWidget extends StatelessWidget {
           onTap: () => {backFunction(state, context, seriesContent)},
           child: Icon(
             Icons.arrow_back,
+            size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
           ),
         );
       },
@@ -276,6 +278,8 @@ class SeriesContentDetailPlaceholder extends StatelessWidget {
                   onTap: () => Navigator.pop(context),
                   child: Icon(
                     Icons.arrow_back,
+                    size: getIt<LayoutFactory>()
+                        .getDimension(baseDimension: 24.0),
                   ),
                 ),
                 SizedBox(width: 8),

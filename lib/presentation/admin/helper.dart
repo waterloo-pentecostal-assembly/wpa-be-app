@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wpa_app/presentation/common/layout_factory.dart';
 
 import '../../app/constants.dart';
 import '../../app/injection.dart';
@@ -15,7 +16,10 @@ class HeaderWidget extends StatelessWidget {
         children: [
           GestureDetector(
             onTap: () => Navigator.pop(context),
-            child: Icon(Icons.arrow_back),
+            child: Icon(
+              Icons.arrow_back,
+              size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
+            ),
           ),
           SizedBox(width: 8),
           getIt<TextFactory>().subPageHeading(title),

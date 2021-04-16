@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:wpa_app/app/constants.dart';
+import 'package:wpa_app/app/injection.dart';
+
+import 'layout_factory.dart';
 
 class TextFactory {
   final String _fontFamily;
@@ -15,7 +18,7 @@ class TextFactory {
       style: TextStyle(
         fontFamily: _fontFamily,
         fontWeight: fontWeight,
-        fontSize: 30.0,
+        fontSize: getIt<LayoutFactory>().getDimension(baseDimension: 30.0),
       ),
     );
   }
@@ -26,7 +29,7 @@ class TextFactory {
       style: TextStyle(
         fontFamily: _fontFamily,
         fontWeight: FontWeight.w700,
-        fontSize: 24.0,
+        fontSize: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
       ),
     );
   }
@@ -37,7 +40,7 @@ class TextFactory {
       style: TextStyle(
         fontFamily: _fontFamily,
         fontWeight: FontWeight.w700,
-        fontSize: fontSize,
+        fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
       ),
     );
   }
@@ -48,18 +51,18 @@ class TextFactory {
       style: TextStyle(
         fontFamily: _fontFamily,
         fontWeight: FontWeight.w600,
-        fontSize: 16.0,
+        fontSize: getIt<LayoutFactory>().getDimension(baseDimension: 16.0),
       ),
     );
   }
 
-  Text subHeading3(String text) {
+  Text subHeading3(String text, {double fontSize = 14.0}) {
     return Text(
       text,
       style: TextStyle(
         fontFamily: _fontFamily,
         fontWeight: FontWeight.w600,
-        fontSize: 14.0,
+        fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
       ),
     );
   }
@@ -70,7 +73,7 @@ class TextFactory {
       style: TextStyle(
         fontFamily: _fontFamily,
         fontWeight: FontWeight.w600,
-        fontSize: 13.0,
+        fontSize: getIt<LayoutFactory>().getDimension(baseDimension: 13.0),
       ),
     );
   }
@@ -90,11 +93,12 @@ class TextFactory {
     );
   }
 
-  TextStyle regularTextStyle({double fontSize, Color color = Colors.black}) {
+  TextStyle regularTextStyle(
+      {double fontSize = 14.0, Color color = Colors.black}) {
     return TextStyle(
       fontFamily: _fontFamily,
       fontWeight: FontWeight.w600,
-      fontSize: fontSize,
+      fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
       color: color,
     );
   }
@@ -117,7 +121,7 @@ class TextFactory {
     return TextStyle(
         fontFamily: _fontFamily,
         fontWeight: FontWeight.w500,
-        fontSize: fontSize,
+        fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
         color: color);
   }
 
@@ -134,11 +138,12 @@ class TextFactory {
     );
   }
 
-  TextStyle liteTextStyle({double fontSize, Color color = Colors.black}) {
+  TextStyle liteTextStyle(
+      {double fontSize = 14.0, Color color = Colors.black}) {
     return TextStyle(
       fontFamily: _fontFamily,
       fontWeight: FontWeight.w400,
-      fontSize: fontSize,
+      fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
       color: color,
     );
   }
@@ -166,11 +171,11 @@ class TextFactory {
     );
   }
 
-  TextStyle lite2TextStyle({double fontSize}) {
+  TextStyle lite2TextStyle({double fontSize = 14.0}) {
     return TextStyle(
       fontFamily: _fontFamily,
       fontWeight: FontWeight.w400,
-      fontSize: fontSize,
+      fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
       color: Colors.grey[600],
     );
   }
@@ -188,11 +193,12 @@ class TextFactory {
     );
   }
 
-  TextStyle linkLiteTextStyle({double fontSize, Color color = Colors.black}) {
+  TextStyle linkLiteTextStyle(
+      {double fontSize = 14.0, Color color = Colors.black}) {
     return TextStyle(
       fontFamily: _fontFamily,
       fontWeight: FontWeight.w400,
-      fontSize: fontSize,
+      fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
       color: color,
     );
   }
@@ -210,20 +216,22 @@ class TextFactory {
     );
   }
 
-  TextStyle liteSmallTextStyle({double fontSize, Color color = Colors.black}) {
+  TextStyle liteSmallTextStyle(
+      {double fontSize = 10.0, Color color = Colors.black}) {
     return TextStyle(
       fontFamily: _fontFamily,
       fontWeight: FontWeight.w400,
-      fontSize: fontSize,
+      fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
       color: color,
     );
   }
 
-  TextStyle smallBoldTextStyle({double fontSize, Color color = Colors.black}) {
+  TextStyle smallBoldTextStyle(
+      {double fontSize = 12.0, Color color = Colors.black}) {
     return TextStyle(
       fontFamily: _fontFamily,
       fontWeight: FontWeight.bold,
-      fontSize: fontSize,
+      fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
       color: color,
     );
   }
@@ -242,20 +250,20 @@ class TextFactory {
   }
 
   TextStyle authenticationButtonTextStyle(
-      {double fontSize, Color color = Colors.black}) {
+      {double fontSize = 16.0, Color color = Colors.black}) {
     return TextStyle(
       fontFamily: _fontFamily,
       fontWeight: FontWeight.w600,
-      fontSize: fontSize,
+      fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
       color: color,
     );
   }
 
-  TextStyle hintStyle({double fontSize}) {
+  TextStyle hintStyle({double fontSize = 16.0}) {
     return TextStyle(
       fontFamily: _fontFamily,
       fontWeight: FontWeight.w400,
-      fontSize: fontSize,
+      fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
       color: Colors.grey[400],
     );
   }

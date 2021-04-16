@@ -4,6 +4,7 @@ import 'package:wpa_app/app/constants.dart';
 import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/application/admin/admin_bloc.dart';
 import 'package:wpa_app/domain/authentication/entities.dart';
+import 'package:wpa_app/presentation/common/layout_factory.dart';
 import 'package:wpa_app/presentation/common/loader.dart';
 import 'package:wpa_app/presentation/common/text_factory.dart';
 import 'package:wpa_app/presentation/admin/helper.dart';
@@ -141,7 +142,8 @@ class _UserVerificationPageState extends State<UserVerificationPage> {
                       child: Icon(
                         Icons.cancel,
                         color: kErrorColor.withOpacity(0.8),
-                        size: 40,
+                        size: getIt<LayoutFactory>()
+                            .getDimension(baseDimension: 40.0),
                       ),
                     ),
                     SizedBox(width: 8),
@@ -154,7 +156,8 @@ class _UserVerificationPageState extends State<UserVerificationPage> {
                         child: Icon(
                           Icons.check_circle_rounded,
                           color: kSuccessColor.withOpacity(0.8),
-                          size: 40,
+                          size: getIt<LayoutFactory>()
+                              .getDimension(baseDimension: 40.0),
                         )),
                   ],
                 ),

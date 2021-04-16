@@ -4,13 +4,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../application/authentication/authentication_bloc.dart';
 import '../application/navigation_bar/navigation_bar_bloc.dart';
-import 'injection.dart';
 import '../presentation/authentication/password_reset_page.dart';
 import '../presentation/authentication/sign_in_page.dart';
 import '../presentation/authentication/sign_up_page.dart';
+import '../presentation/common/layout_factory.dart';
 import '../presentation/index.dart';
 import '../presentation/splash/splash_page.dart';
 import '../services/firebase_messaging_service.dart';
+import 'injection.dart';
 
 class App extends StatelessWidget {
   Future<void> initializeServices() async {
@@ -60,42 +61,40 @@ class App extends StatelessWidget {
   }
 }
 
-Route routes(RouteSettings settings) {
-  if (settings.name == '/') {
-    return MaterialPageRoute(
-      builder: (BuildContext context) {
-        return SplashPage();
-      },
-    );
-  } else if (settings.name == '/index') {
-    return MaterialPageRoute(
-      builder: (BuildContext context) {
-        return IndexPage();
-      },
-    );
-  } else if (settings.name == '/sign_in') {
-    return MaterialPageRoute(
-      builder: (BuildContext context) {
-        return SignInPage();
-      },
-    );
-  } else if (settings.name == '/sign_up') {
-    return MaterialPageRoute(
-      builder: (BuildContext context) {
-        return SignUpPage();
-      },
-    );
-  } else if (settings.name == '/password_reset') {
-    return MaterialPageRoute(
-      builder: (BuildContext context) {
-        return PasswordResetPage();
-      },
-    );
+void registerLayoutBuilder(context) {
+  if (!getIt.isRegistered<LayoutFactory>()) {
+    DeviceType deviceType = getDeviceType(context);
+    getIt.registerLazySingleton<LayoutFactory>(() => LayoutFactory(deviceType));
   }
-  // default
+}
+
+DeviceType getDeviceType(context) {
+  double smallestDimension = MediaQuery.of(context).size.shortestSide;
+  // 600 here is a common breakpoint for a typical 7-inch tablet
+  bool mobile = smallestDimension < 600;
+  if (mobile) {
+    return DeviceType.MOBILE;
+  }
+  return DeviceType.TABLET;
+}
+
+Route routes(RouteSettings settings) {
+  Widget widget = SplashPage();
+  if (settings.name == '/') {
+    widget = SplashPage();
+  } else if (settings.name == '/index') {
+    widget = IndexPage();
+  } else if (settings.name == '/sign_in') {
+    widget = SignInPage();
+  } else if (settings.name == '/sign_up') {
+    widget = SignUpPage();
+  } else if (settings.name == '/password_reset') {
+    widget = PasswordResetPage();
+  }
   return MaterialPageRoute(
     builder: (BuildContext context) {
-      return SplashPage();
+      registerLayoutBuilder(context);
+      return widget;
     },
   );
 }

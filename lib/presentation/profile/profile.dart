@@ -7,6 +7,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:wpa_app/application/links/links_bloc.dart';
+import 'package:wpa_app/presentation/common/layout_factory.dart';
 import 'package:wpa_app/presentation/profile/terms_of_use.dart';
 
 import '../../app/constants.dart';
@@ -342,7 +343,8 @@ class _NotificationSettingsState extends State<NotificationSettings> {
             children: [
               getIt<TextFactory>().lite("Prayers"),
               Container(
-                height: 30,
+                height:
+                    getIt<LayoutFactory>().getDimension(baseDimension: 30.0),
                 child: BlocConsumer<NotificationSettingsBloc,
                     NotificationSettingsState>(
                   listener: (context, NotificationSettingsState state) {
@@ -427,6 +429,8 @@ class Other extends StatelessWidget {
                       Icon(
                         Icons.keyboard_arrow_right,
                         color: kDarkGreyColor,
+                        size: getIt<LayoutFactory>()
+                            .getDimension(baseDimension: 24.0),
                       )
                     ],
                   ),
@@ -449,6 +453,8 @@ class Other extends StatelessWidget {
                       Icon(
                         Icons.keyboard_arrow_right,
                         color: kDarkGreyColor,
+                        size: getIt<LayoutFactory>()
+                            .getDimension(baseDimension: 24.0),
                       )
                     ],
                   ),
@@ -476,6 +482,8 @@ class Other extends StatelessWidget {
                       Icon(
                         Icons.keyboard_arrow_right,
                         color: kDarkGreyColor,
+                        size: getIt<LayoutFactory>()
+                            .getDimension(baseDimension: 24.0),
                       )
                     ],
                   ),
@@ -503,6 +511,8 @@ class Other extends StatelessWidget {
                       Icon(
                         Icons.keyboard_arrow_right,
                         color: kDarkGreyColor,
+                        size: getIt<LayoutFactory>()
+                            .getDimension(baseDimension: 24.0),
                       )
                     ],
                   ),

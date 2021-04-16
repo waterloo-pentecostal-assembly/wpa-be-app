@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'package:wpa_app/application/bible_series/bible_series_bloc.dart';
 import 'package:wpa_app/domain/bible_series/entities.dart';
+import 'package:wpa_app/presentation/common/layout_factory.dart';
 
 import '../../../../app/constants.dart';
 import '../../../../app/injection.dart';
@@ -53,7 +54,8 @@ class ProgressTile extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.only(bottom: 8),
-              height: kProgressWidgetWidth,
+              height: getIt<LayoutFactory>()
+                  .getDimension(baseDimension: kProgressWidgetWidth),
               child: SfRadialGauge(
                 enableLoadingAnimation: true,
                 axes: [
@@ -89,7 +91,9 @@ class ProgressTile extends StatelessWidget {
                         widget: Column(
                           children: [
                             SizedBox(
-                              height: 0.2 * kProgressWidgetWidth,
+                              height: 0.2 *
+                                  getIt<LayoutFactory>().getDimension(
+                                      baseDimension: kProgressWidgetWidth),
                             ),
                             Container(
                                 child: getIt<TextFactory>().subHeading(
@@ -98,7 +102,8 @@ class ProgressTile extends StatelessWidget {
                                 child: getIt<TextFactory>().regular(
                                     '${getProgressBarPhrase(achievements.seriesProgress)}')),
                             SizedBox(
-                              height: 10,
+                              height: getIt<LayoutFactory>()
+                                  .getDimension(baseDimension: 10.0),
                             ),
                             ProgressWidgetTitle()
                           ],
@@ -140,8 +145,9 @@ class ProgressTile extends StatelessWidget {
         value: seriesValue,
         enableDragging: false,
         enableAnimation: true,
-        markerHeight: 15,
-        markerOffset: -20,
+        markerHeight: getIt<LayoutFactory>().getDimension(baseDimension: 15.0),
+        markerWidth: getIt<LayoutFactory>().getDimension(baseDimension: 10.0),
+        markerOffset: -getIt<LayoutFactory>().getDimension(baseDimension: 20.0),
         color: Colors.black);
   }
 }

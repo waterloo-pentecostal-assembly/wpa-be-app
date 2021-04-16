@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/presentation/common/layout_factory.dart';
 import 'package:wpa_app/presentation/engage/prayer_requests/pages/my_answered_prayer_request.dart';
 
 import '../../../../app/constants.dart';
@@ -132,7 +133,11 @@ class PrayerRequestsTitleBar extends StatelessWidget {
             children: [
               GestureDetector(
                 onTap: () => Navigator.pop(context),
-                child: Icon(Icons.arrow_back),
+                child: Icon(
+                  Icons.arrow_back,
+                  size:
+                      getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
+                ),
               ),
               SizedBox(width: 8),
               getIt<TextFactory>().subPageHeading('Prayer Requests'),
@@ -151,10 +156,10 @@ class PrayerRequestsTitleBar extends StatelessWidget {
             },
             child: ClipOval(
               child: Container(
-                height: 30,
-                width: 30,
                 color: Colors.grey.shade300,
-                child: Icon(Icons.add),
+                child: Icon(Icons.add,
+                    size: getIt<LayoutFactory>()
+                        .getDimension(baseDimension: 24.0)),
               ),
             ),
           ),

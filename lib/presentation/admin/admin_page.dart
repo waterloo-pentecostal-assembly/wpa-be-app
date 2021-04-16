@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:wpa_app/presentation/common/layout_factory.dart';
 import '../../app/injection.dart';
 import '../../application/admin/admin_bloc.dart';
 import '../common/interfaces.dart';
@@ -64,8 +64,10 @@ class OptionsList extends StatelessWidget {
                 },
                 child: Container(
                   padding: const EdgeInsets.all(8),
-                  width: 150,
-                  height: 125,
+                  width: getIt<LayoutFactory>().getDimension(
+                      layoutDimension: LayoutDimension.ADMIN_TILE_WIDTH),
+                  height: getIt<LayoutFactory>().getDimension(
+                      layoutDimension: LayoutDimension.ADMIN_TILE_HEIGHT),
                   decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.all(Radius.circular(15)),
@@ -83,7 +85,8 @@ class OptionsList extends StatelessWidget {
                         child: Icon(
                           Icons.supervised_user_circle,
                           color: Colors.amber[300],
-                          size: 50,
+                          size: getIt<LayoutFactory>().getDimension(
+                              layoutDimension: LayoutDimension.ADMIN_ICON_SIZE),
                         ),
                       ),
                       SizedBox(height: 20),
@@ -100,8 +103,10 @@ class OptionsList extends StatelessWidget {
                 },
                 child: Container(
                   padding: const EdgeInsets.all(8),
-                  width: 150,
-                  height: 125,
+                  width: getIt<LayoutFactory>().getDimension(
+                      layoutDimension: LayoutDimension.ADMIN_TILE_WIDTH),
+                  height: getIt<LayoutFactory>().getDimension(
+                      layoutDimension: LayoutDimension.ADMIN_TILE_HEIGHT),
                   decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.all(Radius.circular(15)),
@@ -119,12 +124,16 @@ class OptionsList extends StatelessWidget {
                         child: Icon(
                           Icons.verified_user,
                           color: Colors.greenAccent[400],
-                          size: 50,
+                          size: getIt<LayoutFactory>().getDimension(
+                              layoutDimension: LayoutDimension.ADMIN_ICON_SIZE),
                         ),
                       ),
                       SizedBox(height: 16),
-                      getIt<TextFactory>()
-                          .subHeading3('Prayer Request Approval'),
+                      getIt<TextFactory>().subHeading3(
+                          'Prayer Request Approval',
+                          fontSize: getIt<LayoutFactory>().getDimension(
+                              layoutDimension:
+                                  LayoutDimension.ADMIN_TILE_FONT_SIZE)),
                     ],
                   ),
                 ),

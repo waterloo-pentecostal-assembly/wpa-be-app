@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:wpa_app/application/links/links_bloc.dart';
 import 'package:wpa_app/domain/authentication/entities.dart';
+import 'package:wpa_app/presentation/common/layout_factory.dart';
 
 import '../app/constants.dart';
 import '../app/injection.dart';
@@ -121,12 +122,17 @@ class NavigationBar extends StatelessWidget {
       BottomNavigationBarItem(
         // icon: Icon(Icons.class_),
         // label: 'ENGAGE',
-        icon: Icon(Icons.home),
+        icon: Icon(
+          Icons.home,
+          size: getIt<LayoutFactory>().getDimension(baseDimension: 24),
+          // size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
+        ),
         label:
             'HOME', // Really the engage page that we are using as "HOME" in phase 1
       ),
       BottomNavigationBarItem(
-        icon: Icon(Icons.favorite),
+        icon: Icon(Icons.favorite,
+            size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0)),
         label: 'GIVE',
       ),
       // BottomNavigationBarItem(
@@ -134,7 +140,8 @@ class NavigationBar extends StatelessWidget {
       //   label: 'NOTIFICATIONS',
       // ),
       BottomNavigationBarItem(
-        icon: Icon(Icons.person),
+        icon: Icon(Icons.person,
+            size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0)),
         label: 'PROFILE',
       )
     ];
@@ -142,7 +149,8 @@ class NavigationBar extends StatelessWidget {
     if (user.isAdmin) {
       items.add(
         BottomNavigationBarItem(
-          icon: Icon(Icons.admin_panel_settings),
+          icon: Icon(Icons.admin_panel_settings,
+              size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0)),
           label: 'ADMIN',
         ),
       );
