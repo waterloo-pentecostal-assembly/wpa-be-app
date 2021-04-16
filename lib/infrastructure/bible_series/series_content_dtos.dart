@@ -107,7 +107,7 @@ class SeriesContentBodyDto {
       _properties['scriptures'] = findOrThrowException(json, 'scriptures');
     } else if (_bodyType == 'image_input') {
     } else if (_bodyType == 'link') {
-      _properties['title'] = findOrThrowException(json, 'title');
+      _properties['title'] = findOrDefaultTo(json, 'title', '');
       _properties['text'] = findOrThrowException(json, 'text');
       _properties['link'] = findOrThrowException(json, 'link');
     } else {
