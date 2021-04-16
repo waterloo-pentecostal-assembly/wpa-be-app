@@ -378,12 +378,12 @@ String _getMonth(Timestamp date) {
 }
 
 String _getDate(Timestamp date) {
-  return date.toDate().toString().substring(8, 10);
+  return date.toDate().toUtc().toString().substring(8, 10);
 }
 
 Text _getTodayIndicator(Timestamp date) {
-  String today = DateTime.now().toString().substring(0, 10);
-  String d = date.toDate().toString().substring(0, 10);
+  String today = DateTime.now().toUtc().toString().substring(0, 10);
+  String d = date.toDate().toUtc().toString().substring(0, 10);
   if (today == d) {
     return Text('•');
   }
@@ -406,7 +406,8 @@ Color _getStatusColor(bool isCompleted, bool isDraft, Timestamp date) {
     return Colors.grey.shade100;
   } else if (date
           .toDate()
-          .isBefore(DateTime.now().subtract(Duration(days: 1))) &&
+          .toUtc()
+          .isBefore(DateTime.now().toUtc().subtract(Duration(days: 1))) &&
       !isCompleted) {
     return Colors.amber.withOpacity(0.25);
   }
@@ -414,9 +415,9 @@ Color _getStatusColor(bool isCompleted, bool isDraft, Timestamp date) {
 }
 
 int _getInitialIndex(List<SeriesContentSnippet> snippet) {
-  String today = DateTime.now().toString().substring(0, 10);
+  String today = DateTime.now().toUtc().toString().substring(0, 10);
   for (SeriesContentSnippet element in snippet) {
-    String date = element.date.toDate().toString().substring(0, 10);
+    String date = element.date.toDate().toUtc().toString().substring(0, 10);
     if (today == date) {
       return snippet.indexOf(element);
     }
