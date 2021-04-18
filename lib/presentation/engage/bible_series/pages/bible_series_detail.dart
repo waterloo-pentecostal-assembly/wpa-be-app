@@ -378,12 +378,12 @@ String _getMonth(Timestamp date) {
 }
 
 String _getDate(Timestamp date) {
-  return date.toDate().toUtc().toString().substring(8, 10);
+  return date.toDate().toLocal().toString().substring(8, 10);
 }
 
 Text _getTodayIndicator(Timestamp date) {
-  String today = DateTime.now().toUtc().toString().substring(0, 10);
-  String d = date.toDate().toUtc().toString().substring(0, 10);
+  String today = DateTime.now().toLocal().toString().substring(0, 10);
+  String d = date.toDate().toLocal().toString().substring(0, 10);
   if (today == d) {
     return Text('•');
   }
@@ -400,14 +400,16 @@ Widget _getStatusIndicator(bool isCompleted, bool isDraft, double conversion) {
 }
 
 Color _getStatusColor(bool isCompleted, bool isDraft, Timestamp date) {
+  String today = DateTime.now().toLocal().toString().substring(0, 10);
+  String d = date.toDate().toLocal().toString().substring(0, 10);
   if (isCompleted) {
     return Colors.green.withOpacity(0.25);
-  } else if (isDraft) {
+  } else if (isDraft || today == d) {
     return Colors.grey.shade100;
   } else if (date
           .toDate()
-          .toUtc()
-          .isBefore(DateTime.now().toUtc().subtract(Duration(days: 1))) &&
+          .toLocal()
+          .isBefore(DateTime.now().toLocal().subtract(Duration(days: 0))) &&
       !isCompleted) {
     return Colors.amber.withOpacity(0.25);
   }
@@ -415,9 +417,9 @@ Color _getStatusColor(bool isCompleted, bool isDraft, Timestamp date) {
 }
 
 int _getInitialIndex(List<SeriesContentSnippet> snippet) {
-  String today = DateTime.now().toUtc().toString().substring(0, 10);
+  String today = DateTime.now().toLocal().toString().substring(0, 10);
   for (SeriesContentSnippet element in snippet) {
-    String date = element.date.toDate().toUtc().toString().substring(0, 10);
+    String date = element.date.toDate().toLocal().toString().substring(0, 10);
     if (today == date) {
       return snippet.indexOf(element);
     }
