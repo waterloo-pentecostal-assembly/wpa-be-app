@@ -406,10 +406,7 @@ Color _getStatusColor(bool isCompleted, bool isDraft, Timestamp date) {
     return Colors.green.withOpacity(0.25);
   } else if (isDraft || today == d) {
     return Colors.grey.shade100;
-  } else if (date
-          .toDate()
-          .toLocal()
-          .isBefore(DateTime.now().toLocal())) {
+  } else if (date.toDate().toLocal().isBefore(DateTime.now().toLocal())) {
     return Colors.amber.withOpacity(0.25);
   }
   return Colors.grey.shade100;
