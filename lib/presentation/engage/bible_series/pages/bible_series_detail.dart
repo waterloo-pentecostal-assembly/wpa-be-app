@@ -409,7 +409,7 @@ Color _getStatusColor(bool isCompleted, bool isDraft, Timestamp date) {
   } else if (date
           .toDate()
           .toLocal()
-          .isBefore(DateTime.now().toLocal().subtract(Duration(days: 0))) &&
+          .isBefore(DateTime.now().toLocal()) &&
       !isCompleted) {
     return Colors.amber.withOpacity(0.25);
   }
