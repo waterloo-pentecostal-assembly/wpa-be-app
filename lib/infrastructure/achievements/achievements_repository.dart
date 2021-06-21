@@ -26,7 +26,7 @@ class AchievementsRepository implements IAchievementsRepository {
       _firebaseFirestoreService.handleException(e);
     }
 
-    if (documentSnapshot.data().isEmpty) {
+    if (!documentSnapshot.exists) {
       return Achievements(seriesProgress: 0);
     }
 

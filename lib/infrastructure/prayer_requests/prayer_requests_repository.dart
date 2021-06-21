@@ -220,7 +220,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
           );
         }
 
-        List<dynamic> prayedBy = documentSnapshot.data()["prayed_by"];
+        List<dynamic> prayedBy = documentSnapshot["prayed_by"];
 
         if (prayedBy == null) {
           prayedBy = [user.id];
@@ -246,7 +246,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
         DocumentSnapshot documentSnapshot =
             await transaction.get(documentReference);
 
-        List<dynamic> reportedBy = documentSnapshot.data()["reported_by"] ?? [];
+        List<dynamic> reportedBy = documentSnapshot["reported_by"] ?? [];
 
         if (reportedBy.contains(user.id)) {
           throw PrayerRequestsException(
