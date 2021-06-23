@@ -55,7 +55,6 @@ const kWpaGiveUrl = 'https://www.canadahelps.org/en/dne/15479';
 const kDailyEngagementReminderTopic = 'daily_engagement_reminder';
 
 // Help/Reporting
-const kWpaContactEmail = 'dan@wpa.church';
 const kHelpEmailSubject = 'WPA_BE_APP_Help_Request';
 const kReportEmailSubject = 'WPA_BE_APP_Problem_Report';
 
