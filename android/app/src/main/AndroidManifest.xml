@@ -8,7 +8,7 @@
     <application
         android:usesCleartextTraffic="true"
         android:name=".Application"
-        android:label="WPA"
+        android:label="WPA B.E."
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"
