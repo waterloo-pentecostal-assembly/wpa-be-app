@@ -26,7 +26,7 @@ void main() {
         return AuthenticationBloc(mockIAuthenticationFacade);
       },
       act: (AuthenticationBloc bloc) => bloc.add(RequestAuthenticationState()),
-      expect: [Authenticated(user)],
+      expect: () => [Authenticated(user)],
     );
 
     blocTest(
@@ -41,7 +41,7 @@ void main() {
         return AuthenticationBloc(mockIAuthenticationFacade);
       },
       act: (AuthenticationBloc bloc) => bloc.add(RequestAuthenticationState()),
-      expect: [Unauthenticated()],
+      expect: () => [Unauthenticated()],
     );
   });
 }
