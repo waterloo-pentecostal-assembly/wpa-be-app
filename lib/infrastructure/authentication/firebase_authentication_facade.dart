@@ -314,4 +314,18 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
 
     return false;
   }
+
+  @override
+  Future<void> initiateDelete(userId) async {
+    try {
+      await _firestore.collection("account_deletion_requests").doc().set({
+        "account_disabled": false,
+        "user_data_deleted": false,
+        "user_id": userId,
+        "request_date": Timestamp.now(),
+      });
+    } catch (e) {
+      _firebaseFirestoreService.handleException(e);
+    }
+  }
 }

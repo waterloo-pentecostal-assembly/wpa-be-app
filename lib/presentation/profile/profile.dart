@@ -1,7 +1,6 @@
 import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -240,8 +239,7 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
   }
 
   void selectNewProfileImage() async {
-    PickedFile selected =
-        await imagePicker.getImage(source: ImageSource.gallery);
+    XFile selected = await imagePicker.pickImage(source: ImageSource.gallery);
     if (selected != null && selected.path != null) {
       BlocProvider.of<UserProfileBloc>(context)
         ..add(UploadProfilePhoto(profilePhoto: File(selected.path)));
@@ -518,6 +516,77 @@ class Other extends StatelessWidget {
                   ),
                 ),
                 SizedBox(height: 8),
+                GestureDetector(
+                  onTap: () {
+                    return showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        buttonPadding:
+                            const EdgeInsets.fromLTRB(10, 20, 20, 20),
+                        shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(16))),
+                        title: getIt<TextFactory>()
+                            .subHeading2("Delete my Account"),
+                        content: getIt<TextFactory>().lite(
+                          "This account will be permanently disabled and all data associated with this account will be deleted. Would you like to proceed?",
+                        ),
+                        actions: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.all(Radius.circular(16)),
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                  minimumSize: Size(90, 30),
+                                  backgroundColor:
+                                      kDarkGreyColor.withOpacity(0.5),
+                                  primary: Colors.white,
+                                  padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap),
+                              onPressed: () {
+                                Navigator.of(context, rootNavigator: true)
+                                    .pop();
+                              },
+                              child: getIt<TextFactory>().regularButton('No'),
+                            ),
+                          ),
+                          ClipRRect(
+                            borderRadius: BorderRadius.all(Radius.circular(16)),
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                  minimumSize: Size(90, 30),
+                                  backgroundColor: kWpaBlue.withOpacity(0.8),
+                                  primary: Colors.white,
+                                  padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap),
+                              onPressed: () {
+                                BlocProvider.of<AuthenticationBloc>(context)
+                                    .add(InitiateDelete());
+                                Navigator.of(context, rootNavigator: true)
+                                    .pop();
+                              },
+                              child: getIt<TextFactory>().regularButton('Yes'),
+                            ),
+                          )
+                        ],
+                      ),
+                    );
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      getIt<TextFactory>().lite("Delete my Account"),
+                      Icon(
+                        Icons.delete,
+                        color: kDarkGreyColor,
+                        size: getIt<LayoutFactory>()
+                            .getDimension(baseDimension: 24.0),
+                      )
+                    ],
+                  ),
+                ),
+                SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -557,7 +626,7 @@ class _TestImagePickerState extends State<TestImagePicker> {
   final picker = ImagePicker();
 
   Future getImage() async {
-    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     setState(() {
       if (pickedFile != null) {
