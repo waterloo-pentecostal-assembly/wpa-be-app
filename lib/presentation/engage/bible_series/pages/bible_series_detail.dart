@@ -333,8 +333,8 @@ List<Widget> _buildContentChildren(
                   alignment: Alignment.center,
                   child: Row(
                     children: [
-                      getIt<TextFactory>().subHeading(
-                          element.seriesContentType.toString().split('.')[1]),
+                      getIt<TextFactory>()
+                          .subHeading(element.seriesContentType),
                       _getStatusIndicator(element.isCompleted, element.isDraft,
                           getIt<LayoutFactory>().conversionVal)
                     ],

@@ -1,6 +1,7 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/infrastructure/bible_series/bible_series_repository.dart';
 
 import '../../../app/injection.dart';
 import '../../../application/achievements/achievements_bloc.dart';
@@ -35,8 +36,7 @@ class EngagePage extends IIndexedPage {
               RecentBibleSeriesRequested(amount: 3),
             ),
         ),
-        BlocProvider<PrayerRequestsBloc>(
-            create: (BuildContext context) => getIt<PrayerRequestsBloc>()
+        BlocProvider<PrayerRequestsBloc>(create: (BuildContext context) => getIt<PrayerRequestsBloc>()
             // ..add(
             // TODO: dynamically calculate how much recent prayer requests to get
             // RecentPrayerRequestsRequested(amount: 10),
@@ -67,8 +67,7 @@ class EngagePage extends IIndexedPage {
                   case '/':
                     return EngageIndex();
                   case '/bible_series':
-                    getIt<FirebaseAnalytics>()
-                        .logEvent(name: 'bible_series_viewed');
+                    getIt<FirebaseAnalytics>().logEvent(name: 'bible_series_viewed');
                     Map args = settings.arguments;
                     return BibleSeriesDetailPage(
                       bibleSeriesId: args['bibleSeriesId'],
@@ -80,8 +79,7 @@ class EngagePage extends IIndexedPage {
                   case '/prayer_requests/mine':
                     return PrayerRequestsPage(tabIndex: 1);
                   case '/content_detail':
-                    getIt<FirebaseAnalytics>()
-                        .logEvent(name: 'engagement_viewed');
+                    getIt<FirebaseAnalytics>().logEvent(name: 'engagement_viewed');
                     Map args = settings.arguments;
                     return ContentDetailPage(
                       seriesContentId: args['seriesContentId'],
@@ -113,14 +111,10 @@ class EngageIndex extends StatelessWidget {
             child: RefreshIndicator(
               onRefresh: () async {
                 // TODO: determine number of recents to get based on screen size
-                BlocProvider.of<AchievementsBloc>(context)
-                  ..add(WatchAchievementsStarted());
-                BlocProvider.of<BibleSeriesBloc>(context)
-                  ..add(RecentBibleSeriesRequested(amount: 15));
-                BlocProvider.of<PrayerRequestsBloc>(context)
-                  ..add(RecentPrayerRequestsRequested(amount: 10));
-                BlocProvider.of<MediaBloc>(context)
-                  ..add(AvailableMediaRequested());
+                BlocProvider.of<AchievementsBloc>(context)..add(WatchAchievementsStarted());
+                BlocProvider.of<BibleSeriesBloc>(context)..add(RecentBibleSeriesRequested(amount: 15));
+                BlocProvider.of<PrayerRequestsBloc>(context)..add(RecentPrayerRequestsRequested(amount: 10));
+                BlocProvider.of<MediaBloc>(context)..add(AvailableMediaRequested());
               },
               child: ListView(
                 physics: AlwaysScrollableScrollPhysics(),
@@ -141,6 +135,22 @@ class EngageIndex extends StatelessWidget {
       ),
     );
   }
+}
+
+List<Widget> getEngagePageWidgets() {
+  // we want to know if there is any active bible
+  // series. This determines the order of the list
+
+  return [
+    HeaderWidget(),
+    ProgressWidget(),
+    SizedBox(height: 16.0),
+    RecentBibleSeriesWidget(),
+    SizedBox(height: 16.0),
+    RecentPrayerRequestsWidget(),
+    SizedBox(height: 16.0),
+    MediaWidget(),
+  ];
 }
 
 class HeaderWidget extends StatelessWidget {

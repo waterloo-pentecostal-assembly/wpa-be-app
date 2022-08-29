@@ -47,6 +47,10 @@ class BibleSeriesBloc extends Bloc<BibleSeriesEvent, BibleSeriesState> {
           event, _iCompletionsRepository.getCompletionOrNull);
     } else if (event is RestoreState) {
       yield* _mapRestoreStateEventToState(event);
+    } else if (event is HasActiveBibleSeriesRequested) {
+      yield* _mapHasActiveBibleSeriesRequestedToState(
+        _iBibleSeriesRepository.hasActiveBibleSeries,
+      );
     }
   }
 }
@@ -176,4 +180,12 @@ Stream<BibleSeriesState> _mapRestoreStateEventToState(
       message: 'An unknown error occurred',
     );
   }
+}
+
+Stream<BibleSeriesState> _mapHasActiveBibleSeriesRequestedToState(
+  Future<bool> Function() hasActiveSeriesMethod,
+) async* {
+  // TODO: handle error properly here
+  bool hasActive = await hasActiveSeriesMethod();
+  yield HasActiveBibleSeries(hasActive);
 }

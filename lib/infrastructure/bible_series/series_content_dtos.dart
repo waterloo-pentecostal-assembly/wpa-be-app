@@ -79,7 +79,7 @@ extension SeriesContentDtoX on SeriesContentDto {
       id: this.id,
       title: this.title,
       subTitle: this.subTitle,
-      contentType: contentTypeMapper(this.contentType),
+      contentType: this.contentType.toUpperCase(),
       date: this.date,
       body: _body,
     );

@@ -12,6 +12,11 @@ class RecentBibleSeriesRequested extends BibleSeriesEvent {
   List<Object> get props => [];
 }
 
+class HasActiveBibleSeriesRequested extends BibleSeriesEvent {
+  @override
+  List<Object> get props => [];
+}
+
 class InitialBibleSeriesListRequested extends BibleSeriesEvent {
   final int limit;
 

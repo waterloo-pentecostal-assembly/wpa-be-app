@@ -1,17 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-enum SeriesContentType {
-  REFLECT,
-  LISTEN,
-  SCRIBE,
-  DRAW,
-  READ,
-  PRAY,
-  DEVOTIONAL,
-  MEMORIZE,
-}
-
 enum SeriesContentBodyType {
   AUDIO,
   TEXT,
@@ -91,7 +80,7 @@ class SeriesContentSnippet {
 }
 
 class AvailableContentType {
-  final SeriesContentType seriesContentType;
+  final String seriesContentType;
   final String contentId;
   bool _isCompleted;
   bool _isOnTime;
@@ -128,7 +117,7 @@ class AvailableContentType {
 
 class SeriesContent {
   final String id;
-  final SeriesContentType contentType;
+  final String contentType;
   final Timestamp date;
   final String title;
   final String subTitle;

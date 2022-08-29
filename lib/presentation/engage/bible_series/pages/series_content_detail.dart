@@ -22,7 +22,7 @@ import '../widgets/text_body.dart';
 class ContentDetailPage extends StatelessWidget {
   final String seriesContentId;
   final String bibleSeriesId;
-  final SeriesContentType seriesContentType;
+  final String seriesContentType;
   final bool getCompletionDetails;
 
   const ContentDetailPage({
@@ -57,7 +57,7 @@ class ContentDetailPage extends StatelessWidget {
 
 class ContentDetailWidget extends StatelessWidget {
   final String bibleSeriesId;
-  final SeriesContentType seriesContentType;
+  final String seriesContentType;
 
   ContentDetailWidget(this.bibleSeriesId, this.seriesContentType);
   final GlobalKey<AudioSliderState> keyChild = GlobalKey();
@@ -158,8 +158,7 @@ class ContentDetailWidget extends StatelessWidget {
                         backButton(state.seriesContentDetail),
                         SizedBox(width: 8),
                         HeaderWidget(
-                            contentType: state.seriesContentDetail.contentType
-                                .toString()),
+                            contentType: state.seriesContentDetail.contentType),
                       ],
                     ),
                   ),
@@ -264,7 +263,7 @@ class ContentDetailWidget extends StatelessWidget {
 }
 
 class SeriesContentDetailPlaceholder extends StatelessWidget {
-  final SeriesContentType seriesContentType;
+  final String seriesContentType;
 
   const SeriesContentDetailPlaceholder({Key key, this.seriesContentType})
       : super(key: key);
@@ -302,17 +301,12 @@ class HeaderWidget extends StatelessWidget {
   final String contentType;
   const HeaderWidget({Key key, this.contentType}) : super(key: key);
 
-  String splitContentType() {
-    var temp = contentType.split(".");
-    return temp[1];
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.center,
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-      child: getIt<TextFactory>().subPageHeading(splitContentType()),
+      child: getIt<TextFactory>().subPageHeading2(contentType),
     );
   }
 }
