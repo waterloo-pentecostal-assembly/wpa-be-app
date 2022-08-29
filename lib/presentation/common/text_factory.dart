@@ -26,10 +26,23 @@ class TextFactory {
   Text subPageHeading(String text) {
     return Text(
       text,
+      overflow: TextOverflow.fade,
       style: TextStyle(
         fontFamily: _fontFamily,
         fontWeight: FontWeight.w700,
         fontSize: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
+      ),
+    );
+  }
+
+  Text subPageHeading2(String text) {
+    return Text(
+      text,
+      overflow: TextOverflow.fade,
+      style: TextStyle(
+        fontFamily: _fontFamily,
+        fontWeight: FontWeight.w700,
+        fontSize: getIt<LayoutFactory>().getDimension(baseDimension: 18.0),
       ),
     );
   }

@@ -7,6 +7,8 @@ import '../common/loader.dart';
 class SplashPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    // return MultiBlocListener(listeners: listeners, child: child);
+
     return BlocListener<AuthenticationBloc, AuthenticationState>(
       listener: (context, state) {
         if (state is Authenticated) {

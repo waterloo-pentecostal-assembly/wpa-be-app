@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/application/bible_series/bible_series_bloc.dart';
 
 import '../application/authentication/authentication_bloc.dart';
 import '../application/navigation_bar/navigation_bar_bloc.dart';
@@ -41,6 +42,12 @@ class App extends StatelessWidget {
                     ),
                   ),
               ),
+              BlocProvider(
+                create: (context) => getIt<BibleSeriesBloc>()
+                  ..add(
+                    HasActiveBibleSeriesRequested(),
+                  ),
+              )
             ],
             child: MaterialApp(
               theme: ThemeData(

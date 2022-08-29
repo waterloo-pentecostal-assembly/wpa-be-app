@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/application/navigation_bar/navigation_bar_bloc.dart';
 
@@ -50,7 +51,7 @@ class FirebaseMessagingService {
     });
   }
 
-  void navigationHandler(Map<String, dynamic> payload) {
+  void navigationHandler(Map<String, dynamic> payload) async {
     if (payload['notificationType'] == 'dailyEngagementReminder') {
       getIt<FirebaseAnalytics>()
           .logEvent(name: 'daily_engagement_notification_clicked');
@@ -77,8 +78,21 @@ class FirebaseMessagingService {
         ..add(
           NavigationBarEvent(
             tab: NavigationTabEnum.ADMIN,
+            route: '/user_verification',
           ),
         );
+    } else if (payload['notificationType'] == 'newPrayerRequest') {
+      getIt<NavigationBarBloc>()
+        ..add(
+          NavigationBarEvent(
+            tab: NavigationTabEnum.ADMIN,
+            route: '/prayer_request_approval',
+          ),
+        );
+    } else if (payload['notificationType'] == 'link') {
+      if (await canLaunch(payload['link'])) {
+        await launch(payload['link']);
+      }
     }
   }
 }

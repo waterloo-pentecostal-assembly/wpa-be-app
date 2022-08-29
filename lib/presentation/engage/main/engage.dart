@@ -1,6 +1,7 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/infrastructure/bible_series/bible_series_repository.dart';
 
 import '../../../app/injection.dart';
 import '../../../application/achievements/achievements_bloc.dart';
@@ -141,6 +142,22 @@ class EngageIndex extends StatelessWidget {
       ),
     );
   }
+}
+
+List<Widget> getEngagePageWidgets() {
+  // we want to know if there is any active bible
+  // series. This determines the order of the list
+
+  return [
+    HeaderWidget(),
+    ProgressWidget(),
+    SizedBox(height: 16.0),
+    RecentBibleSeriesWidget(),
+    SizedBox(height: 16.0),
+    RecentPrayerRequestsWidget(),
+    SizedBox(height: 16.0),
+    MediaWidget(),
+  ];
 }
 
 class HeaderWidget extends StatelessWidget {

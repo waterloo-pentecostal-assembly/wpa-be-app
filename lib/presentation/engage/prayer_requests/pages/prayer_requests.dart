@@ -65,16 +65,22 @@ class TabPrayerRequestWidget extends StatefulWidget {
 
 class _TabPrayerRequestWidgetState extends State<TabPrayerRequestWidget>
     with SingleTickerProviderStateMixin {
-  TabController tabController;
+  TabController _tabController;
   final int tabIndex;
 
+ @override
+ void dispose() {
+   _tabController.dispose();
+   super.dispose();
+ }
+
   _TabPrayerRequestWidgetState(this.tabIndex) {
-    this.tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
   Widget build(BuildContext context) {
-    tabController.index = tabIndex;
+    _tabController.index = tabIndex;
 
     return Expanded(
       child: Column(
@@ -85,7 +91,7 @@ class _TabPrayerRequestWidgetState extends State<TabPrayerRequestWidget>
             color: Colors.transparent,
             child: TabBar(
               labelPadding: EdgeInsets.all(8),
-              controller: tabController,
+              controller: _tabController,
               isScrollable: true,
               indicator: BoxDecoration(),
               indicatorSize: TabBarIndicatorSize.label,
@@ -102,7 +108,7 @@ class _TabPrayerRequestWidgetState extends State<TabPrayerRequestWidget>
             child: Container(
               padding: EdgeInsets.all(0),
               child: TabBarView(
-                controller: tabController,
+                controller: _tabController,
                 children: [
                   AllPrayerRequests(),
                   MyPrayerRequests(),

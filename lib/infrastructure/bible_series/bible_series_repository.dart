@@ -183,4 +183,28 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
       message: 'Cannot find content details',
     );
   }
+
+  @override
+  Future<bool> hasActiveBibleSeries() async {
+    QuerySnapshot querySnapshot;
+
+    try {
+      querySnapshot = await _bibleSeriesCollection
+          .orderBy("start_date", descending: true)
+          .where("is_visible", isEqualTo: true)
+          .limit(1)
+          .get();
+      if (querySnapshot.docs.length > 0) {
+        QueryDocumentSnapshot doc = querySnapshot.docs[0];
+        final BibleSeries bibleSeriesDto =
+            await BibleSeriesDto.fromFirestore(doc)
+                .toDomain(_firebaseStorageService);
+        return bibleSeriesDto.isActive;
+      }
+    } catch (e) {
+      _firebaseFirestoreService.handleException(e);
+    }
+
+    return false;
+  }
 }
