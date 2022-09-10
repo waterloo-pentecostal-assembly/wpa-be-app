@@ -68,11 +68,11 @@ class _TabPrayerRequestWidgetState extends State<TabPrayerRequestWidget>
   TabController _tabController;
   final int tabIndex;
 
- @override
- void dispose() {
-   _tabController.dispose();
-   super.dispose();
- }
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   _TabPrayerRequestWidgetState(this.tabIndex) {
     _tabController = TabController(length: 3, vsync: this);
