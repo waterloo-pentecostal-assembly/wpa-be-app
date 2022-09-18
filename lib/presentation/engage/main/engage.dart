@@ -1,8 +1,9 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:wpa_app/infrastructure/bible_series/bible_series_repository.dart';
+import 'package:wpa_app/presentation/common/loader.dart';
 
+import '../../../domain/bible_series/interfaces.dart';
 import '../../../app/injection.dart';
 import '../../../application/achievements/achievements_bloc.dart';
 import '../../../application/bible_series/bible_series_bloc.dart';
@@ -33,21 +34,15 @@ class EngagePage extends IIndexedPage {
           create: (BuildContext context) => getIt<BibleSeriesBloc>()
             ..add(
               // TODO: dynamically calculate how much recent bible series to get
-              RecentBibleSeriesRequested(amount: 3),
+              RecentBibleSeriesRequested(amount: 15),
             ),
         ),
         BlocProvider<PrayerRequestsBloc>(
-            create: (BuildContext context) => getIt<PrayerRequestsBloc>()
-            // ..add(
-            // TODO: dynamically calculate how much recent prayer requests to get
-            // RecentPrayerRequestsRequested(amount: 10),
-            // ),
-            ),
+            create: (BuildContext context) => getIt<PrayerRequestsBloc>()),
         BlocProvider<AchievementsBloc>(
           create: (BuildContext context) => getIt<AchievementsBloc>()
             ..add(
               WatchAchievementsStarted(),
-              // AchievementsRequested(),
             ),
         ),
         BlocProvider<MediaBloc>(
@@ -109,34 +104,53 @@ class EngageIndex extends StatelessWidget {
       color: Colors.grey.shade100,
       child: SafeArea(
         child: Scaffold(
-          body: Container(
-            // TODO: Add pull to refresh here
-            child: RefreshIndicator(
-              onRefresh: () async {
-                // TODO: determine number of recents to get based on screen size
-                BlocProvider.of<AchievementsBloc>(context)
-                  ..add(WatchAchievementsStarted());
-                BlocProvider.of<BibleSeriesBloc>(context)
-                  ..add(RecentBibleSeriesRequested(amount: 15));
-                BlocProvider.of<PrayerRequestsBloc>(context)
-                  ..add(RecentPrayerRequestsRequested(amount: 10));
-                BlocProvider.of<MediaBloc>(context)
-                  ..add(AvailableMediaRequested());
-              },
-              child: ListView(
-                physics: AlwaysScrollableScrollPhysics(),
-                children: <Widget>[
-                  HeaderWidget(),
-                  ProgressWidget(),
-                  SizedBox(height: 16.0),
-                  RecentBibleSeriesWidget(),
-                  SizedBox(height: 16.0),
-                  RecentPrayerRequestsWidget(),
-                  SizedBox(height: 16.0),
-                  MediaWidget(),
-                ],
-              ),
-            ),
+          body: FutureBuilder(
+            future: getIt<IBibleSeriesRepository>().hasActiveBibleSeries(),
+            builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
+              if (snapshot.hasData) {
+                List<Widget> children;
+                if (snapshot.data == false) {
+                  children = <Widget>[
+                    HeaderWidget(),
+                    SizedBox(height: 16.0),
+                    RecentBibleSeriesWidget(),
+                    SizedBox(height: 16.0),
+                    RecentPrayerRequestsWidget(),
+                    SizedBox(height: 16.0),
+                    MediaWidget(),
+                  ];
+                } else {
+                  children = <Widget>[
+                    HeaderWidget(),
+                    ProgressWidget(),
+                    SizedBox(height: 16.0),
+                    RecentBibleSeriesWidget(),
+                    SizedBox(height: 16.0),
+                    RecentPrayerRequestsWidget(),
+                    SizedBox(height: 16.0),
+                    MediaWidget(),
+                  ];
+                }
+                return Container(
+                  child: RefreshIndicator(
+                    onRefresh: () async {
+                      // TODO: determine number of recents to get based on screen size
+                      BlocProvider.of<AchievementsBloc>(context)
+                        ..add(WatchAchievementsStarted());
+                      BlocProvider.of<BibleSeriesBloc>(context)
+                        ..add(RecentBibleSeriesRequested(amount: 15));
+                      BlocProvider.of<MediaBloc>(context)
+                        ..add(AvailableMediaRequested());
+                    },
+                    child: ListView(
+                      physics: AlwaysScrollableScrollPhysics(),
+                      children: children,
+                    ),
+                  ),
+                );
+              }
+              return Loader();
+            },
           ),
         ),
       ),
