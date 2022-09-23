@@ -9,7 +9,7 @@ class RecentBibleSeriesRequested extends BibleSeriesEvent {
 
   RecentBibleSeriesRequested({@required this.amount});
   @override
-  List<Object> get props => [];
+  List<Object> get props => [amount];
 }
 
 class HasActiveBibleSeriesRequested extends BibleSeriesEvent {

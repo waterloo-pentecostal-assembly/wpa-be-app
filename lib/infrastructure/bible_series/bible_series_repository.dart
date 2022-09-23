@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:wpa_app/app/injection.dart';
@@ -60,7 +62,6 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
                   .toDomain(_firebaseStorageService);
           bibleSeriesList.add(bibleSeriesDto);
         } catch (e) {
-          print(e);
           // Handle exceptions separately for each document conversion.
           // This will ensure that corrupted documents do not affect the others.
         }
@@ -186,6 +187,9 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
 
   @override
   Future<bool> hasActiveBibleSeries() async {
+    var rng = Random();
+    var num = rng.nextInt(100);
+    return num % 2 == 0;
     QuerySnapshot querySnapshot;
 
     try {

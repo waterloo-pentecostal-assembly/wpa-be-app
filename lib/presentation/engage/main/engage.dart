@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -30,13 +32,22 @@ class EngagePage extends IIndexedPage {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
+        // BlocProvider<BibleSeriesBloc>(
+        //     create: (BuildContext context) => getIt<BibleSeriesBloc>()
+        //       // ..add(HasActiveBibleSeriesRequested())
+        //       ..add(
+        //         // TODO: dynamically calculate how much recent bible series to get
+        //         RecentBibleSeriesRequested(amount: 15),
+        //       )),
         BlocProvider<BibleSeriesBloc>(
-          create: (BuildContext context) => getIt<BibleSeriesBloc>()
-            ..add(
-              // TODO: dynamically calculate how much recent bible series to get
-              RecentBibleSeriesRequested(amount: 15),
+            create: (BuildContext context) =>
+                getIt<BibleSeriesBloc>(instanceName: 'engage_page_layout')
+                  ..add(HasActiveBibleSeriesRequested())
+            // ..add(
+            //   // TODO: dynamically calculate how much recent bible series to get
+            //   RecentBibleSeriesRequested(amount: 15),
+            // )
             ),
-        ),
         BlocProvider<PrayerRequestsBloc>(
             create: (BuildContext context) => getIt<PrayerRequestsBloc>()),
         BlocProvider<AchievementsBloc>(
@@ -98,80 +109,86 @@ class EngagePage extends IIndexedPage {
 }
 
 class EngageIndex extends StatelessWidget {
+  const EngageIndex({Key key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: Colors.grey.shade100,
-      child: SafeArea(
-        child: Scaffold(
-          body: FutureBuilder(
-            future: getIt<IBibleSeriesRepository>().hasActiveBibleSeries(),
-            builder: (BuildContext context, AsyncSnapshot<bool> snapshot) {
-              if (snapshot.hasData) {
-                List<Widget> children;
-                if (snapshot.data == false) {
-                  children = <Widget>[
-                    HeaderWidget(),
-                    SizedBox(height: 16.0),
-                    RecentBibleSeriesWidget(),
-                    SizedBox(height: 16.0),
-                    RecentPrayerRequestsWidget(),
-                    SizedBox(height: 16.0),
-                    MediaWidget(),
-                  ];
-                } else {
-                  children = <Widget>[
-                    HeaderWidget(),
-                    ProgressWidget(),
-                    SizedBox(height: 16.0),
-                    RecentBibleSeriesWidget(),
-                    SizedBox(height: 16.0),
-                    RecentPrayerRequestsWidget(),
-                    SizedBox(height: 16.0),
-                    MediaWidget(),
-                  ];
-                }
-                return Container(
-                  child: RefreshIndicator(
-                    onRefresh: () async {
-                      // TODO: determine number of recents to get based on screen size
-                      BlocProvider.of<AchievementsBloc>(context)
-                        ..add(WatchAchievementsStarted());
-                      BlocProvider.of<BibleSeriesBloc>(context)
-                        ..add(RecentBibleSeriesRequested(amount: 15));
-                      BlocProvider.of<MediaBloc>(context)
-                        ..add(AvailableMediaRequested());
-                    },
-                    child: ListView(
-                      physics: AlwaysScrollableScrollPhysics(),
-                      children: children,
-                    ),
-                  ),
+    return BlocConsumer<BibleSeriesBloc, BibleSeriesState>(
+      builder: (BuildContext context, BibleSeriesState state) {
+        if (state is HasActiveBibleSeries) {
+          List<Widget> children;
+          if (state.hasActive) {
+            children = <Widget>[
+              HeaderWidget(),
+              ProgressWidget(),
+              SizedBox(height: 16.0),
+              RecentBibleSeriesWidget(),
+              SizedBox(height: 16.0),
+              RecentPrayerRequestsWidget(),
+              SizedBox(height: 16.0),
+              MediaWidget(),
+            ];
+          } else {
+            children = <Widget>[
+              HeaderWidget(),
+              SizedBox(height: 16.0),
+              RecentBibleSeriesWidget(),
+              SizedBox(height: 16.0),
+              RecentPrayerRequestsWidget(),
+              SizedBox(height: 16.0),
+              MediaWidget(),
+            ];
+          }
+          var parentContextBibleSeriesBloc =
+              BlocProvider.of<BibleSeriesBloc>(context);
+          return BlocProvider(
+            create: (BuildContext context) {
+              return getIt<BibleSeriesBloc>()
+                ..add(
+                  RecentBibleSeriesRequested(amount: 15),
                 );
-              }
-              return Loader();
             },
-          ),
-        ),
-      ),
+            child: EngageLayoutWidget(
+                parentContextBibleSeriesBloc: parentContextBibleSeriesBloc,
+                children: children),
+          );
+        }
+        return Loader();
+      },
+      listener: (BuildContext context, BibleSeriesState state) {},
     );
   }
 }
 
-List<Widget> getEngagePageWidgets() {
-  // we want to know if there is any active bible
-  // series. This determines the order of the list
+class EngageLayoutWidget extends StatelessWidget {
+  const EngageLayoutWidget({
+    Key key,
+    @required this.parentContextBibleSeriesBloc,
+    @required this.children,
+  }) : super(key: key);
 
-  return [
-    HeaderWidget(),
-    ProgressWidget(),
-    SizedBox(height: 16.0),
-    RecentBibleSeriesWidget(),
-    SizedBox(height: 16.0),
-    RecentPrayerRequestsWidget(),
-    SizedBox(height: 16.0),
-    MediaWidget(),
-  ];
+  final BibleSeriesBloc parentContextBibleSeriesBloc;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return RefreshIndicator(
+      onRefresh: () async {
+        parentContextBibleSeriesBloc..add(HasActiveBibleSeriesRequested());
+        BlocProvider.of<AchievementsBloc>(context)
+          ..add(WatchAchievementsStarted());
+        BlocProvider.of<BibleSeriesBloc>(context)
+          ..add(RecentBibleSeriesRequested(amount: 15));
+        BlocProvider.of<MediaBloc>(context)..add(AvailableMediaRequested());
+      },
+      child: Container(
+        child: ListView(
+          physics: AlwaysScrollableScrollPhysics(),
+          children: children,
+        ),
+      ),
+    );
+  }
 }
 
 class HeaderWidget extends StatelessWidget {

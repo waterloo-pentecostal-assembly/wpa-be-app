@@ -185,7 +185,10 @@ Stream<BibleSeriesState> _mapRestoreStateEventToState(
 Stream<BibleSeriesState> _mapHasActiveBibleSeriesRequestedToState(
   Future<bool> Function() hasActiveSeriesMethod,
 ) async* {
-  // TODO: handle error properly here
-  bool hasActive = await hasActiveSeriesMethod();
-  yield HasActiveBibleSeries(hasActive);
+  try {
+    bool hasActive = await hasActiveSeriesMethod();
+    yield HasActiveBibleSeries(hasActive);
+  } catch (_) {
+    yield HasActiveBibleSeries(false);
+  }
 }
