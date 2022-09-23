@@ -138,13 +138,6 @@ void initializeInjections({
     ),
   );
 
-  getIt.registerFactory<BibleSeriesBloc>(
-      () => BibleSeriesBloc(
-            getIt<IBibleSeriesRepository>(),
-            getIt<ICompletionsRepository>(),
-          ),
-      instanceName: 'engage_page_layout');
-
   getIt.registerFactory<CompletionsBloc>(() => CompletionsBloc(
         getIt<ICompletionsRepository>(),
       ));

@@ -187,9 +187,6 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
 
   @override
   Future<bool> hasActiveBibleSeries() async {
-    var rng = Random();
-    var num = rng.nextInt(100);
-    return num % 2 == 0;
     QuerySnapshot querySnapshot;
 
     try {

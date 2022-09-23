@@ -32,22 +32,9 @@ class EngagePage extends IIndexedPage {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        // BlocProvider<BibleSeriesBloc>(
-        //     create: (BuildContext context) => getIt<BibleSeriesBloc>()
-        //       // ..add(HasActiveBibleSeriesRequested())
-        //       ..add(
-        //         // TODO: dynamically calculate how much recent bible series to get
-        //         RecentBibleSeriesRequested(amount: 15),
-        //       )),
         BlocProvider<BibleSeriesBloc>(
             create: (BuildContext context) =>
-                getIt<BibleSeriesBloc>(instanceName: 'engage_page_layout')
-                  ..add(HasActiveBibleSeriesRequested())
-            // ..add(
-            //   // TODO: dynamically calculate how much recent bible series to get
-            //   RecentBibleSeriesRequested(amount: 15),
-            // )
-            ),
+                getIt<BibleSeriesBloc>()..add(HasActiveBibleSeriesRequested())),
         BlocProvider<PrayerRequestsBloc>(
             create: (BuildContext context) => getIt<PrayerRequestsBloc>()),
         BlocProvider<AchievementsBloc>(
