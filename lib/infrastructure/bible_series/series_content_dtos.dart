@@ -141,10 +141,12 @@ extension SeriesContentBodyDtoX on SeriesContentBodyDto {
       AudioBodyProperties bodyProperties = AudioBodyProperties();
 
       // Convert GS URL to Download URL
-      String audioFileUrl = await firebaseStorageService
-          .getDownloadUrl(this.properties['audioFileGsLocation']);
+      // String audioFileUrl = await firebaseStorageService
+      //     .getDownloadUrl(this.properties['audioFileGsLocation']);
 
-      bodyProperties.audioFileUrl = audioFileUrl;
+      // bodyProperties.audioFileUrl = audioFileUrl;
+      // TODO: REVERT!
+      bodyProperties.audioFileUrl = this.properties['audioFileGsLocation'];
 
       return AudioBody(
         type: SeriesContentBodyType.AUDIO,

@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/application/audio_player/audio_player_bloc.dart';
 import 'package:wpa_app/application/bible_series/bible_series_bloc.dart';
 
 import '../application/authentication/authentication_bloc.dart';
@@ -46,6 +47,12 @@ class App extends StatelessWidget {
                 create: (context) => getIt<BibleSeriesBloc>()
                   ..add(
                     HasActiveBibleSeriesRequested(),
+                  ),
+              ),
+              BlocProvider(
+                create: (context) => getIt<AudioPlayerBloc>()
+                  ..add(
+                    InitializePlayer(),
                   ),
               )
             ],

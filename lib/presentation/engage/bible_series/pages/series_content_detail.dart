@@ -60,7 +60,7 @@ class ContentDetailWidget extends StatelessWidget {
   final String seriesContentType;
 
   ContentDetailWidget(this.bibleSeriesId, this.seriesContentType);
-  final GlobalKey<AudioSliderState> keyChild = GlobalKey();
+  final GlobalKey<AudioBodyWidgetState> keyChild = GlobalKey();
 
   List<Widget> contentDetailList(
     SeriesContent seriesContent,
@@ -72,10 +72,17 @@ class ContentDetailWidget extends StatelessWidget {
 
     for (int index = 0; index < body.length; index++) {
       if (body[index].type == SeriesContentBodyType.AUDIO) {
-        contentBodyList.add(AudioSlider(
+        contentBodyList.add(AudioPlayerWidget(
           key: this.keyChild,
           audioContentBody: body[index],
         ));
+        // contentBodyList.add(AudioBodyWidget(
+        //   key: this.keyChild,
+        //   audioContentBody: body[index],
+        // ));
+        // contentBodyList.add(AudioBodyWidget(
+        //   audioContentBody: body[index],
+        // ));
       } else if (body[index].type == SeriesContentBodyType.TEXT) {
         contentBodyList.add(TextContentBodyWidget(
           textContentBody: body[index],
@@ -132,7 +139,7 @@ class ContentDetailWidget extends StatelessWidget {
                 //     :
                 () {
               if (keyChild.currentState != null) {
-                keyChild.currentState.stopAudio();
+                // keyChild.currentState.stopAudio();
               }
               if (state.seriesContentDetail.isResponsePossible) {
                 CompletionDetails completionDetails = CompletionDetails(
@@ -254,7 +261,7 @@ class ContentDetailWidget extends StatelessWidget {
         Navigator.pop(context);
       } else {
         if (keyChild.currentState != null) {
-          keyChild.currentState.stopAudio();
+          // keyChild.currentState.stopAudio();
         }
         Navigator.pop(context);
       }
