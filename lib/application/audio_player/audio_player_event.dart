@@ -38,15 +38,15 @@ class Complete extends AudioPlayerEvent {
 
 class Play extends AudioPlayerEvent {
   final String sourceUrl;
-  final String sourceTitle;
+  final String contentId;
 
   const Play({
     @required this.sourceUrl,
-    @required this.sourceTitle,
+    @required this.contentId,
   });
 
   @override
-  List<Object> get props => [sourceUrl, sourceTitle];
+  List<Object> get props => [sourceUrl];
 }
 
 class Pause extends AudioPlayerEvent {
@@ -61,6 +61,16 @@ class Reset extends AudioPlayerEvent {
 
   @override
   List<Object> get props => [];
+}
+
+class Seek extends AudioPlayerEvent {
+  final Duration position;
+  const Seek({
+    @required this.position,
+  });
+
+  @override
+  List<Object> get props => [position];
 }
 
 class InitializePlayer extends AudioPlayerEvent {

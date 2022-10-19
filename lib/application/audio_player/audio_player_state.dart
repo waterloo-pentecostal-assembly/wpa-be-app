@@ -5,14 +5,14 @@ class AudioPlayerState extends Equatable {
   final Duration duration;
   final Duration position;
   final String sourceUrl;
-  final String sourceTitle;
+  final String contentId;
 
   const AudioPlayerState({
     @required this.playerState,
     @required this.duration,
     @required this.position,
     this.sourceUrl,
-    this.sourceTitle,
+    this.contentId,
   });
 
   factory AudioPlayerState.initial() {
@@ -28,17 +28,23 @@ class AudioPlayerState extends Equatable {
     Duration duration,
     Duration position,
     String sourceUrl,
-    String sourceTitle,
+    String contentId,
   ) {
     return AudioPlayerState(
       playerState: playerState,
       duration: duration,
       position: position,
-      sourceTitle: sourceTitle,
       sourceUrl: sourceUrl,
+      contentId: contentId,
     );
   }
 
   @override
-  List<Object> get props => [playerState, duration, position, sourceTitle, sourceUrl];
+  List<Object> get props => [
+        playerState,
+        duration,
+        position,
+        sourceUrl,
+        contentId,
+      ];
 }

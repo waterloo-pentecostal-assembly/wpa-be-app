@@ -18,7 +18,6 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
 
   AudioPlayerBloc() : super(AudioPlayerState.initial()) {
     on<AudioPlayerEvent>((event, emit) async {
-      // print('EVENT! ---> ' + event.toString());
       if (event is InitializePlayer) {
         initAudioPlayer(emit);
         emit(AudioPlayerState.initial());
@@ -27,13 +26,14 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
       } else if (event is Play) {
         await this.player.setSourceUrl(event.sourceUrl);
         Duration duration = await this.player.getDuration();
+        Duration position = await this.player.getCurrentPosition();
         await this.player.resume();
         emit(state.copyWith(
           PlayerStateEnum.PLAYING,
           duration,
-          Duration(),
+          position,
           event.sourceUrl,
-          event.sourceTitle,
+          event.contentId,
         ));
       } else if (event is Pause) {
         await this.player.pause();
@@ -42,7 +42,7 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
           state.duration,
           state.position,
           state.sourceUrl,
-          state.sourceTitle,
+          state.contentId,
         ));
       } else if (event is DurationChanged) {
         emit(state.copyWith(
@@ -50,7 +50,7 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
           event.duration,
           state.position,
           state.sourceUrl,
-          state.sourceTitle,
+          state.contentId,
         ));
       } else if (event is PositionChanged) {
         emit(state.copyWith(
@@ -58,7 +58,7 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
           state.duration,
           event.position,
           state.sourceUrl,
-          state.sourceTitle,
+          state.contentId,
         ));
       } else if (event is Complete) {
         emit(state.copyWith(
@@ -66,14 +66,22 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
           state.duration,
           Duration(),
           state.sourceUrl,
-          state.sourceTitle,
+          state.contentId,
         ));
+      } else if (event is Seek) {
+        await this.player.seek(event.position);
+          emit(state.copyWith(
+            PlayerStateEnum.PLAYING,
+            state.duration,
+            event.position,
+            state.sourceUrl,
+            state.contentId,
+          ));
       }
     });
   }
 
   void initAudioPlayer(Emitter<AudioPlayerState> emit) {
-    int x = 0;
     player.onDurationChanged.listen((Duration duration) {
       getIt<AudioPlayerBloc>().add(DurationChanged(duration: duration));
     });

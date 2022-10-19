@@ -1,14 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-enum SeriesContentBodyType {
-  AUDIO,
-  TEXT,
-  SCRIPTURE,
-  QUESTION,
-  IMAGE_INPUT,
-  LINK
-}
+enum SeriesContentBodyType { AUDIO, TEXT, SCRIPTURE, QUESTION, IMAGE_INPUT, LINK }
 
 class BibleSeries {
   final String id;
@@ -127,8 +120,7 @@ class SeriesContent {
   bool get isResponsePossible {
     bool check = false;
     this.body.forEach((element) {
-      if (element.type == SeriesContentBodyType.QUESTION ||
-          element.type == SeriesContentBodyType.IMAGE_INPUT) {
+      if (element.type == SeriesContentBodyType.QUESTION || element.type == SeriesContentBodyType.IMAGE_INPUT) {
         check = true;
       }
     });
@@ -200,6 +192,7 @@ class AudioBody implements ISeriesContentBody {
 
 class AudioBodyProperties {
   String audioFileUrl;
+  String title;
 }
 
 class TextBody implements ISeriesContentBody {
