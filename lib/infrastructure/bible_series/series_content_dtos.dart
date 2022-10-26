@@ -6,7 +6,6 @@ import 'package:wpa_app/services/firebase_storage_service.dart';
 import '../../domain/bible_series/entities.dart';
 import '../../domain/bible_series/exceptions.dart';
 import '../common/helpers.dart';
-import 'helpers.dart';
 
 class SeriesContentDto {
   final String id;
@@ -93,7 +92,7 @@ class SeriesContentBodyDto {
     Map<String, dynamic> _properties = {};
 
     if (_bodyType == 'audio') {
-      _properties['audioFileGsLocation'] = findOrThrowException(json, 'audio_file_gs_location');
+      _properties['audioFileUrl'] = findOrThrowException(json, 'audio_file_url');
       _properties['title'] = findOrDefaultTo(json, 'title', '');
     } else if (_bodyType == 'text') {
       _properties['paragraphs'] = findOrThrowException(json, 'paragraphs');
@@ -108,6 +107,8 @@ class SeriesContentBodyDto {
       _properties['title'] = findOrDefaultTo(json, 'title', '');
       _properties['text'] = findOrThrowException(json, 'text');
       _properties['link'] = findOrThrowException(json, 'link');
+    } else if (_bodyType == 'title') {
+      _properties['text'] = findOrThrowException(json, 'text');
     } else {
       throw BibleSeriesException(
         message: 'Invalid body_type: $_bodyType',
@@ -136,14 +137,7 @@ extension SeriesContentBodyDtoX on SeriesContentBodyDto {
   Future<ISeriesContentBody> toDomain(int index, FirebaseStorageService firebaseStorageService) async {
     if (this.bodyType == 'audio') {
       AudioBodyProperties bodyProperties = AudioBodyProperties();
-
-      // Convert GS URL to Download URL
-      // String audioFileUrl = await firebaseStorageService
-      //     .getDownloadUrl(this.properties['audioFileGsLocation']);
-
-      // bodyProperties.audioFileUrl = audioFileUrl;
-      // TODO: REVERT!
-      bodyProperties.audioFileUrl = this.properties['audioFileGsLocation'];
+      bodyProperties.audioFileUrl = this.properties['audioFileUrl'];
       bodyProperties.title = this.properties['title'];
 
       return AudioBody(
@@ -198,7 +192,12 @@ extension SeriesContentBodyDtoX on SeriesContentBodyDto {
       dynamic questions = this.properties['questions'];
 
       questions.forEach((question) {
-        _questions.add(Question(location: [index, questions.indexOf(question)], question: question));
+        _questions.add(
+          Question(
+            location: [index, questions.indexOf(question)],
+            question: question,
+          ),
+        );
       });
 
       bodyProperties.questions = _questions;
@@ -214,7 +213,19 @@ extension SeriesContentBodyDtoX on SeriesContentBodyDto {
       properties.title = this.properties['title'];
       properties.text = this.properties['text'];
       properties.link = this.properties['link'];
-      return LinkBody(type: SeriesContentBodyType.LINK, properties: properties);
+      return LinkBody(
+        type: SeriesContentBodyType.LINK,
+        properties: properties,
+      );
+    } else if (this.bodyType == 'title') {
+      TitleBodyProperties properties = TitleBodyProperties();
+      properties.text = this.properties['text'];
+      return TitleBody(
+        type: SeriesContentBodyType.TITLE,
+        properties: properties,
+      );
+    } else if (this.bodyType == 'divider') {
+      return DividerBody();
     }
   }
 }

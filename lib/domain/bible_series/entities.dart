@@ -1,7 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-enum SeriesContentBodyType { AUDIO, TEXT, SCRIPTURE, QUESTION, IMAGE_INPUT, LINK }
+enum SeriesContentBodyType {
+  AUDIO,
+  TEXT,
+  SCRIPTURE,
+  QUESTION,
+  IMAGE_INPUT,
+  LINK,
+  TITLE,
+  DIVIDER,
+}
 
 class BibleSeries {
   final String id;
@@ -193,6 +202,25 @@ class AudioBody implements ISeriesContentBody {
 class AudioBodyProperties {
   String audioFileUrl;
   String title;
+}
+
+class DividerBody implements ISeriesContentBody {
+  final SeriesContentBodyType type = SeriesContentBodyType.DIVIDER;
+  get properties {}
+}
+
+class TitleBody implements ISeriesContentBody {
+  final SeriesContentBodyType type;
+  final TitleBodyProperties properties;
+
+  TitleBody({
+    @required this.type,
+    @required this.properties,
+  });
+}
+
+class TitleBodyProperties {
+  String text;
 }
 
 class TextBody implements ISeriesContentBody {
