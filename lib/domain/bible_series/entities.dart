@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
@@ -129,7 +131,8 @@ class SeriesContent {
   bool get isResponsePossible {
     bool check = false;
     this.body.forEach((element) {
-      if (element.type == SeriesContentBodyType.QUESTION || element.type == SeriesContentBodyType.IMAGE_INPUT) {
+      if (element.type == SeriesContentBodyType.QUESTION ||
+          element.type == SeriesContentBodyType.IMAGE_INPUT) {
         check = true;
       }
     });
@@ -257,12 +260,14 @@ class Scripture {
   final String book;
   final String chapter;
   final String title;
+  final bool fullChapter;
   final Map<String, String> verses;
 
   Scripture({
     @required this.book,
     @required this.chapter,
     this.title,
+    @required this.fullChapter,
     @required this.verses,
   });
 }

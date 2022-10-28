@@ -69,8 +69,10 @@ void initializeInjections({
   getIt.registerLazySingleton<AppConfig>(() => appConfig);
 
   getIt.registerLazySingleton<FirebaseStorage>(() => FirebaseStorage.instance);
-  getIt.registerLazySingleton<FirebaseMessaging>(() => FirebaseMessaging.instance);
-  getIt.registerLazySingleton<FirebaseAnalytics>(() => FirebaseAnalytics.instance);
+  getIt.registerLazySingleton<FirebaseMessaging>(
+      () => FirebaseMessaging.instance);
+  getIt.registerLazySingleton<FirebaseAnalytics>(
+      () => FirebaseAnalytics.instance);
 
   getIt.registerLazySingleton<FirebaseFirestore>(() {
     FirebaseFirestore firebaseFirestoreInstance = FirebaseFirestore.instance;
@@ -106,9 +108,12 @@ void initializeInjections({
   });
 
   // Services
-  getIt.registerLazySingleton<FirebaseStorageService>(() => FirebaseStorageService(getIt<FirebaseStorage>()));
-  getIt.registerLazySingleton<FirebaseMessagingService>(() => FirebaseMessagingService(getIt<FirebaseMessaging>()));
-  getIt.registerLazySingleton<FirebaseFirestoreService>(() => FirebaseFirestoreService());
+  getIt.registerLazySingleton<FirebaseStorageService>(
+      () => FirebaseStorageService(getIt<FirebaseStorage>()));
+  getIt.registerLazySingleton<FirebaseMessagingService>(
+      () => FirebaseMessagingService(getIt<FirebaseMessaging>()));
+  getIt.registerLazySingleton<FirebaseFirestoreService>(
+      () => FirebaseFirestoreService());
 
   // Blocs
   getIt.registerFactory<AuthenticationBloc>(
@@ -246,8 +251,8 @@ void initializeInjections({
     ),
   );
 
-  getIt.registerLazySingleton<ILinksRepository>(
-      () => LinksRepository(getIt<FirebaseFirestore>(), getIt<FirebaseFirestoreService>()));
+  getIt.registerLazySingleton<ILinksRepository>(() => LinksRepository(
+      getIt<FirebaseFirestore>(), getIt<FirebaseFirestoreService>()));
 
   // Factories
   getIt.registerLazySingleton<TextFactory>(() => TextFactory('Montserrat'));

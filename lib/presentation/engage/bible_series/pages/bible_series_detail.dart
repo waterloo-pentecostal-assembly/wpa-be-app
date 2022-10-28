@@ -16,7 +16,8 @@ import '../../../common/text_factory.dart';
 class BibleSeriesDetailPage extends StatelessWidget {
   final String bibleSeriesId;
 
-  const BibleSeriesDetailPage({Key key, @required this.bibleSeriesId}) : super(key: key);
+  const BibleSeriesDetailPage({Key key, @required this.bibleSeriesId})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +40,8 @@ class BibleSeriesWidget extends StatefulWidget {
   State<StatefulWidget> createState() => new _BibleSeriesState();
 }
 
-class _BibleSeriesState extends State<BibleSeriesWidget> with TickerProviderStateMixin {
+class _BibleSeriesState extends State<BibleSeriesWidget>
+    with TickerProviderStateMixin {
   int tabLength;
   TabController _tabController;
   BibleSeries bibleSeries;
@@ -106,7 +108,8 @@ class _BibleSeriesState extends State<BibleSeriesWidget> with TickerProviderStat
                               IconButton(
                                 icon: Icon(
                                   Icons.arrow_back,
-                                  size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
+                                  size: getIt<LayoutFactory>()
+                                      .getDimension(baseDimension: 24.0),
                                 ),
                                 onPressed: () => Navigator.pop(context),
                                 color: Colors.white,
@@ -138,7 +141,8 @@ class _BibleSeriesState extends State<BibleSeriesWidget> with TickerProviderStat
                         padding: EdgeInsets.all(0),
                         child: TabBarView(
                           controller: _tabController,
-                          children: _buildContentChildren(context, bibleSeries, state),
+                          children: _buildContentChildren(
+                              context, bibleSeries, state),
                         ),
                       );
                     },
@@ -188,7 +192,8 @@ class SeriesDetailPlaceholder extends StatelessWidget {
                       IconButton(
                         icon: Icon(
                           Icons.arrow_back,
-                          size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
+                          size: getIt<LayoutFactory>()
+                              .getDimension(baseDimension: 24.0),
                         ),
                         onPressed: () => Navigator.pop(context),
                         color: Colors.white,
@@ -207,7 +212,8 @@ class SeriesDetailPlaceholder extends StatelessWidget {
               scrollDirection: Axis.horizontal,
               itemCount: amtOfCards,
               itemBuilder: (context, index) => Container(
-                width: getIt<LayoutFactory>().getDimension(layoutDimension: LayoutDimension.CONTENT_TAB_WIDTH),
+                width: getIt<LayoutFactory>().getDimension(
+                    layoutDimension: LayoutDimension.CONTENT_TAB_WIDTH),
                 margin: EdgeInsets.all(8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -215,8 +221,9 @@ class SeriesDetailPlaceholder extends StatelessWidget {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(10.0),
                       child: Container(
-                        height:
-                            getIt<LayoutFactory>().getDimension(layoutDimension: LayoutDimension.CONTENT_TAB_HEIGHT),
+                        height: getIt<LayoutFactory>().getDimension(
+                            layoutDimension:
+                                LayoutDimension.CONTENT_TAB_HEIGHT),
                         color: Colors.grey.shade200,
                       ),
                     ),
@@ -243,19 +250,23 @@ class SeriesDetailPlaceholder extends StatelessWidget {
   }
 }
 
-List<Widget> _buildContentTabs(List<SeriesContentSnippet> seriesContentSnippets) {
+List<Widget> _buildContentTabs(
+    List<SeriesContentSnippet> seriesContentSnippets) {
   List<Widget> tabs = [];
   seriesContentSnippets.forEach((element) {
     tabs.add(
       Container(
-        height: getIt<LayoutFactory>().getDimension(layoutDimension: LayoutDimension.CONTENT_TAB_HEIGHT),
-        width: getIt<LayoutFactory>().getDimension(layoutDimension: LayoutDimension.CONTENT_TAB_WIDTH),
+        height: getIt<LayoutFactory>()
+            .getDimension(layoutDimension: LayoutDimension.CONTENT_TAB_HEIGHT),
+        width: getIt<LayoutFactory>()
+            .getDimension(layoutDimension: LayoutDimension.CONTENT_TAB_WIDTH),
         child: Tab(
           child: Container(
             padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
-              color: _getStatusColor(element.isCompleted, element.isDraft, element.date),
+              color: _getStatusColor(
+                  element.isCompleted, element.isDraft, element.date),
               boxShadow: [
                 BoxShadow(
                   color: Colors.grey.withOpacity(0.2),
@@ -299,15 +310,18 @@ List<Widget> _buildContentChildren(
       listChildren.add(
         Container(
           margin: EdgeInsets.only(top: 0, bottom: 15),
-          height: getIt<LayoutFactory>().getDimension(baseDimension: kContentChildrenHeight),
+          height: getIt<LayoutFactory>()
+              .getDimension(baseDimension: kContentChildrenHeight),
           child: Tab(
             child: GestureDetector(
               onTap: () {
-                BlocProvider.of<BibleSeriesBloc>(context)..add(RestoreState(bibleSeries));
+                BlocProvider.of<BibleSeriesBloc>(context)
+                  ..add(RestoreState(bibleSeries));
                 Navigator.pushNamed(context, '/content_detail', arguments: {
                   'bibleSeriesId': bibleSeries.id,
                   'seriesContentId': element.contentId,
-                  'getCompletionDetails': element.isCompleted || element.isDraft,
+                  'getCompletionDetails':
+                      element.isCompleted || element.isDraft,
                   'seriesContentType': element.seriesContentType,
                 }).then((value) => {onGoBack(context, i, j, bibleSeries)});
               },
@@ -330,7 +344,8 @@ List<Widget> _buildContentChildren(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      getIt<TextFactory>().subHeading(element.seriesContentType),
+                      getIt<TextFactory>()
+                          .subHeading(element.seriesContentType),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
@@ -363,7 +378,8 @@ List<Widget> _buildContentChildren(
 }
 
 Widget _getPlayingIndicator(AudioPlayerState state, String contentId) {
-  if (state.contentId == contentId && state.playerState == PlayerStateEnum.PLAYING) {
+  if (state.contentId == contentId &&
+      state.playerState == PlayerStateEnum.PLAYING) {
     return Icon(
       Icons.play_arrow_outlined,
     );
@@ -372,7 +388,20 @@ Widget _getPlayingIndicator(AudioPlayerState state, String contentId) {
 }
 
 String _getMonth(Timestamp date) {
-  List<String> months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
+  List<String> months = [
+    'JAN',
+    'FEB',
+    'MAR',
+    'APR',
+    'MAY',
+    'JUN',
+    'JUL',
+    'AUG',
+    'SEP',
+    'OCT',
+    'NOV',
+    'DEC'
+  ];
   int monthNumber = int.parse(date.toDate().toString().substring(5, 7)) - 1;
   return months[monthNumber];
 }
@@ -423,7 +452,9 @@ int _getInitialIndex(List<SeriesContentSnippet> snippet) {
   return 0;
 }
 
-FutureOr onGoBack(BuildContext context, int scsNum, int actNum, BibleSeries bibleSeries) {
+FutureOr onGoBack(
+    BuildContext context, int scsNum, int actNum, BibleSeries bibleSeries) {
   BlocProvider.of<BibleSeriesBloc>(context)
-    ..add(UpdateCompletionDetail(bibleSeries: bibleSeries, actNum: actNum, scsNum: scsNum));
+    ..add(UpdateCompletionDetail(
+        bibleSeries: bibleSeries, actNum: actNum, scsNum: scsNum));
 }

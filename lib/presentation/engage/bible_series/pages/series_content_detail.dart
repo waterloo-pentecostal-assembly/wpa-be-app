@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
+import 'package:wpa_app/presentation/engage/bible_series/widgets/divider_body.dart';
 import 'package:wpa_app/presentation/engage/bible_series/widgets/link_body.dart';
+import 'package:wpa_app/presentation/engage/bible_series/widgets/title_body.dart';
 
 import '../../../../app/constants.dart';
 import '../../../../app/injection.dart';
@@ -101,6 +103,12 @@ class ContentDetailWidget extends StatelessWidget {
         contentBodyList.add(LinkBodyWidget(
           linkBody: body[index],
         ));
+      } else if (body[index].type == SeriesContentBodyType.TITLE) {
+        contentBodyList.add(TitleBodyWidget(
+          titleBody: body[index],
+        ));
+      } else if (body[index].type == SeriesContentBodyType.DIVIDER) {
+        contentBodyList.add(DividerBodyWidget());
       }
     }
 

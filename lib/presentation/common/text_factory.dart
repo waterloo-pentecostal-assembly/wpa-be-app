@@ -12,13 +12,16 @@ class TextFactory {
   Text heading(
     String text, {
     FontWeight fontWeight = FontWeight.w700,
+    double fontSize = 30,
+    TextAlign textAlign = TextAlign.left,
   }) {
     return Text(
       text,
+      textAlign: textAlign,
       style: TextStyle(
         fontFamily: _fontFamily,
         fontWeight: fontWeight,
-        fontSize: getIt<LayoutFactory>().getDimension(baseDimension: 30.0),
+        fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
       ),
     );
   }
@@ -47,9 +50,14 @@ class TextFactory {
     );
   }
 
-  Text subHeading(String text, {double fontSize = 18}) {
+  Text subHeading(
+    String text, {
+    double fontSize = 18,
+    TextAlign textAlign = TextAlign.left,
+  }) {
     return Text(
       text,
+      textAlign: textAlign,
       style: TextStyle(
         fontFamily: _fontFamily,
         fontWeight: FontWeight.w700,

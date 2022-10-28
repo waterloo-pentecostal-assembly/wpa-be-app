@@ -70,13 +70,13 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
         ));
       } else if (event is Seek) {
         await this.player.seek(event.position);
-          emit(state.copyWith(
-            PlayerStateEnum.PLAYING,
-            state.duration,
-            event.position,
-            state.sourceUrl,
-            state.contentId,
-          ));
+        emit(state.copyWith(
+          PlayerStateEnum.PLAYING,
+          state.duration,
+          event.position,
+          state.sourceUrl,
+          state.contentId,
+        ));
       }
     });
   }

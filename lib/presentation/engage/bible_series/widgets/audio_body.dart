@@ -134,7 +134,9 @@ class AudioPlayerWidget extends StatelessWidget {
               }
             },
             child: Icon(
-              playerState == PlayerStateEnum.PLAYING ? Icons.pause_circle_filled : Icons.play_circle_filled,
+              playerState == PlayerStateEnum.PLAYING
+                  ? Icons.pause_circle_filled
+                  : Icons.play_circle_filled,
               size: 70,
               color: Colors.black87.withOpacity(0.75),
             ),
