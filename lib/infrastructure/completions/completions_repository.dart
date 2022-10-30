@@ -234,7 +234,7 @@ class CompletionsRepository extends ICompletionsRepository {
   }
 
   @override
-  UploadTask uploadImages({File file, String userId}) {
+  UploadTask uploadImage({File file, String userId}) {
     String fileExt = path.extension(file.path);
     String filePath = '/responses/$userId/${DateTime.now()}$fileExt';
     try {
@@ -249,7 +249,7 @@ class CompletionsRepository extends ICompletionsRepository {
   }
 
   @override
-  void deleteImages({String gsUrl}) async {
+  void deleteImage({String gsUrl}) async {
     try {
       await _firebaseStorageService.deleteFile(gsUrl);
     } catch (e) {

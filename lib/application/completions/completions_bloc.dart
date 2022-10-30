@@ -316,7 +316,7 @@ Stream<CompletionsState> _mapUploadImageEventToState(
     Map<String, UploadTask> uploadTask = Map();
     uploadTask = {
       event.contentNum.toString():
-          completionsRepository.uploadImages(file: event.image, userId: user.id)
+          completionsRepository.uploadImage(file: event.image, userId: user.id)
     };
     yield state.copyWith(uploadTask: uploadTask);
 
@@ -389,9 +389,9 @@ Stream<CompletionsState> _mapDeleteImageEventToState(
     Map<String, List<String>> thumbnailMap = state.thumbnailURL;
     Map<String, List<File>> localImage = state.localImage;
     if (state.responses.responses != null) {
-      completionsRepository.deleteImages(gsUrl: event.gsURL);
+      completionsRepository.deleteImage(gsUrl: event.gsURL);
       final String thumbnailgsURL = toThumbnail(event.gsURL);
-      completionsRepository.deleteImages(gsUrl: thumbnailgsURL);
+      completionsRepository.deleteImage(gsUrl: thumbnailgsURL);
       downloadMap[event.contentNum.toString()].removeLast();
       if (thumbnailMap != null &&
           thumbnailMap[event.contentNum.toString()] != null) {
