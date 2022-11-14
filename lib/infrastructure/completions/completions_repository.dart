@@ -249,6 +249,21 @@ class CompletionsRepository extends ICompletionsRepository {
   }
 
   @override
+  List<UploadTask> uploadImages({List<File> images, String userId}) {
+    List<UploadTask> response = [];
+    for (File image in images) {
+      String fileExt = path.extension(image.path);
+      String filePath = '/responses/$userId/${DateTime.now()}$fileExt';
+      UploadTask uploadTask = _firebaseStorageService.startFileUpload(
+        filePath,
+        image,
+      );
+      response.add(uploadTask);
+    }
+    return response;
+  }
+
+  @override
   void deleteImage({String gsUrl}) async {
     try {
       await _firebaseStorageService.deleteFile(gsUrl);

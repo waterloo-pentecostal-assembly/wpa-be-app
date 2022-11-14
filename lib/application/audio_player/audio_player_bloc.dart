@@ -1,7 +1,7 @@
-import 'package:audioplayers/audioplayers.dart';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:wpa_app/app/injection.dart';
 
 part 'audio_player_event.dart';
@@ -24,10 +24,20 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
       } else if (event is Reset) {
         emit(AudioPlayerState.initial());
       } else if (event is Play) {
-        await this.player.setSourceUrl(event.sourceUrl);
-        Duration duration = await this.player.getDuration();
-        Duration position = await this.player.getCurrentPosition();
-        await this.player.resume();
+        Duration position;
+        //TODO: update this to use an ID since we can technically
+        // have the same source URL appearing twice
+        if (state.sourceUrl != event.sourceUrl) {
+          await this.player.setUrl(event.sourceUrl);
+          position = this.player.position;
+        } else {
+          position = state.position;
+          if (state.playerState == PlayerStateEnum.STOPPED) {
+            await this.player.setUrl(event.sourceUrl);
+          }
+        }
+        Duration duration = this.player.duration;
+        this.player.play();
         emit(state.copyWith(
           PlayerStateEnum.PLAYING,
           duration,
@@ -69,9 +79,13 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
           state.contentId,
         ));
       } else if (event is Seek) {
+        PlayerStateEnum newState = state.playerState;
         await this.player.seek(event.position);
+        if (state.playerState == PlayerStateEnum.STOPPED) {
+          newState = PlayerStateEnum.PAUSED;
+        }
         emit(state.copyWith(
-          PlayerStateEnum.PLAYING,
+          newState,
           state.duration,
           event.position,
           state.sourceUrl,
@@ -82,14 +96,17 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
   }
 
   void initAudioPlayer(Emitter<AudioPlayerState> emit) {
-    player.onDurationChanged.listen((Duration duration) {
-      getIt<AudioPlayerBloc>().add(DurationChanged(duration: duration));
-    });
-    player.onPositionChanged.listen((Duration position) {
+    this.player.positionStream.listen((Duration position) {
       getIt<AudioPlayerBloc>().add(PositionChanged(position: position));
     });
-    player.onPlayerComplete.listen((event) {
-      getIt<AudioPlayerBloc>().add(Complete());
+    this.player.durationStream.listen((Duration duration) {
+      getIt<AudioPlayerBloc>().add(DurationChanged(duration: duration));
+    });
+    this.player.processingStateStream.listen((ProcessingState state) async {
+      if (state == ProcessingState.completed) {
+        await this.player.stop();
+        getIt<AudioPlayerBloc>().add(Complete());
+      }
     });
   }
 }
