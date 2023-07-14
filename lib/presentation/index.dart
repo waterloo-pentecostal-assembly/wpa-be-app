@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import 'package:wpa_app/application/links/links_bloc.dart';
 import 'package:wpa_app/domain/authentication/entities.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
@@ -92,8 +93,8 @@ class NavigationBar extends StatelessWidget {
 
   void handleOnTap(BuildContext context, int index, String url) async {
     if (NavigationTabEnum.values[index] == NavigationTabEnum.GIVE) {
-      if (await canLaunch(url)) {
-        await launch(url);
+      if (await canLaunchUrlString(url)) {
+        await launchUrlString(url);
       } else {
         ToastMessage.showErrorToast("Error opening page", context);
       }
@@ -125,7 +126,6 @@ class NavigationBar extends StatelessWidget {
         icon: Icon(
           Icons.home,
           size: getIt<LayoutFactory>().getDimension(baseDimension: 24),
-          // size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
         ),
         label:
             'HOME', // Really the engage page that we are using as "HOME" in phase 1

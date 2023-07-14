@@ -28,7 +28,6 @@ class AuthenticationBloc
         // Register user infomation with getIt to have access to it throughout the application
         if (!getIt.isRegistered<LocalUser>()) {
           getIt.registerLazySingleton(() => localUser);
-          // getIt.registerFactory(() => localUser);
         }
 
         yield Authenticated(localUser);
@@ -38,15 +37,14 @@ class AuthenticationBloc
     } else if (event is SignOut) {
       await _iAuthenticationFacade.signOut();
       yield Unauthenticated();
+    } else if (event is InitiateDelete) {
+      try {
+        final LocalUser user = getIt<LocalUser>();
+        await _iAuthenticationFacade.initiateDelete(user.id);
+        yield Unauthenticated();
+      } catch (e) {
+        yield Error("Unable to initiate account deletion");
+      }
     }
   }
-}
-
-// TODO: Remove
-Future fakeFuture() {
-  return Future.delayed(
-    const Duration(
-      seconds: 1,
-    ),
-  );
 }

@@ -141,8 +141,10 @@ extension SeriesContentSnippetDtoX on SeriesContentSnippetDto {
   SeriesContentSnippet toDomain() {
     List<AvailableContentType> availableContentTypes = [];
     this.contentTypes.forEach((element) {
-      final SeriesContentType seriesContentType =
-          contentTypeMapper(findOrThrowException(element, 'content_type'));
+      final String seriesContentType =
+          findOrThrowException(element, 'content_type')
+              .toString()
+              .toUpperCase();
       final String seriesContentId =
           findOrThrowException(element, 'content_id');
       if (seriesContentType != null) {

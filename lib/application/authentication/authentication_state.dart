@@ -23,3 +23,12 @@ class Unauthenticated extends AuthenticationState {
   @override
   List<Object> get props => [];
 }
+
+class Error extends AuthenticationState {
+  final String message;
+
+  Error(this.message);
+
+  @override
+  List<Object> get props => [message];
+}

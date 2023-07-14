@@ -37,10 +37,10 @@ Widget scripture(Scripture script) {
   List<int> sortedVerses = [];
   verses = script.verses.keys.toList();
   sortedVerses = verses.map((e) => int.parse(e)).toList()..sort();
-  return Column(children: buildcombinedScripture(script, sortedVerses));
+  return Column(children: buildCombinedScripture(script, sortedVerses));
 }
 
-List<Widget> buildcombinedScripture(Scripture script, List<int> sortedVerses) {
+List<Widget> buildCombinedScripture(Scripture script, List<int> sortedVerses) {
   List<Widget> combinedScripture = [];
   combinedScripture.add(book(script, sortedVerses));
   if (script.title != '') {
@@ -71,10 +71,12 @@ Widget book(Scripture script, List<int> sortedVerses) {
   String end = sortedVerses.last.toString();
   String book = script.book;
   String chapter = script.chapter;
-  String text = "$book $chapter: $start - $end";
+  bool fullChapter = script.fullChapter;
+  String text =
+      fullChapter ? "$book $chapter" : "$book $chapter: $start - $end";
   return Padding(
     padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
-    child: getIt<TextFactory>().subHeading(text, fontSize: 22),
+    child: getIt<TextFactory>().subHeading(text, fontSize: 18),
   );
 }
 

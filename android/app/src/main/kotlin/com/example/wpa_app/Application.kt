@@ -11,7 +11,7 @@ class Application : FlutterApplication(), PluginRegistrantCallback {
         super.onCreate()
     }
 
-    override fun registerWith(registry: PluginRegistry?) {
+    override fun registerWith(registry: PluginRegistry) {
        
     }
 }

@@ -2,7 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
+import 'package:wpa_app/presentation/engage/bible_series/widgets/divider_body.dart';
 import 'package:wpa_app/presentation/engage/bible_series/widgets/link_body.dart';
+import 'package:wpa_app/presentation/engage/bible_series/widgets/title_body.dart';
 
 import '../../../../app/constants.dart';
 import '../../../../app/injection.dart';
@@ -22,7 +24,7 @@ import '../widgets/text_body.dart';
 class ContentDetailPage extends StatelessWidget {
   final String seriesContentId;
   final String bibleSeriesId;
-  final SeriesContentType seriesContentType;
+  final String seriesContentType;
   final bool getCompletionDetails;
 
   const ContentDetailPage({
@@ -57,10 +59,9 @@ class ContentDetailPage extends StatelessWidget {
 
 class ContentDetailWidget extends StatelessWidget {
   final String bibleSeriesId;
-  final SeriesContentType seriesContentType;
+  final String seriesContentType;
 
   ContentDetailWidget(this.bibleSeriesId, this.seriesContentType);
-  final GlobalKey<AudioSliderState> keyChild = GlobalKey();
 
   List<Widget> contentDetailList(
     SeriesContent seriesContent,
@@ -72,9 +73,9 @@ class ContentDetailWidget extends StatelessWidget {
 
     for (int index = 0; index < body.length; index++) {
       if (body[index].type == SeriesContentBodyType.AUDIO) {
-        contentBodyList.add(AudioSlider(
-          key: this.keyChild,
+        contentBodyList.add(AudioBodyWidget(
           audioContentBody: body[index],
+          contentId: seriesContent.id,
         ));
       } else if (body[index].type == SeriesContentBodyType.TEXT) {
         contentBodyList.add(TextContentBodyWidget(
@@ -102,6 +103,12 @@ class ContentDetailWidget extends StatelessWidget {
         contentBodyList.add(LinkBodyWidget(
           linkBody: body[index],
         ));
+      } else if (body[index].type == SeriesContentBodyType.TITLE) {
+        contentBodyList.add(TitleBodyWidget(
+          titleBody: body[index],
+        ));
+      } else if (body[index].type == SeriesContentBodyType.DIVIDER) {
+        contentBodyList.add(DividerBodyWidget());
       }
     }
 
@@ -131,9 +138,6 @@ class ContentDetailWidget extends StatelessWidget {
                 //     ? null
                 //     :
                 () {
-              if (keyChild.currentState != null) {
-                keyChild.currentState.stopAudio();
-              }
               if (state.seriesContentDetail.isResponsePossible) {
                 CompletionDetails completionDetails = CompletionDetails(
                     seriesId: bibleSeriesId,
@@ -158,8 +162,7 @@ class ContentDetailWidget extends StatelessWidget {
                         backButton(state.seriesContentDetail),
                         SizedBox(width: 8),
                         HeaderWidget(
-                            contentType: state.seriesContentDetail.contentType
-                                .toString()),
+                            contentType: state.seriesContentDetail.contentType),
                       ],
                     ),
                   ),
@@ -254,9 +257,6 @@ class ContentDetailWidget extends StatelessWidget {
         }
         Navigator.pop(context);
       } else {
-        if (keyChild.currentState != null) {
-          keyChild.currentState.stopAudio();
-        }
         Navigator.pop(context);
       }
     }
@@ -264,7 +264,7 @@ class ContentDetailWidget extends StatelessWidget {
 }
 
 class SeriesContentDetailPlaceholder extends StatelessWidget {
-  final SeriesContentType seriesContentType;
+  final String seriesContentType;
 
   const SeriesContentDetailPlaceholder({Key key, this.seriesContentType})
       : super(key: key);
@@ -302,17 +302,12 @@ class HeaderWidget extends StatelessWidget {
   final String contentType;
   const HeaderWidget({Key key, this.contentType}) : super(key: key);
 
-  String splitContentType() {
-    var temp = contentType.split(".");
-    return temp[1];
-  }
-
   @override
   Widget build(BuildContext context) {
     return Container(
       alignment: Alignment.center,
       padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
-      child: getIt<TextFactory>().subPageHeading(splitContentType()),
+      child: getIt<TextFactory>().subPageHeading2(contentType),
     );
   }
 }

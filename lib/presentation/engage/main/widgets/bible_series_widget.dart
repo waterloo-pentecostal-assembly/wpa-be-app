@@ -13,8 +13,8 @@ class RecentBibleSeriesWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<BibleSeriesBloc, BibleSeriesState>(
-      listener: (BuildContext context, state) {},
-      builder: (BuildContext context, state) {
+      listener: (BuildContext context, BibleSeriesState state) {},
+      builder: (BuildContext context, BibleSeriesState state) {
         return Column(
           children: [
             Padding(

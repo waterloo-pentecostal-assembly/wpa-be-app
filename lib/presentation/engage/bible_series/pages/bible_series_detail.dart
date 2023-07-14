@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/application/audio_player/audio_player_bloc.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
+import 'package:wpa_app/presentation/engage/bible_series/widgets/audio_body.dart';
 
 import '../../../../app/constants.dart';
 import '../../../../app/injection.dart';
@@ -133,12 +135,17 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                   ),
                 ),
                 Expanded(
-                  child: Container(
-                    padding: EdgeInsets.all(0),
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: _buildContentChildren(context, bibleSeries),
-                    ),
+                  child: BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
+                    builder: (context, state) {
+                      return Container(
+                        padding: EdgeInsets.all(0),
+                        child: TabBarView(
+                          controller: _tabController,
+                          children: _buildContentChildren(
+                              context, bibleSeries, state),
+                        ),
+                      );
+                    },
                   ),
                 )
               ],
@@ -290,7 +297,10 @@ List<Widget> _buildContentTabs(
 }
 
 List<Widget> _buildContentChildren(
-    BuildContext context, BibleSeries bibleSeries) {
+  BuildContext context,
+  BibleSeries bibleSeries,
+  AudioPlayerState state,
+) {
   List<Widget> contentChildren = [];
 
   bibleSeries.seriesContentSnippet.asMap().forEach((i, _element) {
@@ -332,13 +342,22 @@ List<Widget> _buildContentChildren(
                 child: Align(
                   alignment: Alignment.center,
                   child: Row(
-                    children: [
-                      getIt<TextFactory>().subHeading(
-                          element.seriesContentType.toString().split('.')[1]),
-                      _getStatusIndicator(element.isCompleted, element.isDraft,
-                          getIt<LayoutFactory>().conversionVal)
-                    ],
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      getIt<TextFactory>()
+                          .subHeading(element.seriesContentType),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          _getPlayingIndicator(state, element.contentId),
+                          _getStatusIndicator(
+                            element.isCompleted,
+                            element.isDraft,
+                            getIt<LayoutFactory>().conversionVal,
+                          )
+                        ],
+                      )
+                    ],
                   ),
                 ),
               ),
@@ -356,6 +375,16 @@ List<Widget> _buildContentChildren(
     );
   });
   return contentChildren;
+}
+
+Widget _getPlayingIndicator(AudioPlayerState state, String contentId) {
+  if (state.contentId == contentId &&
+      state.playerState == PlayerStateEnum.PLAYING) {
+    return Icon(
+      Icons.play_arrow_outlined,
+    );
+  }
+  return Text("");
 }
 
 String _getMonth(Timestamp date) {

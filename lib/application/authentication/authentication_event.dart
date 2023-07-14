@@ -13,3 +13,8 @@ class SignOut extends AuthenticationEvent {
   @override
   List<Object> get props => [];
 }
+
+class InitiateDelete extends AuthenticationEvent {
+  @override
+  List<Object> get props => [];
+}

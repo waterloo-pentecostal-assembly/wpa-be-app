@@ -1,16 +1,7 @@
+import 'dart:ffi';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
-enum SeriesContentType {
-  REFLECT,
-  LISTEN,
-  SCRIBE,
-  DRAW,
-  READ,
-  PRAY,
-  DEVOTIONAL,
-  MEMORIZE,
-}
 
 enum SeriesContentBodyType {
   AUDIO,
@@ -18,7 +9,9 @@ enum SeriesContentBodyType {
   SCRIPTURE,
   QUESTION,
   IMAGE_INPUT,
-  LINK
+  LINK,
+  TITLE,
+  DIVIDER,
 }
 
 class BibleSeries {
@@ -91,7 +84,7 @@ class SeriesContentSnippet {
 }
 
 class AvailableContentType {
-  final SeriesContentType seriesContentType;
+  final String seriesContentType;
   final String contentId;
   bool _isCompleted;
   bool _isOnTime;
@@ -128,7 +121,7 @@ class AvailableContentType {
 
 class SeriesContent {
   final String id;
-  final SeriesContentType contentType;
+  final String contentType;
   final Timestamp date;
   final String title;
   final String subTitle;
@@ -211,6 +204,26 @@ class AudioBody implements ISeriesContentBody {
 
 class AudioBodyProperties {
   String audioFileUrl;
+  String title;
+}
+
+class DividerBody implements ISeriesContentBody {
+  final SeriesContentBodyType type = SeriesContentBodyType.DIVIDER;
+  get properties {}
+}
+
+class TitleBody implements ISeriesContentBody {
+  final SeriesContentBodyType type;
+  final TitleBodyProperties properties;
+
+  TitleBody({
+    @required this.type,
+    @required this.properties,
+  });
+}
+
+class TitleBodyProperties {
+  String text;
 }
 
 class TextBody implements ISeriesContentBody {
@@ -247,12 +260,14 @@ class Scripture {
   final String book;
   final String chapter;
   final String title;
+  final bool fullChapter;
   final Map<String, String> verses;
 
   Scripture({
     @required this.book,
     @required this.chapter,
     this.title,
+    @required this.fullChapter,
     @required this.verses,
   });
 }

@@ -7,6 +7,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:wpa_app/application/audio_player/audio_player_bloc.dart';
 import 'package:wpa_app/application/links/links_bloc.dart';
 import 'package:wpa_app/domain/links/interface.dart';
 import 'package:wpa_app/infrastructure/links/links_repository.dart';
@@ -70,7 +71,8 @@ void initializeInjections({
   getIt.registerLazySingleton<FirebaseStorage>(() => FirebaseStorage.instance);
   getIt.registerLazySingleton<FirebaseMessaging>(
       () => FirebaseMessaging.instance);
-  getIt.registerLazySingleton<FirebaseAnalytics>(() => FirebaseAnalytics());
+  getIt.registerLazySingleton<FirebaseAnalytics>(
+      () => FirebaseAnalytics.instance);
 
   getIt.registerLazySingleton<FirebaseFirestore>(() {
     FirebaseFirestore firebaseFirestoreInstance = FirebaseFirestore.instance;
@@ -169,6 +171,10 @@ void initializeInjections({
 
   getIt.registerLazySingleton<NavigationBarBloc>(
     () => NavigationBarBloc(),
+  );
+
+  getIt.registerLazySingleton<AudioPlayerBloc>(
+    () => AudioPlayerBloc(),
   );
 
   // Implementations

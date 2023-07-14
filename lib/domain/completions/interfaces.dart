@@ -40,9 +40,12 @@ abstract class ICompletionsRepository {
     @required String completionId,
   });
 
-  UploadTask uploadImages({@required File file, @required String userId});
+  UploadTask uploadImage({@required File file, @required String userId});
 
-  void deleteImages({@required String gsUrl});
+  List<UploadTask> uploadImages(
+      {@required List<File> images, @required String userId});
+
+  void deleteImage({@required String gsUrl});
 
   Future<String> getDownloadURL({@required String gsUrl});
 }

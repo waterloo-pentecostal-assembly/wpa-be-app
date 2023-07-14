@@ -66,3 +66,12 @@ class UpdatedBibleSeries extends BibleSeriesState {
   @override
   List<Object> get props => [_bibleSeriesDetail];
 }
+
+class HasActiveBibleSeries extends BibleSeriesState {
+  final bool _hasActive;
+  HasActiveBibleSeries(this._hasActive);
+  bool get hasActive => _hasActive;
+
+  @override
+  List<Object> get props => [_hasActive];
+}
