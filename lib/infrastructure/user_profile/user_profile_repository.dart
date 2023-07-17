@@ -37,10 +37,8 @@ class UserProfileRepository implements IUserProfileRepository {
 
   @override
   UploadTask uploadProfilePhoto(File file, String userId) {
-    // final LocalUser user = getIt<LocalUser>();
     String fileExt = path.extension(file.path);
-    String filePath =
-        '/users/$userId/profile_photo/profile_photo_${DateTime.now()}$fileExt';
+    String filePath = '/users/$userId/profile_photo/image$fileExt';
 
     try {
       return _firebaseStorageService.startFileUpload(filePath, file);

@@ -5,13 +5,16 @@ import '../injection.dart';
 import '../app.dart';
 
 void main() async {
+  AppConfig appConfig = AppConfig(
+    appEnvironment: AppEnvironment.DEV,
+    title: 'WPA Bible Engagement DEV',
+  );
+  appConfig.hasActiveBibleSeries = false;
   initializeInjections(
-      useLocalFirestore: false,
-      useLocalAuth: false,
-      appConfig: AppConfig(
-        appEnvironment: AppEnvironment.DEV,
-        title: 'WPA Bible Engagement DEV',
-      ));
+    useLocalFirestore: false,
+    useLocalAuth: false,
+    appConfig: appConfig,
+  );
 
   runApp(App());
 }

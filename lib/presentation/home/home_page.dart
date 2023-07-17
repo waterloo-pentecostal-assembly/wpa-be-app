@@ -59,7 +59,7 @@ class HomeIndex extends StatelessWidget {
             Container(
               child: Text('HOME'),
             ),
-            RaisedButton(
+            ElevatedButton(
               child: Text('Engage'),
               onPressed: () {
                 BlocProvider.of<NavigationBarBloc>(context)
@@ -70,17 +70,17 @@ class HomeIndex extends StatelessWidget {
                   );
               },
             ),
-            RaisedButton(
-              child: Text('Example Notification Detail'),
-              onPressed: () {
-                BlocProvider.of<NavigationBarBloc>(context)
-                  ..add(
-                    NavigationBarEvent(
-                        tab: NavigationTabEnum.NOTIFICATIONS,
-                        route: '/notification_detail'),
-                  );
-              },
-            ),
+            // RaisedButton(
+            //   child: Text('Example Notification Detail'),
+            //   onPressed: () {
+            //     BlocProvider.of<NavigationBarBloc>(context)
+            //       ..add(
+            //         NavigationBarEvent(
+            //             tab: NavigationTabEnum.NOTIFICATIONS,
+            //             route: '/notification_detail'),
+            //       );
+            //   },
+            // ),
             Container(
               child: Text(getIt<AppConfig>().appEnvironment.toString()),
             )

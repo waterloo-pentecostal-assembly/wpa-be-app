@@ -1,24 +1,32 @@
 import 'dart:io';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:wpa_app/application/audio_player/audio_player_bloc.dart';
+import 'package:wpa_app/application/links/links_bloc.dart';
+import 'package:wpa_app/domain/links/interface.dart';
+import 'package:wpa_app/infrastructure/links/links_repository.dart';
 
 import '../application/achievements/achievements_bloc.dart';
+import '../application/admin/admin_bloc.dart';
 import '../application/authentication/authentication_bloc.dart';
 import '../application/authentication/password_reset/password_reset_bloc.dart';
 import '../application/authentication/sign_in/sign_in_bloc.dart';
 import '../application/authentication/sign_up/sign_up_bloc.dart';
 import '../application/bible_series/bible_series_bloc.dart';
+import '../application/completions/completions_bloc.dart';
 import '../application/media/media_bloc.dart';
 import '../application/navigation_bar/navigation_bar_bloc.dart';
 import '../application/notification_settings/notification_settings_bloc.dart';
 import '../application/prayer_requests/prayer_requests_bloc.dart';
 import '../application/user_profile/user_profile_bloc.dart';
 import '../domain/achievements/interfaces.dart';
+import '../domain/admin/interfaces.dart';
 import '../domain/authentication/interfaces.dart';
 import '../domain/bible_series/interfaces.dart';
 import '../domain/completions/interfaces.dart';
@@ -27,6 +35,7 @@ import '../domain/notification_settings/interfaces.dart';
 import '../domain/prayer_requests/interfaces.dart';
 import '../domain/user_profile/interfaces.dart';
 import '../infrastructure/achievements/achievements_repository.dart';
+import '../infrastructure/admin/admin_service.dart';
 import '../infrastructure/authentication/firebase_authentication_facade.dart';
 import '../infrastructure/bible_series/bible_series_repository.dart';
 import '../infrastructure/completions/completions_repository.dart';
@@ -60,7 +69,10 @@ void initializeInjections({
   getIt.registerLazySingleton<AppConfig>(() => appConfig);
 
   getIt.registerLazySingleton<FirebaseStorage>(() => FirebaseStorage.instance);
-  getIt.registerLazySingleton<FirebaseMessaging>(() => FirebaseMessaging());
+  getIt.registerLazySingleton<FirebaseMessaging>(
+      () => FirebaseMessaging.instance);
+  getIt.registerLazySingleton<FirebaseAnalytics>(
+      () => FirebaseAnalytics.instance);
 
   getIt.registerLazySingleton<FirebaseFirestore>(() {
     FirebaseFirestore firebaseFirestoreInstance = FirebaseFirestore.instance;
@@ -127,12 +139,20 @@ void initializeInjections({
     ),
   );
 
+  getIt.registerFactory<CompletionsBloc>(() => CompletionsBloc(
+        getIt<ICompletionsRepository>(),
+      ));
+
   getIt.registerFactory<AchievementsBloc>(
     () => AchievementsBloc(getIt<IAchievementsRepository>()),
   );
 
   getIt.registerFactory<MediaBloc>(
     () => MediaBloc(getIt<IMediaRepository>()),
+  );
+
+  getIt.registerFactory<AdminBloc>(
+    () => AdminBloc(getIt<IAdminService>()),
   );
 
   getIt.registerFactory<NotificationSettingsBloc>(
@@ -147,8 +167,14 @@ void initializeInjections({
     () => UserProfileBloc(getIt<IUserProfileRepository>()),
   );
 
-  getIt.registerFactory<NavigationBarBloc>(
+  getIt.registerFactory<LinksBloc>(() => LinksBloc(getIt<ILinksRepository>()));
+
+  getIt.registerLazySingleton<NavigationBarBloc>(
     () => NavigationBarBloc(),
+  );
+
+  getIt.registerLazySingleton<AudioPlayerBloc>(
+    () => AudioPlayerBloc(),
   );
 
   // Implementations
@@ -174,6 +200,7 @@ void initializeInjections({
     () => CompletionsRepository(
       getIt<FirebaseFirestore>(),
       getIt<FirebaseFirestoreService>(),
+      getIt<FirebaseStorageService>(),
     ),
   );
 
@@ -215,6 +242,17 @@ void initializeInjections({
       getIt<FirebaseStorageService>(),
     ),
   );
+
+  getIt.registerLazySingleton<IAdminService>(
+    () => AdminService(
+      getIt<FirebaseFirestore>(),
+      getIt<FirebaseFirestoreService>(),
+      getIt<FirebaseStorageService>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<ILinksRepository>(() => LinksRepository(
+      getIt<FirebaseFirestore>(), getIt<FirebaseFirestoreService>()));
 
   // Factories
   getIt.registerLazySingleton<TextFactory>(() => TextFactory('Montserrat'));

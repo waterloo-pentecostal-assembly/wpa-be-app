@@ -51,7 +51,7 @@ void main() {
       },
       act: (SignInBloc bloc) =>
           bloc.add(PasswordChanged(password: invalidPassword)),
-      expect: [
+      expect: () => [
         signInStateBuilder(
             password: invalidPassword,
             passwordError: invalidPasswordErrorMessage),
@@ -65,7 +65,7 @@ void main() {
       },
       act: (SignInBloc bloc) =>
           bloc.add(PasswordChanged(password: validPassword)),
-      expect: [
+      expect: () => [
         signInStateBuilder(password: validPassword),
       ],
     );
@@ -78,7 +78,7 @@ void main() {
         return SignInBloc(mockIAuthenticationFacade);
       },
       act: (SignInBloc bloc) => bloc.add(EmailChanged(email: invalidEmail)),
-      expect: [
+      expect: () => [
         signInStateBuilder(
             emailAddress: invalidEmail,
             emailAddressError: invalidEmailErrorMessage),
@@ -91,7 +91,7 @@ void main() {
         return SignInBloc(mockIAuthenticationFacade);
       },
       act: (SignInBloc bloc) => bloc.add(EmailChanged(email: validEmail)),
-      expect: [
+      expect: () => [
         signInStateBuilder(emailAddress: validEmail),
       ],
     );
@@ -111,7 +111,7 @@ void main() {
 
       // assert
       expectLater(
-        bloc,
+        bloc.stream,
         emitsInOrder([
           signInStateBuilder(
               emailAddress: invalidEmail,
@@ -139,7 +139,7 @@ void main() {
 
       // assert
       expectLater(
-        bloc,
+        bloc.stream,
         emitsInOrder([
           signInStateBuilder(emailAddress: validEmail),
           signInStateBuilder(
@@ -163,7 +163,7 @@ void main() {
 
       // assert
       expectLater(
-        bloc,
+        bloc.stream,
         emitsInOrder([
           signInStateBuilder(emailAddress: validEmail),
           signInStateBuilder(emailAddress: validEmail, password: validPassword),
@@ -197,7 +197,7 @@ void main() {
 
       // assert
       expectLater(
-        bloc,
+        bloc.stream,
         emitsInOrder([
           signInStateBuilder(emailAddress: validEmail),
           signInStateBuilder(emailAddress: validEmail, password: validPassword),

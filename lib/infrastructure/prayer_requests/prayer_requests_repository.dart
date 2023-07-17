@@ -60,7 +60,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
     try {
       querySnapshot = await _prayerRequestsCollection
           .where("user_id", isEqualTo: user.id)
-          .where("is_safe", isEqualTo: true)
+          .where("is_answered", isEqualTo: false)
           .orderBy("date", descending: true)
           .get();
     } catch (e) {
@@ -77,6 +77,49 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
     }
 
     return myPrayerRequests;
+  }
+
+  @override
+  Future<List<PrayerRequest>> getMyAnsweredPrayerRequests() async {
+    final LocalUser user = getIt<LocalUser>();
+    QuerySnapshot querySnapshot;
+
+    try {
+      querySnapshot = await _prayerRequestsCollection
+          .where("user_id", isEqualTo: user.id)
+          .where("is_answered", isEqualTo: true)
+          .orderBy("date", descending: true)
+          .get();
+    } catch (e) {
+      _firebaseFirestoreService.handleException(e);
+    }
+
+    List<PrayerRequest> myPrayerRequests = [];
+
+    for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+      PrayerRequest prayerRequest =
+          await PrayerRequestsDto.fromFirestore(doc, user.id)
+              .toDomain(_firebaseStorageService);
+      myPrayerRequests.add(prayerRequest);
+    }
+
+    return myPrayerRequests;
+  }
+
+  @override
+  Future<PrayerRequest> closePrayerRequest({String id}) async {
+    final LocalUser user = getIt<LocalUser>();
+    DocumentReference prayerRequestReference;
+    DocumentSnapshot prayerRequestSnapshot;
+    try {
+      prayerRequestReference = _prayerRequestsCollection.doc(id);
+      await prayerRequestReference.update({"is_answered": true});
+      prayerRequestSnapshot = await prayerRequestReference.get();
+    } catch (e) {
+      _firebaseFirestoreService.handleException(e);
+    }
+    return PrayerRequestsDto.fromFirestore(prayerRequestSnapshot, user.id)
+        .toDomain(_firebaseStorageService);
   }
 
   @override
@@ -98,7 +141,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
 
     try {
       querySnapshot = await _prayerRequestsCollection
-          .where("is_safe", isEqualTo: true)
+          .where("is_approved", isEqualTo: true)
+          .where("is_answered", isEqualTo: false)
           .orderBy("date", descending: true)
           .startAfterDocument(_lastPrayerRequestDocument)
           .limit(limit)
@@ -132,7 +176,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
 
     try {
       querySnapshot = await _prayerRequestsCollection
-          .where("is_safe", isEqualTo: true)
+          .where("is_approved", isEqualTo: true)
+          .where("is_answered", isEqualTo: false)
           .orderBy("date", descending: true)
           .limit(limit)
           .get();
@@ -175,7 +220,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
           );
         }
 
-        List<dynamic> prayedBy = documentSnapshot.data()["prayed_by"];
+        List<dynamic> prayedBy = documentSnapshot["prayed_by"];
 
         if (prayedBy == null) {
           prayedBy = [user.id];
@@ -191,9 +236,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
   }
 
   @override
-  Future<bool> reportPrayerRequest({String id}) async {
+  Future<void> reportPrayerRequest({String id}) async {
     final LocalUser user = getIt<LocalUser>();
-    bool isSafe = false;
 
     try {
       // Using transaction to avoid stale data
@@ -202,7 +246,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
         DocumentSnapshot documentSnapshot =
             await transaction.get(documentReference);
 
-        List<dynamic> reportedBy = documentSnapshot.data()["reported_by"] ?? [];
+        List<dynamic> reportedBy = documentSnapshot["reported_by"] ?? [];
 
         if (reportedBy.contains(user.id)) {
           throw PrayerRequestsException(
@@ -212,11 +256,10 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
         }
 
         reportedBy.add(user.id);
-        isSafe = reportedBy.length < kPrayerRequestsReportsLimit;
 
         transaction.update(documentReference, {
           "reported_by": reportedBy,
-          "is_safe": isSafe,
+          "is_approved": false,
         });
       });
     } on PrayerRequestsException catch (_) {
@@ -224,7 +267,6 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
     } catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
-    return isSafe;
   }
 
   @override
@@ -235,7 +277,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
     try {
       querySnapshot = await _prayerRequestsCollection
           .where("user_id", isEqualTo: user.id)
-          .where("is_safe", isEqualTo: true)
+          .where("is_approved", isEqualTo: true)
           .orderBy("date", descending: true)
           .get();
     } catch (e) {

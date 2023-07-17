@@ -16,6 +16,7 @@ class BibleSeriesDto {
   final Timestamp startDate;
   final Timestamp endDate;
   final bool isActive;
+  final bool isVisible;
   final List<SeriesContentSnippetDto> seriesContentSnippet;
 
   factory BibleSeriesDto.fromJson(Map<String, dynamic> json) {
@@ -33,7 +34,8 @@ class BibleSeriesDto {
       imageGsLocation: findOrThrowException(json, 'image_gs_location'),
       startDate: findOrThrowException(json, 'start_date'),
       endDate: findOrThrowException(json, 'end_date'),
-      isActive: json['is_active'] ?? false,
+      isActive: findOrDefaultTo(json, 'is_active', false),
+      isVisible: findOrDefaultTo(json, 'is_visible', false),
       seriesContentSnippet: _seriesContentSnippet,
     );
   }
@@ -51,6 +53,7 @@ class BibleSeriesDto {
     Timestamp startDate,
     Timestamp endDate,
     bool isActive,
+    bool isVisible,
     List<SeriesContentSnippetDto> seriesContentSnippet,
   }) {
     return BibleSeriesDto._(
@@ -62,6 +65,7 @@ class BibleSeriesDto {
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
       isActive: isActive ?? this.isActive,
+      isVisible: isVisible ?? this.isVisible,
       seriesContentSnippet: seriesContentSnippet ?? this.seriesContentSnippet,
     );
   }
@@ -75,6 +79,7 @@ class BibleSeriesDto {
     @required this.startDate,
     @required this.endDate,
     @required this.isActive,
+    @required this.isVisible,
     @required this.seriesContentSnippet,
   });
 }
@@ -100,6 +105,7 @@ extension BibleSeriesDtoX on BibleSeriesDto {
       startDate: this.startDate,
       endDate: this.endDate,
       isActive: this.isActive,
+      isVisible: this.isVisible,
       seriesContentSnippet: _seriesContentSnippet,
     );
   }
@@ -135,8 +141,10 @@ extension SeriesContentSnippetDtoX on SeriesContentSnippetDto {
   SeriesContentSnippet toDomain() {
     List<AvailableContentType> availableContentTypes = [];
     this.contentTypes.forEach((element) {
-      final SeriesContentType seriesContentType =
-          contentTypeMapper(findOrThrowException(element, 'content_type'));
+      final String seriesContentType =
+          findOrThrowException(element, 'content_type')
+              .toString()
+              .toUpperCase();
       final String seriesContentId =
           findOrThrowException(element, 'content_id');
       if (seriesContentType != null) {

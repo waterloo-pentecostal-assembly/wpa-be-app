@@ -30,21 +30,33 @@ class _MyPrayerRequestsState extends State<MyPrayerRequests>
 
   Widget _buildItem(
       BuildContext context, int index, Animation<double> animation) {
+    Widget prayButtonOrIndicator;
+    if (_prayerRequests[index].isApproved) {
+      prayButtonOrIndicator =
+          PrayedByIndicator(amount: _prayerRequests[index].prayedBy.length);
+    } else {
+      prayButtonOrIndicator = PendingIndicator();
+    }
     return PrayerRequestCard(
       animation: animation,
       prayerRequest: _prayerRequests[index],
-      prayButtonOrIndicator:
-          PrayedByIndicator(amount: _prayerRequests[index].prayedBy.length),
+      prayButtonOrIndicator: prayButtonOrIndicator,
     );
   }
 
   Widget _buildDeletedItem(BuildContext context, PrayerRequest prayerRequest,
       Animation<double> animation) {
+    Widget prayButtonOrIndicator;
+    if (prayerRequest.isApproved) {
+      prayButtonOrIndicator =
+          PrayedByIndicator(amount: prayerRequest.prayedBy.length);
+    } else {
+      prayButtonOrIndicator = PendingIndicator();
+    }
     return PrayerRequestCard(
       animation: animation,
       prayerRequest: prayerRequest,
-      prayButtonOrIndicator:
-          PrayedByIndicator(amount: prayerRequest.prayedBy.length),
+      prayButtonOrIndicator: prayButtonOrIndicator,
     );
   }
 
@@ -77,6 +89,11 @@ class _MyPrayerRequestsState extends State<MyPrayerRequests>
               }
             } else if (state is NewPrayerRequestLoaded) {
               _insertAtTop(state.prayerRequest);
+            } else if (state is MyPrayerRequestAnsweredComplete) {
+              int indexToDelete = getIndexToDelete(state.id);
+              if (indexToDelete != null) {
+                _delete(indexToDelete);
+              }
             }
           },
         ),

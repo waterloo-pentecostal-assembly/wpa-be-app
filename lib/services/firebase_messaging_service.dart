@@ -1,6 +1,9 @@
 import 'dart:io';
-
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:wpa_app/app/injection.dart';
+import 'package:wpa_app/application/navigation_bar/navigation_bar_bloc.dart';
 
 class FirebaseMessagingService {
   final FirebaseMessaging _firebaseMessaging;
@@ -24,65 +27,72 @@ class FirebaseMessagingService {
   }
 
   Future<void> initialize() async {
-    if (Platform.isIOS) {
-      _firebaseMessaging
-          .requestNotificationPermissions(IosNotificationSettings());
-    }
+    await _firebaseMessaging.requestPermission(
+      alert: true,
+      announcement: false,
+      badge: true,
+      carPlay: false,
+      criticalAlert: false,
+      provisional: false,
+      sound: true,
+    );
 
     // If you want to test the push notification locally,
     // you need to get the token and input to the Firebase console
     // String token = await _firebaseMessaging.getToken();
     // print("FirebaseMessaging token: $token");
 
-    _firebaseMessaging.configure(
-      //when the app is running in the foreground and the notification is clicked
-      onMessage: onMessageHanlder,
+    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+      // print('onMessage.listen: $message');
+    });
 
-      //when clicking on a notification and the application is not running at all
-      onLaunch: onLaunchHanlder,
-
-      //when clicking on a notification and the application is running in the background
-      onResume: onResumeHanlder,
-
-      onBackgroundMessage: onBackgroundMessageHandler,
-    );
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      navigationHandler(message.data);
+    });
   }
 
-  Future onMessageHanlder(Map<String, dynamic> message) async {
-    print("onMessage: $message");
-    // String _message;
-    // TODO: we may need to handle the message by platform.
-    // if (Platform.isIOS) {
-    //   //hanle ios
-    // } else {
-    //   // handle android
-    // }
-  }
-
-  Future onLaunchHanlder(Map<String, dynamic> message) async {
-    print("onLaunch: $message");
-  }
-
-  Future onResumeHanlder(Map<String, dynamic> message) async {
-    print("onLaunch: $message");
-  }
-
-  Future onBackgroundMessageHandler(Map<String, dynamic> message) async {
-    // Note: the protocol of data and notification are in line with the fields defined by a RemoteMessage.
-    // https://firebase.google.com/docs/reference/android/com/google/firebase/messaging/RemoteMessage
-
-    if (message.containsKey('data')) {
-      // Handle data message
-      final dynamic data = message['data'];
-      print("backgroundMessageHandler data: $data");
+  void navigationHandler(Map<String, dynamic> payload) async {
+    if (payload['notificationType'] == 'dailyEngagementReminder') {
+      getIt<FirebaseAnalytics>()
+          .logEvent(name: 'daily_engagement_notification_clicked');
+      getIt<NavigationBarBloc>()
+        ..add(
+          NavigationBarEvent(
+            tab: NavigationTabEnum.ENGAGE,
+            route: '/bible_series',
+            arguments: {
+              'bibleSeriesId': payload['bibleSeriesId'],
+            },
+          ),
+        );
+    } else if (payload['notificationType'] == 'prayerRequestPrayed') {
+      getIt<NavigationBarBloc>()
+        ..add(
+          NavigationBarEvent(
+            tab: NavigationTabEnum.ENGAGE,
+            route: '/prayer_requests/mine',
+          ),
+        );
+    } else if (payload['notificationType'] == 'userSignUp') {
+      getIt<NavigationBarBloc>()
+        ..add(
+          NavigationBarEvent(
+            tab: NavigationTabEnum.ADMIN,
+            route: '/user_verification',
+          ),
+        );
+    } else if (payload['notificationType'] == 'newPrayerRequest') {
+      getIt<NavigationBarBloc>()
+        ..add(
+          NavigationBarEvent(
+            tab: NavigationTabEnum.ADMIN,
+            route: '/prayer_request_approval',
+          ),
+        );
+    } else if (payload['notificationType'] == 'link') {
+      if (await canLaunch(payload['link'])) {
+        await launch(payload['link']);
+      }
     }
-
-    if (message.containsKey('notification')) {
-      // Handle notification message
-      final dynamic notification = message['notification'];
-      print("backgroundMessageHandler data: $notification");
-    }
-
-    // Or do other work.
   }
 }

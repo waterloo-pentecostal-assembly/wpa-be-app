@@ -13,6 +13,8 @@ abstract class IPrayerRequestsRepository {
 
   Future<List<PrayerRequest>> getMyPrayerRequests();
 
+  Future<List<PrayerRequest>> getMyAnsweredPrayerRequests();
+
   /// Checks if the signed in user is within the prayer request limit
   Future<bool> canAddPrayerRequest();
 
@@ -20,10 +22,11 @@ abstract class IPrayerRequestsRepository {
     @required String id,
   });
 
-  /// Reports a Prayer Request. Returns a [bool] indicating whether
-  /// or not the request is still safe to display based on the
-  /// [kPrayerRequestsReportsLimit]
-  Future<bool> reportPrayerRequest({
+  Future<void> closePrayerRequest({@required String id});
+
+  /// Reports a Prayer Request. Resets is_approved to false
+  /// to reapproval
+  Future<void> reportPrayerRequest({
     @required String id,
   });
 

@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:wpa_app/app/injection.dart';
+import 'package:wpa_app/domain/authentication/entities.dart';
 
 import '../../domain/bible_series/entities.dart';
 import '../../domain/bible_series/exceptions.dart';
@@ -31,11 +33,19 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
     QuerySnapshot querySnapshot;
 
     try {
-      querySnapshot = await _bibleSeriesCollection
-          .orderBy("start_date", descending: true)
-          .where("is_active", isEqualTo: true)
-          .limit(limit)
-          .get();
+      final LocalUser user = getIt<LocalUser>();
+      if (user.isAdmin) {
+        querySnapshot = await _bibleSeriesCollection
+            .orderBy("start_date", descending: true)
+            .limit(limit)
+            .get();
+      } else {
+        querySnapshot = await _bibleSeriesCollection
+            .orderBy("start_date", descending: true)
+            .where("is_visible", isEqualTo: true)
+            .limit(limit)
+            .get();
+      }
     } catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
@@ -50,7 +60,6 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
                   .toDomain(_firebaseStorageService);
           bibleSeriesList.add(bibleSeriesDto);
         } catch (e) {
-          print(e);
           // Handle exceptions separately for each document conversion.
           // This will ensure that corrupted documents do not affect the others.
         }
@@ -82,7 +91,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
     try {
       querySnapshot = await _bibleSeriesCollection
           .orderBy("start_date", descending: true)
-          .where("is_active", isEqualTo: true)
+          .where("is_visible", isEqualTo: true)
           .startAfterDocument(_lastBibleSeriesDocument)
           .limit(limit)
           .get();
@@ -160,9 +169,11 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
     }
 
     if (document.data() != null) {
-      final SeriesContent seriesContent =
-          SeriesContentDto.fromFirestore(document)
+      //made Series Content a variable instead of a final, may cause issues
+      SeriesContent seriesContent =
+          await SeriesContentDto.fromFirestore(document)
               .toDomain(_firebaseStorageService);
+
       return seriesContent;
     }
 
@@ -170,5 +181,29 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
       code: BibleSeriesExceptionCode.NO_CONTENT_INFO,
       message: 'Cannot find content details',
     );
+  }
+
+  @override
+  Future<bool> hasActiveBibleSeries() async {
+    QuerySnapshot querySnapshot;
+
+    try {
+      querySnapshot = await _bibleSeriesCollection
+          .orderBy("start_date", descending: true)
+          .where("is_visible", isEqualTo: true)
+          .limit(1)
+          .get();
+      if (querySnapshot.docs.length > 0) {
+        QueryDocumentSnapshot doc = querySnapshot.docs[0];
+        final BibleSeries bibleSeriesDto =
+            await BibleSeriesDto.fromFirestore(doc)
+                .toDomain(_firebaseStorageService);
+        return bibleSeriesDto.isActive;
+      }
+    } catch (e) {
+      _firebaseFirestoreService.handleException(e);
+    }
+
+    return false;
   }
 }

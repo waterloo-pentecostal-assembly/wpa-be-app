@@ -1,12 +1,30 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/presentation/common/layout_factory.dart';
+import 'package:wpa_app/presentation/engage/bible_series/widgets/divider_body.dart';
+import 'package:wpa_app/presentation/engage/bible_series/widgets/link_body.dart';
+import 'package:wpa_app/presentation/engage/bible_series/widgets/title_body.dart';
 
-import '../../../../application/bible_series/bible_series_bloc.dart';
+import '../../../../app/constants.dart';
 import '../../../../app/injection.dart';
+import '../../../../application/bible_series/bible_series_bloc.dart';
+import '../../../../application/completions/completions_bloc.dart';
+import '../../../../domain/bible_series/entities.dart';
+import '../../../../domain/completions/entities.dart';
+import '../../../common/text_factory.dart';
+import '../helper.dart';
+import '../widgets/audio_body.dart';
+import '../widgets/completion_buttons.dart';
+import '../widgets/image_body.dart';
+import '../widgets/question_body.dart';
+import '../widgets/scripture_body.dart';
+import '../widgets/text_body.dart';
 
 class ContentDetailPage extends StatelessWidget {
   final String seriesContentId;
   final String bibleSeriesId;
+  final String seriesContentType;
   final bool getCompletionDetails;
 
   const ContentDetailPage({
@@ -14,6 +32,7 @@ class ContentDetailPage extends StatelessWidget {
     @required this.seriesContentId,
     @required this.bibleSeriesId,
     @required this.getCompletionDetails,
+    @required this.seriesContentType,
   }) : super(key: key);
 
   @override
@@ -30,24 +49,265 @@ class ContentDetailPage extends StatelessWidget {
               ),
             ),
         ),
+        BlocProvider<CompletionsBloc>(
+            create: (context) => getIt<CompletionsBloc>()),
       ],
-      child: ContentDetailWidget(),
+      child: ContentDetailWidget(bibleSeriesId, seriesContentType),
     );
   }
 }
 
 class ContentDetailWidget extends StatelessWidget {
+  final String bibleSeriesId;
+  final String seriesContentType;
+
+  ContentDetailWidget(this.bibleSeriesId, this.seriesContentType);
+
+  List<Widget> contentDetailList(
+    SeriesContent seriesContent,
+    CompletionDetails completionDetails,
+    BuildContext context,
+  ) {
+    List<ISeriesContentBody> body = seriesContent.body;
+    List<Widget> contentBodyList = [];
+
+    for (int index = 0; index < body.length; index++) {
+      if (body[index].type == SeriesContentBodyType.AUDIO) {
+        contentBodyList.add(AudioBodyWidget(
+          audioContentBody: body[index],
+          contentId: seriesContent.id,
+        ));
+      } else if (body[index].type == SeriesContentBodyType.TEXT) {
+        contentBodyList.add(TextContentBodyWidget(
+          textContentBody: body[index],
+        ));
+      } else if (body[index].type == SeriesContentBodyType.SCRIPTURE) {
+        contentBodyList.add(ScriptureContentBodyWidget(
+          scriptureContentBody: body[index],
+        ));
+      } else if (body[index].type == SeriesContentBodyType.QUESTION) {
+        contentBodyList.add(QuestionContentBodyWidget(
+          questionContentBody: body[index],
+          contentNum: index,
+          completionDetails: completionDetails,
+        ));
+      } else if (body[index].type == SeriesContentBodyType.IMAGE_INPUT) {
+        contentBodyList.add(ImageInputBodyWidget(
+          imageInputBody: body[index],
+          contentNum: index,
+          completionDetails: completionDetails,
+          bibleSeriesId: bibleSeriesId,
+          seriesContent: seriesContent,
+        ));
+      } else if (body[index].type == SeriesContentBodyType.LINK) {
+        contentBodyList.add(LinkBodyWidget(
+          linkBody: body[index],
+        ));
+      } else if (body[index].type == SeriesContentBodyType.TITLE) {
+        contentBodyList.add(TitleBodyWidget(
+          titleBody: body[index],
+        ));
+      } else if (body[index].type == SeriesContentBodyType.DIVIDER) {
+        contentBodyList.add(DividerBodyWidget());
+      }
+    }
+
+    if (seriesContent.isResponsePossible &&
+        !seriesContent.responseContainImage) {
+      contentBodyList.add(ResponseCompletionButton(
+          seriesContent, completionDetails, bibleSeriesId));
+    } else {
+      contentBodyList.add(
+          CompletionButton(seriesContent, completionDetails, bibleSeriesId));
+    }
+
+    return contentBodyList;
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<BibleSeriesBloc, BibleSeriesState>(
       listener: (context, state) {},
       builder: (BuildContext context, BibleSeriesState state) {
-        return SafeArea(
-          child: Scaffold(
-            body: Container(child: Text('Detail Page')),
+        if (state is SeriesContentDetail) {
+          BlocProvider.of<CompletionsBloc>(context)
+            ..add(CompletionDetailRequested(state.contentCompletionDetail));
+          return WillPopScope(
+            onWillPop:
+                // Platform.isIOS
+                //     ? null
+                //     :
+                () {
+              if (state.seriesContentDetail.isResponsePossible) {
+                CompletionDetails completionDetails = CompletionDetails(
+                    seriesId: bibleSeriesId,
+                    contentId: state.seriesContentDetail.id,
+                    isDraft: true,
+                    isOnTime: isOnTime(state.seriesContentDetail.date),
+                    completionDate: Timestamp.fromDate(DateTime.now()));
+                BlocProvider.of<CompletionsBloc>(context)
+                  ..add(MarkAsDraft(completionDetails));
+              }
+              Navigator.pop(context);
+              return Future.value(false);
+            },
+            child: Scaffold(
+              body: SafeArea(
+                child: Column(children: <Widget>[
+                  Container(
+                    padding: const EdgeInsets.all(kHeadingPadding),
+                    alignment: Alignment.centerLeft,
+                    child: Row(
+                      children: [
+                        backButton(state.seriesContentDetail),
+                        SizedBox(width: 8),
+                        HeaderWidget(
+                            contentType: state.seriesContentDetail.contentType),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
+                      child: ListView(
+                        shrinkWrap: true,
+                        children: contentDetailList(state.seriesContentDetail,
+                            state.contentCompletionDetail, context),
+                      ),
+                    ),
+                  ),
+                ]),
+              ),
+            ),
+          );
+        } else if (state is BibleSeriesError) {
+          return Scaffold(
+              body: SafeArea(
+            child: Text('Error: ${state.message}'),
+          ));
+        }
+        return SeriesContentDetailPlaceholder(
+          seriesContentType: seriesContentType,
+        );
+      },
+    );
+  }
+
+  Widget backButton(SeriesContent seriesContent) {
+    return BlocConsumer<CompletionsBloc, CompletionsState>(
+      listener: (context, state) {},
+      builder: (context, state) {
+        return GestureDetector(
+          onTap: () => {backFunction(state, context, seriesContent)},
+          child: Icon(
+            Icons.arrow_back,
+            size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
           ),
         );
       },
+    );
+  }
+
+  void backFunction(CompletionsState state, BuildContext context,
+      SeriesContent seriesContent) {
+    if (state.uploadTask != null) {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          buttonPadding: const EdgeInsets.all(20),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(16))),
+          title:
+              getIt<TextFactory>().subHeading2("Uploading Image in Progress"),
+          content: getIt<TextFactory>()
+              .lite("Must wait for image to uplaod before exiting this page"),
+          actions: [
+            ClipRRect(
+              borderRadius: BorderRadius.all(Radius.circular(16)),
+              child: TextButton(
+                style: TextButton.styleFrom(
+                    minimumSize: Size(90, 30),
+                    backgroundColor: kWpaBlue.withOpacity(0.8),
+                    primary: Colors.white,
+                    padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap),
+                onPressed: () {
+                  Navigator.of(context, rootNavigator: true).pop();
+                },
+                child: getIt<TextFactory>().regularButton('OK'),
+              ),
+            )
+          ],
+        ),
+      );
+    } else {
+      if (seriesContent.isResponsePossible && state.responses != null) {
+        if (!isResponseEmpty(state.responses)) {
+          CompletionDetails completionDetails = CompletionDetails(
+              seriesId: bibleSeriesId,
+              contentId: seriesContent.id,
+              isDraft: true,
+              isOnTime: isOnTime(seriesContent.date),
+              completionDate: Timestamp.fromDate(DateTime.now()));
+          BlocProvider.of<CompletionsBloc>(context)
+            ..add(MarkAsDraft(completionDetails));
+        } else if (state.responses.responses != null && state.id.isNotEmpty) {
+          BlocProvider.of<CompletionsBloc>(context)
+            ..add(MarkAsInComplete(state.id));
+        }
+        Navigator.pop(context);
+      } else {
+        Navigator.pop(context);
+      }
+    }
+  }
+}
+
+class SeriesContentDetailPlaceholder extends StatelessWidget {
+  final String seriesContentType;
+
+  const SeriesContentDetailPlaceholder({Key key, this.seriesContentType})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Column(children: <Widget>[
+          Container(
+            padding: const EdgeInsets.all(kHeadingPadding),
+            alignment: Alignment.centerLeft,
+            child: Row(
+              children: [
+                GestureDetector(
+                  onTap: () => Navigator.pop(context),
+                  child: Icon(
+                    Icons.arrow_back,
+                    size: getIt<LayoutFactory>()
+                        .getDimension(baseDimension: 24.0),
+                  ),
+                ),
+                SizedBox(width: 8),
+                HeaderWidget(contentType: seriesContentType.toString()),
+              ],
+            ),
+          ),
+        ]),
+      ),
+    );
+  }
+}
+
+class HeaderWidget extends StatelessWidget {
+  final String contentType;
+  const HeaderWidget({Key key, this.contentType}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment.center,
+      padding: const EdgeInsets.fromLTRB(0, 0, 0, 0),
+      child: getIt<TextFactory>().subPageHeading2(contentType),
     );
   }
 }

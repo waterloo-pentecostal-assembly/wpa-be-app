@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/presentation/common/layout_factory.dart';
 
 import '../../../../app/constants.dart';
 import '../../../../app/injection.dart';
@@ -253,14 +254,28 @@ class PostButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.all(Radius.circular(16)),
-      child: FlatButton(
-        height: 30,
-        minWidth: 90,
-        color: kWpaBlue.withOpacity(0.75),
-        textColor: Colors.white,
-        padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      borderRadius: BorderRadius.all(Radius.circular(
+          getIt<LayoutFactory>().getDimension(baseDimension: 16.0))),
+      child: TextButton(
+        style: ButtonStyle(
+            minimumSize: MaterialStateProperty.all(Size(
+                getIt<LayoutFactory>().getDimension(baseDimension: 90.0),
+                getIt<LayoutFactory>().getDimension(baseDimension: 30.0))),
+            backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+              if (states.contains(MaterialState.disabled)) {
+                return kWpaBlue.withOpacity(0.25);
+              }
+              return kWpaBlue.withOpacity(0.75);
+            }),
+            foregroundColor: MaterialStateProperty.resolveWith<Color>((states) {
+              if (states.contains(MaterialState.disabled)) {
+                return Colors.white;
+              }
+              return Colors.white;
+            }),
+            padding: MaterialStateProperty.all(
+                EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8)),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap),
         onPressed: !isValid
             ? null
             : () {
@@ -271,8 +286,6 @@ class PostButton extends StatelessWidget {
                   ));
                 entry.remove();
               },
-        disabledColor: kWpaBlue.withOpacity(0.25),
-        disabledTextColor: Colors.white,
         child: getIt<TextFactory>().regularButton('POST'),
       ),
     );
@@ -286,13 +299,18 @@ class CancelButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.all(Radius.circular(16)),
-      child: FlatButton(
-        height: 30,
-        minWidth: 90,
-        color: kCardGrey,
-        padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
-        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      borderRadius: BorderRadius.all(Radius.circular(
+          getIt<LayoutFactory>().getDimension(baseDimension: 16.0))),
+      child: TextButton(
+        style: TextButton.styleFrom(
+          primary: Colors.black,
+          minimumSize: Size(
+              getIt<LayoutFactory>().getDimension(baseDimension: 90.0),
+              getIt<LayoutFactory>().getDimension(baseDimension: 30.0)),
+          backgroundColor: kCardGrey,
+          padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+        ),
         onPressed: () => entry.remove(),
         child: getIt<TextFactory>().regularButton('CANCEL'),
       ),

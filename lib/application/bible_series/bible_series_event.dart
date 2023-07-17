@@ -9,6 +9,11 @@ class RecentBibleSeriesRequested extends BibleSeriesEvent {
 
   RecentBibleSeriesRequested({@required this.amount});
   @override
+  List<Object> get props => [amount];
+}
+
+class HasActiveBibleSeriesRequested extends BibleSeriesEvent {
+  @override
   List<Object> get props => [];
 }
 
@@ -52,4 +57,25 @@ class ContentDetailRequested extends BibleSeriesEvent {
 
   @override
   List<Object> get props => [seriesContentId];
+}
+
+class UpdateCompletionDetail extends BibleSeriesEvent {
+  final BibleSeries bibleSeries;
+  final int scsNum;
+  final int actNum;
+
+  UpdateCompletionDetail(
+      {@required this.bibleSeries,
+      @required this.actNum,
+      @required this.scsNum});
+
+  @override
+  List<Object> get props => [bibleSeries, scsNum, actNum];
+}
+
+class RestoreState extends BibleSeriesEvent {
+  final BibleSeries bibleSeries;
+  RestoreState(this.bibleSeries);
+  @override
+  List<Object> get props => [bibleSeries];
 }

@@ -12,6 +12,8 @@
 .DS_Store
 .todo
 
+/builds
+
 # vscode related
 *.vscode/
 

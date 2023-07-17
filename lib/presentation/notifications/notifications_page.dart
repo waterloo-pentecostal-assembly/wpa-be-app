@@ -4,19 +4,6 @@ import '../../app/injection.dart';
 import '../common/interfaces.dart';
 import '../common/text_factory.dart';
 
-// class NotificationsPage extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: SafeArea(
-//         child: Container(
-//           child: Text('Notifications Page'),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
 class NotificationsPage extends IIndexedPage {
   final GlobalKey<NavigatorState> navigatorKey;
 
@@ -47,6 +34,16 @@ class NotificationsPage extends IIndexedPage {
   }
 }
 
+class NoNotifications extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      alignment: Alignment.center,
+      child: getIt<TextFactory>().lite('No Notifications'),
+    );
+  }
+}
+
 class NotificationsPageRoot extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
@@ -56,12 +53,13 @@ class NotificationsPageRoot extends StatelessWidget {
           children: <Widget>[
             HeaderWidget(),
             SizedBox(height: 12),
-            RaisedButton(
-              child: Text('Example Notification'),
-              onPressed: () {
-                Navigator.pushNamed(context, '/notification_detail');
-              },
-            ),
+            NoNotifications(),
+            // RaisedButton(
+            //   child: Text('Example Notification'),
+            //   onPressed: () {
+            //     Navigator.pushNamed(context, '/notification_detail');
+            //   },
+            // ),
           ],
         ),
       ),
@@ -77,7 +75,7 @@ class NotificationDetail extends StatelessWidget {
         child: Column(
           children: <Widget>[
             Text('Example notification details'),
-            RaisedButton(
+            ElevatedButton(
               child: Text('Back'),
               onPressed: () {
                 Navigator.pop(context);
@@ -101,11 +99,3 @@ class HeaderWidget extends StatelessWidget {
     );
   }
 }
-
-// return SafeArea(
-//           child: Container(
-//             // child: TestImagePicker(),
-//             child: ListView(
-//               // crossAxisAlignment: CrossAxisAlignment.start,
-//               children: <Widget>[
-//                 HeaderWidget(),

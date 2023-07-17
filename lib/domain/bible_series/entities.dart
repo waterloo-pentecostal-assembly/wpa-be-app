@@ -1,16 +1,7 @@
+import 'dart:ffi';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-
-enum SeriesContentType {
-  REFLECT,
-  LISTEN,
-  SCRIBE,
-  DRAW,
-  READ,
-  PRAY,
-  DEVOTIONAL,
-  MEMORIZE,
-}
 
 enum SeriesContentBodyType {
   AUDIO,
@@ -18,6 +9,9 @@ enum SeriesContentBodyType {
   SCRIPTURE,
   QUESTION,
   IMAGE_INPUT,
+  LINK,
+  TITLE,
+  DIVIDER,
 }
 
 class BibleSeries {
@@ -29,6 +23,7 @@ class BibleSeries {
   final Timestamp startDate;
   final Timestamp endDate;
   final bool isActive;
+  final bool isVisible;
   final List<SeriesContentSnippet> seriesContentSnippet;
 
   BibleSeries({
@@ -40,13 +35,14 @@ class BibleSeries {
     @required this.startDate,
     @required this.endDate,
     @required this.isActive,
+    @required this.isVisible,
     @required this.seriesContentSnippet,
   });
 
   @override
   String toString() {
     return '''id: $id, title: $title, subtitle: $subTitle, imageUrl: $imageUrl, 
-              startDate: $startDate, endDate: $endDate, isActive: $isActive, 
+              startDate: $startDate, endDate: $endDate, isActive: $isActive, isVisible: $isVisible, 
               seriesContentSnippet: $seriesContentSnippet''';
   }
 }
@@ -88,7 +84,7 @@ class SeriesContentSnippet {
 }
 
 class AvailableContentType {
-  final SeriesContentType seriesContentType;
+  final String seriesContentType;
   final String contentId;
   bool _isCompleted;
   bool _isOnTime;
@@ -125,7 +121,7 @@ class AvailableContentType {
 
 class SeriesContent {
   final String id;
-  final SeriesContentType contentType;
+  final String contentType;
   final Timestamp date;
   final String title;
   final String subTitle;
@@ -133,13 +129,24 @@ class SeriesContent {
 
   /// Checks if it possible to have a response for this [SeriesContent]
   bool get isResponsePossible {
+    bool check = false;
     this.body.forEach((element) {
       if (element.type == SeriesContentBodyType.QUESTION ||
           element.type == SeriesContentBodyType.IMAGE_INPUT) {
-        return true;
+        check = true;
       }
     });
-    return false;
+    return check;
+  }
+
+  bool get responseContainImage {
+    bool check = false;
+    this.body.forEach((element) {
+      if (element.type == SeriesContentBodyType.IMAGE_INPUT) {
+        check = true;
+      }
+    });
+    return check;
   }
 
   SeriesContent({
@@ -169,6 +176,22 @@ class ISeriesContentBody {
   });
 }
 
+class LinkBody implements ISeriesContentBody {
+  final SeriesContentBodyType type;
+  final LinkBodyProperties properties;
+
+  LinkBody({
+    @required this.type,
+    @required this.properties,
+  });
+}
+
+class LinkBodyProperties {
+  String link;
+  String title;
+  String text;
+}
+
 class AudioBody implements ISeriesContentBody {
   final SeriesContentBodyType type;
   final AudioBodyProperties properties;
@@ -181,6 +204,26 @@ class AudioBody implements ISeriesContentBody {
 
 class AudioBodyProperties {
   String audioFileUrl;
+  String title;
+}
+
+class DividerBody implements ISeriesContentBody {
+  final SeriesContentBodyType type = SeriesContentBodyType.DIVIDER;
+  get properties {}
+}
+
+class TitleBody implements ISeriesContentBody {
+  final SeriesContentBodyType type;
+  final TitleBodyProperties properties;
+
+  TitleBody({
+    @required this.type,
+    @required this.properties,
+  });
+}
+
+class TitleBodyProperties {
+  String text;
 }
 
 class TextBody implements ISeriesContentBody {
@@ -217,12 +260,14 @@ class Scripture {
   final String book;
   final String chapter;
   final String title;
+  final bool fullChapter;
   final Map<String, String> verses;
 
   Scripture({
     @required this.book,
     @required this.chapter,
     this.title,
+    @required this.fullChapter,
     @required this.verses,
   });
 }

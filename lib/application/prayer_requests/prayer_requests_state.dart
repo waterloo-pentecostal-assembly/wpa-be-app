@@ -57,6 +57,26 @@ class MyPrayerRequestDeleteComplete extends PrayerRequestsState {
   List<Object> get props => [id];
 }
 
+class MyAnsweredPrayerRequestsLoaded extends PrayerRequestsState {
+  final List<PrayerRequest> prayerRequests;
+
+  MyAnsweredPrayerRequestsLoaded({@required this.prayerRequests});
+
+  @override
+  List<Object> get props => [prayerRequests];
+}
+
+class MyPrayerRequestAnsweredComplete extends PrayerRequestsState {
+  final String id;
+  final PrayerRequest prayerRequest;
+
+  MyPrayerRequestAnsweredComplete(
+      {@required this.id, @required this.prayerRequest});
+
+  @override
+  List<Object> get props => [id];
+}
+
 class NewPrayerRequestLoaded extends PrayerRequestsState {
   final PrayerRequest prayerRequest;
 
@@ -125,17 +145,21 @@ class PrayForRequestError extends PrayerRequestsState {
 }
 
 class PrayForRequestLoading extends PrayerRequestsState {
-  PrayForRequestLoading();
+  final String id;
+
+  PrayForRequestLoading({@required this.id});
 
   @override
-  List<Object> get props => [];
+  List<Object> get props => [id];
 }
 
 class PrayForRequestComplete extends PrayerRequestsState {
-  PrayForRequestComplete();
+  final String id;
+
+  PrayForRequestComplete({@required this.id});
 
   @override
-  List<Object> get props => [];
+  List<Object> get props => [id];
 }
 
 class NewPrayerRequestState extends PrayerRequestsState {

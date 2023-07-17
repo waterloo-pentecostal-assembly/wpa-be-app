@@ -5,15 +5,11 @@ import 'package:wpa_app/domain/achievements/entities.dart';
 import '../common/helpers.dart';
 
 class AchievementsDto {
-  final int currentStreak;
-  final int longestStreak;
-  final int perfectSeries;
+  final int seriesProgress;
 
   factory AchievementsDto.fromJson(Map<String, dynamic> json) {
     return AchievementsDto._(
-      currentStreak: findOrThrowException(json, 'current_streak'),
-      longestStreak: findOrThrowException(json, 'longest_streak'),
-      perfectSeries: findOrThrowException(json, 'perfect_series'),
+      seriesProgress: findOrDefaultTo(json, 'series_progress', 0),
     );
   }
 
@@ -22,18 +18,14 @@ class AchievementsDto {
   }
 
   const AchievementsDto._({
-    @required this.currentStreak,
-    @required this.longestStreak,
-    @required this.perfectSeries,
+    @required this.seriesProgress,
   });
 }
 
 extension AchievementsDtoX on AchievementsDto {
   Achievements toDomain() {
     return Achievements(
-      currentStreak: this.currentStreak,
-      longestStreak: this.longestStreak,
-      perfectSeries: this.perfectSeries,
+      seriesProgress: this.seriesProgress,
     );
   }
 }

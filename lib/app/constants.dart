@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 // Color Constants
 const Color kWpaBlue = Color(0xff0092d6);
 const Color kSuccessColor = Color(0xff4BB543);
+const Color kErrorColor = Colors.red;
+const Color kWarningColor = Color(0xffE5B700);
 const Color kLateColor = Color(0xffffc107);
 const Color kDraftColor = Color(0xff007bff);
 const Color kBlackColor = Color(0xff212121);
@@ -12,13 +14,21 @@ Color kCardGrey = Colors.grey.shade300;
 Color kCardOverlayGrey = Colors.grey.shade100;
 
 // Size Constants
+const kProgressWidgetWidth = 150.0;
 const kRecentBibleSeriesTileWidth = 250.0;
 const kRecentBibleSeriesTileHeight = 130.0;
 const kRecentBibleSeriesTileDescriptionHeight = 60.0;
 const kMediaTileWidth = 150.0;
 const kMediaTileHeight = 75.0;
+const kPrayerRequestButtonHeight = 50.0;
+const kPrayerRequestButtonWidth = 150.0;
+const kLinkButtonWidth = 100.0;
 const kMediaTileDescriptionHeight = 60.0;
 const kAllPrayerRequestsCardHeight = 100.0;
+const kHeadingPadding = 16.0;
+const kAdminTileHeight = 125.0;
+const kAdminTileWidth = 150.0;
+const kContentChildrenHeight = 60.0;
 
 // Limits
 const kPrayerRequestsReportsLimit = 2;
@@ -45,6 +55,8 @@ const kWpaGiveUrl = 'https://www.canadahelps.org/en/dne/15479';
 const kDailyEngagementReminderTopic = 'daily_engagement_reminder';
 
 // Help/Reporting
-const kWpaContactEmail = 'dan@wpa.church';
-const kHelpEmailSubject = '[WPA BE APP] Help Request';
-const kReportEmailSubject = '[WPA BE APP] Problem Report';
+const kHelpEmailSubject = 'WPA_BE_APP_Help_Request';
+const kReportEmailSubject = 'WPA_BE_APP_Problem_Report';
+
+//QuestionBody Widget Padding
+const kTopPaddingQuestionBody = 8.0;

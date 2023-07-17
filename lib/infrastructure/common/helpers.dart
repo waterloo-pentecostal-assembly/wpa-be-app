@@ -17,3 +17,11 @@ dynamic findOrDefaultTo(Map map, dynamic key, dynamic defaultValue) {
   }
   return map[key];
 }
+
+Map<String, dynamic> findOrDefaultToGetResponse(
+    Map map, dynamic key, Map<String, dynamic> defaultValue) {
+  if (map[key] == null) {
+    return defaultValue;
+  }
+  return map[key];
+}

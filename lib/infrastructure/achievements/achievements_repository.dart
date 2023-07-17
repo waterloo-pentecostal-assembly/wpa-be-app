@@ -26,8 +26,8 @@ class AchievementsRepository implements IAchievementsRepository {
       _firebaseFirestoreService.handleException(e);
     }
 
-    if (documentSnapshot.data().isEmpty) {
-      return Achievements(currentStreak: 0, longestStreak: 0, perfectSeries: 0);
+    if (!documentSnapshot.exists) {
+      return Achievements(seriesProgress: 0);
     }
 
     return AchievementsDto.fromFirestore(documentSnapshot).toDomain();
@@ -42,8 +42,7 @@ class AchievementsRepository implements IAchievementsRepository {
           .snapshots()
           .map((documentSnapshot) {
         if (documentSnapshot.data() == null) {
-          return Achievements(
-              currentStreak: 0, longestStreak: 0, perfectSeries: 0);
+          return Achievements(seriesProgress: 0);
         }
         return AchievementsDto.fromFirestore(documentSnapshot).toDomain();
       });

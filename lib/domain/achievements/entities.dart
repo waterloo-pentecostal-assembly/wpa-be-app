@@ -1,16 +1,12 @@
 class Achievements {
-  final int currentStreak;
-  final int longestStreak;
-  final int perfectSeries;
+  final int seriesProgress;
 
   Achievements({
-    this.currentStreak,
-    this.longestStreak,
-    this.perfectSeries,
+    this.seriesProgress,
   });
 
   @override
   String toString() {
-    return "currentStreak: $currentStreak, longestStreak: $longestStreak, perfectSeries: $perfectSeries";
+    return "seriesProgress: $seriesProgress";
   }
 }

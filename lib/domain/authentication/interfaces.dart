@@ -45,6 +45,9 @@ abstract class IAuthenticationFacade {
   /// Sign out the singed in user
   Future<void> signOut();
 
+  /// Initiate user account deletion
+  Future<void> initiateDelete(String userId);
+
   /// Delete user
   Future<void> deleteUser();
 }

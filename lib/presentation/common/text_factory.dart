@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:wpa_app/app/constants.dart';
+import 'package:wpa_app/app/injection.dart';
+
+import 'layout_factory.dart';
 
 class TextFactory {
   final String _fontFamily;
@@ -8,13 +12,16 @@ class TextFactory {
   Text heading(
     String text, {
     FontWeight fontWeight = FontWeight.w700,
+    double fontSize = 30,
+    TextAlign textAlign = TextAlign.left,
   }) {
     return Text(
       text,
+      textAlign: textAlign,
       style: TextStyle(
         fontFamily: _fontFamily,
         fontWeight: fontWeight,
-        fontSize: 30.0,
+        fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
       ),
     );
   }
@@ -22,21 +29,39 @@ class TextFactory {
   Text subPageHeading(String text) {
     return Text(
       text,
+      overflow: TextOverflow.fade,
       style: TextStyle(
         fontFamily: _fontFamily,
         fontWeight: FontWeight.w700,
-        fontSize: 24.0,
+        fontSize: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
       ),
     );
   }
 
-  Text subHeading(String text) {
+  Text subPageHeading2(String text) {
     return Text(
       text,
+      overflow: TextOverflow.fade,
       style: TextStyle(
         fontFamily: _fontFamily,
         fontWeight: FontWeight.w700,
-        fontSize: 18.0,
+        fontSize: getIt<LayoutFactory>().getDimension(baseDimension: 18.0),
+      ),
+    );
+  }
+
+  Text subHeading(
+    String text, {
+    double fontSize = 18,
+    TextAlign textAlign = TextAlign.left,
+  }) {
+    return Text(
+      text,
+      textAlign: textAlign,
+      style: TextStyle(
+        fontFamily: _fontFamily,
+        fontWeight: FontWeight.w700,
+        fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
       ),
     );
   }
@@ -47,18 +72,18 @@ class TextFactory {
       style: TextStyle(
         fontFamily: _fontFamily,
         fontWeight: FontWeight.w600,
-        fontSize: 16.0,
+        fontSize: getIt<LayoutFactory>().getDimension(baseDimension: 16.0),
       ),
     );
   }
 
-  Text subHeading3(String text) {
+  Text subHeading3(String text, {double fontSize = 14.0}) {
     return Text(
       text,
       style: TextStyle(
         fontFamily: _fontFamily,
         fontWeight: FontWeight.w600,
-        fontSize: 14.0,
+        fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
       ),
     );
   }
@@ -69,7 +94,7 @@ class TextFactory {
       style: TextStyle(
         fontFamily: _fontFamily,
         fontWeight: FontWeight.w600,
-        fontSize: 13.0,
+        fontSize: getIt<LayoutFactory>().getDimension(baseDimension: 13.0),
       ),
     );
   }
@@ -79,7 +104,7 @@ class TextFactory {
     TextOverflow overflow = TextOverflow.visible,
     TextAlign textAlign = TextAlign.left,
     Color color = Colors.black87,
-    double fontSize = 12.0,
+    double fontSize = 14.0,
   }) {
     return Text(
       text,
@@ -89,11 +114,12 @@ class TextFactory {
     );
   }
 
-  TextStyle regularTextStyle({double fontSize, Color color = Colors.black}) {
+  TextStyle regularTextStyle(
+      {double fontSize = 14.0, Color color = Colors.black}) {
     return TextStyle(
       fontFamily: _fontFamily,
       fontWeight: FontWeight.w600,
-      fontSize: fontSize,
+      fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
       color: color,
     );
   }
@@ -116,13 +142,13 @@ class TextFactory {
     return TextStyle(
         fontFamily: _fontFamily,
         fontWeight: FontWeight.w500,
-        fontSize: fontSize,
+        fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
         color: color);
   }
 
   Text lite(
     String text, {
-    double fontSize = 12.0,
+    double fontSize = 14.0,
     Color color: Colors.black,
     TextOverflow overflow = TextOverflow.visible,
   }) {
@@ -133,12 +159,133 @@ class TextFactory {
     );
   }
 
-  TextStyle liteTextStyle({double fontSize, Color color = Colors.black}) {
+  TextStyle liteTextStyle(
+      {double fontSize = 14.0, Color color = Colors.black}) {
     return TextStyle(
       fontFamily: _fontFamily,
       fontWeight: FontWeight.w400,
-      fontSize: fontSize,
+      fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
       color: color,
+    );
+  }
+
+  SelectableText selectLite(String text,
+      {double fontSize = 14.0,
+      Color color: Colors.black,
+      TextOverflow overflow = TextOverflow.visible}) {
+    return SelectableText(
+      text,
+      style: liteTextStyle(fontSize: fontSize, color: color),
+      //selectable text does not have an overflow parameter, may cause issue
+    );
+  }
+
+  Text lite2(
+    String text, {
+    double fontSize = 14.0,
+    TextOverflow overflow = TextOverflow.visible,
+  }) {
+    return Text(
+      text,
+      style: lite2TextStyle(fontSize: fontSize),
+      overflow: overflow,
+    );
+  }
+
+  TextStyle lite2TextStyle({double fontSize = 14.0}) {
+    return TextStyle(
+      fontFamily: _fontFamily,
+      fontWeight: FontWeight.w400,
+      fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
+      color: Colors.grey[600],
+    );
+  }
+
+  Text linkLite(
+    String text, {
+    double fontSize = 14.0,
+    Color color: kWpaBlue,
+    TextOverflow overflow = TextOverflow.visible,
+  }) {
+    return Text(
+      text,
+      style: linkLiteTextStyle(fontSize: fontSize, color: color),
+      overflow: overflow,
+    );
+  }
+
+  TextStyle linkLiteTextStyle(
+      {double fontSize = 14.0, Color color = Colors.black}) {
+    return TextStyle(
+      fontFamily: _fontFamily,
+      fontWeight: FontWeight.w400,
+      fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
+      color: color,
+    );
+  }
+
+  Text liteSmall(
+    String text, {
+    double fontSize = 10.0,
+    Color color: Colors.black,
+    TextOverflow overflow = TextOverflow.visible,
+  }) {
+    return Text(
+      text,
+      style: liteSmallTextStyle(fontSize: fontSize, color: color),
+      overflow: overflow,
+    );
+  }
+
+  TextStyle liteSmallTextStyle(
+      {double fontSize = 10.0, Color color = Colors.black}) {
+    return TextStyle(
+      fontFamily: _fontFamily,
+      fontWeight: FontWeight.w400,
+      fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
+      color: color,
+    );
+  }
+
+  TextStyle smallBoldTextStyle(
+      {double fontSize = 12.0, Color color = Colors.black}) {
+    return TextStyle(
+      fontFamily: _fontFamily,
+      fontWeight: FontWeight.bold,
+      fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
+      color: color,
+    );
+  }
+
+  Text authenticationButton(
+    String text, {
+    double fontSize = 16.0,
+    Color color: Colors.white,
+    TextOverflow overflow = TextOverflow.visible,
+  }) {
+    return Text(
+      text,
+      style: authenticationButtonTextStyle(fontSize: fontSize, color: color),
+      overflow: overflow,
+    );
+  }
+
+  TextStyle authenticationButtonTextStyle(
+      {double fontSize = 16.0, Color color = Colors.black}) {
+    return TextStyle(
+      fontFamily: _fontFamily,
+      fontWeight: FontWeight.w600,
+      fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
+      color: color,
+    );
+  }
+
+  TextStyle hintStyle({double fontSize = 16.0}) {
+    return TextStyle(
+      fontFamily: _fontFamily,
+      fontWeight: FontWeight.w400,
+      fontSize: getIt<LayoutFactory>().getDimension(baseDimension: fontSize),
+      color: Colors.grey[400],
     );
   }
 }

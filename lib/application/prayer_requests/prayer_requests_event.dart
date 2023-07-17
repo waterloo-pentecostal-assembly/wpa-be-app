@@ -101,3 +101,18 @@ class NewPrayerRequestAnonymousChanged extends PrayerRequestsEvent {
   @override
   List<Object> get props => [isAnonymous];
 }
+
+class ClosePrayerRequest extends PrayerRequestsEvent {
+  final String id;
+
+  ClosePrayerRequest({@required this.id});
+
+  @override
+  List<Object> get props => [id];
+}
+
+class MyAnsweredPrayerRequestsRequested extends PrayerRequestsEvent {
+  MyAnsweredPrayerRequestsRequested();
+  @override
+  List<Object> get props => [];
+}

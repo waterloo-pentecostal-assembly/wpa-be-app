@@ -42,6 +42,15 @@ class BibleSeriesBloc extends Bloc<BibleSeriesEvent, BibleSeriesState> {
         _iBibleSeriesRepository.getContentDetails,
         _iCompletionsRepository.getCompletion,
       );
+    } else if (event is UpdateCompletionDetail) {
+      yield* _mapUpdateCompletionDetailEventToState(
+          event, _iCompletionsRepository.getCompletionOrNull);
+    } else if (event is RestoreState) {
+      yield* _mapRestoreStateEventToState(event);
+    } else if (event is HasActiveBibleSeriesRequested) {
+      yield* _mapHasActiveBibleSeriesRequestedToState(
+        _iBibleSeriesRepository.hasActiveBibleSeries,
+      );
     }
   }
 }
@@ -58,7 +67,6 @@ Stream<BibleSeriesState> _mapContentDetailRequestedEventToState(
   })
       getCompletionDetails,
 ) async* {
-  yield FetchingBibleSeries();
   try {
     SeriesContent seriesContentDetail = await getContentDetails(
       seriesContentId: event.seriesContentId.toString(),
@@ -113,8 +121,6 @@ Stream<BibleSeriesState> _mapBibleSeriesDetailRequestedEventToState(
           {@required String bibleSeriesId})
       getAllCompletionDetailsFunction,
 ) async* {
-  yield FetchingBibleSeries();
-
   try {
     BibleSeries bibleSeries = await getBibleSeriesDetailsFunction(
       bibleSeriesId: event.bibleSeriesId.toString(),
@@ -138,5 +144,51 @@ Stream<BibleSeriesState> _mapBibleSeriesDetailRequestedEventToState(
     yield BibleSeriesError(
       message: 'An unknown error occurred',
     );
+  }
+}
+
+Stream<BibleSeriesState> _mapUpdateCompletionDetailEventToState(
+    UpdateCompletionDetail event,
+    Future<CompletionDetails> Function({
+  @required String seriesContentId,
+})
+        getCompletionDetails) async* {
+  try {
+    CompletionDetails completionDetails = await getCompletionDetails(
+        seriesContentId: event.bibleSeries.seriesContentSnippet[event.scsNum]
+            .availableContentTypes[event.actNum].contentId);
+    BibleSeries newBibleSeries = updateCompletionDetailToSeries(
+        event.bibleSeries, completionDetails, event.scsNum, event.actNum);
+    yield UpdatedBibleSeries(newBibleSeries);
+  } on BaseApplicationException catch (e) {
+    yield BibleSeriesError(message: e.message);
+  } catch (e) {
+    yield BibleSeriesError(
+      message: 'An unknown error occurred',
+    );
+  }
+}
+
+Stream<BibleSeriesState> _mapRestoreStateEventToState(
+    RestoreState event) async* {
+  try {
+    yield BibleSeriesDetail(event.bibleSeries);
+  } on BaseApplicationException catch (e) {
+    yield BibleSeriesError(message: e.message);
+  } catch (e) {
+    yield BibleSeriesError(
+      message: 'An unknown error occurred',
+    );
+  }
+}
+
+Stream<BibleSeriesState> _mapHasActiveBibleSeriesRequestedToState(
+  Future<bool> Function() hasActiveSeriesMethod,
+) async* {
+  try {
+    bool hasActive = await hasActiveSeriesMethod();
+    yield HasActiveBibleSeries(hasActive);
+  } catch (_) {
+    yield HasActiveBibleSeries(false);
   }
 }

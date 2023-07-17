@@ -6,7 +6,6 @@ import 'package:wpa_app/services/firebase_storage_service.dart';
 import '../../domain/bible_series/entities.dart';
 import '../../domain/bible_series/exceptions.dart';
 import '../common/helpers.dart';
-import 'helpers.dart';
 
 class SeriesContentDto {
   final String id;
@@ -66,20 +65,20 @@ class SeriesContentDto {
 }
 
 extension SeriesContentDtoX on SeriesContentDto {
-  SeriesContent toDomain(FirebaseStorageService firebaseStorageService) {
+  Future<SeriesContent> toDomain(
+      FirebaseStorageService firebaseStorageService) async {
     List<ISeriesContentBody> _body = [];
 
-    this.body.forEach((element) async {
+    for (SeriesContentBodyDto element in this.body) {
       ISeriesContentBody seriesContentBody =
           await element.toDomain(body.indexOf(element), firebaseStorageService);
       _body.add(seriesContentBody);
-    });
-
+    }
     return SeriesContent(
       id: this.id,
       title: this.title,
       subTitle: this.subTitle,
-      contentType: contentTypeMapper(this.contentType),
+      contentType: this.contentType.toUpperCase(),
       date: this.date,
       body: _body,
     );
@@ -95,8 +94,9 @@ class SeriesContentBodyDto {
     Map<String, dynamic> _properties = {};
 
     if (_bodyType == 'audio') {
-      _properties['audioFileGsLocation'] =
-          findOrThrowException(json, 'audio_file_gs_location');
+      _properties['audioFileUrl'] =
+          findOrThrowException(json, 'audio_file_url');
+      _properties['title'] = findOrDefaultTo(json, 'title', '');
     } else if (_bodyType == 'text') {
       _properties['paragraphs'] = findOrThrowException(json, 'paragraphs');
     } else if (_bodyType == 'question') {
@@ -106,6 +106,13 @@ class SeriesContentBodyDto {
       _properties['attribution'] = findOrThrowException(json, 'attribution');
       _properties['scriptures'] = findOrThrowException(json, 'scriptures');
     } else if (_bodyType == 'image_input') {
+    } else if (_bodyType == 'link') {
+      _properties['title'] = findOrDefaultTo(json, 'title', '');
+      _properties['text'] = findOrThrowException(json, 'text');
+      _properties['link'] = findOrThrowException(json, 'link');
+    } else if (_bodyType == 'title') {
+      _properties['text'] = findOrThrowException(json, 'text');
+    } else if (_bodyType == 'divider') {
     } else {
       throw BibleSeriesException(
         message: 'Invalid body_type: $_bodyType',
@@ -135,12 +142,8 @@ extension SeriesContentBodyDtoX on SeriesContentBodyDto {
       int index, FirebaseStorageService firebaseStorageService) async {
     if (this.bodyType == 'audio') {
       AudioBodyProperties bodyProperties = AudioBodyProperties();
-
-      // Convert GS URL to Download URL
-      String audioFileUrl = await firebaseStorageService
-          .getDownloadUrl(this.properties['audioFileGsLocation']);
-
-      bodyProperties.audioFileUrl = audioFileUrl;
+      bodyProperties.audioFileUrl = this.properties['audioFileUrl'];
+      bodyProperties.title = this.properties['title'];
 
       return AudioBody(
         type: SeriesContentBodyType.AUDIO,
@@ -180,6 +183,7 @@ extension SeriesContentBodyDtoX on SeriesContentBodyDto {
             title: element['title'] ?? '',
             book: findOrThrowException(element, 'book'),
             chapter: findOrThrowException(element, 'chapter'),
+            fullChapter: findOrDefaultTo(element, 'full_chapter', false),
             verses: _verses,
           ),
         );
@@ -195,9 +199,12 @@ extension SeriesContentBodyDtoX on SeriesContentBodyDto {
       dynamic questions = this.properties['questions'];
 
       questions.forEach((question) {
-        _questions.add(Question(
+        _questions.add(
+          Question(
             location: [index, questions.indexOf(question)],
-            question: question));
+            question: question,
+          ),
+        );
       });
 
       bodyProperties.questions = _questions;
@@ -208,6 +215,24 @@ extension SeriesContentBodyDtoX on SeriesContentBodyDto {
       );
     } else if (this.bodyType == 'image_input') {
       return ImageInputBody(type: SeriesContentBodyType.IMAGE_INPUT);
+    } else if (this.bodyType == 'link') {
+      LinkBodyProperties properties = LinkBodyProperties();
+      properties.title = this.properties['title'];
+      properties.text = this.properties['text'];
+      properties.link = this.properties['link'];
+      return LinkBody(
+        type: SeriesContentBodyType.LINK,
+        properties: properties,
+      );
+    } else if (this.bodyType == 'title') {
+      TitleBodyProperties properties = TitleBodyProperties();
+      properties.text = this.properties['text'];
+      return TitleBody(
+        type: SeriesContentBodyType.TITLE,
+        properties: properties,
+      );
+    } else if (this.bodyType == 'divider') {
+      return DividerBody();
     }
   }
 }

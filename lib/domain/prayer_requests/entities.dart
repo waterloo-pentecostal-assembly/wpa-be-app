@@ -7,12 +7,14 @@ class PrayerRequest {
   final String request;
   final List<String> prayedBy;
   final List<String> reportedBy;
-  final bool hasPrayed;
+  bool hasPrayed;
   final bool hasReported;
   final bool isMine;
+  final bool isApproved;
   final Timestamp date;
   final bool isAnonymous;
   final UserSnippet userSnippet;
+  final bool isAnswered;
 
   PrayerRequest({
     @required this.id,
@@ -23,34 +25,36 @@ class PrayerRequest {
     @required this.hasPrayed,
     @required this.hasReported,
     @required this.isMine,
+    @required this.isApproved,
     @required this.date,
     @required this.isAnonymous,
     @required this.userSnippet,
+    @required this.isAnswered,
   });
 
   @override
   String toString() {
     return '''id: $id, userId: $userId, request: $request, prayedBy: $prayedBy, reportedBy: $reportedBy, 
               hasPrayed: $hasPrayed, hasReported: $hasReported, date: $date, isAnonymous: $isAnonymous, 
-              userSnippet: $userSnippet''';
+              userSnippet: $userSnippet, isApproved: $isApproved''';
   }
 }
 
 class UserSnippet {
   final String firstName;
   final String lastName;
-  final String profilePhotoUrl;
-  final String profilePhotoGsLocation;
+  final String thumbnailUrl;
+  final String thumbnail;
 
   UserSnippet({
     @required this.firstName,
     @required this.lastName,
-    @required this.profilePhotoUrl,
-    @required this.profilePhotoGsLocation,
+    @required this.thumbnailUrl,
+    @required this.thumbnail,
   });
 
   @override
   String toString() {
-    return '''firstName: $firstName, lastName: $lastName, profilePhotoUrl: $profilePhotoUrl''';
+    return '''firstName: $firstName, lastName: $lastName, thumbnailUrl: $thumbnailUrl''';
   }
 }

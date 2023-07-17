@@ -1,11 +1,13 @@
 import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:wpa_app/application/links/links_bloc.dart';
+import 'package:wpa_app/presentation/common/layout_factory.dart';
+import 'package:wpa_app/presentation/profile/terms_of_use.dart';
 
 import '../../app/constants.dart';
 import '../../app/injection.dart';
@@ -51,6 +53,8 @@ class ProfilePage extends IIndexedPage {
                     return ProfilePageRoot();
                   case '/privacy_policy':
                     return PrivacyPolicyPage();
+                  case '/terms_of_use':
+                    return TermsOfUsePage();
                   default:
                     return ProfilePageRoot();
                 }
@@ -75,9 +79,8 @@ class ProfilePageRoot extends StatelessWidget {
       builder: (BuildContext context, AuthenticationState state) {
         return SafeArea(
           child: Container(
-            // child: TestImagePicker(),
             child: ListView(
-              // crossAxisAlignment: CrossAxisAlignment.start,
+              physics: ClampingScrollPhysics(),
               children: <Widget>[
                 HeaderWidget(),
                 SizedBox(height: 12),
@@ -179,6 +182,26 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
           );
         } else {
           LocalUser localUser = getIt<LocalUser>();
+          String photoUrl = localUser.thumbnailUrl;
+          Widget imageWidget;
+
+          if (state is NewProfilePhotoUploadComplete) {
+            imageWidget = Image.file(
+              state.profilePhoto,
+              fit: BoxFit.cover,
+            );
+          } else {
+            if (photoUrl == null) {
+              imageWidget = Image.asset(kProfilePhotoPlaceholder);
+            } else {
+              imageWidget = FadeInImage.assetNetwork(
+                fit: BoxFit.cover,
+                placeholder: kProfilePhotoPlaceholder,
+                image: photoUrl,
+              );
+            }
+          }
+
           return Column(
             children: [
               ClipOval(
@@ -188,13 +211,7 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
                     Container(
                       height: profilePhotoDiameter,
                       width: profilePhotoDiameter,
-                      child: (localUser.profilePhotoUrl == null)
-                          ? Image.asset(kProfilePhotoPlaceholder)
-                          : FadeInImage.assetNetwork(
-                              fit: BoxFit.cover,
-                              placeholder: kProfilePhotoPlaceholder,
-                              image: localUser.profilePhotoUrl,
-                            ),
+                      child: imageWidget,
                     ),
                     GestureDetector(
                       onTap: selectNewProfileImage,
@@ -222,8 +239,7 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
   }
 
   void selectNewProfileImage() async {
-    PickedFile selected =
-        await imagePicker.getImage(source: ImageSource.gallery);
+    XFile selected = await imagePicker.pickImage(source: ImageSource.gallery);
     if (selected != null && selected.path != null) {
       BlocProvider.of<UserProfileBloc>(context)
         ..add(UploadProfilePhoto(profilePhoto: File(selected.path)));
@@ -325,7 +341,8 @@ class _NotificationSettingsState extends State<NotificationSettings> {
             children: [
               getIt<TextFactory>().lite("Prayers"),
               Container(
-                height: 30,
+                height:
+                    getIt<LayoutFactory>().getDimension(baseDimension: 30.0),
                 child: BlocConsumer<NotificationSettingsBloc,
                     NotificationSettingsState>(
                   listener: (context, NotificationSettingsState state) {
@@ -378,98 +395,216 @@ class _NotificationSettingsState extends State<NotificationSettings> {
 class Other extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 12.0, right: 12.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            child: getIt<TextFactory>().regular('OTHER'),
-          ),
-          Divider(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              getIt<TextFactory>().lite("Privacy Policy"),
-              Icon(
-                Icons.keyboard_arrow_right,
-                color: kDarkGreyColor,
-              )
-            ],
-          ),
-          SizedBox(height: 6),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              getIt<TextFactory>().lite("Terms of Use"),
-              Icon(
-                Icons.keyboard_arrow_right,
-                color: kDarkGreyColor,
-              )
-            ],
-          ),
-          SizedBox(height: 8),
-          GestureDetector(
-            onTap: () async {
-              final Uri _emailLaunchUri = Uri(
-                scheme: 'mailto',
-                path: kWpaContactEmail,
-                queryParameters: {'subject': kHelpEmailSubject},
-              );
-
-              if (await canLaunch(_emailLaunchUri.toString())) {
-                await launch(_emailLaunchUri.toString());
-              } else {
-                ToastMessage.showErrorToast("Error opening page", context);
-              }
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return BlocConsumer<LinksBloc, LinksState>(
+      listener: (context, state) {
+        // TODO: implement listener
+      },
+      builder: (context, state) {
+        if (state is LinksLoaded) {
+          return Padding(
+            padding: const EdgeInsets.only(left: 12.0, right: 12.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                getIt<TextFactory>().lite("Help"),
-                Icon(
-                  Icons.keyboard_arrow_right,
-                  color: kDarkGreyColor,
-                )
+                Container(
+                  child: getIt<TextFactory>().regular('OTHER'),
+                ),
+                Divider(),
+                GestureDetector(
+                  onTap: () async {
+                    String url = state.linkMap['privacy_policy_link'];
+                    if (await canLaunch(url)) {
+                      await launch(url);
+                    } else {
+                      ToastMessage.showErrorToast(
+                          "Error opening page", context);
+                    }
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      getIt<TextFactory>().lite("Privacy Policy"),
+                      Icon(
+                        Icons.keyboard_arrow_right,
+                        color: kDarkGreyColor,
+                        size: getIt<LayoutFactory>()
+                            .getDimension(baseDimension: 24.0),
+                      )
+                    ],
+                  ),
+                ),
+                SizedBox(height: 6),
+                GestureDetector(
+                  onTap: () async {
+                    String url = state.linkMap['terms_of_use_link'];
+                    if (await canLaunch(url)) {
+                      await launch(url);
+                    } else {
+                      ToastMessage.showErrorToast(
+                          "Error opening page", context);
+                    }
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      getIt<TextFactory>().lite("Terms of Use"),
+                      Icon(
+                        Icons.keyboard_arrow_right,
+                        color: kDarkGreyColor,
+                        size: getIt<LayoutFactory>()
+                            .getDimension(baseDimension: 24.0),
+                      )
+                    ],
+                  ),
+                ),
+                SizedBox(height: 8),
+                GestureDetector(
+                  onTap: () async {
+                    final Uri _emailLaunchUri = Uri(
+                      scheme: 'mailto',
+                      path: state.linkMap['help_email'],
+                      queryParameters: {'subject': kHelpEmailSubject},
+                    );
+
+                    if (await canLaunch(_emailLaunchUri.toString())) {
+                      await launch(_emailLaunchUri.toString());
+                    } else {
+                      ToastMessage.showErrorToast(
+                          "Error opening page", context);
+                    }
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      getIt<TextFactory>().lite("Help"),
+                      Icon(
+                        Icons.keyboard_arrow_right,
+                        color: kDarkGreyColor,
+                        size: getIt<LayoutFactory>()
+                            .getDimension(baseDimension: 24.0),
+                      )
+                    ],
+                  ),
+                ),
+                SizedBox(height: 8),
+                GestureDetector(
+                  onTap: () async {
+                    final Uri _emailLaunchUri = Uri(
+                      scheme: 'mailto',
+                      path: state.linkMap['report_email'],
+                      queryParameters: {'subject': kReportEmailSubject},
+                    );
+
+                    if (await canLaunch(_emailLaunchUri.toString())) {
+                      await launch(_emailLaunchUri.toString());
+                    } else {
+                      ToastMessage.showErrorToast(
+                          "Error opening page", context);
+                    }
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      getIt<TextFactory>().lite("Report a Problem"),
+                      Icon(
+                        Icons.keyboard_arrow_right,
+                        color: kDarkGreyColor,
+                        size: getIt<LayoutFactory>()
+                            .getDimension(baseDimension: 24.0),
+                      )
+                    ],
+                  ),
+                ),
+                SizedBox(height: 8),
+                GestureDetector(
+                  onTap: () {
+                    return showDialog(
+                      context: context,
+                      builder: (_) => AlertDialog(
+                        buttonPadding:
+                            const EdgeInsets.fromLTRB(10, 20, 20, 20),
+                        shape: RoundedRectangleBorder(
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(16))),
+                        title: getIt<TextFactory>()
+                            .subHeading2("Delete my Account"),
+                        content: getIt<TextFactory>().lite(
+                          "This account will be permanently disabled and all data associated with this account will be deleted. Would you like to proceed?",
+                        ),
+                        actions: [
+                          ClipRRect(
+                            borderRadius: BorderRadius.all(Radius.circular(16)),
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                  minimumSize: Size(90, 30),
+                                  backgroundColor:
+                                      kDarkGreyColor.withOpacity(0.5),
+                                  primary: Colors.white,
+                                  padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap),
+                              onPressed: () {
+                                Navigator.of(context, rootNavigator: true)
+                                    .pop();
+                              },
+                              child: getIt<TextFactory>().regularButton('No'),
+                            ),
+                          ),
+                          ClipRRect(
+                            borderRadius: BorderRadius.all(Radius.circular(16)),
+                            child: TextButton(
+                              style: TextButton.styleFrom(
+                                  minimumSize: Size(90, 30),
+                                  backgroundColor: kWpaBlue.withOpacity(0.8),
+                                  primary: Colors.white,
+                                  padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
+                                  tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap),
+                              onPressed: () {
+                                BlocProvider.of<AuthenticationBloc>(context)
+                                    .add(InitiateDelete());
+                                Navigator.of(context, rootNavigator: true)
+                                    .pop();
+                              },
+                              child: getIt<TextFactory>().regularButton('Yes'),
+                            ),
+                          )
+                        ],
+                      ),
+                    );
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      getIt<TextFactory>().lite("Delete my Account"),
+                      Icon(
+                        Icons.delete,
+                        color: kDarkGreyColor,
+                        size: getIt<LayoutFactory>()
+                            .getDimension(baseDimension: 24.0),
+                      )
+                    ],
+                  ),
+                ),
+                SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    getIt<TextFactory>().lite("Version 1.0.1"),
+                  ],
+                ),
+                Divider(),
               ],
             ),
-          ),
-          SizedBox(height: 8),
-          GestureDetector(
-            onTap: () async {
-              final Uri _emailLaunchUri = Uri(
-                scheme: 'mailto',
-                path: kWpaContactEmail,
-                queryParameters: {'subject': kReportEmailSubject},
-              );
-
-              if (await canLaunch(_emailLaunchUri.toString())) {
-                await launch(_emailLaunchUri.toString());
-              } else {
-                ToastMessage.showErrorToast("Error opening page", context);
-              }
-            },
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                getIt<TextFactory>().lite("Report a Problem"),
-                Icon(
-                  Icons.keyboard_arrow_right,
-                  color: kDarkGreyColor,
-                )
-              ],
-            ),
-          ),
-          SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              getIt<TextFactory>().lite("Version 0.0.1"),
-            ],
-          ),
-          Divider(),
-        ],
-      ),
+          );
+        } else if (state is LinksError) {
+          return Container(
+            child: Text(state.message),
+          );
+        } else {
+          return Container();
+        }
+      },
     );
   }
 }
@@ -491,7 +626,7 @@ class _TestImagePickerState extends State<TestImagePicker> {
   final picker = ImagePicker();
 
   Future getImage() async {
-    final pickedFile = await picker.getImage(source: ImageSource.gallery);
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     setState(() {
       if (pickedFile != null) {
@@ -510,7 +645,7 @@ class _TestImagePickerState extends State<TestImagePicker> {
           child:
               _image == null ? Text('No image selected.') : Image.file(_image),
         ),
-        FlatButton(
+        TextButton(
           onPressed: getImage,
           child: Icon(Icons.add_a_photo),
         ),

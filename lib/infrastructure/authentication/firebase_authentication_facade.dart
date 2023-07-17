@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
-import '../../app/constants.dart';
 import '../../domain/authentication/entities.dart';
 import '../../domain/authentication/exceptions.dart';
 import '../../domain/authentication/interfaces.dart';
@@ -37,12 +36,6 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
         code: AuthenticationExceptionCode.NOT_AUTHENTICATED,
         message: 'User not authenticated',
       );
-    } else if (!user.emailVerified) {
-      throw AuthenticationException(
-        code: AuthenticationExceptionCode.EMAIL_NOT_VERIFIED,
-        message:
-            '''Email not verified. If 24 hours has passed since you signed up, please contact us at $kWpaContactEmail''',
-      );
     }
 
     DocumentSnapshot userInfo;
@@ -57,9 +50,24 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
         message: 'User details not found',
       );
     }
-
     LocalUser domainUser = await FirebaseUserDto.fromFirestore(userInfo)
         .toDomain(_firebaseStorageService);
+
+    if (!domainUser.isVerified) {
+      throw AuthenticationException(
+        code: AuthenticationExceptionCode.USER_NOT_VERIFIED,
+        message: 'User not verified',
+      );
+    } else {
+      if (!user.emailVerified) {
+        await user.sendEmailVerification();
+        throw AuthenticationException(
+          code: AuthenticationExceptionCode.USER_NOT_VERIFIED,
+          message:
+              'Email not verified. See verification email sent to ${domainUser.email}',
+        );
+      }
+    }
     return domainUser;
   }
 
@@ -110,6 +118,8 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
         'last_name': lastName.value,
         'email': emailAddress.value,
         'reports': 0,
+        'is_verified': false,
+        'is_admin': false,
       });
 
       // Add default notification settings
@@ -173,7 +183,19 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
   }
 
   @override
-  Future<void> signOut() {
+  Future<void> signOut() async {
+    try {
+      String uid = _firebaseAuth.currentUser.uid;
+      String token = await _firebaseMessagingService.getToken();
+      await _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('devices')
+          .doc(token)
+          .delete();
+    } catch (e) {
+      _firebaseFirestoreService.handleException(e);
+    }
     return _firebaseAuth.signOut();
   }
 
@@ -291,5 +313,19 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
     }
 
     return false;
+  }
+
+  @override
+  Future<void> initiateDelete(userId) async {
+    try {
+      await _firestore.collection("account_deletion_requests").doc().set({
+        "account_disabled": false,
+        "user_data_deleted": false,
+        "user_id": userId,
+        "request_date": Timestamp.now(),
+      });
+    } catch (e) {
+      _firebaseFirestoreService.handleException(e);
+    }
   }
 }

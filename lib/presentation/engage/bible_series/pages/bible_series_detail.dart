@@ -1,11 +1,16 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/application/audio_player/audio_player_bloc.dart';
+import 'package:wpa_app/presentation/common/layout_factory.dart';
+import 'package:wpa_app/presentation/engage/bible_series/widgets/audio_body.dart';
 
+import '../../../../app/constants.dart';
+import '../../../../app/injection.dart';
 import '../../../../application/bible_series/bible_series_bloc.dart';
 import '../../../../domain/bible_series/entities.dart';
-import '../../../../app/injection.dart';
-import '../../../common/loader.dart';
 import '../../../common/text_factory.dart';
 
 class BibleSeriesDetailPage extends StatelessWidget {
@@ -37,8 +42,9 @@ class BibleSeriesWidget extends StatefulWidget {
 
 class _BibleSeriesState extends State<BibleSeriesWidget>
     with TickerProviderStateMixin {
-  TabController _tabController;
   int tabLength;
+  TabController _tabController;
+  BibleSeries bibleSeries;
 
   @override
   void initState() {
@@ -48,18 +54,23 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<BibleSeriesBloc, BibleSeriesState>(
-      listener: (context, state) {},
-      builder: (BuildContext context, BibleSeriesState state) {
+      listener: (context, state) {
         if (state is BibleSeriesDetail) {
-          List<SeriesContentSnippet> snippet =
-              state.bibleSeriesDetail.seriesContentSnippet;
-
-          tabLength = state.bibleSeriesDetail.seriesContentSnippet.length;
-          _tabController = new TabController(
+          bibleSeries = state.bibleSeriesDetail;
+          tabLength = bibleSeries.seriesContentSnippet.length;
+          if (_tabController == null) {
+            _tabController = new TabController(
               length: tabLength,
               vsync: this,
-              initialIndex: _getInitialIndex(snippet));
-
+              initialIndex: _getInitialIndex(bibleSeries.seriesContentSnippet),
+            );
+          }
+        } else if (state is UpdatedBibleSeries) {
+          bibleSeries = state.bibleSeriesDetail;
+        }
+      },
+      builder: (BuildContext context, BibleSeriesState state) {
+        if (state is BibleSeriesDetail || state is UpdatedBibleSeries) {
           return Scaffold(
             body: Column(
               children: [
@@ -84,24 +95,27 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                             bottomRight: Radius.circular(30.0),
                           ),
                           child: Image.network(
-                            state.bibleSeriesDetail.imageUrl,
+                            bibleSeries.imageUrl,
                             fit: BoxFit.cover,
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 10.0,
-                          vertical: 40.0,
-                        ),
-                        child: Row(
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.arrow_back),
-                              onPressed: () => Navigator.pop(context),
-                              color: Colors.white,
-                            )
-                          ],
+                      SafeArea(
+                        child: Padding(
+                          padding: const EdgeInsets.all(kHeadingPadding),
+                          child: Row(
+                            children: [
+                              IconButton(
+                                icon: Icon(
+                                  Icons.arrow_back,
+                                  size: getIt<LayoutFactory>()
+                                      .getDimension(baseDimension: 24.0),
+                                ),
+                                onPressed: () => Navigator.pop(context),
+                                color: Colors.white,
+                              )
+                            ],
+                          ),
                         ),
                       ),
                     ],
@@ -115,23 +129,23 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                     isScrollable: true,
                     indicator: BoxDecoration(),
                     indicatorSize: TabBarIndicatorSize.label,
-                    unselectedLabelColor: Colors.black54,
+                    unselectedLabelColor: Colors.black45,
                     labelColor: Colors.black87,
-                    tabs: _buildContentTabs(
-                        state.bibleSeriesDetail.seriesContentSnippet),
+                    tabs: _buildContentTabs(bibleSeries.seriesContentSnippet),
                   ),
                 ),
                 Expanded(
-                  child: Container(
-                    padding: EdgeInsets.all(0),
-                    child: TabBarView(
-                      controller: _tabController,
-                      children: _buildContentChildren(
-                        context,
-                        state.bibleSeriesDetail.seriesContentSnippet,
-                        state.bibleSeriesDetail.id,
-                      ),
-                    ),
+                  child: BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
+                    builder: (context, state) {
+                      return Container(
+                        padding: EdgeInsets.all(0),
+                        child: TabBarView(
+                          controller: _tabController,
+                          children: _buildContentChildren(
+                              context, bibleSeries, state),
+                        ),
+                      );
+                    },
                   ),
                 )
               ],
@@ -139,10 +153,99 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
           );
         } else if (state is BibleSeriesError) {
           return Scaffold(
-              body: SafeArea(child: Text('Error: ${state.message}')));
+            body: SafeArea(
+              child: Text('Error: ${state.message}'),
+            ),
+          );
         }
-        return Loader();
+        return SeriesDetailPlaceholder();
       },
+    );
+  }
+}
+
+class SeriesDetailPlaceholder extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    int amtOfCards = (MediaQuery.of(context).size.width / 70).ceil();
+    return Scaffold(
+      body: Column(
+        children: [
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(30.0),
+                  bottomRight: Radius.circular(30.0),
+                ),
+                child: Container(
+                  height: 0.35 * MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  color: Colors.grey.shade200,
+                ),
+              ),
+              SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(kHeadingPadding),
+                  child: Row(
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          Icons.arrow_back,
+                          size: getIt<LayoutFactory>()
+                              .getDimension(baseDimension: 24.0),
+                        ),
+                        onPressed: () => Navigator.pop(context),
+                        color: Colors.white,
+                      )
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+          Container(
+            height: getIt<LayoutFactory>().getDimension(baseDimension: 148.0),
+            padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
+            child: ListView.builder(
+              padding: EdgeInsets.only(left: 16),
+              scrollDirection: Axis.horizontal,
+              itemCount: amtOfCards,
+              itemBuilder: (context, index) => Container(
+                width: getIt<LayoutFactory>().getDimension(
+                    layoutDimension: LayoutDimension.CONTENT_TAB_WIDTH),
+                margin: EdgeInsets.all(8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(10.0),
+                      child: Container(
+                        height: getIt<LayoutFactory>().getDimension(
+                            layoutDimension:
+                                LayoutDimension.CONTENT_TAB_HEIGHT),
+                        color: Colors.grey.shade200,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          Container(
+            margin: EdgeInsets.only(top: 0, bottom: 15),
+            height: getIt<LayoutFactory>().getDimension(baseDimension: 60.0),
+            child: Container(
+              width: 0.9 * MediaQuery.of(context).size.width,
+              padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                color: Colors.grey.shade200,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -153,8 +256,10 @@ List<Widget> _buildContentTabs(
   seriesContentSnippets.forEach((element) {
     tabs.add(
       Container(
-        height: 108,
-        width: 70,
+        height: getIt<LayoutFactory>()
+            .getDimension(layoutDimension: LayoutDimension.CONTENT_TAB_HEIGHT),
+        width: getIt<LayoutFactory>()
+            .getDimension(layoutDimension: LayoutDimension.CONTENT_TAB_WIDTH),
         child: Tab(
           child: Container(
             padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
@@ -179,7 +284,7 @@ List<Widget> _buildContentTabs(
                   SizedBox(height: 3),
                   getIt<TextFactory>().heading('${_getDate(element.date)}'),
                   SizedBox(height: 3),
-                  _getStatusIndicator(element.isCompleted, element.isDraft)
+                  _getStatusIndicator(element.isCompleted, element.isDraft, 1)
                 ],
               ),
             ),
@@ -193,27 +298,32 @@ List<Widget> _buildContentTabs(
 
 List<Widget> _buildContentChildren(
   BuildContext context,
-  List<SeriesContentSnippet> seriesContentSnippets,
-  String bibleSeriesId,
+  BibleSeries bibleSeries,
+  AudioPlayerState state,
 ) {
   List<Widget> contentChildren = [];
-  seriesContentSnippets.forEach((_element) {
+
+  bibleSeries.seriesContentSnippet.asMap().forEach((i, _element) {
     List<Widget> listChildren = [];
 
-    _element.availableContentTypes.forEach((element) {
+    _element.availableContentTypes.asMap().forEach((j, element) {
       listChildren.add(
         Container(
           margin: EdgeInsets.only(top: 0, bottom: 15),
-          height: 60,
+          height: getIt<LayoutFactory>()
+              .getDimension(baseDimension: kContentChildrenHeight),
           child: Tab(
             child: GestureDetector(
               onTap: () {
+                BlocProvider.of<BibleSeriesBloc>(context)
+                  ..add(RestoreState(bibleSeries));
                 Navigator.pushNamed(context, '/content_detail', arguments: {
-                  'bibleSeriesId': bibleSeriesId,
+                  'bibleSeriesId': bibleSeries.id,
                   'seriesContentId': element.contentId,
                   'getCompletionDetails':
                       element.isCompleted || element.isDraft,
-                });
+                  'seriesContentType': element.seriesContentType,
+                }).then((value) => {onGoBack(context, i, j, bibleSeries)});
               },
               child: Container(
                 width: 0.9 * MediaQuery.of(context).size.width,
@@ -232,12 +342,22 @@ List<Widget> _buildContentChildren(
                 child: Align(
                   alignment: Alignment.center,
                   child: Row(
-                    children: [
-                      getIt<TextFactory>().subHeading(
-                          element.seriesContentType.toString().split('.')[1]),
-                      _getStatusIndicator(element.isCompleted, element.isDraft)
-                    ],
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      getIt<TextFactory>()
+                          .subHeading(element.seriesContentType),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          _getPlayingIndicator(state, element.contentId),
+                          _getStatusIndicator(
+                            element.isCompleted,
+                            element.isDraft,
+                            getIt<LayoutFactory>().conversionVal,
+                          )
+                        ],
+                      )
+                    ],
                   ),
                 ),
               ),
@@ -255,6 +375,16 @@ List<Widget> _buildContentChildren(
     );
   });
   return contentChildren;
+}
+
+Widget _getPlayingIndicator(AudioPlayerState state, String contentId) {
+  if (state.contentId == contentId &&
+      state.playerState == PlayerStateEnum.PLAYING) {
+    return Icon(
+      Icons.play_arrow_outlined,
+    );
+  }
+  return Text("");
 }
 
 String _getMonth(Timestamp date) {
@@ -277,48 +407,54 @@ String _getMonth(Timestamp date) {
 }
 
 String _getDate(Timestamp date) {
-  return date.toDate().toString().substring(8, 10);
+  return date.toDate().toLocal().toString().substring(8, 10);
 }
 
 Text _getTodayIndicator(Timestamp date) {
-  String today = DateTime.now().toString().substring(0, 10);
-  String d = date.toDate().toString().substring(0, 10);
+  String today = DateTime.now().toLocal().toString().substring(0, 10);
+  String d = date.toDate().toLocal().toString().substring(0, 10);
   if (today == d) {
     return Text('•');
   }
   return Text('');
 }
 
-Widget _getStatusIndicator(bool isCompleted, bool isDraft) {
+Widget _getStatusIndicator(bool isCompleted, bool isDraft, double conversion) {
   if (isCompleted) {
-    return Icon(Icons.done, size: 15);
+    return Icon(Icons.done, size: 15 * conversion);
   } else if (isDraft) {
-    return Icon(Icons.edit, size: 15);
+    return Icon(Icons.edit, size: 15 * conversion);
   }
   return Text('');
 }
 
 Color _getStatusColor(bool isCompleted, bool isDraft, Timestamp date) {
+  String today = DateTime.now().toLocal().toString().substring(0, 10);
+  String d = date.toDate().toLocal().toString().substring(0, 10);
   if (isCompleted) {
     return Colors.green.withOpacity(0.25);
-  } else if (isDraft) {
+  } else if (isDraft || today == d) {
     return Colors.grey.shade100;
-  } else if (date
-          .toDate()
-          .isBefore(DateTime.now().subtract(Duration(days: 1))) &&
-      !isCompleted) {
+  } else if (date.toDate().toLocal().isBefore(DateTime.now().toLocal())) {
     return Colors.amber.withOpacity(0.25);
   }
   return Colors.grey.shade100;
 }
 
 int _getInitialIndex(List<SeriesContentSnippet> snippet) {
-  String today = DateTime.now().toString().substring(0, 10);
+  String today = DateTime.now().toLocal().toString().substring(0, 10);
   for (SeriesContentSnippet element in snippet) {
-    String date = element.date.toDate().toString().substring(0, 10);
+    String date = element.date.toDate().toLocal().toString().substring(0, 10);
     if (today == date) {
       return snippet.indexOf(element);
     }
   }
   return 0;
+}
+
+FutureOr onGoBack(
+    BuildContext context, int scsNum, int actNum, BibleSeries bibleSeries) {
+  BlocProvider.of<BibleSeriesBloc>(context)
+    ..add(UpdateCompletionDetail(
+        bibleSeries: bibleSeries, actNum: actNum, scsNum: scsNum));
 }

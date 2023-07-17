@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/app/injection.dart';
+import 'package:wpa_app/presentation/common/text_factory.dart';
 
 import '../../../app/constants.dart';
 import '../../../application/authentication/sign_in/sign_in_bloc.dart';
@@ -16,7 +18,7 @@ class SignInForm extends StatelessWidget {
           BlocProvider.of<NavigationBarBloc>(context)
             ..add(
               NavigationBarEvent(
-                tab: NavigationTabEnum.HOME,
+                tab: NavigationTabEnum.ENGAGE,
               ),
             );
           Navigator.pushNamed(context, '/index');
@@ -94,6 +96,8 @@ class SignInForm extends StatelessWidget {
                                         ),
                                       ),
                                       child: TextFormField(
+                                        style: getIt<TextFactory>()
+                                            .liteTextStyle(fontSize: 16),
                                         validator: (_) {
                                           String emailAddressError =
                                               BlocProvider.of<SignInBloc>(
@@ -112,15 +116,16 @@ class SignInForm extends StatelessWidget {
                                         decoration: InputDecoration(
                                           border: InputBorder.none,
                                           hintText: "Email Address",
-                                          hintStyle: TextStyle(
-                                            color: Colors.grey[400],
-                                          ),
+                                          hintStyle: getIt<TextFactory>()
+                                              .hintStyle(fontSize: 16),
                                         ),
                                       ),
                                     ),
                                     Container(
                                       padding: EdgeInsets.all(4.0),
                                       child: TextFormField(
+                                        style: getIt<TextFactory>()
+                                            .liteTextStyle(fontSize: 16),
                                         validator: (_) {
                                           String passwordError =
                                               BlocProvider.of<SignInBloc>(
@@ -141,9 +146,8 @@ class SignInForm extends StatelessWidget {
                                         decoration: InputDecoration(
                                           border: InputBorder.none,
                                           hintText: "Password",
-                                          hintStyle: TextStyle(
-                                            color: Colors.grey[400],
-                                          ),
+                                          hintStyle: getIt<TextFactory>()
+                                              .hintStyle(fontSize: 16),
                                         ),
                                       ),
                                     ),
@@ -156,12 +160,8 @@ class SignInForm extends StatelessWidget {
                               Align(
                                 alignment: Alignment.topRight,
                                 child: GestureDetector(
-                                  child: Text(
-                                    "Forgot Password?",
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
+                                  child: getIt<TextFactory>()
+                                      .lite2('Forgot Password?'),
                                   onTap: () {
                                     Navigator.pushNamed(
                                         context, '/password_reset');
@@ -184,8 +184,16 @@ class SignInForm extends StatelessWidget {
                                       ],
                                     ),
                                   ),
-                                  child: FlatButton(
-                                    disabledColor: Colors.grey[400],
+                                  child: TextButton(
+                                    style: ButtonStyle(backgroundColor:
+                                        MaterialStateProperty.resolveWith<
+                                            Color>((states) {
+                                      if (states
+                                          .contains(MaterialState.disabled)) {
+                                        return Colors.grey[400];
+                                      }
+                                      return null;
+                                    })),
                                     onPressed: state.submitting ||
                                             !state.isSignInFormValid
                                         ? null
@@ -195,11 +203,8 @@ class SignInForm extends StatelessWidget {
                                               SignInWithEmailAndPassword(),
                                             ),
                                     child: Center(
-                                      child: Text(
-                                        "LOGIN",
-                                        style: TextStyle(
-                                            color: Colors.white, fontSize: 16),
-                                      ),
+                                      child: getIt<TextFactory>()
+                                          .authenticationButton('LOGIN'),
                                     ),
                                   ),
                                 ),
@@ -210,22 +215,14 @@ class SignInForm extends StatelessWidget {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
-                                  Text(
-                                    'Don\'t have an account?',
-                                    style: TextStyle(
-                                      color: Colors.grey[600],
-                                    ),
-                                  ),
+                                  getIt<TextFactory>()
+                                      .lite2('Don\'t have an account?'),
                                   SizedBox(
                                     width: 3,
                                   ),
                                   GestureDetector(
-                                    child: Text(
-                                      'Sign Up',
-                                      style: TextStyle(
-                                        color: kWpaBlue,
-                                      ),
-                                    ),
+                                    child: getIt<TextFactory>()
+                                        .linkLite('Sign Up'),
                                     onTap: () {
                                       Navigator.pushNamed(context, '/sign_up');
                                     },

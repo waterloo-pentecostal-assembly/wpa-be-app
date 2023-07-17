@@ -32,21 +32,24 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
   ) async* {
     try {
       final LocalUser user = getIt<LocalUser>();
-
       UploadTask uploadTask =
           userProfileRepository.uploadProfilePhoto(event.profilePhoto, user.id);
       yield NewProfilePhotoUploadStarted(uploadTask: uploadTask);
 
       TaskSnapshot data = await uploadTask;
 
-      // build ptofile_photo_gs_location
-      final String profilePhotoGsLocation =
+      // build thumbnail
+      final String profilePhoto =
           'gs://${data.ref.bucket}/${data.ref.fullPath}';
+      final String thumbnail = 'gs://${data.ref.bucket}/${data.ref.fullPath}'
+          .replaceAll('profile_photo', 'profile_photo/thumbs')
+          .replaceAll('image', 'image_200x200');
 
       // Update user collection
       await userProfileRepository.updateUserCollection(
         {
-          "profile_photo_gs_location": profilePhotoGsLocation,
+          "thumbnail": thumbnail,
+          "profile_photo": profilePhoto,
         },
         user.id,
       );
@@ -55,14 +58,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
       await userProfileRepository.updateLocalUser();
 
       // yield complete
-      yield NewProfilePhotoUploadComplete();
-
-      // delete old profile photo if it exists
-      if (user.profilePhotoGsLocation != null) {
-        // fire and forget
-        userProfileRepository.deleteOldProfilePhoto(
-            user.profilePhotoGsLocation, user.id);
-      }
+      yield NewProfilePhotoUploadComplete(profilePhoto: event.profilePhoto);
     } catch (e) {
       yield UploadProfilePhotoError(message: "Error uploading photo");
     }

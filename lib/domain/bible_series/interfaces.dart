@@ -7,6 +7,8 @@ abstract class IBibleSeriesRepository {
     @required String bibleSeriesId,
   });
 
+  Future<bool> hasActiveBibleSeries();
+
   Future<SeriesContent> getContentDetails({
     @required String bibleSeriesId,
     @required String seriesContentId,
