@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:wpa_app/domain/achievements/entities.dart';
@@ -14,11 +16,12 @@ class AchievementsDto {
   }
 
   factory AchievementsDto.fromFirestore(DocumentSnapshot doc) {
-    return AchievementsDto.fromJson(doc.data());
+    Map<String, dynamic> data = (doc.data() ?? {}) as Map<String, dynamic>;
+    return AchievementsDto.fromJson(data);
   }
 
   const AchievementsDto._({
-    @required this.seriesProgress,
+    required this.seriesProgress,
   });
 }
 
@@ -27,5 +30,11 @@ extension AchievementsDtoX on AchievementsDto {
     return Achievements(
       seriesProgress: this.seriesProgress,
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'series_progress': this.seriesProgress,
+    };
   }
 }

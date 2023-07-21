@@ -5,12 +5,11 @@ import '../../domain/achievements/interfaces.dart';
 import '../../domain/authentication/entities.dart';
 import '../../app/injection.dart';
 import '../../services/firebase_firestore_service.dart';
-import 'achievements_dto.dart';
 
 class AchievementsRepository implements IAchievementsRepository {
   final FirebaseFirestore _firestore;
   final FirebaseFirestoreService _firebaseFirestoreService;
-  CollectionReference _achievementsCollection;
+  late CollectionReference _achievementsCollection;
 
   AchievementsRepository(this._firestore, this._firebaseFirestoreService) {
     _achievementsCollection = _firestore.collection("achievements");
@@ -18,19 +17,20 @@ class AchievementsRepository implements IAchievementsRepository {
 
   @override
   Future<Achievements> getAchievements() async {
-    DocumentSnapshot documentSnapshot;
+    late DocumentSnapshot<Achievements> documentSnapshot;
     final LocalUser user = getIt<LocalUser>();
     try {
-      documentSnapshot = await _achievementsCollection.doc(user.id).get();
-    } catch (e) {
+      documentSnapshot = await _achievementsCollection
+          .doc(user.id)
+          .withConverter<Achievements>(
+              fromFirestore: (snapshots, _) =>
+                  Achievements.fromJson(snapshots.data()!),
+              toFirestore: (model, _) => model.toJson())
+          .get();
+    } on Exception catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
-
-    if (!documentSnapshot.exists) {
-      return Achievements(seriesProgress: 0);
-    }
-
-    return AchievementsDto.fromFirestore(documentSnapshot).toDomain();
+    return documentSnapshot.data() ?? Achievements(seriesProgress: 0);
   }
 
   @override
@@ -39,14 +39,15 @@ class AchievementsRepository implements IAchievementsRepository {
     try {
       yield* _achievementsCollection
           .doc(user.id)
+          .withConverter<Achievements>(
+              fromFirestore: (snapshots, _) =>
+                  Achievements.fromJson(snapshots.data()!),
+              toFirestore: (model, _) => model.toJson())
           .snapshots()
           .map((documentSnapshot) {
-        if (documentSnapshot.data() == null) {
-          return Achievements(seriesProgress: 0);
-        }
-        return AchievementsDto.fromFirestore(documentSnapshot).toDomain();
-      });
-    } catch (e) {
+            return documentSnapshot.data() ?? Achievements(seriesProgress: 0);
+          });
+    } on Exception catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
   }

@@ -31,25 +31,25 @@ class FirebaseUserDto {
     );
   }
 
-  factory FirebaseUserDto.fromFirestore(DocumentSnapshot doc) {
-    return FirebaseUserDto.fromJson(doc.data()).copyWith(id: doc.id);
+  factory FirebaseUserDto.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
+    return FirebaseUserDto.fromJson(doc.data()!).copyWith(id: doc.id);
   }
 
   FirebaseUserDto copyWith({
-    String id,
-    String firstName,
-    String lastName,
-    String email,
-    int reports,
-    String thumbnailUrl,
-    String thumbnail,
-    String profilePhotoUrl,
-    String profilePhoto,
-    bool isVerified,
-    bool isAdmin,
+    required String id,
+    String? firstName,
+    String? lastName,
+    String? email,
+    int? reports,
+    String? thumbnailUrl,
+    String? thumbnail,
+    String? profilePhotoUrl,
+    String? profilePhoto,
+    bool? isVerified,
+    bool? isAdmin,
   }) {
     return FirebaseUserDto._(
-      id: id ?? this.id,
+      id: id,
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
       email: email ?? this.email,
@@ -65,16 +65,16 @@ class FirebaseUserDto {
 
   const FirebaseUserDto._({
     this.id,
-    @required this.firstName,
-    @required this.lastName,
-    @required this.email,
-    @required this.reports,
+    required this.firstName,
+    required this.lastName,
+    required this.email,
+    required this.reports,
     this.thumbnailUrl,
-    @required this.thumbnail,
+    required this.thumbnail,
     this.profilePhotoUrl,
-    @required this.profilePhoto,
-    @required this.isVerified,
-    @required this.isAdmin,
+    required this.profilePhoto,
+    required this.isVerified,
+    required this.isAdmin,
   });
 }
 
