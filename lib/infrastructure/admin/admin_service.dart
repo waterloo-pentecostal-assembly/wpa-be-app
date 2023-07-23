@@ -23,10 +23,6 @@ class AdminService implements IAdminService {
       querySnapshot = await _firestore
           .collection('users')
           .where("is_verified", isEqualTo: false)
-          .withConverter<FirebaseUserDto>(
-              fromFirestore: (snapshots, _) =>
-                  Achievements.fromJson(snapshots.data()!),
-              toFirestore: (model, _) => model.toJson()))
           .get();
     } on Exception catch (e) {
       _firebaseFirestoreService.handleException(e);
@@ -41,7 +37,7 @@ class AdminService implements IAdminService {
   }
 
   @override
-  Future<void> verifyUser({String userId}) async {
+  Future<void> verifyUser({required String userId}) async {
     try {
       await _firestore.runTransaction((transaction) async {
         DocumentReference documentReference = _firestore.collection("users").doc(userId);
@@ -53,7 +49,7 @@ class AdminService implements IAdminService {
   }
 
   @override
-  Future<void> approvePrayerRequest({String prayerRequestId}) async {
+  Future<void> approvePrayerRequest({required String prayerRequestId}) async {
     try {
       await _firestore.runTransaction((transaction) async {
         DocumentReference documentReference = _firestore.collection("prayer_requests").doc(prayerRequestId);
@@ -67,8 +63,7 @@ class AdminService implements IAdminService {
   @override
   Future<List<PrayerRequest>> getUnapprovedPrayerRequest() async {
     final LocalUser user = getIt<LocalUser>();
-
-    QuerySnapshot querySnapshot;
+    late QuerySnapshot<Map<String, dynamic>> querySnapshot;
     List<PrayerRequest> prayerRequests = [];
     try {
       querySnapshot = await _firestore.collection("prayer_requests").where("is_approved", isEqualTo: false).get();
@@ -76,7 +71,7 @@ class AdminService implements IAdminService {
       _firebaseFirestoreService.handleException(e);
     }
 
-    for (QueryDocumentSnapshot doc in querySnapshot.docs) {
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in querySnapshot.docs) {
       PrayerRequest prayerRequest =
           await PrayerRequestsDto.fromFirestore(doc, user.id).toDomain(_firebaseStorageService);
       prayerRequests.add(prayerRequest);
@@ -95,7 +90,7 @@ class AdminService implements IAdminService {
   }
 
   @override
-  Future<void> deleteUnverifiedUsers({String userId}) async {
+  Future<void> deleteUnverifiedUsers({required String userId}) async {
     try {
       await _firestore.collection('users').doc(userId).delete();
     } on Exception catch (e) {

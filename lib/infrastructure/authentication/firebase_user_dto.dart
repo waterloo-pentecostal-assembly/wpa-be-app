@@ -11,28 +11,26 @@ class FirebaseUserDto {
   final String lastName;
   final String email;
   final int reports;
-  final String thumbnailUrl;
+  final String? thumbnailUrl;
   final String thumbnail;
-  final String profilePhotoUrl;
+  final String? profilePhotoUrl;
   final String profilePhoto;
   final bool isVerified;
   final bool isAdmin;
 
-  factory FirebaseUserDto.fromJson(Map<String, dynamic> json) {
-    return FirebaseUserDto._(
-      firstName: findOrThrowException(json, 'first_name'),
-      lastName: findOrThrowException(json, 'last_name'),
-      email: findOrThrowException(json, 'email'),
-      reports: findOrThrowException(json, 'reports'),
-      thumbnail: json['thumbnail'],
-      profilePhoto: json['profile_photo'],
-      isVerified: findOrDefaultTo(json, 'is_verified', false),
-      isAdmin: findOrDefaultTo(json, 'is_admin', false),
-    );
-  }
-
   factory FirebaseUserDto.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
-    return FirebaseUserDto.fromJson(doc.data()!).copyWith(id: doc.id);
+    Map<String, dynamic> data = doc.data()!;
+    return FirebaseUserDto._(
+      firstName: findOrThrowException(data, 'first_name'),
+      lastName: findOrThrowException(data, 'last_name'),
+      email: findOrThrowException(data, 'email'),
+      reports: findOrThrowException(data, 'reports'),
+      thumbnail: data['thumbnail'],
+      profilePhoto: data['profile_photo'],
+      isVerified: findOrDefaultTo(data, 'is_verified', false),
+      isAdmin: findOrDefaultTo(data, 'is_admin', false), 
+      id: doc.id,
+    );
   }
 
   FirebaseUserDto copyWith({
@@ -64,7 +62,7 @@ class FirebaseUserDto {
   }
 
   const FirebaseUserDto._({
-    this.id,
+    required this.id,
     required this.firstName,
     required this.lastName,
     required this.email,
@@ -79,18 +77,15 @@ class FirebaseUserDto {
 }
 
 extension FirebaseUserDtoX on FirebaseUserDto {
-  Future<LocalUser> toDomain(
-      FirebaseStorageService firebaseStorageService) async {
+  Future<LocalUser> toDomain(FirebaseStorageService firebaseStorageService) async {
     // Convert GS Location to Download URL
-    String thumbnailUrl;
+    String? thumbnailUrl;
     try {
-      thumbnailUrl =
-          await firebaseStorageService.getDownloadUrl(this.thumbnail);
+      thumbnailUrl = await firebaseStorageService.getDownloadUrl(this.thumbnail);
     } catch (e) {
       thumbnailUrl = null;
     }
-    String profilePhotoUrl =
-        await firebaseStorageService.getDownloadUrl(this.profilePhoto);
+    String profilePhotoUrl = await firebaseStorageService.getDownloadUrl(this.profilePhoto);
 
     return LocalUser(
       id: this.id,

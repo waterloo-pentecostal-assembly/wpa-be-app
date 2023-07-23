@@ -29,7 +29,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
 
   @override
   Future<LocalUser> getSignedInUser() async {
-    User user = _firebaseAuth.currentUser;
+    late User? user = _firebaseAuth.currentUser;
 
     if (user == null) {
       throw AuthenticationException(
@@ -38,19 +38,19 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
       );
     }
 
-    DocumentSnapshot userInfo;
+    late DocumentSnapshot<Map<String, dynamic>> userSnapshot;
     try {
-      userInfo = await _firestore.collection("users").doc(user.uid).get();
-    } catch (e) {
+      userSnapshot = await _firestore.collection("users").doc(user.uid).get();
+    } on Exception catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
-    if (userInfo == null || userInfo.data() == null) {
+    if (userSnapshot.data() == null) {
       throw AuthenticationException(
         code: AuthenticationExceptionCode.USER_COLLECTION_NOT_FOUND,
         message: 'User details not found',
       );
     }
-    LocalUser domainUser = await FirebaseUserDto.fromFirestore(userInfo)
+    LocalUser domainUser = await FirebaseUserDto.fromFirestore(userSnapshot)
         .toDomain(_firebaseStorageService);
 
     if (!domainUser.isVerified) {
@@ -73,15 +73,15 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
 
   @override
   Future<void> registerWithEmailAndPassword({
-    Name firstName,
-    Name lastName,
-    EmailAddress emailAddress,
-    Password password,
+    required Name firstName,
+    required Name lastName,
+    required EmailAddress emailAddress,
+    required Password password,
   }) async {
     // Create Firebase Authentication User
     final String _emailAddress = emailAddress.value;
     final String _password = password.value;
-    UserCredential userCredential;
+    late UserCredential userCredential;
 
     try {
       userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
@@ -113,7 +113,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
 
     try {
       // Create Document for that user in the User Collection
-      await _firestore.collection('users').doc(userCredential.user.uid).set({
+      await _firestore.collection('users').doc(userCredential.user!.uid).set({
         'first_name': firstName.value,
         'last_name': lastName.value,
         'email': emailAddress.value,
@@ -125,11 +125,11 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
       // Add default notification settings
       await _firestore
           .collection('users')
-          .doc(userCredential.user.uid)
+          .doc(userCredential.user!.uid)
           .collection("notification_settings")
           .add(defaultNotificationSettings());
-    } catch (e) {
-      userCredential.user.delete();
+    } on Exception catch (e) {
+      userCredential.user!.delete();
       _firebaseFirestoreService.handleException(e);
     }
   }
@@ -139,8 +139,8 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
   /// Throws [AuthenticationException] or [ApplicationException]
   @override
   Future<LocalUser> signInWithEmailAndPassword({
-    EmailAddress emailAddress,
-    Password password,
+    required EmailAddress emailAddress,
+    required Password password,
   }) async {
     final String _emailAddress = emailAddress.value;
     final String _password = password.value;
@@ -185,7 +185,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
   @override
   Future<void> signOut() async {
     try {
-      String uid = _firebaseAuth.currentUser.uid;
+      String uid = _firebaseAuth.currentUser!.uid;
       String token = await _firebaseMessagingService.getToken();
       await _firestore
           .collection('users')
@@ -193,7 +193,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
           .collection('devices')
           .doc(token)
           .delete();
-    } catch (e) {
+    } on Exception catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
     return _firebaseAuth.signOut();
@@ -201,7 +201,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
 
   @override
   Future<void> sendPasswordResetEmail({
-    EmailAddress emailAddress,
+    required EmailAddress emailAddress,
   }) async {
     final String _emailAddress = emailAddress.value;
     try {
@@ -226,10 +226,10 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
 
   @override
   Future<void> deleteUser() async {
-    String uid;
+    late String? uid;
     try {
-      uid = _firebaseAuth.currentUser.uid;
-      await _firebaseAuth.currentUser.delete();
+      uid = _firebaseAuth.currentUser?.uid;
+      await _firebaseAuth.currentUser?.delete();
     } on FirebaseAuthException catch (e) {
       if (e.code == 'requires-recent-login') {
         throw AuthenticationException(
@@ -249,15 +249,15 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
       if (uid != null) {
         await _firestore.collection('users').doc(uid).delete();
       }
-    } catch (e) {
+    } on Exception catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
   }
 
   @override
   Future<void> sendAccountVerificationEmail({
-    EmailAddress emailAddress,
-    Password password,
+    required EmailAddress emailAddress,
+    required Password password,
   }) async {
     await this.signInWithEmailAndPassword(
       emailAddress: emailAddress,
@@ -265,8 +265,8 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
     );
 
     try {
-      await _firebaseAuth.currentUser.sendEmailVerification();
-    } catch (e) {
+      await _firebaseAuth.currentUser?.sendEmailVerification();
+    } on Exception catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
   }
@@ -287,7 +287,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
         "created_at": Timestamp.now(),
         "platform": platform,
       });
-    } catch (e) {
+    } on Exception catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
   }
@@ -296,7 +296,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
   Future<bool> deviceTokenExists(String userId) async {
     String deviceToken = await _firebaseMessagingService.getToken();
 
-    DocumentSnapshot documentSnapshot;
+    late DocumentSnapshot documentSnapshot;
     try {
       documentSnapshot = await _firestore
           .collection("users")
@@ -304,7 +304,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
           .collection("devices")
           .doc(deviceToken)
           .get();
-    } catch (e) {
+    } on Exception catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
 
@@ -324,7 +324,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
         "user_id": userId,
         "request_date": Timestamp.now(),
       });
-    } catch (e) {
+    } on Exception catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
   }
