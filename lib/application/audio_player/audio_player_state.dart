@@ -8,9 +8,9 @@ class AudioPlayerState extends Equatable {
   final String contentId;
 
   const AudioPlayerState({
-    @required this.playerState,
-    @required this.duration,
-    @required this.position,
+    required this.playerState,
+    required this.duration,
+    required this.position,
     this.sourceUrl,
     this.contentId,
   });

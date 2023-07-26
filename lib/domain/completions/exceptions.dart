@@ -14,8 +14,8 @@ class CompletionsException implements BaseApplicationException {
   /// Creates an [CompletionsException] with the specified error [type],
   /// [message], and optional error [details].
   CompletionsException({
-    @required this.code,
-    @required this.message,
+    required this.code,
+    required this.message,
     this.details,
   });
 

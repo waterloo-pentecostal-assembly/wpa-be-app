@@ -14,8 +14,7 @@ import 'my_prayer_requests.dart';
 class PrayerRequestsPage extends StatelessWidget {
   final int tabIndex;
 
-  const PrayerRequestsPage({Key key, @required this.tabIndex})
-      : super(key: key);
+  const PrayerRequestsPage({Key key, required this.tabIndex}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -23,16 +22,13 @@ class PrayerRequestsPage extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<AllPrayerRequestsBloc>(
-          create: (BuildContext context) => getIt<PrayerRequestsBloc>()
-            ..add(PrayerRequestsRequested(amount: amount)),
+          create: (BuildContext context) => getIt<PrayerRequestsBloc>()..add(PrayerRequestsRequested(amount: amount)),
         ),
         BlocProvider<MyPrayerRequestsBloc>(
-          create: (BuildContext context) =>
-              getIt<PrayerRequestsBloc>()..add(MyPrayerRequestsRequested()),
+          create: (BuildContext context) => getIt<PrayerRequestsBloc>()..add(MyPrayerRequestsRequested()),
         ),
         BlocProvider<MyAnsweredPrayerRequestsBloc>(
-          create: (BuildContext context) => getIt<PrayerRequestsBloc>()
-            ..add(MyAnsweredPrayerRequestsRequested()),
+          create: (BuildContext context) => getIt<PrayerRequestsBloc>()..add(MyAnsweredPrayerRequestsRequested()),
         )
       ],
       child: Scaffold(
@@ -55,16 +51,13 @@ class PrayerRequestsPage extends StatelessWidget {
 class TabPrayerRequestWidget extends StatefulWidget {
   final int tabIndex;
 
-  const TabPrayerRequestWidget({Key key, @required this.tabIndex})
-      : super(key: key);
+  const TabPrayerRequestWidget({Key key, required this.tabIndex}) : super(key: key);
 
   @override
-  _TabPrayerRequestWidgetState createState() =>
-      _TabPrayerRequestWidgetState(tabIndex);
+  _TabPrayerRequestWidgetState createState() => _TabPrayerRequestWidgetState(tabIndex);
 }
 
-class _TabPrayerRequestWidgetState extends State<TabPrayerRequestWidget>
-    with SingleTickerProviderStateMixin {
+class _TabPrayerRequestWidgetState extends State<TabPrayerRequestWidget> with SingleTickerProviderStateMixin {
   TabController _tabController;
   final int tabIndex;
 
@@ -145,8 +138,7 @@ class PrayerRequestsTitleBar extends StatelessWidget {
                 onTap: () => Navigator.pop(context),
                 child: Icon(
                   Icons.arrow_back,
-                  size:
-                      getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
+                  size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
                 ),
               ),
               SizedBox(width: 8),
@@ -167,9 +159,7 @@ class PrayerRequestsTitleBar extends StatelessWidget {
             child: ClipOval(
               child: Container(
                 color: Colors.grey.shade300,
-                child: Icon(Icons.add,
-                    size: getIt<LayoutFactory>()
-                        .getDimension(baseDimension: 24.0)),
+                child: Icon(Icons.add, size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0)),
               ),
             ),
           ),

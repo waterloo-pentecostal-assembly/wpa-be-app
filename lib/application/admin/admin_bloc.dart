@@ -22,29 +22,24 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
     AdminEvent event,
   ) async* {
     if (event is LoadUnverifiedUsers) {
-      yield* _mapLoadUnverifiedUsersEventToState(
-          _iAdminService.getUnverifiedUsers);
+      yield* _mapLoadUnverifiedUsersEventToState(_iAdminService.getUnverifiedUsers);
     } else if (event is LoadUnverifiedPrayerRequests) {
-      yield* _mapLoadUnverifiedPrayerRequestsToState(
-          _iAdminService.getUnapprovedPrayerRequest);
+      yield* _mapLoadUnverifiedPrayerRequestsToState(_iAdminService.getUnapprovedPrayerRequest);
     } else if (event is VerifyUser) {
       yield* _mapVerifyUserToState(event, _iAdminService.verifyUser);
     } else if (event is ApprovePrayerRequest) {
-      yield* _mapApprovePrayerRequestToState(
-          event, _iAdminService.approvePrayerRequest);
+      yield* _mapApprovePrayerRequestToState(event, _iAdminService.approvePrayerRequest);
     } else if (event is DeletePrayerRequest) {
-      yield* _mapDeletePrayerRequestToState(
-          event, _iAdminService.deletePrayerRequest);
+      yield* _mapDeletePrayerRequestToState(event, _iAdminService.deletePrayerRequest);
     } else if (event is DeleteUnverifiedUser) {
-      yield* _mapDeleteUnverifiedUserEventToState(
-          event, _iAdminService.deleteUnverifiedUsers);
+      yield* _mapDeleteUnverifiedUserEventToState(event, _iAdminService.deleteUnverifiedUsers);
     }
   }
 }
 
 Stream<AdminState> _mapDeletePrayerRequestToState(
   DeletePrayerRequest event,
-  Future<void> Function({@required String prayerRequestId}) deletePrayerRequest,
+  Future<void> Function({required String prayerRequestId}) deletePrayerRequest,
 ) async* {
   try {
     await deletePrayerRequest(prayerRequestId: event.prayerRequestId);
@@ -62,8 +57,7 @@ Stream<AdminState> _mapDeletePrayerRequestToState(
 
 Stream<AdminState> _mapApprovePrayerRequestToState(
   ApprovePrayerRequest event,
-  Future<void> Function({@required String prayerRequestId})
-      approvePrayerRequest,
+  Future<void> Function({required String prayerRequestId}) approvePrayerRequest,
 ) async* {
   try {
     await approvePrayerRequest(prayerRequestId: event.prayerRequestId);
@@ -81,7 +75,7 @@ Stream<AdminState> _mapApprovePrayerRequestToState(
 
 Stream<AdminState> _mapVerifyUserToState(
   VerifyUser event,
-  Future<void> Function({@required String userId}) verifyUser,
+  Future<void> Function({required String userId}) verifyUser,
 ) async* {
   try {
     await verifyUser(userId: event.userId);
@@ -132,8 +126,7 @@ Stream<AdminState> _mapLoadUnverifiedUsersEventToState(
 }
 
 Stream<AdminState> _mapDeleteUnverifiedUserEventToState(
-    DeleteUnverifiedUser event,
-    Future<void> Function({@required String userId}) deleteUser) async* {
+    DeleteUnverifiedUser event, Future<void> Function({required String userId}) deleteUser) async* {
   try {
     await deleteUser(userId: event.userId);
     yield UserDeleted(userId: event.userId);

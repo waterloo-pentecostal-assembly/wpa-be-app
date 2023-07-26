@@ -7,7 +7,7 @@ abstract class BibleSeriesEvent extends Equatable {
 class RecentBibleSeriesRequested extends BibleSeriesEvent {
   final int amount;
 
-  RecentBibleSeriesRequested({@required this.amount});
+  RecentBibleSeriesRequested({required this.amount});
   @override
   List<Object> get props => [amount];
 }
@@ -38,7 +38,7 @@ class NextBibleSeriesListRequested extends BibleSeriesEvent {
 class BibleSeriesDetailRequested extends BibleSeriesEvent {
   final String bibleSeriesId;
 
-  BibleSeriesDetailRequested({@required this.bibleSeriesId});
+  BibleSeriesDetailRequested({required this.bibleSeriesId});
 
   @override
   List<Object> get props => [bibleSeriesId];
@@ -50,9 +50,9 @@ class ContentDetailRequested extends BibleSeriesEvent {
   final bool getCompletionDetails;
 
   ContentDetailRequested({
-    @required this.bibleSeriesId,
-    @required this.seriesContentId,
-    @required this.getCompletionDetails,
+    required this.bibleSeriesId,
+    required this.seriesContentId,
+    required this.getCompletionDetails,
   });
 
   @override
@@ -64,10 +64,7 @@ class UpdateCompletionDetail extends BibleSeriesEvent {
   final int scsNum;
   final int actNum;
 
-  UpdateCompletionDetail(
-      {@required this.bibleSeries,
-      @required this.actNum,
-      @required this.scsNum});
+  UpdateCompletionDetail({required this.bibleSeries, required this.actNum, required this.scsNum});
 
   @override
   List<Object> get props => [bibleSeries, scsNum, actNum];

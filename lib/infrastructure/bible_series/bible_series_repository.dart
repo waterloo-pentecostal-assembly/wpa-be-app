@@ -19,8 +19,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
   CollectionReference _bibleSeriesCollection;
   DocumentSnapshot _lastBibleSeriesDocument;
 
-  BibleSeriesRepository(this._firestore, this._firebaseStorageService,
-      this._firebaseFirestoreService) {
+  BibleSeriesRepository(this._firestore, this._firebaseStorageService, this._firebaseFirestoreService) {
     _bibleSeriesCollection = _firestore.collection("bible_series");
   }
 
@@ -35,10 +34,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
     try {
       final LocalUser user = getIt<LocalUser>();
       if (user.isAdmin) {
-        querySnapshot = await _bibleSeriesCollection
-            .orderBy("start_date", descending: true)
-            .limit(limit)
-            .get();
+        querySnapshot = await _bibleSeriesCollection.orderBy("start_date", descending: true).limit(limit).get();
       } else {
         querySnapshot = await _bibleSeriesCollection
             .orderBy("start_date", descending: true)
@@ -55,9 +51,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
     if (querySnapshot.docs.length > 0) {
       for (QueryDocumentSnapshot doc in querySnapshot.docs) {
         try {
-          final BibleSeries bibleSeriesDto =
-              await BibleSeriesDto.fromFirestore(doc)
-                  .toDomain(_firebaseStorageService);
+          final BibleSeries bibleSeriesDto = await BibleSeriesDto.fromFirestore(doc).toDomain(_firebaseStorageService);
           bibleSeriesList.add(bibleSeriesDto);
         } catch (e) {
           // Handle exceptions separately for each document conversion.
@@ -76,14 +70,13 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
   /// Throws [ApplicationException] or [BibleSeriesException].
   @override
   Future<List<BibleSeries>> getMoreBibleSeries({
-    @required int limit,
+    required int limit,
   }) async {
     if (_lastBibleSeriesDocument == null) {
       throw BibleSeriesException(
           code: BibleSeriesExceptionCode.NO_STARTING_DOCUMENT,
           message: 'No starting document defined',
-          details:
-              'No starting document defined. Call [getBibleSeries] first.');
+          details: 'No starting document defined. Call [getBibleSeries] first.');
     }
 
     QuerySnapshot querySnapshot;
@@ -104,9 +97,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
     if (querySnapshot.docs.length > 0) {
       for (QueryDocumentSnapshot doc in querySnapshot.docs) {
         try {
-          final BibleSeries bibleSeriesDto =
-              await BibleSeriesDto.fromFirestore(doc)
-                  .toDomain(_firebaseStorageService);
+          final BibleSeries bibleSeriesDto = await BibleSeriesDto.fromFirestore(doc).toDomain(_firebaseStorageService);
           bibleSeriesList.add(bibleSeriesDto);
         } catch (e) {
           // Handle exceptions separately for each document conversion.
@@ -127,7 +118,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
   /// Throws [ApplicationException] or [BibleSeriesException].
   @override
   Future<BibleSeries> getBibleSeriesDetails({
-    @required String bibleSeriesId,
+    required String bibleSeriesId,
   }) async {
     DocumentSnapshot document;
     try {
@@ -144,8 +135,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
       );
     }
 
-    final BibleSeries bibleSeries = await BibleSeriesDto.fromFirestore(document)
-        .toDomain(_firebaseStorageService);
+    final BibleSeries bibleSeries = await BibleSeriesDto.fromFirestore(document).toDomain(_firebaseStorageService);
     return bibleSeries;
   }
 
@@ -154,25 +144,20 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
   /// Throws [ApplicationException] or [BibleSeriesException].
   @override
   Future<SeriesContent> getContentDetails({
-    @required String bibleSeriesId,
-    @required String seriesContentId,
+    required String bibleSeriesId,
+    required String seriesContentId,
   }) async {
     DocumentSnapshot document;
     try {
-      document = await _bibleSeriesCollection
-          .doc(bibleSeriesId)
-          .collection("series_content")
-          .doc(seriesContentId)
-          .get();
+      document =
+          await _bibleSeriesCollection.doc(bibleSeriesId).collection("series_content").doc(seriesContentId).get();
     } catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
 
     if (document.data() != null) {
       //made Series Content a variable instead of a final, may cause issues
-      SeriesContent seriesContent =
-          await SeriesContentDto.fromFirestore(document)
-              .toDomain(_firebaseStorageService);
+      SeriesContent seriesContent = await SeriesContentDto.fromFirestore(document).toDomain(_firebaseStorageService);
 
       return seriesContent;
     }
@@ -195,9 +180,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
           .get();
       if (querySnapshot.docs.length > 0) {
         QueryDocumentSnapshot doc = querySnapshot.docs[0];
-        final BibleSeries bibleSeriesDto =
-            await BibleSeriesDto.fromFirestore(doc)
-                .toDomain(_firebaseStorageService);
+        final BibleSeries bibleSeriesDto = await BibleSeriesDto.fromFirestore(doc).toDomain(_firebaseStorageService);
         return bibleSeriesDto.isActive;
       }
     } catch (e) {

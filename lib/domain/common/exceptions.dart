@@ -15,8 +15,8 @@ abstract class BaseApplicationException implements Exception {
   /// Creates a [BaseApplicationException] with the specified error [type],
   /// [message], and optional error [details].
   BaseApplicationException({
-    @required this.code,
-    @required this.message,
+    required this.code,
+    required this.message,
     this.details,
   });
 
@@ -41,7 +41,7 @@ class ValueObjectException implements BaseApplicationException {
   /// [ValueObjectExceptionCode.INVALID_FORMAT]
   ValueObjectException({
     this.code = ValueObjectExceptionCode.INVALID_FORMAT,
-    @required this.message,
+    required this.message,
     this.details,
   });
 }
@@ -61,8 +61,8 @@ class ApplicationException implements BaseApplicationException {
   /// Creates a [ApplicationException] with the specified error [type],
   /// [message], and optional error [details].
   ApplicationException({
-    @required this.code,
-    @required this.message,
+    required this.code,
+    required this.message,
     this.details,
   });
 }
@@ -84,8 +84,8 @@ class FirebaseStorageException implements BaseApplicationException {
   /// Creates a [ApplicationException] with the specified error [type],
   /// [message], and optional error [details].
   FirebaseStorageException({
-    @required this.code,
-    @required this.message,
+    required this.code,
+    required this.message,
     this.details,
   });
 }
@@ -104,8 +104,8 @@ class FirebaseFirestoreException implements BaseApplicationException {
   /// Creates a [ApplicationException] with the specified error [type],
   /// [message], and optional error [details].
   FirebaseFirestoreException({
-    @required this.code,
-    @required this.message,
+    required this.code,
+    required this.message,
     this.details,
   });
 }

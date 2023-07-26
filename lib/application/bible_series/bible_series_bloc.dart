@@ -18,8 +18,7 @@ class BibleSeriesBloc extends Bloc<BibleSeriesEvent, BibleSeriesState> {
   final IBibleSeriesRepository _iBibleSeriesRepository;
   final ICompletionsRepository _iCompletionsRepository;
 
-  BibleSeriesBloc(this._iBibleSeriesRepository, this._iCompletionsRepository)
-      : super(BibleSeriesInitial());
+  BibleSeriesBloc(this._iBibleSeriesRepository, this._iCompletionsRepository) : super(BibleSeriesInitial());
 
   @override
   Stream<BibleSeriesState> mapEventToState(
@@ -43,8 +42,7 @@ class BibleSeriesBloc extends Bloc<BibleSeriesEvent, BibleSeriesState> {
         _iCompletionsRepository.getCompletion,
       );
     } else if (event is UpdateCompletionDetail) {
-      yield* _mapUpdateCompletionDetailEventToState(
-          event, _iCompletionsRepository.getCompletionOrNull);
+      yield* _mapUpdateCompletionDetailEventToState(event, _iCompletionsRepository.getCompletionOrNull);
     } else if (event is RestoreState) {
       yield* _mapRestoreStateEventToState(event);
     } else if (event is HasActiveBibleSeriesRequested) {
@@ -58,12 +56,12 @@ class BibleSeriesBloc extends Bloc<BibleSeriesEvent, BibleSeriesState> {
 Stream<BibleSeriesState> _mapContentDetailRequestedEventToState(
   ContentDetailRequested event,
   Future<SeriesContent> Function({
-    @required String seriesContentId,
-    @required String bibleSeriesId,
+    required String seriesContentId,
+    required String bibleSeriesId,
   })
       getContentDetails,
   Future<CompletionDetails> Function({
-    @required String seriesContentId,
+    required String seriesContentId,
   })
       getCompletionDetails,
 ) async* {
@@ -94,13 +92,11 @@ Stream<BibleSeriesState> _mapContentDetailRequestedEventToState(
 
 Stream<BibleSeriesState> _mapGetRecentBibleSeriesEventToState(
   RecentBibleSeriesRequested event,
-  Future<List<BibleSeries>> Function({@required int limit})
-      getBibleSeriesFunction,
+  Future<List<BibleSeries>> Function({required int limit}) getBibleSeriesFunction,
 ) async* {
   yield FetchingBibleSeries();
   try {
-    List<BibleSeries> bibleSeriesList =
-        await getBibleSeriesFunction(limit: event.amount);
+    List<BibleSeries> bibleSeriesList = await getBibleSeriesFunction(limit: event.amount);
     yield RecentBibleSeries(bibleSeriesList);
   } on BaseApplicationException catch (e) {
     yield BibleSeriesError(
@@ -115,19 +111,15 @@ Stream<BibleSeriesState> _mapGetRecentBibleSeriesEventToState(
 
 Stream<BibleSeriesState> _mapBibleSeriesDetailRequestedEventToState(
   BibleSeriesDetailRequested event,
-  Future<BibleSeries> Function({@required String bibleSeriesId})
-      getBibleSeriesDetailsFunction,
-  Future<Map<String, CompletionDetails>> Function(
-          {@required String bibleSeriesId})
-      getAllCompletionDetailsFunction,
+  Future<BibleSeries> Function({required String bibleSeriesId}) getBibleSeriesDetailsFunction,
+  Future<Map<String, CompletionDetails>> Function({required String bibleSeriesId}) getAllCompletionDetailsFunction,
 ) async* {
   try {
     BibleSeries bibleSeries = await getBibleSeriesDetailsFunction(
       bibleSeriesId: event.bibleSeriesId.toString(),
     );
 
-    Map<String, CompletionDetails> completionDetails =
-        await getAllCompletionDetailsFunction(
+    Map<String, CompletionDetails> completionDetails = await getAllCompletionDetailsFunction(
       bibleSeriesId: event.bibleSeriesId.toString(),
     );
 
@@ -150,15 +142,15 @@ Stream<BibleSeriesState> _mapBibleSeriesDetailRequestedEventToState(
 Stream<BibleSeriesState> _mapUpdateCompletionDetailEventToState(
     UpdateCompletionDetail event,
     Future<CompletionDetails> Function({
-  @required String seriesContentId,
+  required String seriesContentId,
 })
         getCompletionDetails) async* {
   try {
     CompletionDetails completionDetails = await getCompletionDetails(
-        seriesContentId: event.bibleSeries.seriesContentSnippet[event.scsNum]
-            .availableContentTypes[event.actNum].contentId);
-    BibleSeries newBibleSeries = updateCompletionDetailToSeries(
-        event.bibleSeries, completionDetails, event.scsNum, event.actNum);
+        seriesContentId:
+            event.bibleSeries.seriesContentSnippet[event.scsNum].availableContentTypes[event.actNum].contentId);
+    BibleSeries newBibleSeries =
+        updateCompletionDetailToSeries(event.bibleSeries, completionDetails, event.scsNum, event.actNum);
     yield UpdatedBibleSeries(newBibleSeries);
   } on BaseApplicationException catch (e) {
     yield BibleSeriesError(message: e.message);
@@ -169,8 +161,7 @@ Stream<BibleSeriesState> _mapUpdateCompletionDetailEventToState(
   }
 }
 
-Stream<BibleSeriesState> _mapRestoreStateEventToState(
-    RestoreState event) async* {
+Stream<BibleSeriesState> _mapRestoreStateEventToState(RestoreState event) async* {
   try {
     yield BibleSeriesDetail(event.bibleSeries);
   } on BaseApplicationException catch (e) {

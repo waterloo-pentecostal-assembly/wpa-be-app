@@ -16,7 +16,7 @@ class PrayerApprovalPage extends StatefulWidget {
 
 class _PrayerApprovalPageState extends State<PrayerApprovalPage> {
   final key = GlobalKey<AnimatedListState>();
-  List<PrayerRequest> prayerRequestCards;
+  late List<PrayerRequest> prayerRequestCards;
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class _PrayerApprovalPageState extends State<PrayerApprovalPage> {
         }
       },
       builder: (BuildContext context, state) {
-        if (prayerRequestCards != null) {
+        if (prayerRequestCards.isNotEmpty) {
           return SafeArea(
               child: Scaffold(
                   body: RefreshIndicator(
@@ -49,8 +49,10 @@ class _PrayerApprovalPageState extends State<PrayerApprovalPage> {
                 ))
               ],
             ),
-          )));
-        } else if (prayerRequestCards == null) {
+          )
+          )
+          );
+        } else if (prayerRequestCards.isEmpty) {
           return SafeArea(
               child: Container(
             child: Scaffold(
@@ -82,7 +84,7 @@ class _PrayerApprovalPageState extends State<PrayerApprovalPage> {
   void removeItem(int index) {
     setState(() {
       final item = prayerRequestCards.removeAt(index);
-      key.currentState.removeItem(
+      key.currentState?.removeItem(
           index, (context, animation) => buildItem(item, index, animation));
     });
   }

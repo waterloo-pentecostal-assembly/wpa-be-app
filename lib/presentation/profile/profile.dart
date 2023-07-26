@@ -24,7 +24,7 @@ import 'privacy_policy.dart';
 class ProfilePage extends IIndexedPage {
   final GlobalKey<NavigatorState> navigatorKey;
 
-  const ProfilePage({Key key, @required this.navigatorKey}) : super(key: key);
+  const ProfilePage({Key key, required this.navigatorKey}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -37,8 +37,7 @@ class ProfilePage extends IIndexedPage {
           create: (BuildContext context) => getIt<UserProfileBloc>(),
         ),
         BlocProvider<NotificationSettingsBloc>(
-          create: (BuildContext context) => getIt<NotificationSettingsBloc>()
-            ..add(NotificationSettingsRequested()),
+          create: (BuildContext context) => getIt<NotificationSettingsBloc>()..add(NotificationSettingsRequested()),
         ),
       ],
       child: Scaffold(
@@ -126,9 +125,8 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
   Widget build(BuildContext context) {
     // LocalUser localUser = getIt<LocalUser>();
 
-    double profilePhotoDiameter = 150 > MediaQuery.of(context).size.width * 0.5
-        ? MediaQuery.of(context).size.width * 0.5
-        : 150;
+    double profilePhotoDiameter =
+        150 > MediaQuery.of(context).size.width * 0.5 ? MediaQuery.of(context).size.width * 0.5 : 150;
 
     return BlocConsumer<UserProfileBloc, UserProfileState>(
       listener: (context, UserProfileState state) {},
@@ -145,8 +143,7 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
               int progressPercent = 0;
 
               if (bytesTransferred != null && totalBytes != null) {
-                progressPercent =
-                    ((bytesTransferred / totalBytes) * 100).ceil();
+                progressPercent = ((bytesTransferred / totalBytes) * 100).ceil();
               }
 
               return Column(
@@ -165,10 +162,8 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
                           height: 30,
                           child: Container(
                             alignment: Alignment.center,
-                            child: getIt<TextFactory>().regular(
-                                '$progressPercent%',
-                                color: Colors.white,
-                                fontSize: 12.0),
+                            child:
+                                getIt<TextFactory>().regular('$progressPercent%', color: Colors.white, fontSize: 12.0),
                           ),
                         ),
                       ],
@@ -221,8 +216,7 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
                         height: 30,
                         child: Container(
                           alignment: Alignment.center,
-                          child: getIt<TextFactory>().regular('EDIT',
-                              color: Colors.white, fontSize: 12.0),
+                          child: getIt<TextFactory>().regular('EDIT', color: Colors.white, fontSize: 12.0),
                         ),
                       ),
                     ),
@@ -241,8 +235,7 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
   void selectNewProfileImage() async {
     XFile selected = await imagePicker.pickImage(source: ImageSource.gallery);
     if (selected != null && selected.path != null) {
-      BlocProvider.of<UserProfileBloc>(context)
-        ..add(UploadProfilePhoto(profilePhoto: File(selected.path)));
+      BlocProvider.of<UserProfileBloc>(context)..add(UploadProfilePhoto(profilePhoto: File(selected.path)));
     }
   }
 }
@@ -256,10 +249,8 @@ class LogoutButton extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(top: 4.0, bottom: 4.0),
           child: GestureDetector(
-            onTap: () =>
-                BlocProvider.of<AuthenticationBloc>(context).add(SignOut()),
-            child: getIt<TextFactory>()
-                .lite('Logout', color: Colors.red, fontSize: 14.0),
+            onTap: () => BlocProvider.of<AuthenticationBloc>(context).add(SignOut()),
+            child: getIt<TextFactory>().lite('Logout', color: Colors.red, fontSize: 14.0),
           ),
         ),
       ],
@@ -293,19 +284,16 @@ class _NotificationSettingsState extends State<NotificationSettings> {
               getIt<TextFactory>().lite("Daily Engagement Reminder"),
               Container(
                 height: 30,
-                child: BlocConsumer<NotificationSettingsBloc,
-                    NotificationSettingsState>(
+                child: BlocConsumer<NotificationSettingsBloc, NotificationSettingsState>(
                   listener: (context, NotificationSettingsState state) {
                     if (state is NotificationSettingsPositions) {
                       setState(() {
-                        isEngagementReminderSwitched =
-                            state.notificationSettings.dailyEngagementReminder;
+                        isEngagementReminderSwitched = state.notificationSettings.dailyEngagementReminder;
                       });
                     } else if (state is DailyEngagementReminderError) {
                       ToastMessage.showErrorToast(state.message, context);
                       setState(() {
-                        isEngagementReminderSwitched =
-                            !isEngagementReminderSwitched;
+                        isEngagementReminderSwitched = !isEngagementReminderSwitched;
                       });
                     }
                   },
@@ -341,21 +329,17 @@ class _NotificationSettingsState extends State<NotificationSettings> {
             children: [
               getIt<TextFactory>().lite("Prayers"),
               Container(
-                height:
-                    getIt<LayoutFactory>().getDimension(baseDimension: 30.0),
-                child: BlocConsumer<NotificationSettingsBloc,
-                    NotificationSettingsState>(
+                height: getIt<LayoutFactory>().getDimension(baseDimension: 30.0),
+                child: BlocConsumer<NotificationSettingsBloc, NotificationSettingsState>(
                   listener: (context, NotificationSettingsState state) {
                     if (state is NotificationSettingsPositions) {
                       setState(() {
-                        isPrayerNotificationsSwitched =
-                            state.notificationSettings.prayers;
+                        isPrayerNotificationsSwitched = state.notificationSettings.prayers;
                       });
                     } else if (state is PrayerNotificationError) {
                       ToastMessage.showErrorToast(state.message, context);
                       setState(() {
-                        isPrayerNotificationsSwitched =
-                            !isPrayerNotificationsSwitched;
+                        isPrayerNotificationsSwitched = !isPrayerNotificationsSwitched;
                       });
                     }
                   },
@@ -368,8 +352,7 @@ class _NotificationSettingsState extends State<NotificationSettings> {
                             isPrayerNotificationsSwitched = value;
                           });
                           if (value) {
-                            BlocProvider.of<NotificationSettingsBloc>(context)
-                              ..add(SubscribedToPrayerNotifications());
+                            BlocProvider.of<NotificationSettingsBloc>(context)..add(SubscribedToPrayerNotifications());
                           } else {
                             BlocProvider.of<NotificationSettingsBloc>(context)
                               ..add(UnsubscribedFromPrayerNotifications());
@@ -416,8 +399,7 @@ class Other extends StatelessWidget {
                     if (await canLaunch(url)) {
                       await launch(url);
                     } else {
-                      ToastMessage.showErrorToast(
-                          "Error opening page", context);
+                      ToastMessage.showErrorToast("Error opening page", context);
                     }
                   },
                   child: Row(
@@ -427,8 +409,7 @@ class Other extends StatelessWidget {
                       Icon(
                         Icons.keyboard_arrow_right,
                         color: kDarkGreyColor,
-                        size: getIt<LayoutFactory>()
-                            .getDimension(baseDimension: 24.0),
+                        size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
                       )
                     ],
                   ),
@@ -440,8 +421,7 @@ class Other extends StatelessWidget {
                     if (await canLaunch(url)) {
                       await launch(url);
                     } else {
-                      ToastMessage.showErrorToast(
-                          "Error opening page", context);
+                      ToastMessage.showErrorToast("Error opening page", context);
                     }
                   },
                   child: Row(
@@ -451,8 +431,7 @@ class Other extends StatelessWidget {
                       Icon(
                         Icons.keyboard_arrow_right,
                         color: kDarkGreyColor,
-                        size: getIt<LayoutFactory>()
-                            .getDimension(baseDimension: 24.0),
+                        size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
                       )
                     ],
                   ),
@@ -469,8 +448,7 @@ class Other extends StatelessWidget {
                     if (await canLaunch(_emailLaunchUri.toString())) {
                       await launch(_emailLaunchUri.toString());
                     } else {
-                      ToastMessage.showErrorToast(
-                          "Error opening page", context);
+                      ToastMessage.showErrorToast("Error opening page", context);
                     }
                   },
                   child: Row(
@@ -480,8 +458,7 @@ class Other extends StatelessWidget {
                       Icon(
                         Icons.keyboard_arrow_right,
                         color: kDarkGreyColor,
-                        size: getIt<LayoutFactory>()
-                            .getDimension(baseDimension: 24.0),
+                        size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
                       )
                     ],
                   ),
@@ -498,8 +475,7 @@ class Other extends StatelessWidget {
                     if (await canLaunch(_emailLaunchUri.toString())) {
                       await launch(_emailLaunchUri.toString());
                     } else {
-                      ToastMessage.showErrorToast(
-                          "Error opening page", context);
+                      ToastMessage.showErrorToast("Error opening page", context);
                     }
                   },
                   child: Row(
@@ -509,8 +485,7 @@ class Other extends StatelessWidget {
                       Icon(
                         Icons.keyboard_arrow_right,
                         color: kDarkGreyColor,
-                        size: getIt<LayoutFactory>()
-                            .getDimension(baseDimension: 24.0),
+                        size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
                       )
                     ],
                   ),
@@ -521,13 +496,9 @@ class Other extends StatelessWidget {
                     return showDialog(
                       context: context,
                       builder: (_) => AlertDialog(
-                        buttonPadding:
-                            const EdgeInsets.fromLTRB(10, 20, 20, 20),
-                        shape: RoundedRectangleBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(16))),
-                        title: getIt<TextFactory>()
-                            .subHeading2("Delete my Account"),
+                        buttonPadding: const EdgeInsets.fromLTRB(10, 20, 20, 20),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
+                        title: getIt<TextFactory>().subHeading2("Delete my Account"),
                         content: getIt<TextFactory>().lite(
                           "This account will be permanently disabled and all data associated with this account will be deleted. Would you like to proceed?",
                         ),
@@ -537,15 +508,12 @@ class Other extends StatelessWidget {
                             child: TextButton(
                               style: TextButton.styleFrom(
                                   minimumSize: Size(90, 30),
-                                  backgroundColor:
-                                      kDarkGreyColor.withOpacity(0.5),
+                                  backgroundColor: kDarkGreyColor.withOpacity(0.5),
                                   primary: Colors.white,
                                   padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
-                                  tapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap),
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                               onPressed: () {
-                                Navigator.of(context, rootNavigator: true)
-                                    .pop();
+                                Navigator.of(context, rootNavigator: true).pop();
                               },
                               child: getIt<TextFactory>().regularButton('No'),
                             ),
@@ -558,13 +526,10 @@ class Other extends StatelessWidget {
                                   backgroundColor: kWpaBlue.withOpacity(0.8),
                                   primary: Colors.white,
                                   padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
-                                  tapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap),
+                                  tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                               onPressed: () {
-                                BlocProvider.of<AuthenticationBloc>(context)
-                                    .add(InitiateDelete());
-                                Navigator.of(context, rootNavigator: true)
-                                    .pop();
+                                BlocProvider.of<AuthenticationBloc>(context).add(InitiateDelete());
+                                Navigator.of(context, rootNavigator: true).pop();
                               },
                               child: getIt<TextFactory>().regularButton('Yes'),
                             ),
@@ -580,8 +545,7 @@ class Other extends StatelessWidget {
                       Icon(
                         Icons.delete,
                         color: kDarkGreyColor,
-                        size: getIt<LayoutFactory>()
-                            .getDimension(baseDimension: 24.0),
+                        size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
                       )
                     ],
                   ),
@@ -642,8 +606,7 @@ class _TestImagePickerState extends State<TestImagePicker> {
     return Column(
       children: [
         Center(
-          child:
-              _image == null ? Text('No image selected.') : Image.file(_image),
+          child: _image == null ? Text('No image selected.') : Image.file(_image),
         ),
         TextButton(
           onPressed: getImage,

@@ -5,18 +5,18 @@ enum AppEnvironment { DEV, LOCAL_DEV, PROD }
 class AppConfig {
   final AppEnvironment appEnvironment;
   final String title;
-  bool _hasActiveBibleSeries;
+  late bool _hasActiveBibleSeries;
 
   AppConfig({
-    @required this.appEnvironment,
-    @required this.title,
+    required this.appEnvironment,
+    required this.title,
   });
 
   set hasActiveBibleSeries(bool hasActive) {
     this._hasActiveBibleSeries = hasActive;
   }
 
-  get hasActiveBibleSeries {
+  bool get hasActiveBibleSeries {
     return this._hasActiveBibleSeries;
   }
 }

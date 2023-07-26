@@ -17,19 +17,19 @@ class PrayerRequest {
   final bool isAnswered;
 
   PrayerRequest({
-    @required this.id,
-    @required this.userId,
-    @required this.request,
-    @required this.prayedBy,
-    @required this.reportedBy,
-    @required this.hasPrayed,
-    @required this.hasReported,
-    @required this.isMine,
-    @required this.isApproved,
-    @required this.date,
-    @required this.isAnonymous,
-    @required this.userSnippet,
-    @required this.isAnswered,
+    required this.id,
+    required this.userId,
+    required this.request,
+    required this.prayedBy,
+    required this.reportedBy,
+    required this.hasPrayed,
+    required this.hasReported,
+    required this.isMine,
+    required this.isApproved,
+    required this.date,
+    required this.isAnonymous,
+    required this.userSnippet,
+    required this.isAnswered,
   });
 
   @override
@@ -47,10 +47,10 @@ class UserSnippet {
   final String thumbnail;
 
   UserSnippet({
-    @required this.firstName,
-    @required this.lastName,
-    @required this.thumbnailUrl,
-    @required this.thumbnail,
+    required this.firstName,
+    required this.lastName,
+    required this.thumbnailUrl,
+    required this.thumbnail,
   });
 
   @override

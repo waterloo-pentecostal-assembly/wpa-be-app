@@ -20,8 +20,7 @@ class CompletionsDto {
       contentId: findOrThrowException(json, 'content_id'),
       isOnTime: !isDraft ? findOrThrowException(json, 'is_on_time') : false,
       isDraft: isDraft,
-      completionDate:
-          !isDraft ? findOrThrowException(json, 'completion_date') : null,
+      completionDate: !isDraft ? findOrThrowException(json, 'completion_date') : null,
     );
   }
 
@@ -59,10 +58,10 @@ class CompletionsDto {
 
   const CompletionsDto._({
     this.id,
-    @required this.seriesId,
-    @required this.contentId,
-    @required this.isOnTime,
-    @required this.isDraft,
+    required this.seriesId,
+    required this.contentId,
+    required this.isOnTime,
+    required this.isDraft,
     this.completionDate,
   });
 }

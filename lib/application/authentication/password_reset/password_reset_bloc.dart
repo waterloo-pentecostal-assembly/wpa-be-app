@@ -14,8 +14,7 @@ part 'password_reset_state.dart';
 class PasswordResetBloc extends Bloc<PasswordResetEvent, PasswordResetState> {
   final IAuthenticationFacade _iAuthenticationFacade;
 
-  PasswordResetBloc(this._iAuthenticationFacade)
-      : super(PasswordResetState.initial());
+  PasswordResetBloc(this._iAuthenticationFacade) : super(PasswordResetState.initial());
 
   @override
   Stream<PasswordResetState> mapEventToState(
@@ -60,7 +59,7 @@ Stream<PasswordResetState> _mapResetPasswordToState(
   ResetPassword event,
   PasswordResetState state,
   Future Function({
-    @required EmailAddress emailAddress,
+    required EmailAddress emailAddress,
   })
       passwordResetFunction,
 ) async* {

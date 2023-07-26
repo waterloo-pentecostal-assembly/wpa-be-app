@@ -11,15 +11,13 @@ import '../../../common/text_factory.dart';
 class NewPrayerRequestForm extends StatefulWidget {
   final OverlayEntry entry;
 
-  const NewPrayerRequestForm({Key key, @required this.entry}) : super(key: key);
+  const NewPrayerRequestForm({Key key, required this.entry}) : super(key: key);
 
   @override
-  _NewPrayerRequestFormState createState() =>
-      _NewPrayerRequestFormState(entry: entry);
+  _NewPrayerRequestFormState createState() => _NewPrayerRequestFormState(entry: entry);
 }
 
-class _NewPrayerRequestFormState extends State<NewPrayerRequestForm>
-    with TickerProviderStateMixin {
+class _NewPrayerRequestFormState extends State<NewPrayerRequestForm> with TickerProviderStateMixin {
   final OverlayEntry entry;
   final FocusNode _focusNode = FocusNode();
   final TextEditingController _textEditingController = TextEditingController();
@@ -27,7 +25,7 @@ class _NewPrayerRequestFormState extends State<NewPrayerRequestForm>
   Animation<double> _animation;
   bool _isAnonymous;
 
-  _NewPrayerRequestFormState({@required this.entry});
+  _NewPrayerRequestFormState({required this.entry});
 
   initState() {
     super.initState();
@@ -40,8 +38,7 @@ class _NewPrayerRequestFormState extends State<NewPrayerRequestForm>
       upperBound: 1,
     );
 
-    _animation =
-        CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn);
+    _animation = CurvedAnimation(parent: _controller, curve: Curves.fastOutSlowIn);
 
     _controller.forward();
   }
@@ -56,8 +53,7 @@ class _NewPrayerRequestFormState extends State<NewPrayerRequestForm>
   @override
   Widget build(BuildContext context) {
     return BlocProvider<NewPrayerRequestsBloc>(
-      create: (BuildContext context) =>
-          getIt<PrayerRequestsBloc>()..add(NewPrayerRequestStarted()),
+      create: (BuildContext context) => getIt<PrayerRequestsBloc>()..add(NewPrayerRequestStarted()),
       child: BlocBuilder<NewPrayerRequestsBloc, PrayerRequestsState>(
         builder: (BuildContext context, state) {
           if (state is NewPrayerRequestState) {
@@ -101,8 +97,7 @@ class _NewPrayerRequestFormState extends State<NewPrayerRequestForm>
                           shrinkWrap: true,
                           children: [
                             Container(
-                              padding:
-                                  EdgeInsets.only(top: 8, left: 8, right: 8),
+                              padding: EdgeInsets.only(top: 8, left: 8, right: 8),
                               child: TextFormField(
                                 controller: _textEditingController,
                                 keyboardType: TextInputType.multiline,
@@ -110,34 +105,25 @@ class _NewPrayerRequestFormState extends State<NewPrayerRequestForm>
                                 focusNode: _focusNode,
                                 autofocus: true,
                                 onChanged: (value) {
-                                  BlocProvider.of<NewPrayerRequestsBloc>(
-                                      context)
-                                    ..add(NewPrayerRequestRequestChanged(
-                                        prayerRequest: value.toString()));
+                                  BlocProvider.of<NewPrayerRequestsBloc>(context)
+                                    ..add(NewPrayerRequestRequestChanged(prayerRequest: value.toString()));
                                 },
                                 decoration: InputDecoration(
                                   border: InputBorder.none,
                                   hintText: 'Prayer Request',
-                                  hintStyle: getIt<TextFactory>()
-                                      .textFormFieldInputStyle()
-                                      .copyWith(
+                                  hintStyle: getIt<TextFactory>().textFormFieldInputStyle().copyWith(
                                         color: Colors.grey.shade300,
                                       ),
                                 ),
-                                style: getIt<TextFactory>()
-                                    .textFormFieldInputStyle(),
+                                style: getIt<TextFactory>().textFormFieldInputStyle(),
                               ),
                             ),
                             Container(
-                              padding: state.errorExist
-                                  ? null
-                                  : EdgeInsets.only(bottom: 16),
+                              padding: state.errorExist ? null : EdgeInsets.only(bottom: 16),
                               child: state.errorExist
                                   ? Text('')
-                                  : getIt<TextFactory>().textFormFieldInput(
-                                      state.prayerRequestError,
-                                      color: kErrorTextColor.withOpacity(0.8),
-                                      fontSize: 12.0),
+                                  : getIt<TextFactory>().textFormFieldInput(state.prayerRequestError,
+                                      color: kErrorTextColor.withOpacity(0.8), fontSize: 12.0),
                             ),
                             Wrap(
                               runSpacing: 16.0,
@@ -150,11 +136,8 @@ class _NewPrayerRequestFormState extends State<NewPrayerRequestForm>
                                     AnonymousCheckbox(
                                       value: _isAnonymous,
                                       onChanged: (bool state) {
-                                        BlocProvider.of<NewPrayerRequestsBloc>(
-                                            context)
-                                          ..add(
-                                              NewPrayerRequestAnonymousChanged(
-                                                  isAnonymous: state));
+                                        BlocProvider.of<NewPrayerRequestsBloc>(context)
+                                          ..add(NewPrayerRequestAnonymousChanged(isAnonymous: state));
                                       },
                                     ),
                                     SizedBox(width: 4),
@@ -195,20 +178,17 @@ class AnonymousCheckbox extends StatefulWidget {
   final bool value;
   final Function(bool state) onChanged;
 
-  const AnonymousCheckbox(
-      {Key key, @required this.value, @required this.onChanged})
-      : super(key: key);
+  const AnonymousCheckbox({Key key, required this.value, required this.onChanged}) : super(key: key);
 
   @override
-  _AnonymousCheckboxState createState() =>
-      _AnonymousCheckboxState(value: value, onChanged: onChanged);
+  _AnonymousCheckboxState createState() => _AnonymousCheckboxState(value: value, onChanged: onChanged);
 }
 
 class _AnonymousCheckboxState extends State<AnonymousCheckbox> {
   bool value = true;
   final Function(bool state) onChanged;
 
-  _AnonymousCheckboxState({@required this.value, @required this.onChanged});
+  _AnonymousCheckboxState({required this.value, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -245,21 +225,19 @@ class PostButton extends StatelessWidget {
 
   const PostButton({
     Key key,
-    @required this.isValid,
-    @required this.isAnonymous,
-    @required this.prayerRequest,
-    @required this.entry,
+    required this.isValid,
+    required this.isAnonymous,
+    required this.prayerRequest,
+    required this.entry,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.all(Radius.circular(
-          getIt<LayoutFactory>().getDimension(baseDimension: 16.0))),
+      borderRadius: BorderRadius.all(Radius.circular(getIt<LayoutFactory>().getDimension(baseDimension: 16.0))),
       child: TextButton(
         style: ButtonStyle(
-            minimumSize: MaterialStateProperty.all(Size(
-                getIt<LayoutFactory>().getDimension(baseDimension: 90.0),
+            minimumSize: MaterialStateProperty.all(Size(getIt<LayoutFactory>().getDimension(baseDimension: 90.0),
                 getIt<LayoutFactory>().getDimension(baseDimension: 30.0))),
             backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
               if (states.contains(MaterialState.disabled)) {
@@ -273,8 +251,7 @@ class PostButton extends StatelessWidget {
               }
               return Colors.white;
             }),
-            padding: MaterialStateProperty.all(
-                EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8)),
+            padding: MaterialStateProperty.all(EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8)),
             tapTargetSize: MaterialTapTargetSize.shrinkWrap),
         onPressed: !isValid
             ? null
@@ -295,17 +272,15 @@ class PostButton extends StatelessWidget {
 class CancelButton extends StatelessWidget {
   final OverlayEntry entry;
 
-  const CancelButton({Key key, @required this.entry}) : super(key: key);
+  const CancelButton({Key key, required this.entry}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
-      borderRadius: BorderRadius.all(Radius.circular(
-          getIt<LayoutFactory>().getDimension(baseDimension: 16.0))),
+      borderRadius: BorderRadius.all(Radius.circular(getIt<LayoutFactory>().getDimension(baseDimension: 16.0))),
       child: TextButton(
         style: TextButton.styleFrom(
           primary: Colors.black,
-          minimumSize: Size(
-              getIt<LayoutFactory>().getDimension(baseDimension: 90.0),
+          minimumSize: Size(getIt<LayoutFactory>().getDimension(baseDimension: 90.0),
               getIt<LayoutFactory>().getDimension(baseDimension: 30.0)),
           backgroundColor: kCardGrey,
           padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),

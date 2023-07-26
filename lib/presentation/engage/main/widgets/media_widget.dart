@@ -19,8 +19,7 @@ class MediaWidget extends StatelessWidget {
         return Column(
           children: [
             Padding(
-              padding:
-                  EdgeInsets.only(left: 24, top: 12, bottom: 12, right: 24),
+              padding: EdgeInsets.only(left: 24, top: 12, bottom: 12, right: 24),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
@@ -53,14 +52,12 @@ class MediaWidget extends StatelessWidget {
 class MediaWidgetLoaded extends StatelessWidget {
   final List<Media> mediaList;
 
-  const MediaWidgetLoaded({Key key, @required this.mediaList})
-      : super(key: key);
+  const MediaWidgetLoaded({Key key, required this.mediaList}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: getIt<LayoutFactory>().getDimension(
-          baseDimension: kMediaTileHeight + kMediaTileDescriptionHeight),
+      height: getIt<LayoutFactory>().getDimension(baseDimension: kMediaTileHeight + kMediaTileDescriptionHeight),
       child: ListView.builder(
         padding: EdgeInsets.only(left: 16),
         scrollDirection: Axis.horizontal,
@@ -76,13 +73,11 @@ class MediaWidgetLoaded extends StatelessWidget {
 class MediaWidgetLoading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    int amtOfCards = (MediaQuery.of(context).size.width /
-            (getIt<LayoutFactory>()
-                .getDimension(baseDimension: kMediaTileWidth)))
-        .ceil();
+    int amtOfCards =
+        (MediaQuery.of(context).size.width / (getIt<LayoutFactory>().getDimension(baseDimension: kMediaTileWidth)))
+            .ceil();
     return Container(
-      height: getIt<LayoutFactory>().getDimension(
-          baseDimension: kMediaTileHeight + kMediaTileDescriptionHeight),
+      height: getIt<LayoutFactory>().getDimension(baseDimension: kMediaTileHeight + kMediaTileDescriptionHeight),
       child: ListView.builder(
         padding: EdgeInsets.only(left: 16),
         scrollDirection: Axis.horizontal,
@@ -109,8 +104,7 @@ class MediaCard extends StatelessWidget {
         }
       },
       child: Container(
-        width:
-            getIt<LayoutFactory>().getDimension(baseDimension: kMediaTileWidth),
+        width: getIt<LayoutFactory>().getDimension(baseDimension: kMediaTileWidth),
         padding: EdgeInsets.all(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -119,17 +113,14 @@ class MediaCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(15.0),
               child: Image.network(
                 media.thumbnailUrl,
-                height: getIt<LayoutFactory>()
-                    .getDimension(baseDimension: kMediaTileHeight),
+                height: getIt<LayoutFactory>().getDimension(baseDimension: kMediaTileHeight),
                 fit: BoxFit.fill,
-                frameBuilder: (BuildContext context, Widget child, int frame,
-                    bool wasSynchronouslyLoaded) {
+                frameBuilder: (BuildContext context, Widget child, int frame, bool wasSynchronouslyLoaded) {
                   if (frame != null && frame >= 0) {
                     return child;
                   } else {
                     return Container(
-                      height: getIt<LayoutFactory>()
-                          .getDimension(baseDimension: kMediaTileHeight),
+                      height: getIt<LayoutFactory>().getDimension(baseDimension: kMediaTileHeight),
                       color: Colors.grey.shade200,
                     );
                   }
@@ -142,8 +133,7 @@ class MediaCard extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.only(left: 8.0),
-              child: getIt<TextFactory>()
-                  .lite(media.description, overflow: TextOverflow.ellipsis),
+              child: getIt<TextFactory>().lite(media.description, overflow: TextOverflow.ellipsis),
             ),
           ],
         ),
@@ -156,8 +146,7 @@ class MediaCardPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width:
-          getIt<LayoutFactory>().getDimension(baseDimension: kMediaTileWidth),
+      width: getIt<LayoutFactory>().getDimension(baseDimension: kMediaTileWidth),
       padding: EdgeInsets.all(8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -165,8 +154,7 @@ class MediaCardPlaceholder extends StatelessWidget {
           ClipRRect(
             borderRadius: BorderRadius.circular(15.0),
             child: Container(
-              height: getIt<LayoutFactory>()
-                  .getDimension(baseDimension: kMediaTileHeight),
+              height: getIt<LayoutFactory>().getDimension(baseDimension: kMediaTileHeight),
               color: Colors.grey.shade200,
             ),
           ),
@@ -179,7 +167,7 @@ class MediaCardPlaceholder extends StatelessWidget {
 class MediaWidgetError extends StatelessWidget {
   final String message;
 
-  const MediaWidgetError({Key key, @required this.message}) : super(key: key);
+  const MediaWidgetError({Key key, required this.message}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

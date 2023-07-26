@@ -21,8 +21,7 @@ class PrayerRequestsDto {
   final UserSnippetDto userSnippet;
   final bool isAnswered;
 
-  factory PrayerRequestsDto.fromJson(
-      Map<String, dynamic> json, String signedInUserId) {
+  factory PrayerRequestsDto.fromJson(Map<String, dynamic> json, String signedInUserId) {
     List<String> _prayedBy = [];
     List<String> _reportedBy = [];
     List<dynamic> _prayedByFirestore = json['prayed_by'];
@@ -52,13 +51,11 @@ class PrayerRequestsDto {
         isApproved: findOrDefaultTo(json, 'is_approved', false),
         date: findOrThrowException(json, 'date'),
         isAnonymous: findOrThrowException(json, 'is_anonymous'),
-        userSnippet: UserSnippetDto.fromFirestore(
-            findOrThrowException(json, 'user_snippet')),
+        userSnippet: UserSnippetDto.fromFirestore(findOrThrowException(json, 'user_snippet')),
         isAnswered: findOrDefaultTo(json, 'is_answered', false));
   }
 
-  factory PrayerRequestsDto.newRequestFromDomain(
-      String request, bool isAnonymous, LocalUser user) {
+  factory PrayerRequestsDto.newRequestFromDomain(String request, bool isAnonymous, LocalUser user) {
     return PrayerRequestsDto._(
       userId: user.id,
       request: request,
@@ -68,10 +65,8 @@ class PrayerRequestsDto {
     );
   }
 
-  factory PrayerRequestsDto.fromFirestore(
-      DocumentSnapshot doc, String signedInUserId) {
-    return PrayerRequestsDto.fromJson(doc.data(), signedInUserId)
-        .copyWith(id: doc.id);
+  factory PrayerRequestsDto.fromFirestore(DocumentSnapshot doc, String signedInUserId) {
+    return PrayerRequestsDto.fromJson(doc.data(), signedInUserId).copyWith(id: doc.id);
   }
 
   PrayerRequestsDto copyWith({
@@ -108,8 +103,8 @@ class PrayerRequestsDto {
 
   const PrayerRequestsDto._({
     this.id,
-    @required this.userId,
-    @required this.request,
+    required this.userId,
+    required this.request,
     this.prayedBy,
     this.reportedBy,
     this.hasPrayed,
@@ -117,15 +112,14 @@ class PrayerRequestsDto {
     this.isMine,
     this.isApproved,
     this.isAnswered,
-    @required this.date,
-    @required this.isAnonymous,
-    @required this.userSnippet,
+    required this.date,
+    required this.isAnonymous,
+    required this.userSnippet,
   });
 }
 
 extension PrayerRequestsDtoX on PrayerRequestsDto {
-  Future<PrayerRequest> toDomain(
-      FirebaseStorageService firebaseStorageService) async {
+  Future<PrayerRequest> toDomain(FirebaseStorageService firebaseStorageService) async {
     return PrayerRequest(
       id: this.id,
       date: this.date,
@@ -189,22 +183,20 @@ class UserSnippetDto {
   }
 
   const UserSnippetDto._({
-    @required this.firstName,
-    @required this.lastName,
+    required this.firstName,
+    required this.lastName,
     this.thumbnailUrl,
     this.thumbnail,
   });
 }
 
 extension UserSnippetDtoX on UserSnippetDto {
-  Future<UserSnippet> toDomain(
-      FirebaseStorageService firebaseStorageService) async {
+  Future<UserSnippet> toDomain(FirebaseStorageService firebaseStorageService) async {
     // Convert GS Location to Download URL
     String thumbnailUrl;
 
     try {
-      thumbnailUrl =
-          await firebaseStorageService.getDownloadUrl(this.thumbnail);
+      thumbnailUrl = await firebaseStorageService.getDownloadUrl(this.thumbnail);
     } catch (e) {}
 
     return UserSnippet(

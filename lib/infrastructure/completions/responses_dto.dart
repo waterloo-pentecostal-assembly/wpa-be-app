@@ -13,8 +13,7 @@ class ResponsesDto {
   factory ResponsesDto.fromJson(Map<String, dynamic> json) {
     Map<String, Map<String, ResponseDetails>> _responses = {};
     String userId = findOrThrowException(json, 'user_id');
-    Map<String, dynamic> responses =
-        findOrDefaultToGetResponse(json, 'responses', {});
+    Map<String, dynamic> responses = findOrDefaultToGetResponse(json, 'responses', {});
     responses.forEach((String k1, dynamic v1) {
       v1.forEach((String k2, dynamic v2) {
         ResponseDetails responseDetails;
@@ -40,8 +39,7 @@ class ResponsesDto {
     return ResponsesDto._(responses: _responses, userId: userId);
   }
 
-  factory ResponsesDto.fromDomain(
-      Map<String, Map<String, ResponseDetails>> responses, String userId) {
+  factory ResponsesDto.fromDomain(Map<String, Map<String, ResponseDetails>> responses, String userId) {
     return ResponsesDto._(responses: responses, userId: userId);
   }
 
@@ -62,8 +60,8 @@ class ResponsesDto {
 
   const ResponsesDto._({
     this.id,
-    @required this.responses,
-    @required this.userId,
+    required this.responses,
+    required this.userId,
   });
 }
 

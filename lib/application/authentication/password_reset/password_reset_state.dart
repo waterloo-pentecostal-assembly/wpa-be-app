@@ -15,11 +15,11 @@ class PasswordResetState extends Equatable {
   }
 
   PasswordResetState({
-    @required this.emailAddress,
-    @required this.emailAddressError,
-    @required this.submitting,
-    @required this.passwordResetSuccess,
-    @required this.passwordResetError,
+    required this.emailAddress,
+    required this.emailAddressError,
+    required this.submitting,
+    required this.passwordResetSuccess,
+    required this.passwordResetError,
   });
 
   factory PasswordResetState.initial() {

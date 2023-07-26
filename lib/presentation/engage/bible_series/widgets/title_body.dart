@@ -7,7 +7,7 @@ class TitleBodyWidget extends StatelessWidget {
   final TitleBody titleBody;
   const TitleBodyWidget({
     Key key,
-    @required this.titleBody,
+    required this.titleBody,
   }) : super(key: key);
 
   @override

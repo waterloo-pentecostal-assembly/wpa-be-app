@@ -11,7 +11,7 @@ class FirebaseStorageService {
 
   String get storageBucket => _firebaseStorage.bucket;
 
-  Future<String> getDownloadUrl(String gsUrl) async {
+  Future<String?> getDownloadUrl(String? gsUrl) async {
     if (gsUrl == null) {
       return null;
     }
@@ -20,23 +20,24 @@ class FirebaseStorageService {
       String downloadUrl =
           await _firebaseStorage.refFromURL(gsUrl).getDownloadURL();
       return downloadUrl;
-    } catch (e) {
-      if (e.code == 'object-not-found') {
+    } on FirebaseException catch (e) {
+      // See error codes here: https://firebase.google.com/docs/storage/flutter/handle-errors
+      if (e.code.contains('object-not-found')) {
         throw FirebaseStorageException(
           code: FirebaseStorageExceptionCode.OBJECT_NOT_FOUND,
-          message: e.message,
+          message: e.message ?? 'No specific error message',
           details: e,
         );
-      } else if (e.code == 'unauthorized') {
+      } else if (e.code.contains('unauthorized')) {
         throw FirebaseStorageException(
           code: FirebaseStorageExceptionCode.UNAUTHORIZED,
-          message: e.message,
+          message: e.message ?? 'No specific error message',
           details: e,
         );
       } else {
         throw FirebaseStorageException(
           code: FirebaseStorageExceptionCode.UNKNOWN,
-          message: e.message,
+          message: e.message ?? 'No specific error message',
           details: e,
         );
       }

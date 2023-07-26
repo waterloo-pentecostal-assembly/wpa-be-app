@@ -6,8 +6,8 @@ class NotificationSettingsEntity {
   final bool prayers;
 
   NotificationSettingsEntity({
-    @required this.id,
-    @required this.dailyEngagementReminder,
-    @required this.prayers,
+    required this.id,
+    required this.dailyEngagementReminder,
+    required this.prayers,
   });
 }

@@ -20,8 +20,7 @@ class BibleSeriesDto {
   final List<SeriesContentSnippetDto> seriesContentSnippet;
 
   factory BibleSeriesDto.fromJson(Map<String, dynamic> json) {
-    List<dynamic> _seriesContentSnippetFirebase =
-        json['series_content_snippet'] ?? [];
+    List<dynamic> _seriesContentSnippetFirebase = json['series_content_snippet'] ?? [];
     List<SeriesContentSnippetDto> _seriesContentSnippet = [];
 
     _seriesContentSnippetFirebase.forEach((element) {
@@ -72,29 +71,27 @@ class BibleSeriesDto {
 
   const BibleSeriesDto._({
     this.id,
-    @required this.title,
-    @required this.subTitle,
+    required this.title,
+    required this.subTitle,
     this.imageUrl,
-    @required this.imageGsLocation,
-    @required this.startDate,
-    @required this.endDate,
-    @required this.isActive,
-    @required this.isVisible,
-    @required this.seriesContentSnippet,
+    required this.imageGsLocation,
+    required this.startDate,
+    required this.endDate,
+    required this.isActive,
+    required this.isVisible,
+    required this.seriesContentSnippet,
   });
 }
 
 extension BibleSeriesDtoX on BibleSeriesDto {
-  Future<BibleSeries> toDomain(
-      FirebaseStorageService firebaseStorageService) async {
+  Future<BibleSeries> toDomain(FirebaseStorageService firebaseStorageService) async {
     List<SeriesContentSnippet> _seriesContentSnippet = [];
     this.seriesContentSnippet.forEach((element) {
       _seriesContentSnippet.add(element.toDomain());
     });
 
     // Convert GS URL to Download URL
-    String imageUrl =
-        await firebaseStorageService.getDownloadUrl(this.imageGsLocation);
+    String imageUrl = await firebaseStorageService.getDownloadUrl(this.imageGsLocation);
 
     return BibleSeries(
       id: this.id,
@@ -127,8 +124,8 @@ class SeriesContentSnippetDto {
   }
 
   const SeriesContentSnippetDto._({
-    @required this.contentTypes,
-    @required this.date,
+    required this.contentTypes,
+    required this.date,
   });
 
   @override
@@ -141,12 +138,8 @@ extension SeriesContentSnippetDtoX on SeriesContentSnippetDto {
   SeriesContentSnippet toDomain() {
     List<AvailableContentType> availableContentTypes = [];
     this.contentTypes.forEach((element) {
-      final String seriesContentType =
-          findOrThrowException(element, 'content_type')
-              .toString()
-              .toUpperCase();
-      final String seriesContentId =
-          findOrThrowException(element, 'content_id');
+      final String seriesContentType = findOrThrowException(element, 'content_type').toString().toUpperCase();
+      final String seriesContentId = findOrThrowException(element, 'content_id');
       if (seriesContentType != null) {
         availableContentTypes.add(AvailableContentType(
           seriesContentType: seriesContentType,

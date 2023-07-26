@@ -5,8 +5,7 @@ class NavigationBarEvent extends Equatable {
   final String route;
   final Map<String, dynamic> arguments;
 
-  NavigationBarEvent(
-      {@required this.tab, this.route, this.arguments = const {}});
+  NavigationBarEvent({required this.tab, this.route, this.arguments = const {}});
 
   @override
   List<Object> get props => [tab, route, arguments];

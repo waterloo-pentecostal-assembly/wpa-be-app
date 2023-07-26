@@ -12,7 +12,7 @@ class NotificationSettingsInitial extends NotificationSettingsState {}
 class NotificationSettingsPositions extends NotificationSettingsState {
   final NotificationSettingsEntity notificationSettings;
 
-  NotificationSettingsPositions({@required this.notificationSettings});
+  NotificationSettingsPositions({required this.notificationSettings});
 
   @override
   List<Object> get props => [notificationSettings];
@@ -21,7 +21,7 @@ class NotificationSettingsPositions extends NotificationSettingsState {
 class DailyEngagementReminderError extends NotificationSettingsState {
   final String message;
 
-  const DailyEngagementReminderError({@required this.message});
+  const DailyEngagementReminderError({required this.message});
 
   @override
   List<Object> get props => [message, DateTime.now()];
@@ -30,7 +30,7 @@ class DailyEngagementReminderError extends NotificationSettingsState {
 class PrayerNotificationError extends NotificationSettingsState {
   final String message;
 
-  const PrayerNotificationError({@required this.message});
+  const PrayerNotificationError({required this.message});
 
   @override
   List<Object> get props => [message, DateTime.now()];
@@ -39,7 +39,7 @@ class PrayerNotificationError extends NotificationSettingsState {
 class NotificationSettingsError extends NotificationSettingsState {
   final String message;
 
-  const NotificationSettingsError({@required this.message});
+  const NotificationSettingsError({required this.message});
 
   @override
   List<Object> get props => [message, DateTime.now()];

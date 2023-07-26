@@ -53,9 +53,9 @@ import 'app_config.dart';
 GetIt getIt = GetIt.instance;
 
 void initializeInjections({
-  @required useLocalFirestore,
-  @required useLocalAuth,
-  @required AppConfig appConfig,
+  required useLocalFirestore,
+  required useLocalAuth,
+  required AppConfig appConfig,
 }) async {
   // Dependency Injection Configuration
 

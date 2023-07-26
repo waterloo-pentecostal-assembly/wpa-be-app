@@ -34,17 +34,17 @@ class SignUpState extends Equatable {
   }
 
   SignUpState({
-    @required this.emailAddress,
-    @required this.emailAddressError,
-    @required this.password,
-    @required this.passwordError,
-    @required this.firstName,
-    @required this.firstNameError,
-    @required this.lastName,
-    @required this.lastNameError,
-    @required this.submitting,
-    @required this.signUpSuccess,
-    @required this.signUpError,
+    required this.emailAddress,
+    required this.emailAddressError,
+    required this.password,
+    required this.passwordError,
+    required this.firstName,
+    required this.firstNameError,
+    required this.lastName,
+    required this.lastNameError,
+    required this.submitting,
+    required this.signUpSuccess,
+    required this.signUpError,
   });
 
   factory SignUpState.initial() {

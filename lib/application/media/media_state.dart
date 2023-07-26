@@ -15,7 +15,7 @@ class AvailableMediaLoading extends MediaState {
 class AvailableMediaLoaded extends MediaState {
   final List<Media> media;
 
-  const AvailableMediaLoaded({@required this.media});
+  const AvailableMediaLoaded({required this.media});
 
   @override
   List<Object> get props => [media];
@@ -24,7 +24,7 @@ class AvailableMediaLoaded extends MediaState {
 class AvailableMediaError extends MediaState {
   final String message;
 
-  const AvailableMediaError({@required this.message});
+  const AvailableMediaError({required this.message});
 
   @override
   List<Object> get props => [message];

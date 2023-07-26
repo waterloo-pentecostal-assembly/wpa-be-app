@@ -19,8 +19,8 @@ class AuthenticationException implements BaseApplicationException {
   /// Creates an [AuthenticationException] with the specified error [type],
   /// [message], and optional error [details].
   AuthenticationException({
-    @required this.code,
-    @required this.message,
+    required this.code,
+    required this.message,
     this.details,
   });
 

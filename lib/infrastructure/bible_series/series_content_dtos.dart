@@ -56,22 +56,20 @@ class SeriesContentDto {
 
   const SeriesContentDto._({
     this.id,
-    @required this.title,
-    @required this.subTitle,
-    @required this.contentType,
-    @required this.date,
-    @required this.body,
+    required this.title,
+    required this.subTitle,
+    required this.contentType,
+    required this.date,
+    required this.body,
   });
 }
 
 extension SeriesContentDtoX on SeriesContentDto {
-  Future<SeriesContent> toDomain(
-      FirebaseStorageService firebaseStorageService) async {
+  Future<SeriesContent> toDomain(FirebaseStorageService firebaseStorageService) async {
     List<ISeriesContentBody> _body = [];
 
     for (SeriesContentBodyDto element in this.body) {
-      ISeriesContentBody seriesContentBody =
-          await element.toDomain(body.indexOf(element), firebaseStorageService);
+      ISeriesContentBody seriesContentBody = await element.toDomain(body.indexOf(element), firebaseStorageService);
       _body.add(seriesContentBody);
     }
     return SeriesContent(
@@ -94,8 +92,7 @@ class SeriesContentBodyDto {
     Map<String, dynamic> _properties = {};
 
     if (_bodyType == 'audio') {
-      _properties['audioFileUrl'] =
-          findOrThrowException(json, 'audio_file_url');
+      _properties['audioFileUrl'] = findOrThrowException(json, 'audio_file_url');
       _properties['title'] = findOrDefaultTo(json, 'title', '');
     } else if (_bodyType == 'text') {
       _properties['paragraphs'] = findOrThrowException(json, 'paragraphs');
@@ -138,8 +135,7 @@ class SeriesContentBodyDto {
 
 extension SeriesContentBodyDtoX on SeriesContentBodyDto {
   // ignore: missing_return
-  Future<ISeriesContentBody> toDomain(
-      int index, FirebaseStorageService firebaseStorageService) async {
+  Future<ISeriesContentBody> toDomain(int index, FirebaseStorageService firebaseStorageService) async {
     if (this.bodyType == 'audio') {
       AudioBodyProperties bodyProperties = AudioBodyProperties();
       bodyProperties.audioFileUrl = this.properties['audioFileUrl'];
@@ -171,8 +167,7 @@ extension SeriesContentBodyDtoX on SeriesContentBodyDto {
       List<dynamic> _scriptures = this.properties['scriptures'];
       _scriptures.forEach((element) {
         Map<String, String> _verses = {};
-        Map<String, dynamic> _versesFirebase =
-            findOrThrowException(element, 'verses');
+        Map<String, dynamic> _versesFirebase = findOrThrowException(element, 'verses');
 
         _versesFirebase.forEach((key, value) {
           _verses[key] = value;

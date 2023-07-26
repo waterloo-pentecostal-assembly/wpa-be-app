@@ -11,7 +11,7 @@ import 'user_verification_page.dart';
 class AdminPage extends IIndexedPage {
   final GlobalKey<NavigatorState> navigatorKey;
 
-  const AdminPage({Key key, this.navigatorKey}) : super(key: key);
+  const AdminPage({required Key key, required this.navigatorKey}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

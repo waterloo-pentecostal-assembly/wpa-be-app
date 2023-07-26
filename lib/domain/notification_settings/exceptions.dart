@@ -13,8 +13,8 @@ class NotificationSettingsException implements BaseApplicationException {
   /// Creates an [PrayerRequestsException] with the specified error [type],
   /// [message], and optional error [details].
   NotificationSettingsException({
-    @required this.code,
-    @required this.message,
+    required this.code,
+    required this.message,
     this.details,
   });
 

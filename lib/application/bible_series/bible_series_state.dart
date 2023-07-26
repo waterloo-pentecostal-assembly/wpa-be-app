@@ -12,7 +12,7 @@ class BibleSeriesInitial extends BibleSeriesState {
 class BibleSeriesError extends BibleSeriesState {
   final String message;
 
-  BibleSeriesError({@required this.message});
+  BibleSeriesError({required this.message});
 
   @override
   List<Object> get props => [message];

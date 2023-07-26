@@ -15,20 +15,17 @@ class SignInState extends Equatable {
     bool passwordValid = !_toBoolean(passwordError);
     bool emailAddressFilled = _toBoolean(emailAddress);
     bool passwordFilled = _toBoolean(password);
-    return emailAddressValid &&
-        passwordValid &&
-        emailAddressFilled &&
-        passwordFilled;
+    return emailAddressValid && passwordValid && emailAddressFilled && passwordFilled;
   }
 
   SignInState({
-    @required this.emailAddress,
-    @required this.emailAddressError,
-    @required this.password,
-    @required this.passwordError,
-    @required this.submitting,
-    @required this.signInSuccess,
-    @required this.signInError,
+    required this.emailAddress,
+    required this.emailAddressError,
+    required this.password,
+    required this.passwordError,
+    required this.submitting,
+    required this.signInSuccess,
+    required this.signInError,
   });
 
   factory SignInState.initial() {
