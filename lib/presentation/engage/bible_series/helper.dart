@@ -23,8 +23,7 @@ bool isResponsesFilled(Responses responses, SeriesContent seriesContent) {
       for (int j = 0;
           j < seriesContent.body[i].properties.questions.length;
           j++) {
-        if (responses == null ||
-            responses.responses[i.toString()] == null ||
+        if (responses.responses[i.toString()] == null ||
             responses.responses[i.toString()][j.toString()] == null ||
             responses.responses[i.toString()][j.toString()].response == "") {
           check = false;
@@ -37,14 +36,12 @@ bool isResponsesFilled(Responses responses, SeriesContent seriesContent) {
 
 bool isResponseEmpty(Responses responses) {
   bool check = true;
-  if (responses.responses != null) {
-    responses.responses.forEach((key, value) {
-      value.forEach((key, value) {
-        if (value.response.isNotEmpty) {
-          check = false;
-        }
-      });
+  responses.responses.forEach((key, value) {
+    value.forEach((key, value) {
+      if (value.response.isNotEmpty) {
+        check = false;
+      }
     });
-  }
+  });
   return check;
 }

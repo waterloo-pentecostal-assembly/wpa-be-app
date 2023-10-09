@@ -97,7 +97,7 @@ class BibleSeriesCard extends StatelessWidget {
                 height: getIt<LayoutFactory>().getDimension(baseDimension: kRecentBibleSeriesTileHeight),
                 fit: BoxFit.fill,
                 frameBuilder: (BuildContext context, Widget child, int frame, bool wasSynchronouslyLoaded) {
-                  if (frame != null && frame >= 0) {
+                  if (frame >= 0) {
                     return child;
                   } else {
                     return BibleSeriesCardPlaceholder();

@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/application/audio_player/audio_player_bloc.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
-import 'package:wpa_app/presentation/engage/bible_series/widgets/audio_body.dart';
 
 import '../../../../app/constants.dart';
 import '../../../../app/injection.dart';

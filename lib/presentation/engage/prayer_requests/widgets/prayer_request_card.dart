@@ -176,7 +176,7 @@ class PrayerRequestUserAndDate extends StatelessWidget {
           child: Container(
             height: 30,
             width: 30,
-            child: (prayerRequest.userSnippet.thumbnailUrl == null || prayerRequest.isAnonymous)
+            child: (prayerRequest.isAnonymous)
                 ? Image.asset(kProfilePhotoPlaceholder)
                 : FadeInImage.assetNetwork(
                     fit: BoxFit.cover,

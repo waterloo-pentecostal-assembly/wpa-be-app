@@ -84,10 +84,8 @@ class _MyAnsweredPrayerRequestState extends State<MyAnsweredPrayerRequest>
           listener: (context, state) {
             if (state is MyPrayerRequestDeleteComplete) {
               int indexToDelete = getIndexToDelete(state.id);
-              if (indexToDelete != null) {
-                _delete(indexToDelete);
-              }
-            } else if (state is MyPrayerRequestAnsweredComplete) {
+              _delete(indexToDelete);
+                        } else if (state is MyPrayerRequestAnsweredComplete) {
               _insertAtTop(state.prayerRequest);
             }
           },

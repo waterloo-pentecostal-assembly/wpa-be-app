@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 
 class Media {
   final String id;

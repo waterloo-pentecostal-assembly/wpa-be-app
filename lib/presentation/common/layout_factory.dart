@@ -85,10 +85,8 @@ class LayoutFactory {
         break;
       default:
         if (deviceType == DeviceType.TABLET) {
-          if (baseDimension != null) {
-            return conversionVal * baseDimension;
-          }
-        }
+          return conversionVal * baseDimension;
+                }
         return baseDimension;
         break;
     }

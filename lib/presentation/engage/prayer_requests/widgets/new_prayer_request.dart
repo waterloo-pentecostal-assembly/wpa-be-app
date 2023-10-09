@@ -279,8 +279,7 @@ class CancelButton extends StatelessWidget {
       borderRadius: BorderRadius.all(Radius.circular(getIt<LayoutFactory>().getDimension(baseDimension: 16.0))),
       child: TextButton(
         style: TextButton.styleFrom(
-          primary: Colors.black,
-          minimumSize: Size(getIt<LayoutFactory>().getDimension(baseDimension: 90.0),
+          foregroundColor: Colors.black, minimumSize: Size(getIt<LayoutFactory>().getDimension(baseDimension: 90.0),
               getIt<LayoutFactory>().getDimension(baseDimension: 30.0)),
           backgroundColor: kCardGrey,
           padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),

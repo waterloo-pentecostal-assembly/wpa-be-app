@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 
 import '../../domain/authentication/entities.dart';
 import '../../domain/prayer_requests/entities.dart';
@@ -28,18 +27,14 @@ class PrayerRequestsDto {
     List<dynamic> _reportedByFirestore = json['reported_by'];
     String _userId = findOrThrowException(json, 'user_id');
 
-    if (_prayedByFirestore != null) {
-      _prayedByFirestore.forEach((element) {
-        _prayedBy.add(element.toString());
-      });
-    }
-
-    if (_reportedByFirestore != null) {
-      _reportedByFirestore.forEach((element) {
-        _reportedBy.add(element.toString());
-      });
-    }
-
+    _prayedByFirestore.forEach((element) {
+      _prayedBy.add(element.toString());
+    });
+  
+    _reportedByFirestore.forEach((element) {
+      _reportedBy.add(element.toString());
+    });
+  
     return PrayerRequestsDto._(
         userId: _userId,
         request: findOrThrowException(json, 'request'),

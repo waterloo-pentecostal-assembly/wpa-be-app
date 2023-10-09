@@ -67,9 +67,8 @@ class CompletionButton extends StatelessWidget {
                   ),
                 ));
           }
-        } else if (state.errorMessage != null) {
-          return Text('Error: ${state.errorMessage}');
-        }
+        } else        return Text('Error: ${state.errorMessage}');
+      
         return Loader();
       },
     );
@@ -112,10 +111,9 @@ class ResponseCompletionButton extends StatelessWidget {
                                     BorderRadius.all(Radius.circular(16)),
                                 child: TextButton(
                                   style: TextButton.styleFrom(
-                                      minimumSize: Size(90, 30),
+                                      foregroundColor: Colors.white, minimumSize: Size(90, 30),
                                       backgroundColor:
                                           kWpaBlue.withOpacity(0.8),
-                                      primary: Colors.white,
                                       padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
                                       tapTargetSize:
                                           MaterialTapTargetSize.shrinkWrap),
@@ -157,10 +155,9 @@ class ResponseCompletionButton extends StatelessWidget {
                                     BorderRadius.all(Radius.circular(16)),
                                 child: TextButton(
                                   style: TextButton.styleFrom(
-                                      minimumSize: Size(90, 30),
+                                      foregroundColor: Colors.white, minimumSize: Size(90, 30),
                                       backgroundColor:
                                           kWpaBlue.withOpacity(0.8),
-                                      primary: Colors.white,
                                       padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
                                       tapTargetSize:
                                           MaterialTapTargetSize.shrinkWrap),
@@ -214,9 +211,8 @@ class ResponseCompletionButton extends StatelessWidget {
                   ),
                 ));
           }
-        } else if (state.errorMessage != null) {
-          return Text('Error: ${state.errorMessage}');
-        }
+        } else        return Text('Error: ${state.errorMessage}');
+      
         return Loader();
       },
     );

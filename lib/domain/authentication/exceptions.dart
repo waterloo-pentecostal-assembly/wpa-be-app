@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:wpa_app/domain/common/exceptions.dart';
 
 enum AuthenticationExceptionCode {

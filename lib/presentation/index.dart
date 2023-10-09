@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:wpa_app/application/links/links_bloc.dart';
 import 'package:wpa_app/domain/authentication/entities.dart';
@@ -60,21 +59,19 @@ class _IndexPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<NavigationBarBloc, NavigationBarState>(
       builder: (BuildContext context, NavigationBarState state) {
-        if (state.route != null) {
-          NavigatorState routeNavigatorState =
-              indexedPages[state.tab.index].navigatorKey.currentState;
+        NavigatorState routeNavigatorState =
+            indexedPages[state.tab.index].navigatorKey.currentState;
 
-          if (routeNavigatorState.canPop()) {
-            // clear navigation stack before going to new route
-            routeNavigatorState.popUntil((route) => route.isFirst);
-          }
-
-          indexedPages[state.tab.index].navigatorKey.currentState.pushNamed(
-                state.route,
-                arguments: state.arguments,
-              );
+        if (routeNavigatorState.canPop()) {
+          // clear navigation stack before going to new route
+          routeNavigatorState.popUntil((route) => route.isFirst);
         }
 
+        indexedPages[state.tab.index].navigatorKey.currentState.pushNamed(
+              state.route,
+              arguments: state.arguments,
+            );
+      
         return NavigationBar(
           tabIndex: state.tab.index,
           indexedPages: indexedPages,

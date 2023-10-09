@@ -138,14 +138,12 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
           return StreamBuilder(
             stream: uploadTask.snapshotEvents,
             builder: (context, AsyncSnapshot<TaskSnapshot> snapshot) {
-              int bytesTransferred = snapshot?.data?.bytesTransferred;
-              int totalBytes = snapshot?.data?.totalBytes;
+              int bytesTransferred = snapshot.data?.bytesTransferred;
+              int totalBytes = snapshot.data?.totalBytes;
               int progressPercent = 0;
 
-              if (bytesTransferred != null && totalBytes != null) {
-                progressPercent = ((bytesTransferred / totalBytes) * 100).ceil();
-              }
-
+              progressPercent = ((bytesTransferred / totalBytes) * 100).ceil();
+            
               return Column(
                 children: [
                   ClipOval(
@@ -234,10 +232,8 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
 
   void selectNewProfileImage() async {
     XFile selected = await imagePicker.pickImage(source: ImageSource.gallery);
-    if (selected != null && selected.path != null) {
-      BlocProvider.of<UserProfileBloc>(context)..add(UploadProfilePhoto(profilePhoto: File(selected.path)));
+    BlocProvider.of<UserProfileBloc>(context)..add(UploadProfilePhoto(profilePhoto: File(selected.path)));
     }
-  }
 }
 
 class LogoutButton extends StatelessWidget {
@@ -507,9 +503,8 @@ class Other extends StatelessWidget {
                             borderRadius: BorderRadius.all(Radius.circular(16)),
                             child: TextButton(
                               style: TextButton.styleFrom(
-                                  minimumSize: Size(90, 30),
+                                  foregroundColor: Colors.white, minimumSize: Size(90, 30),
                                   backgroundColor: kDarkGreyColor.withOpacity(0.5),
-                                  primary: Colors.white,
                                   padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
                                   tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                               onPressed: () {
@@ -522,9 +517,8 @@ class Other extends StatelessWidget {
                             borderRadius: BorderRadius.all(Radius.circular(16)),
                             child: TextButton(
                               style: TextButton.styleFrom(
-                                  minimumSize: Size(90, 30),
+                                  foregroundColor: Colors.white, minimumSize: Size(90, 30),
                                   backgroundColor: kWpaBlue.withOpacity(0.8),
-                                  primary: Colors.white,
                                   padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
                                   tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                               onPressed: () {

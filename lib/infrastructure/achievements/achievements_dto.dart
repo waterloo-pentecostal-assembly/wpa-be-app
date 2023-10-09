@@ -1,7 +1,5 @@
-import 'dart:convert';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:wpa_app/domain/achievements/entities.dart';
 
 import '../common/helpers.dart';

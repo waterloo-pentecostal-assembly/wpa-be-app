@@ -1,7 +1,5 @@
-import 'dart:ffi';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 
 enum SeriesContentBodyType {
   AUDIO,
@@ -12,6 +10,7 @@ enum SeriesContentBodyType {
   LINK,
   TITLE,
   DIVIDER,
+  EMPTY,
 }
 
 class BibleSeries {
@@ -208,6 +207,11 @@ class AudioBodyProperties {
 
 class DividerBody implements ISeriesContentBody {
   final SeriesContentBodyType type = SeriesContentBodyType.DIVIDER;
+  get properties {}
+}
+
+class DefaultEmptyBody implements ISeriesContentBody {
+  final SeriesContentBodyType type = SeriesContentBodyType.EMPTY;
   get properties {}
 }
 

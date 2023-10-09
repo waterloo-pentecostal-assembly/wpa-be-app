@@ -1,11 +1,9 @@
-import 'dart:math';
 
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/presentation/common/loader.dart';
 
-import '../../../domain/bible_series/interfaces.dart';
 import '../../../app/injection.dart';
 import '../../../application/achievements/achievements_bloc.dart';
 import '../../../application/bible_series/bible_series_bloc.dart';

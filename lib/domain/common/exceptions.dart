@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 
 /// Parent exception of all exceptions thrown in the app.
 /// Any specific exception type must implement this class.

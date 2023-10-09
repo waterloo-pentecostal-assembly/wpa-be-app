@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 
 import '../../domain/authentication/entities.dart';
 import '../../services/firebase_storage_service.dart';

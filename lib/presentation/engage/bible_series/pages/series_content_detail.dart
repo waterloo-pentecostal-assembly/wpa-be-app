@@ -214,9 +214,8 @@ class ContentDetailWidget extends StatelessWidget {
               borderRadius: BorderRadius.all(Radius.circular(16)),
               child: TextButton(
                 style: TextButton.styleFrom(
-                    minimumSize: Size(90, 30),
+                    foregroundColor: Colors.white, minimumSize: Size(90, 30),
                     backgroundColor: kWpaBlue.withOpacity(0.8),
-                    primary: Colors.white,
                     padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                 onPressed: () {
@@ -229,7 +228,7 @@ class ContentDetailWidget extends StatelessWidget {
         ),
       );
     } else {
-      if (seriesContent.isResponsePossible && state.responses != null) {
+      if (seriesContent.isResponsePossible) {
         if (!isResponseEmpty(state.responses)) {
           CompletionDetails completionDetails = CompletionDetails(
               seriesId: bibleSeriesId,
@@ -238,7 +237,7 @@ class ContentDetailWidget extends StatelessWidget {
               isOnTime: isOnTime(seriesContent.date),
               completionDate: Timestamp.fromDate(DateTime.now()));
           BlocProvider.of<CompletionsBloc>(context)..add(MarkAsDraft(completionDetails));
-        } else if (state.responses.responses != null && state.id.isNotEmpty) {
+        } else if (state.id.isNotEmpty) {
           BlocProvider.of<CompletionsBloc>(context)..add(MarkAsInComplete(state.id));
         }
         Navigator.pop(context);

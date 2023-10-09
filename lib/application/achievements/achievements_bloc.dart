@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 
 import '../../domain/achievements/entities.dart';
 import '../../domain/achievements/interfaces.dart';
@@ -41,7 +40,7 @@ class AchievementsBloc extends Bloc<AchievementsEvent, AchievementsState> {
   Stream<AchievementsState> _mapWatchAchievementsStartedToState(
     WatchAchievementsStarted event,
   ) async* {
-    await _achievementsStreamSubscription?.cancel();
+    await _achievementsStreamSubscription.cancel();
     _achievementsStreamSubscription =
         _iAchievementsRepository.watchAchievements().listen((event) {
       return add(AchievementsReceived(achievements: event));

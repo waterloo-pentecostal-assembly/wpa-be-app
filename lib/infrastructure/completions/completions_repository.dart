@@ -219,15 +219,13 @@ class CompletionsRepository extends ICompletionsRepository {
     try {
       DocumentReference documentReference =
           _completionsCollection.doc(completionId);
-      if (documentReference != null) {
-        await documentReference.update({
-          "is_draft": completionsDto.isDraft,
-          "is_on_time": completionsDto.isOnTime,
-          "completion_date": completionsDto.completionDate,
-        });
-        return documentReference.id;
-      }
-    } catch (e) {
+      await documentReference.update({
+        "is_draft": completionsDto.isDraft,
+        "is_on_time": completionsDto.isOnTime,
+        "completion_date": completionsDto.completionDate,
+      });
+      return documentReference.id;
+        } catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
     return '';

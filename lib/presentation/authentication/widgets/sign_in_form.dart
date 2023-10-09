@@ -53,19 +53,16 @@ class SignInForm extends StatelessWidget {
                     ),
                     child: Column(
                       children: <Widget>[
-                        if (BlocProvider.of<SignInBloc>(context)
-                                .state
-                                .signInError !=
-                            null) ...{
-                          Text(
-                            BlocProvider.of<SignInBloc>(context)
-                                .state
-                                .signInError,
-                            style: TextStyle(
-                              color: kErrorTextColor,
-                            ),
+                        ...{
+                        Text(
+                          BlocProvider.of<SignInBloc>(context)
+                              .state
+                              .signInError,
+                          style: TextStyle(
+                            color: kErrorTextColor,
                           ),
-                        },
+                        ),
+                      },
                         SizedBox(height: 5),
                         Form(
                           autovalidateMode: AutovalidateMode.always,

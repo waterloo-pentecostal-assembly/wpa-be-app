@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:wpa_app/domain/prayer_requests/entities.dart';
 
 import '../authentication/entities.dart';

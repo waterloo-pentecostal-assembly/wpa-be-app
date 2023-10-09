@@ -1,6 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:wpa_app/services/firebase_storage_service.dart';
 
 import '../../domain/bible_series/entities.dart';
@@ -15,56 +13,34 @@ class SeriesContentDto {
   final Timestamp date;
   final List<SeriesContentBodyDto> body;
 
-  factory SeriesContentDto.fromJson(Map<String, dynamic> json) {
-    List<dynamic> _bodyFirebase = findOrThrowException(json, 'body');
-    List<SeriesContentBodyDto> _body = [];
-
-    _bodyFirebase.forEach((element) {
-      _body.add(SeriesContentBodyDto.fromFirestore(element));
-    });
-
-    return SeriesContentDto._(
-      title: findOrThrowException(json, 'title'),
-      subTitle: json['sub_title'] ?? '',
-      contentType: findOrThrowException(json, 'content_type'),
-      date: findOrThrowException(json, 'date'),
-      body: _body,
-    );
-  }
-
-  factory SeriesContentDto.fromFirestore(DocumentSnapshot doc) {
-    return SeriesContentDto.fromJson(doc.data()).copyWith(id: doc.id);
-  }
-
-  SeriesContentDto copyWith({
-    String id,
-    final String title,
-    final String subTitle,
-    final String contentType,
-    final Timestamp date,
-    final List<SeriesContentBodyDto> body,
-  }) {
-    return SeriesContentDto._(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      subTitle: subTitle ?? this.subTitle,
-      contentType: contentType ?? this.contentType,
-      date: date ?? this.date,
-      body: body ?? this.body,
-    );
-  }
-
-  const SeriesContentDto._({
-    this.id,
+  const SeriesContentDto({
+    required this.id,
     required this.title,
     required this.subTitle,
     required this.contentType,
     required this.date,
     required this.body,
   });
-}
 
-extension SeriesContentDtoX on SeriesContentDto {
+  factory SeriesContentDto.fromFirestore(DocumentSnapshot doc) {
+    Map<String, dynamic> data = (doc.data() ?? {}) as Map<String, dynamic>;
+    List<dynamic> _bodyFirebase = findOrThrowException(data, 'body');
+    List<SeriesContentBodyDto> _body = [];
+
+    _bodyFirebase.forEach((element) {
+      _body.add(SeriesContentBodyDto.fromFirestore(element));
+    });
+
+    return SeriesContentDto(
+      id: doc.id,
+      title: findOrThrowException(data, 'title'),
+      subTitle: data['sub_title'] ?? '',
+      contentType: findOrThrowException(data, 'content_type'),
+      date: findOrThrowException(data, 'date'),
+      body: _body,
+    );
+  }
+
   Future<SeriesContent> toDomain(FirebaseStorageService firebaseStorageService) async {
     List<ISeriesContentBody> _body = [];
 
@@ -128,8 +104,8 @@ class SeriesContentBodyDto {
   }
 
   SeriesContentBodyDto._({
-    this.bodyType,
-    this.properties,
+    required this.bodyType,
+    required this.properties,
   });
 }
 
@@ -229,5 +205,6 @@ extension SeriesContentBodyDtoX on SeriesContentBodyDto {
     } else if (this.bodyType == 'divider') {
       return DividerBody();
     }
+    return DefaultEmptyBody();
   }
 }

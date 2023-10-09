@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 
 enum AppEnvironment { DEV, LOCAL_DEV, PROD }
 

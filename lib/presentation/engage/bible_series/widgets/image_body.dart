@@ -58,13 +58,12 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
     return BlocConsumer<CompletionsBloc, CompletionsState>(
       listener: (context, state) {},
       builder: (BuildContext context, CompletionsState state) {
-        if (state.uploadTask != null && state.uploadTask[widget.contentNum.toString()] != null) {
+        if (state.uploadTask[widget.contentNum.toString()] != null) {
           return imageLoading(state.uploadTask[widget.contentNum.toString()]);
-        } else if (state.downloadURL != null) {
-          if (state.downloadURL[widget.contentNum.toString()] != null) {
-            return imageLoaded(state, widget.completionDetails, widget.contentNum);
-          }
+        } else        if (state.downloadURL[widget.contentNum.toString()] != null) {
+          return imageLoaded(state, widget.completionDetails, widget.contentNum);
         }
+      
 
         return Column(
           children: [
@@ -89,32 +88,28 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
 
   void selectImageInput() async {
     PickedFile selected = await imagePicker.getImage(source: ImageSource.gallery);
-    if (selected != null && selected.path != null) {
-      BlocProvider.of<CompletionsBloc>(context)
-        ..add(
-          UploadImage(
-            image: File(selected.path),
-            contentNum: widget.contentNum,
-            questionNum: 0,
-            bibleSeriesId: widget.bibleSeriesId,
-            seriesContent: widget.seriesContent,
-          ),
-        );
+    BlocProvider.of<CompletionsBloc>(context)
+      ..add(
+        UploadImage(
+          image: File(selected.path),
+          contentNum: widget.contentNum,
+          questionNum: 0,
+          bibleSeriesId: widget.bibleSeriesId,
+          seriesContent: widget.seriesContent,
+        ),
+      );
     }
-  }
 
   Widget imageLoading(UploadTask uploadTask) {
     return StreamBuilder(
       stream: uploadTask.snapshotEvents,
       builder: (context, AsyncSnapshot<TaskSnapshot> snapshot) {
-        int bytesTransferred = snapshot?.data?.bytesTransferred;
-        int totalBytes = snapshot?.data?.totalBytes;
+        int bytesTransferred = snapshot.data?.bytesTransferred;
+        int totalBytes = snapshot.data?.totalBytes;
         int progressPercent = 0;
 
-        if (bytesTransferred != null && totalBytes != null) {
-          progressPercent = ((bytesTransferred / totalBytes) * 100).ceil();
-        }
-        return Container(
+        progressPercent = ((bytesTransferred / totalBytes) * 100).ceil();
+              return Container(
           padding: const EdgeInsets.all(16),
           child: Center(child: getIt<TextFactory>().regular('$progressPercent%', fontSize: 12)),
         );
@@ -203,12 +198,12 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
 }
 
 Widget imageWidget(CompletionsState state, String contentNum) {
-  if (state.thumbnailURL != null && state.thumbnailURL[contentNum] != null) {
+  if (state.thumbnailURL[contentNum] != null) {
     return Image.network(
       state.thumbnailURL[contentNum][0],
       fit: BoxFit.fill,
     );
-  } else if (state.localImage != null && state.localImage[contentNum] != null) {
+  } else if (state.localImage[contentNum] != null) {
     return Image.file(state.localImage[contentNum][0]);
   } else {
     return Loader();
