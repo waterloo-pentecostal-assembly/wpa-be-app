@@ -7,10 +7,10 @@ import '../../services/firebase_storage_service.dart';
 import 'media_dto.dart';
 
 class MediaRepository implements IMediaRepository {
-  final FirebaseFirestore _firestore;
-  final FirebaseStorageService _firebaseStorageService;
-  final FirebaseFirestoreService _firebaseFirestoreService;
-  CollectionReference _mediaCollection;
+  late final FirebaseFirestore _firestore;
+  late final FirebaseStorageService _firebaseStorageService;
+  late final FirebaseFirestoreService _firebaseFirestoreService;
+  late CollectionReference _mediaCollection;
 
   MediaRepository(
     this._firestore,
@@ -26,8 +26,8 @@ class MediaRepository implements IMediaRepository {
 
     try {
       querySnapshot = await _mediaCollection.get();
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
 
     List<Media> mediaList = [];
