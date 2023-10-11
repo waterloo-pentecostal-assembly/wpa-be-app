@@ -11,7 +11,7 @@ class CompletionDetails {
   final String contentId;
   final bool isOnTime;
   final bool isDraft;
-  final Timestamp completionDate;
+  final Timestamp? completionDate;
 
   CompletionDetails({
     required this.id,
@@ -19,7 +19,7 @@ class CompletionDetails {
     required this.contentId,
     required this.isOnTime,
     required this.isDraft,
-    required this.completionDate,
+    this.completionDate,
   });
 }
 
