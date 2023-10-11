@@ -228,7 +228,6 @@ void initializeInjections({
 
   getIt.registerLazySingleton<INotificationSettingsService>(
     () => NotificationSettingsService(
-      getIt<FirebaseMessagingService>(),
       getIt<FirebaseFirestore>(),
       getIt<FirebaseFirestoreService>(),
     ),

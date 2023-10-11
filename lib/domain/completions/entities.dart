@@ -14,12 +14,12 @@ class CompletionDetails {
   final Timestamp completionDate;
 
   CompletionDetails({
-    this.id,
-    this.seriesId,
-    this.contentId,
-    this.isOnTime,
-    this.isDraft,
-    this.completionDate,
+    required this.id,
+    required this.seriesId,
+    required this.contentId,
+    required this.isOnTime,
+    required this.isDraft,
+    required this.completionDate,
   });
 }
 
@@ -29,9 +29,9 @@ class Responses {
   final String userId;
 
   Responses({
-    this.id,
-    this.responses,
-    this.userId,
+    required this.id,
+    required this.responses,
+    required this.userId,
   });
 }
 
@@ -40,7 +40,7 @@ class ResponseDetails {
   final String response;
 
   ResponseDetails({
-    this.type,
-    this.response,
+    required this.type,
+    required this.response,
   });
 }

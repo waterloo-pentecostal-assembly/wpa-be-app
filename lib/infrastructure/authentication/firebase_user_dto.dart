@@ -10,10 +10,8 @@ class FirebaseUserDto {
   final String lastName;
   final String email;
   final int reports;
-  final String? thumbnailUrl;
-  final String thumbnail;
-  final String? profilePhotoUrl;
-  final String profilePhoto;
+  final String? thumbnail;
+  final String? profilePhoto;
   final bool isVerified;
   final bool isAdmin;
 
@@ -32,44 +30,14 @@ class FirebaseUserDto {
     );
   }
 
-  FirebaseUserDto copyWith({
-    required String id,
-    String? firstName,
-    String? lastName,
-    String? email,
-    int? reports,
-    String? thumbnailUrl,
-    String? thumbnail,
-    String? profilePhotoUrl,
-    String? profilePhoto,
-    bool? isVerified,
-    bool? isAdmin,
-  }) {
-    return FirebaseUserDto._(
-      id: id,
-      firstName: firstName ?? this.firstName,
-      lastName: lastName ?? this.lastName,
-      email: email ?? this.email,
-      reports: reports ?? this.reports,
-      thumbnailUrl: thumbnailUrl ?? this.thumbnailUrl,
-      thumbnail: thumbnail ?? this.thumbnail,
-      profilePhotoUrl: profilePhotoUrl ?? this.profilePhotoUrl,
-      profilePhoto: profilePhoto ?? this.profilePhoto,
-      isVerified: isVerified ?? this.isVerified,
-      isAdmin: isAdmin ?? this.isAdmin,
-    );
-  }
-
   const FirebaseUserDto._({
     required this.id,
     required this.firstName,
     required this.lastName,
     required this.email,
     required this.reports,
-    this.thumbnailUrl,
-    required this.thumbnail,
-    this.profilePhotoUrl,
-    required this.profilePhoto,
+    this.thumbnail,
+    this.profilePhoto,
     required this.isVerified,
     required this.isAdmin,
   });
@@ -78,13 +46,8 @@ class FirebaseUserDto {
 extension FirebaseUserDtoX on FirebaseUserDto {
   Future<LocalUser> toDomain(FirebaseStorageService firebaseStorageService) async {
     // Convert GS Location to Download URL
-    String? thumbnailUrl;
-    try {
-      thumbnailUrl = await firebaseStorageService.getDownloadUrl(this.thumbnail);
-    } catch (e) {
-      thumbnailUrl = null;
-    }
-    String profilePhotoUrl = await firebaseStorageService.getDownloadUrl(this.profilePhoto);
+    String? thumbnailUrl = await firebaseStorageService.getDownloadUrl(this.thumbnail);
+    String? profilePhotoUrl = await firebaseStorageService.getDownloadUrl(this.profilePhoto);
 
     return LocalUser(
       id: this.id,

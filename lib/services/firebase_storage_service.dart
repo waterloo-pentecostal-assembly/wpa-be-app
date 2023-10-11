@@ -11,7 +11,10 @@ class FirebaseStorageService {
 
   String get storageBucket => _firebaseStorage.bucket;
 
-  Future<String> getDownloadUrl(String gsUrl) async {
+  Future<String?> getDownloadUrl(String? gsUrl) async {
+    if (gsUrl == null) {
+      return null;
+    }
 
     try {
       String downloadUrl =

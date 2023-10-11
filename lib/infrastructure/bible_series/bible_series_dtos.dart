@@ -30,7 +30,7 @@ class BibleSeriesDto {
   });
 
   factory BibleSeriesDto.fromFirestore(DocumentSnapshot doc) {
-    Map<String, dynamic> data = (doc.data() ?? {}) as Map<String, dynamic>;
+    var data = (doc.data() ?? {}) as Map<String, dynamic>;
     List<dynamic> _seriesContentSnippetFirebase = data['series_content_snippet'] ?? [];
     List<SeriesContentSnippetDto> _seriesContentSnippet = [];
 
@@ -58,7 +58,7 @@ class BibleSeriesDto {
     });
 
     // Convert GS URL to Download URL
-    String imageUrl = await firebaseStorageService.getDownloadUrl(this.imageGsLocation);
+    String imageUrl = (await firebaseStorageService.getDownloadUrl(this.imageGsLocation))!;
 
     return BibleSeries(
       id: this.id,

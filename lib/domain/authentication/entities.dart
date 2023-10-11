@@ -5,9 +5,9 @@ class LocalUser {
   final String email;
   final int reports;
   final String? thumbnailUrl;
-  final String thumbnail;
-  final String profilePhotoUrl;
-  final String profilePhoto;
+  final String? thumbnail;
+  final String? profilePhotoUrl;
+  final String? profilePhoto;
   final bool isAdmin;
   final bool isVerified;
 

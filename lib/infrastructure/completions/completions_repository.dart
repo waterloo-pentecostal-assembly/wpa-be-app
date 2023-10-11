@@ -16,10 +16,10 @@ import 'completions_dto.dart';
 import 'responses_dto.dart';
 
 class CompletionsRepository extends ICompletionsRepository {
-  final FirebaseFirestore _firestore;
-  final FirebaseFirestoreService _firebaseFirestoreService;
-  final FirebaseStorageService _firebaseStorageService;
-  CollectionReference _completionsCollection;
+  late final FirebaseFirestore _firestore;
+  late final FirebaseFirestoreService _firebaseFirestoreService;
+  late final FirebaseStorageService _firebaseStorageService;
+  late CollectionReference _completionsCollection;
 
   CompletionsRepository(this._firestore, this._firebaseFirestoreService,
       this._firebaseStorageService) {
@@ -28,7 +28,7 @@ class CompletionsRepository extends ICompletionsRepository {
 
   @override
   Future<String> markAsComplete({
-    CompletionDetails completionDetails,
+    required CompletionDetails completionDetails,
   }) async {
     CompletionsDto completionsDto =
         CompletionsDto.fromDomain(completionDetails);
@@ -44,17 +44,15 @@ class CompletionsRepository extends ICompletionsRepository {
         "user_id": user.id,
       });
       return documentReference.id;
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
-    //must have return statement due to linting issue
-    return '';
   }
 
   @override
   Future<void> markAsIncomplete({
-    String completionId,
-    bool isResponsePossible,
+    required String completionId,
+    required bool isResponsePossible,
   }) async {
     try {
       if (isResponsePossible) {
@@ -75,15 +73,15 @@ class CompletionsRepository extends ICompletionsRepository {
       } else {
         await _completionsCollection.doc(completionId).delete();
       }
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
   }
 
   @override
   Future<String> putResponses({
-    String completionId,
-    Responses responses,
+    required String completionId,
+    required Responses responses,
   }) async {
     final LocalUser user = getIt<LocalUser>();
     try {
@@ -99,8 +97,8 @@ class CompletionsRepository extends ICompletionsRepository {
             await responseCollection.add(responsesForFirestore);
         return documentReference.id;
       }
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
     return '';
   }
@@ -116,8 +114,8 @@ class CompletionsRepository extends ICompletionsRepository {
           .where("user_id", isEqualTo: user.id)
           .where("series_id", isEqualTo: bibleSeriesId)
           .get();
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
     Map<String, CompletionDetails> completionDetails = {};
     snapshot.docs.forEach((element) {
@@ -141,8 +139,8 @@ class CompletionsRepository extends ICompletionsRepository {
           .where("user_id", isEqualTo: user.id)
           .where("content_id", isEqualTo: seriesContentId)
           .get();
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
 
     if (snapshot.docs.length > 0) {
@@ -168,8 +166,8 @@ class CompletionsRepository extends ICompletionsRepository {
           .where("user_id", isEqualTo: user.id)
           .where("content_id", isEqualTo: seriesContentId)
           .get();
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
     if (snapshot.docs.length > 0) {
       DocumentSnapshot document = snapshot.docs[0];
@@ -194,8 +192,8 @@ class CompletionsRepository extends ICompletionsRepository {
           .collection("responses")
           .where("user_id", isEqualTo: user.id)
           .get();
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
 
     if (querySnapshot.docs.isNotEmpty) {
@@ -225,8 +223,8 @@ class CompletionsRepository extends ICompletionsRepository {
         "completion_date": completionsDto.completionDate,
       });
       return documentReference.id;
-        } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+        } on Exception catch (e) {
+      _firthrow ebaseFirestoreService.handleException(e);
     }
     return '';
   }

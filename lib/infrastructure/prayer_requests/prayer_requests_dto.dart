@@ -6,49 +6,19 @@ import '../../services/firebase_storage_service.dart';
 import '../common/helpers.dart';
 
 class PrayerRequestsDto {
-  final String id;
+  final String? id;
   final String userId;
   final String request;
-  final List<String> prayedBy;
-  final List<String> reportedBy;
-  final bool hasPrayed;
-  final bool hasReported;
-  final bool isMine;
-  final bool isApproved;
+  final List<String>? prayedBy;
+  final List<String>? reportedBy;
+  final bool? hasPrayed;
+  final bool? hasReported;
+  final bool? isMine;
+  final bool? isApproved;
   final Timestamp date;
   final bool isAnonymous;
   final UserSnippetDto userSnippet;
-  final bool isAnswered;
-
-  factory PrayerRequestsDto.fromJson(Map<String, dynamic> json, String signedInUserId) {
-    List<String> _prayedBy = [];
-    List<String> _reportedBy = [];
-    List<dynamic> _prayedByFirestore = json['prayed_by'];
-    List<dynamic> _reportedByFirestore = json['reported_by'];
-    String _userId = findOrThrowException(json, 'user_id');
-
-    _prayedByFirestore.forEach((element) {
-      _prayedBy.add(element.toString());
-    });
-  
-    _reportedByFirestore.forEach((element) {
-      _reportedBy.add(element.toString());
-    });
-  
-    return PrayerRequestsDto._(
-        userId: _userId,
-        request: findOrThrowException(json, 'request'),
-        prayedBy: _prayedBy,
-        reportedBy: _reportedBy,
-        hasPrayed: _prayedBy.contains(signedInUserId),
-        hasReported: _reportedBy.contains(signedInUserId),
-        isMine: _userId == signedInUserId,
-        isApproved: findOrDefaultTo(json, 'is_approved', false),
-        date: findOrThrowException(json, 'date'),
-        isAnonymous: findOrThrowException(json, 'is_anonymous'),
-        userSnippet: UserSnippetDto.fromFirestore(findOrThrowException(json, 'user_snippet')),
-        isAnswered: findOrDefaultTo(json, 'is_answered', false));
-  }
+  final bool? isAnswered;
 
   factory PrayerRequestsDto.newRequestFromDomain(String request, bool isAnonymous, LocalUser user) {
     return PrayerRequestsDto._(
@@ -61,38 +31,35 @@ class PrayerRequestsDto {
   }
 
   factory PrayerRequestsDto.fromFirestore(DocumentSnapshot doc, String signedInUserId) {
-    return PrayerRequestsDto.fromJson(doc.data(), signedInUserId).copyWith(id: doc.id);
-  }
+    var data = (doc.data() ?? {}) as Map<String, dynamic>;
+    List<String> _prayedBy = [];
+    List<String> _reportedBy = [];
+    List<dynamic> _prayedByFirestore = data['prayed_by'];
+    List<dynamic> _reportedByFirestore = data['reported_by'];
+    String _userId = findOrThrowException(data, 'user_id');
 
-  PrayerRequestsDto copyWith({
-    String id,
-    String userId,
-    String request,
-    List<String> prayedBy,
-    List<String> reportedBy,
-    bool hasPrayed,
-    bool hasReported,
-    bool isMine,
-    bool isApproved,
-    bool isAnswered,
-    Timestamp date,
-    bool isAnonymous,
-    UserSnippetDto userSnippet,
-  }) {
+    _prayedByFirestore.forEach((element) {
+      _prayedBy.add(element.toString());
+    });
+  
+    _reportedByFirestore.forEach((element) {
+      _reportedBy.add(element.toString());
+    });
+  
     return PrayerRequestsDto._(
-      id: id ?? this.id,
-      userId: userId ?? this.userId,
-      request: request ?? this.request,
-      prayedBy: prayedBy ?? this.prayedBy,
-      reportedBy: reportedBy ?? this.reportedBy,
-      hasPrayed: hasPrayed ?? this.hasPrayed,
-      hasReported: hasReported ?? this.hasReported,
-      isMine: isMine ?? this.isMine,
-      isApproved: isApproved ?? this.isApproved,
-      date: date ?? this.date,
-      isAnonymous: isAnonymous ?? this.isAnonymous,
-      userSnippet: userSnippet ?? this.userSnippet,
-      isAnswered: isAnswered ?? this.isAnswered,
+      id: doc.id,
+      userId: _userId,
+      request: findOrThrowException(data, 'request'),
+      prayedBy: _prayedBy,
+      reportedBy: _reportedBy,
+      hasPrayed: _prayedBy.contains(signedInUserId),
+      hasReported: _reportedBy.contains(signedInUserId),
+      isMine: _userId == signedInUserId,
+      isApproved: findOrDefaultTo(data, 'is_approved', false),
+      date: findOrThrowException(data, 'date'),
+      isAnonymous: findOrThrowException(data, 'is_anonymous'),
+      userSnippet: UserSnippetDto.fromFirestore(findOrThrowException(data, 'user_snippet')),
+      isAnswered: findOrDefaultTo(data, 'is_answered', false)
     );
   }
 
@@ -116,19 +83,19 @@ class PrayerRequestsDto {
 extension PrayerRequestsDtoX on PrayerRequestsDto {
   Future<PrayerRequest> toDomain(FirebaseStorageService firebaseStorageService) async {
     return PrayerRequest(
-      id: this.id,
+      id: this.id!,
       date: this.date,
       isAnonymous: this.isAnonymous,
-      prayedBy: this.prayedBy,
-      reportedBy: this.reportedBy,
-      hasPrayed: this.hasPrayed,
-      hasReported: this.hasReported,
-      isMine: this.isMine,
-      isApproved: this.isApproved,
+      prayedBy: this.prayedBy!,
+      reportedBy: this.reportedBy!,
+      hasPrayed: this.hasPrayed!,
+      hasReported: this.hasReported!,
+      isMine: this.isMine!,
+      isApproved: this.isApproved!,
       request: this.request,
       userId: this.userId,
       userSnippet: await this.userSnippet.toDomain(firebaseStorageService),
-      isAnswered: this.isAnswered,
+      isAnswered: this.isAnswered!,
     );
   }
 
@@ -153,16 +120,8 @@ extension PrayerRequestsDtoX on PrayerRequestsDto {
 class UserSnippetDto {
   final String firstName;
   final String lastName;
-  final String thumbnailUrl;
-  final String thumbnail;
-
-  factory UserSnippetDto.fromJson(Map<String, dynamic> json) {
-    return UserSnippetDto._(
-      firstName: findOrThrowException(json, 'first_name'),
-      lastName: findOrThrowException(json, 'last_name'),
-      thumbnail: json['thumbnail'],
-    );
-  }
+  final String? thumbnailUrl;
+  final String? thumbnail;
 
   factory UserSnippetDto.fromDomain(LocalUser user) {
     return UserSnippetDto._(
@@ -173,8 +132,12 @@ class UserSnippetDto {
     );
   }
 
-  factory UserSnippetDto.fromFirestore(dynamic userSnippet) {
-    return UserSnippetDto.fromJson(userSnippet);
+  factory UserSnippetDto.fromFirestore(Map<String, dynamic> userSnippet) {
+    return UserSnippetDto._(
+      firstName: findOrThrowException(userSnippet, 'first_name'),
+      lastName: findOrThrowException(userSnippet, 'last_name'),
+      thumbnail: userSnippet['thumbnail'],
+    );
   }
 
   const UserSnippetDto._({
@@ -188,11 +151,7 @@ class UserSnippetDto {
 extension UserSnippetDtoX on UserSnippetDto {
   Future<UserSnippet> toDomain(FirebaseStorageService firebaseStorageService) async {
     // Convert GS Location to Download URL
-    String thumbnailUrl;
-
-    try {
-      thumbnailUrl = await firebaseStorageService.getDownloadUrl(this.thumbnail);
-    } catch (e) {}
+    String? thumbnailUrl = await firebaseStorageService.getDownloadUrl(this.thumbnail);;
 
     return UserSnippet(
       firstName: this.firstName,

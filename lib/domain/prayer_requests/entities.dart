@@ -42,8 +42,8 @@ class PrayerRequest {
 class UserSnippet {
   final String firstName;
   final String lastName;
-  final String thumbnailUrl;
-  final String thumbnail;
+  final String? thumbnailUrl;
+  final String? thumbnail;
 
   UserSnippet({
     required this.firstName,

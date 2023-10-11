@@ -1,4 +1,6 @@
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'entities.dart';
 
 abstract class IPrayerRequestsRepository {
@@ -8,6 +10,7 @@ abstract class IPrayerRequestsRepository {
 
   Future<List<PrayerRequest>> getMorePrayerRequests({
     required int limit,
+    required DocumentSnapshot startAtDocument,
   });
 
   Future<List<PrayerRequest>> getMyPrayerRequests();

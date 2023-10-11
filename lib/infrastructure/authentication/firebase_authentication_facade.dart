@@ -186,7 +186,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
   Future<void> signOut() async {
     try {
       String uid = _firebaseAuth.currentUser!.uid;
-      String token = await _firebaseMessagingService.getToken();
+      String? token = await _firebaseMessagingService.getToken();
       await _firestore
           .collection('users')
           .doc(uid)
@@ -273,7 +273,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
 
   @override
   Future<void> addDeviceToken(String userId) async {
-    String deviceToken = await _firebaseMessagingService.getToken();
+    String? deviceToken = await _firebaseMessagingService.getToken();
     String platform = _firebaseMessagingService.getPlatform();
 
     try {
@@ -294,7 +294,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
 
   @override
   Future<bool> deviceTokenExists(String userId) async {
-    String deviceToken = await _firebaseMessagingService.getToken();
+    String? deviceToken = await _firebaseMessagingService.getToken();
 
     late DocumentSnapshot documentSnapshot;
     try {

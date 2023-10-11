@@ -7,32 +7,18 @@ class NotificationSettingsDto {
   final String id;
   final bool dailyEngagementReminder;
   final bool prayers;
-
-  factory NotificationSettingsDto.fromJson(Map<String, dynamic> json) {
-    return NotificationSettingsDto._(
-      dailyEngagementReminder: findOrDefaultTo(json, 'daily_engagement_reminder', false),
-      prayers: findOrDefaultTo(json, 'prayers', false),
-    );
-  }
-
+  
   factory NotificationSettingsDto.fromFirestore(DocumentSnapshot doc) {
-    return NotificationSettingsDto.fromJson(doc.data()).copyWith(id: doc.id);
-  }
-
-  NotificationSettingsDto copyWith({
-    String id,
-    String dailyEngagementReminder,
-    String prayers,
-  }) {
+    var data = (doc.data() ?? {}) as Map<String, dynamic>;
     return NotificationSettingsDto._(
-      id: id ?? this.id,
-      dailyEngagementReminder: dailyEngagementReminder ?? this.dailyEngagementReminder,
-      prayers: prayers ?? this.prayers,
+      id: doc.id,
+      dailyEngagementReminder: findOrDefaultTo(data, 'daily_engagement_reminder', false),
+      prayers: findOrDefaultTo(data, 'prayers', false),
     );
   }
 
   NotificationSettingsDto._({
-    this.id,
+    required this.id,
     required this.dailyEngagementReminder,
     required this.prayers,
   });
