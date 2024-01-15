@@ -106,6 +106,7 @@ Stream<CompletionsState> _mapMarkAsCompleteEventToState(
     Future<String> Function(
             {required CompletionDetails completionDetails, required String completionId})
         updateComplete) async* {
+          final LocalUser user = getIt<LocalUser>();
   try {
     String id = state.id;
     if (id == '') {
@@ -119,7 +120,7 @@ Stream<CompletionsState> _mapMarkAsCompleteEventToState(
       String responseId =
           await putResponses(completionId: id, responses: state.responses);
       Responses newResponse =
-          Responses(id: responseId, responses: state.responses.responses);
+          Responses(id: responseId, responses: state.responses.responses, userId: user.id);
       yield state.copyWith(
           isComplete: true,
           id: id,
@@ -147,6 +148,7 @@ Stream<CompletionsState> _mapMarkAsDraftToState(
         markAsComplete,
     Future<String> Function({required String completionId, required Responses responses})
         putResponses) async* {
+          final LocalUser user = getIt<LocalUser>();
   try {
     //checks if saving as draft is nessesary, if not, return original state
     if (!state.isComplete) {
@@ -157,7 +159,7 @@ Stream<CompletionsState> _mapMarkAsDraftToState(
       String responseId =
           await putResponses(completionId: id, responses: state.responses);
       Responses newResponse =
-          Responses(id: responseId, responses: state.responses.responses, userId: event.completionDetails);
+          Responses(id: responseId, responses: state.responses.responses, userId: user.id);
       yield state.copyWith(isComplete: false, id: id, responses: newResponse);
     } else {
       yield state;
@@ -203,6 +205,7 @@ Stream<CompletionsState> _mapQuestionResponseChangedToState(
   QuestionResponseChanged event,
   CompletionsState state,
 ) async* {
+  final LocalUser user = getIt<LocalUser>();
   try {
     yield state.copyWith(
         responses: toResponses(
@@ -211,7 +214,9 @@ Stream<CompletionsState> _mapQuestionResponseChangedToState(
             event.contentNum.toString(),
             event.questionNum.toString(),
             ResponseType.TEXT,
-            state.responses.id));
+            state.responses.id,
+            user.id
+            ));
   } on BaseApplicationException catch (e) {
     yield state.copyWith(
       errorMessage: e.message,
@@ -251,6 +256,7 @@ Stream<CompletionsState> _mapLoadResponsesEventToState(
     CompletionsState state,
     Future<Responses> Function({required String completionId}) getResponses,
     ICompletionsRepository completionsRepository) async* {
+      final LocalUser user = getIt<LocalUser>();
   try {
     if (event.completionDetails != null) {
       Responses responses =
@@ -288,7 +294,7 @@ Stream<CompletionsState> _mapLoadResponsesEventToState(
             thumbnailURL: thumbnailMap);
       }
     } else {
-      Responses responses = Responses();
+      Responses responses = Responses(responses: Map(), userId: user.id);
       yield state.copyWith(responses: responses);
     }
   } on BaseApplicationException catch (e) {
