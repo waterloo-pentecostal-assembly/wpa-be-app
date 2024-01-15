@@ -45,8 +45,8 @@ class AchievementsRepository implements IAchievementsRepository {
               toFirestore: (model, _) => model.toJson())
           .snapshots()
           .map((documentSnapshot) {
-            return documentSnapshot.data() ?? Achievements(seriesProgress: 0);
-          });
+        return documentSnapshot.data() ?? Achievements(seriesProgress: 0);
+      });
     } on Exception catch (e) {
       _firebaseFirestoreService.handleException(e);
     }

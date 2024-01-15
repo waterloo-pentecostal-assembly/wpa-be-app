@@ -1,4 +1,3 @@
-
 import 'entities.dart';
 
 abstract class IBibleSeriesRepository {

@@ -47,15 +47,15 @@ class PasswordResetForm extends StatelessWidget {
                     child: Column(
                       children: <Widget>[
                         ...{
-                        Text(
-                          BlocProvider.of<PasswordResetBloc>(context)
-                              .state
-                              .passwordResetError,
-                          style: TextStyle(
-                            color: kErrorTextColor,
+                          Text(
+                            BlocProvider.of<PasswordResetBloc>(context)
+                                .state
+                                .passwordResetError,
+                            style: TextStyle(
+                              color: kErrorTextColor,
+                            ),
                           ),
-                        ),
-                      },
+                        },
                         SizedBox(height: 5),
                         Form(
                           autovalidateMode: AutovalidateMode.always,

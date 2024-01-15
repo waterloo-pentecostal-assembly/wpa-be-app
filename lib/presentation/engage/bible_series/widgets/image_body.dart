@@ -20,11 +20,17 @@ class ImageInputBodyWidget extends StatelessWidget {
   final String bibleSeriesId;
   final SeriesContent seriesContent;
   const ImageInputBodyWidget(
-      {Key key, this.imageInputBody, this.contentNum, this.completionDetails, this.bibleSeriesId, this.seriesContent})
+      {Key key,
+      this.imageInputBody,
+      this.contentNum,
+      this.completionDetails,
+      this.bibleSeriesId,
+      this.seriesContent})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
-    BlocProvider.of<CompletionsBloc>(context)..add(LoadResponses(completionDetails));
+    BlocProvider.of<CompletionsBloc>(context)
+      ..add(LoadResponses(completionDetails));
     return ImageInputBodyState(
       contentNum: contentNum,
       completionDetails: completionDetails,
@@ -60,10 +66,10 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
       builder: (BuildContext context, CompletionsState state) {
         if (state.uploadTask[widget.contentNum.toString()] != null) {
           return imageLoading(state.uploadTask[widget.contentNum.toString()]);
-        } else        if (state.downloadURL[widget.contentNum.toString()] != null) {
-          return imageLoaded(state, widget.completionDetails, widget.contentNum);
+        } else if (state.downloadURL[widget.contentNum.toString()] != null) {
+          return imageLoaded(
+              state, widget.completionDetails, widget.contentNum);
         }
-      
 
         return Column(
           children: [
@@ -72,7 +78,8 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
               child: GestureDetector(
                 child: Icon(
                   Icons.add_a_photo,
-                  size: getIt<LayoutFactory>().getDimension(baseDimension: 36.0),
+                  size:
+                      getIt<LayoutFactory>().getDimension(baseDimension: 36.0),
                   color: Colors.black87.withOpacity(0.75),
                 ),
                 onTap: selectImageInput,
@@ -87,7 +94,8 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
   }
 
   void selectImageInput() async {
-    PickedFile selected = await imagePicker.getImage(source: ImageSource.gallery);
+    PickedFile selected =
+        await imagePicker.getImage(source: ImageSource.gallery);
     BlocProvider.of<CompletionsBloc>(context)
       ..add(
         UploadImage(
@@ -98,7 +106,7 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
           seriesContent: widget.seriesContent,
         ),
       );
-    }
+  }
 
   Widget imageLoading(UploadTask uploadTask) {
     return StreamBuilder(
@@ -109,15 +117,18 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
         int progressPercent = 0;
 
         progressPercent = ((bytesTransferred / totalBytes) * 100).ceil();
-              return Container(
+        return Container(
           padding: const EdgeInsets.all(16),
-          child: Center(child: getIt<TextFactory>().regular('$progressPercent%', fontSize: 12)),
+          child: Center(
+              child: getIt<TextFactory>()
+                  .regular('$progressPercent%', fontSize: 12)),
         );
       },
     );
   }
 
-  Widget imageLoaded(CompletionsState state, CompletionDetails completionDetails, int contentNum) {
+  Widget imageLoaded(CompletionsState state,
+      CompletionDetails completionDetails, int contentNum) {
     return Column(
       children: [
         Row(
@@ -128,7 +139,10 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
                 onTap: () {
                   BlocProvider.of<CompletionsBloc>(context)
                     ..add(DeleteImage(
-                      gsURL: state.responses.responses[widget.contentNum.toString()]['0'].response,
+                      gsURL: state
+                          .responses
+                          .responses[widget.contentNum.toString()]['0']
+                          .response,
                       completionDetails: completionDetails,
                       contentNum: contentNum,
                     ));
@@ -136,7 +150,8 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
                 child: Center(
                   child: Icon(
                     Icons.close,
-                    size: getIt<LayoutFactory>().getDimension(baseDimension: 30.0),
+                    size: getIt<LayoutFactory>()
+                        .getDimension(baseDimension: 30.0),
                   ),
                 ),
               ),
@@ -160,8 +175,11 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
                             width: MediaQuery.of(context).size.width * 0.9,
                             height: MediaQuery.of(context).size.width * 1.6,
                             child: PhotoView(
-                              backgroundDecoration: BoxDecoration(color: Colors.transparent),
-                              imageProvider: NetworkImage(state.downloadURL[widget.contentNum.toString()][0]),
+                              backgroundDecoration:
+                                  BoxDecoration(color: Colors.transparent),
+                              imageProvider: NetworkImage(state
+                                      .downloadURL[widget.contentNum.toString()]
+                                  [0]),
                               minScale: PhotoViewComputedScale.contained * 0.8,
                               maxScale: PhotoViewComputedScale.covered * 2,
                               loadingBuilder: (context, event) => Center(
@@ -180,7 +198,8 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
                             child: Center(
                               child: Icon(
                                 Icons.close,
-                                size: getIt<LayoutFactory>().getDimension(baseDimension: 30.0),
+                                size: getIt<LayoutFactory>()
+                                    .getDimension(baseDimension: 30.0),
                                 color: Colors.white,
                               ),
                             ),
@@ -191,7 +210,8 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
                   });
             },
             child: Container(
-                width: MediaQuery.of(context).size.width * 0.8, child: imageWidget(state, contentNum.toString()))),
+                width: MediaQuery.of(context).size.width * 0.8,
+                child: imageWidget(state, contentNum.toString()))),
       ],
     );
   }

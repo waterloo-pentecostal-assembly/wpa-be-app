@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 enum SeriesContentBodyType {
@@ -130,7 +129,8 @@ class SeriesContent {
   bool get isResponsePossible {
     bool check = false;
     this.body.forEach((element) {
-      if (element.type == SeriesContentBodyType.QUESTION || element.type == SeriesContentBodyType.IMAGE_INPUT) {
+      if (element.type == SeriesContentBodyType.QUESTION ||
+          element.type == SeriesContentBodyType.IMAGE_INPUT) {
         check = true;
       }
     });

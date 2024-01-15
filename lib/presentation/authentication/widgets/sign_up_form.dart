@@ -46,15 +46,15 @@ class SignUpForm extends StatelessWidget {
                     child: Column(
                       children: <Widget>[
                         ...{
-                        Text(
-                          BlocProvider.of<SignUpBloc>(context)
-                              .state
-                              .signUpError,
-                          style: TextStyle(
-                            color: kErrorTextColor,
+                          Text(
+                            BlocProvider.of<SignUpBloc>(context)
+                                .state
+                                .signUpError,
+                            style: TextStyle(
+                              color: kErrorTextColor,
+                            ),
                           ),
-                        ),
-                      },
+                        },
                         SizedBox(height: 5),
                         Form(
                           autovalidateMode: AutovalidateMode.always,
@@ -285,7 +285,8 @@ _signUpSuccessAlert(BuildContext context, String emailAddress) {
           borderRadius: BorderRadius.all(Radius.circular(16)),
           child: TextButton(
             style: TextButton.styleFrom(
-                foregroundColor: Colors.white, backgroundColor: kWpaBlue.withOpacity(0.8),
+                foregroundColor: Colors.white,
+                backgroundColor: kWpaBlue.withOpacity(0.8),
                 minimumSize: Size(90, 30),
                 padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap),

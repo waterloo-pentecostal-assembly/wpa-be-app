@@ -30,10 +30,11 @@ class CompletionsDto {
       contentId: findOrThrowException(data, 'content_id'),
       isOnTime: !isDraft ? findOrThrowException(data, 'is_on_time') : false,
       isDraft: isDraft,
-      completionDate: !isDraft ? findOrThrowException(data, 'completion_date') : null,
+      completionDate:
+          !isDraft ? findOrThrowException(data, 'completion_date') : null,
     );
   }
-  
+
   CompletionDetails toDomain() {
     return CompletionDetails(
       id: this.id!,
@@ -53,4 +54,3 @@ class CompletionsDto {
     this.completionDate,
   });
 }
-

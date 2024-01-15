@@ -1,4 +1,3 @@
-
 import '../common/exceptions.dart';
 
 enum PrayerRequestsExceptionCode {

@@ -15,7 +15,8 @@ class FirebaseUserDto {
   final bool isVerified;
   final bool isAdmin;
 
-  factory FirebaseUserDto.fromFirestore(DocumentSnapshot<Map<String, dynamic>> doc) {
+  factory FirebaseUserDto.fromFirestore(
+      DocumentSnapshot<Map<String, dynamic>> doc) {
     Map<String, dynamic> data = doc.data()!;
     return FirebaseUserDto._(
       firstName: findOrThrowException(data, 'first_name'),
@@ -25,7 +26,7 @@ class FirebaseUserDto {
       thumbnail: data['thumbnail'],
       profilePhoto: data['profile_photo'],
       isVerified: findOrDefaultTo(data, 'is_verified', false),
-      isAdmin: findOrDefaultTo(data, 'is_admin', false), 
+      isAdmin: findOrDefaultTo(data, 'is_admin', false),
       id: doc.id,
     );
   }
@@ -44,10 +45,13 @@ class FirebaseUserDto {
 }
 
 extension FirebaseUserDtoX on FirebaseUserDto {
-  Future<LocalUser> toDomain(FirebaseStorageService firebaseStorageService) async {
+  Future<LocalUser> toDomain(
+      FirebaseStorageService firebaseStorageService) async {
     // Convert GS Location to Download URL
-    String? thumbnailUrl = await firebaseStorageService.getDownloadUrl(this.thumbnail);
-    String? profilePhotoUrl = await firebaseStorageService.getDownloadUrl(this.profilePhoto);
+    String? thumbnailUrl =
+        await firebaseStorageService.getNullableDownloadUrl(this.thumbnail);
+    String? profilePhotoUrl =
+        await firebaseStorageService.getNullableDownloadUrl(this.profilePhoto);
 
     return LocalUser(
       id: this.id,

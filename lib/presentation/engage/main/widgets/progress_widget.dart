@@ -54,7 +54,8 @@ class ProgressTile extends StatelessWidget {
           children: [
             Container(
               padding: const EdgeInsets.only(bottom: 8),
-              height: getIt<LayoutFactory>().getDimension(baseDimension: kProgressWidgetWidth),
+              height: getIt<LayoutFactory>()
+                  .getDimension(baseDimension: kProgressWidgetWidth),
               child: SfRadialGauge(
                 enableLoadingAnimation: true,
                 axes: [
@@ -90,14 +91,19 @@ class ProgressTile extends StatelessWidget {
                         widget: Column(
                           children: [
                             SizedBox(
-                              height: 0.2 * getIt<LayoutFactory>().getDimension(baseDimension: kProgressWidgetWidth),
+                              height: 0.2 *
+                                  getIt<LayoutFactory>().getDimension(
+                                      baseDimension: kProgressWidgetWidth),
                             ),
-                            Container(child: getIt<TextFactory>().subHeading('${achievements.seriesProgress}%')),
                             Container(
-                                child: getIt<TextFactory>()
-                                    .regular('${getProgressBarPhrase(achievements.seriesProgress)}')),
+                                child: getIt<TextFactory>().subHeading(
+                                    '${achievements.seriesProgress}%')),
+                            Container(
+                                child: getIt<TextFactory>().regular(
+                                    '${getProgressBarPhrase(achievements.seriesProgress)}')),
                             SizedBox(
-                              height: getIt<LayoutFactory>().getDimension(baseDimension: 10.0),
+                              height: getIt<LayoutFactory>()
+                                  .getDimension(baseDimension: 10.0),
                             ),
                             ProgressWidgetTitle()
                           ],
@@ -182,11 +188,14 @@ class ProgressWidgetTitle extends StatelessWidget {
           return Center(
             child: RichText(
                 textAlign: TextAlign.center,
-                text: TextSpan(style: getIt<TextFactory>().liteTextStyle(), children: [
-                  TextSpan(text: "Your Progress for "),
-                  TextSpan(
-                      text: getLastestActive(state.bibleSeriesList), style: getIt<TextFactory>().regularTextStyle())
-                ])),
+                text: TextSpan(
+                    style: getIt<TextFactory>().liteTextStyle(),
+                    children: [
+                      TextSpan(text: "Your Progress for "),
+                      TextSpan(
+                          text: getLastestActive(state.bibleSeriesList),
+                          style: getIt<TextFactory>().regularTextStyle())
+                    ])),
           );
         } else {
           return Container();

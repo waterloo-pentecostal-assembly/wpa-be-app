@@ -85,12 +85,12 @@ class _MyPrayerRequestsState extends State<MyPrayerRequests>
             if (state is MyPrayerRequestDeleteComplete) {
               int indexToDelete = getIndexToDelete(state.id);
               _delete(indexToDelete);
-                        } else if (state is NewPrayerRequestLoaded) {
+            } else if (state is NewPrayerRequestLoaded) {
               _insertAtTop(state.prayerRequest);
             } else if (state is MyPrayerRequestAnsweredComplete) {
               int indexToDelete = getIndexToDelete(state.id);
               _delete(indexToDelete);
-                        }
+            }
           },
         ),
         BlocListener<MyPrayerRequestsBloc, PrayerRequestsState>(

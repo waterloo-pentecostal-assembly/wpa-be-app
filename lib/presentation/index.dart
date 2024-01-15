@@ -71,7 +71,7 @@ class _IndexPage extends StatelessWidget {
               state.route,
               arguments: state.arguments,
             );
-      
+
         return NavigationBar(
           tabIndex: state.tab.index,
           indexedPages: indexedPages,

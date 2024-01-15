@@ -72,14 +72,16 @@ class UploadImage extends CompletionsEvent {
       required this.bibleSeriesId,
       required this.seriesContent});
   @override
-  List<Object> get props => [image, contentNum, seriesContent, questionNum, bibleSeriesId];
+  List<Object> get props =>
+      [image, contentNum, seriesContent, questionNum, bibleSeriesId];
 }
 
 class DeleteImage extends CompletionsEvent {
   final String gsURL;
   final CompletionDetails completionDetails;
   final int contentNum;
-  DeleteImage({required this.gsURL, required this.completionDetails, this.contentNum});
+  DeleteImage(
+      {required this.gsURL, required this.completionDetails, this.contentNum});
   @override
   List<Object> get props => [gsURL, completionDetails];
 }

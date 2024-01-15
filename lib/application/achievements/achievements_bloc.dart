@@ -15,7 +15,7 @@ class AchievementsBloc extends Bloc<AchievementsEvent, AchievementsState> {
   AchievementsBloc(this._iAchievementsRepository)
       : super(AchievementsLoading());
 
-  StreamSubscription<Achievements> _achievementsStreamSubscription;
+  late StreamSubscription<Achievements> _achievementsStreamSubscription;
 
   @override
   Stream<AchievementsState> mapEventToState(
@@ -42,12 +42,15 @@ class AchievementsBloc extends Bloc<AchievementsEvent, AchievementsState> {
   ) async* {
     await _achievementsStreamSubscription.cancel();
     _achievementsStreamSubscription =
-        _iAchievementsRepository.watchAchievements().listen((event) {
-      return add(AchievementsReceived(achievements: event));
-    })
-          ..onError((_) {
-            return add(AchievementsErrorReceived());
-          });
+        _iAchievementsRepository.watchAchievements().listen(
+      (event) {
+        return add(AchievementsReceived(achievements: event));
+      },
+    )..onError(
+            (_) {
+              return add(AchievementsErrorReceived());
+            },
+          );
   }
 
   @override

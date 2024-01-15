@@ -1,4 +1,3 @@
-
 enum AppEnvironment { DEV, LOCAL_DEV, PROD }
 
 class AppConfig {

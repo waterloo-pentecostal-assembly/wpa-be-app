@@ -1,4 +1,3 @@
-
 /// Parent exception of all exceptions thrown in the app.
 /// Any specific exception type must implement this class.
 abstract class BaseApplicationException implements Exception {

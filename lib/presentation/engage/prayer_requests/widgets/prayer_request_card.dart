@@ -77,7 +77,8 @@ class PrayerRequestCard extends StatelessWidget {
 class PrayerRequestMenuButton extends StatelessWidget {
   final PrayerRequest prayerRequest;
 
-  const PrayerRequestMenuButton({Key key, required this.prayerRequest}) : super(key: key);
+  const PrayerRequestMenuButton({Key key, required this.prayerRequest})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -92,27 +93,35 @@ class PrayerRequestMenuButton extends StatelessWidget {
         ),
       ),
       color: kCardOverlayGrey,
-      itemBuilder: (BuildContext context) => getPrayerRequestCardMenuItems(prayerRequest),
-      child: Icon(Icons.more_horiz, size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0)),
+      itemBuilder: (BuildContext context) =>
+          getPrayerRequestCardMenuItems(prayerRequest),
+      child: Icon(Icons.more_horiz,
+          size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0)),
     );
   }
 
-  void handleMenuButtonSelection(MenuButtonValue menuButtonValue, BuildContext context) {
+  void handleMenuButtonSelection(
+      MenuButtonValue menuButtonValue, BuildContext context) {
     if (menuButtonValue.action == PrayerActionOptions.MY_DELETE) {
-      BlocProvider.of<PrayerRequestsBloc>(context)..add(MyPrayerRequestDeleted(id: menuButtonValue.id));
+      BlocProvider.of<PrayerRequestsBloc>(context)
+        ..add(MyPrayerRequestDeleted(id: menuButtonValue.id));
     } else if (menuButtonValue.action == PrayerActionOptions.REPORT) {
-      BlocProvider.of<AllPrayerRequestsBloc>(context)..add(PrayerRequestReported(id: menuButtonValue.id));
+      BlocProvider.of<AllPrayerRequestsBloc>(context)
+        ..add(PrayerRequestReported(id: menuButtonValue.id));
     } else if (menuButtonValue.action == PrayerActionOptions.MY_CLOSE) {
-      BlocProvider.of<PrayerRequestsBloc>(context)..add(ClosePrayerRequest(id: menuButtonValue.id));
+      BlocProvider.of<PrayerRequestsBloc>(context)
+        ..add(ClosePrayerRequest(id: menuButtonValue.id));
     }
   }
 
-  List<PopupMenuItem> getPrayerRequestCardMenuItems(PrayerRequest prayerRequest) {
+  List<PopupMenuItem> getPrayerRequestCardMenuItems(
+      PrayerRequest prayerRequest) {
     List<PopupMenuItem> popupMenuItems = [];
 
     if (prayerRequest.isMine) {
       popupMenuItems.add(PopupMenuItem(
-        value: MenuButtonValue(id: prayerRequest.id, action: PrayerActionOptions.MY_DELETE),
+        value: MenuButtonValue(
+            id: prayerRequest.id, action: PrayerActionOptions.MY_DELETE),
         child: Row(
           children: [
             Icon(
@@ -128,7 +137,8 @@ class PrayerRequestMenuButton extends StatelessWidget {
       ));
       if (!prayerRequest.isAnswered) {
         popupMenuItems.add(PopupMenuItem(
-          value: MenuButtonValue(id: prayerRequest.id, action: PrayerActionOptions.MY_CLOSE),
+          value: MenuButtonValue(
+              id: prayerRequest.id, action: PrayerActionOptions.MY_CLOSE),
           child: Row(
             children: [
               Icon(
@@ -145,7 +155,8 @@ class PrayerRequestMenuButton extends StatelessWidget {
       }
     } else {
       popupMenuItems.add(PopupMenuItem(
-        value: MenuButtonValue(id: prayerRequest.id, action: PrayerActionOptions.REPORT),
+        value: MenuButtonValue(
+            id: prayerRequest.id, action: PrayerActionOptions.REPORT),
         child: Row(
           children: [
             Icon(
@@ -153,7 +164,8 @@ class PrayerRequestMenuButton extends StatelessWidget {
               size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
             ),
             SizedBox(width: 4),
-            Expanded(child: getIt<TextFactory>().lite('REPORT AS INAPPROPRIATE'))
+            Expanded(
+                child: getIt<TextFactory>().lite('REPORT AS INAPPROPRIATE'))
           ],
         ),
       ));
@@ -166,7 +178,8 @@ class PrayerRequestMenuButton extends StatelessWidget {
 class PrayerRequestUserAndDate extends StatelessWidget {
   final PrayerRequest prayerRequest;
 
-  const PrayerRequestUserAndDate({Key key, required this.prayerRequest}) : super(key: key);
+  const PrayerRequestUserAndDate({Key key, required this.prayerRequest})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -193,11 +206,12 @@ class PrayerRequestUserAndDate extends StatelessWidget {
               if (prayerRequest.isAnonymous) {
                 return getIt<TextFactory>().regular("Anonymous");
               } else {
-                return getIt<TextFactory>()
-                    .regular('${prayerRequest.userSnippet.firstName} ${prayerRequest.userSnippet.lastName}');
+                return getIt<TextFactory>().regular(
+                    '${prayerRequest.userSnippet.firstName} ${prayerRequest.userSnippet.lastName}');
               }
             }(),
-            getIt<TextFactory>().lite(toReadableDate(prayerRequest.date), fontSize: 10.0)
+            getIt<TextFactory>()
+                .lite(toReadableDate(prayerRequest.date), fontSize: 10.0)
           ],
         )
       ],
@@ -246,15 +260,19 @@ class _PrayButton extends StatelessWidget {
   Widget _createPrayButton(BuildContext context) {
     return Container(
       child: ClipRRect(
-        borderRadius: BorderRadius.all(Radius.circular(getIt<LayoutFactory>().getDimension(baseDimension: 20.0))),
+        borderRadius: BorderRadius.all(Radius.circular(
+            getIt<LayoutFactory>().getDimension(baseDimension: 20.0))),
         child: TextButton(
           style: TextButton.styleFrom(
               padding: EdgeInsets.only(
                   top: 6,
                   bottom: 6,
-                  left: getIt<LayoutFactory>().getDimension(baseDimension: 12.0),
-                  right: getIt<LayoutFactory>().getDimension(baseDimension: 12.0)),
-              minimumSize: Size(0, getIt<LayoutFactory>().getDimension(baseDimension: 32.0)),
+                  left:
+                      getIt<LayoutFactory>().getDimension(baseDimension: 12.0),
+                  right:
+                      getIt<LayoutFactory>().getDimension(baseDimension: 12.0)),
+              minimumSize: Size(
+                  0, getIt<LayoutFactory>().getDimension(baseDimension: 32.0)),
               backgroundColor: kCardGrey,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap),
           onPressed: () {
@@ -305,7 +323,9 @@ class PrayedByIndicator extends StatelessWidget {
           padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap),
       onPressed: null,
-      child: getIt<TextFactory>().regular('Prayed by $amount other${getS(amount)}', color: Colors.black54),
+      child: getIt<TextFactory>().regular(
+          'Prayed by $amount other${getS(amount)}',
+          color: Colors.black54),
     );
   }
 
@@ -326,7 +346,8 @@ class PendingIndicator extends StatelessWidget {
           padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap),
       onPressed: null,
-      child: getIt<TextFactory>().regular('Pending', color: kWarningColor.withOpacity(0.8)),
+      child: getIt<TextFactory>()
+          .regular('Pending', color: kWarningColor.withOpacity(0.8)),
     );
   }
 }

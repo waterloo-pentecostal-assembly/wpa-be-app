@@ -16,7 +16,7 @@ class BibleSeriesDto {
   final bool isVisible;
   final List<SeriesContentSnippetDto> seriesContentSnippet;
 
-  const BibleSeriesDto ({
+  const BibleSeriesDto({
     required this.id,
     required this.title,
     required this.subTitle,
@@ -31,7 +31,8 @@ class BibleSeriesDto {
 
   factory BibleSeriesDto.fromFirestore(DocumentSnapshot doc) {
     var data = (doc.data() ?? {}) as Map<String, dynamic>;
-    List<dynamic> _seriesContentSnippetFirebase = data['series_content_snippet'] ?? [];
+    List<dynamic> _seriesContentSnippetFirebase =
+        data['series_content_snippet'] ?? [];
     List<SeriesContentSnippetDto> _seriesContentSnippet = [];
 
     _seriesContentSnippetFirebase.forEach((element) {
@@ -51,14 +52,16 @@ class BibleSeriesDto {
     );
   }
 
-  Future<BibleSeries> toDomain(FirebaseStorageService firebaseStorageService) async {
+  Future<BibleSeries> toDomain(
+      FirebaseStorageService firebaseStorageService) async {
     List<SeriesContentSnippet> _seriesContentSnippet = [];
     this.seriesContentSnippet.forEach((element) {
       _seriesContentSnippet.add(element.toDomain());
     });
 
     // Convert GS URL to Download URL
-    String imageUrl = (await firebaseStorageService.getDownloadUrl(this.imageGsLocation))!;
+    String imageUrl =
+        (await firebaseStorageService.getDownloadUrl(this.imageGsLocation));
 
     return BibleSeries(
       id: this.id,
@@ -105,13 +108,17 @@ extension SeriesContentSnippetDtoX on SeriesContentSnippetDto {
   SeriesContentSnippet toDomain() {
     List<AvailableContentType> availableContentTypes = [];
     this.contentTypes.forEach((element) {
-      final String seriesContentType = findOrThrowException(element, 'content_type').toString().toUpperCase();
-      final String seriesContentId = findOrThrowException(element, 'content_id');
+      final String seriesContentType =
+          findOrThrowException(element, 'content_type')
+              .toString()
+              .toUpperCase();
+      final String seriesContentId =
+          findOrThrowException(element, 'content_id');
       availableContentTypes.add(AvailableContentType(
         seriesContentType: seriesContentType,
         contentId: seriesContentId,
       ));
-        });
+    });
 
     return SeriesContentSnippet(
       availableContentTypes: availableContentTypes,

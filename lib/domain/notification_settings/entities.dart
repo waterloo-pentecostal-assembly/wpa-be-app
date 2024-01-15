@@ -1,4 +1,3 @@
-
 class NotificationSettingsEntity {
   final String id;
   final bool dailyEngagementReminder;

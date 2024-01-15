@@ -11,8 +11,8 @@ class AudioPlayerState extends Equatable {
     required this.playerState,
     required this.duration,
     required this.position,
-    this.sourceUrl,
-    this.contentId,
+    required this.sourceUrl,
+    required this.contentId,
   });
 
   factory AudioPlayerState.initial() {
@@ -20,6 +20,8 @@ class AudioPlayerState extends Equatable {
       playerState: PlayerStateEnum.STOPPED,
       duration: Duration(),
       position: Duration(),
+      sourceUrl: '',
+      contentId: '',
     );
   }
 

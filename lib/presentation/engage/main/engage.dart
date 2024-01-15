@@ -1,4 +1,3 @@
-
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -24,15 +23,17 @@ import 'widgets/prayer_request_widget.dart';
 class EngagePage extends IIndexedPage {
   final GlobalKey<NavigatorState> navigatorKey;
 
-  const EngagePage({Key key, this.navigatorKey}) : super(key: key);
+  const EngagePage({required Key key, this.navigatorKey}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
         BlocProvider<BibleSeriesBloc>(
-            create: (BuildContext context) => getIt<BibleSeriesBloc>()..add(HasActiveBibleSeriesRequested())),
-        BlocProvider<PrayerRequestsBloc>(create: (BuildContext context) => getIt<PrayerRequestsBloc>()),
+            create: (BuildContext context) =>
+                getIt<BibleSeriesBloc>()..add(HasActiveBibleSeriesRequested())),
+        BlocProvider<PrayerRequestsBloc>(
+            create: (BuildContext context) => getIt<PrayerRequestsBloc>()),
         BlocProvider<AchievementsBloc>(
           create: (BuildContext context) => getIt<AchievementsBloc>()
             ..add(
@@ -57,7 +58,8 @@ class EngagePage extends IIndexedPage {
                   case '/':
                     return EngageIndex();
                   case '/bible_series':
-                    getIt<FirebaseAnalytics>().logEvent(name: 'bible_series_viewed');
+                    getIt<FirebaseAnalytics>()
+                        .logEvent(name: 'bible_series_viewed');
                     Map args = settings.arguments;
                     return BibleSeriesDetailPage(
                       bibleSeriesId: args['bibleSeriesId'],
@@ -69,7 +71,8 @@ class EngagePage extends IIndexedPage {
                   case '/prayer_requests/mine':
                     return PrayerRequestsPage(tabIndex: 1);
                   case '/content_detail':
-                    getIt<FirebaseAnalytics>().logEvent(name: 'engagement_viewed');
+                    getIt<FirebaseAnalytics>()
+                        .logEvent(name: 'engagement_viewed');
                     Map args = settings.arguments;
                     return ContentDetailPage(
                       seriesContentId: args['seriesContentId'],
@@ -120,7 +123,8 @@ class EngageIndex extends StatelessWidget {
               MediaWidget(),
             ];
           }
-          var parentContextBibleSeriesBloc = BlocProvider.of<BibleSeriesBloc>(context);
+          var parentContextBibleSeriesBloc =
+              BlocProvider.of<BibleSeriesBloc>(context);
           return BlocProvider(
             create: (BuildContext context) {
               return getIt<BibleSeriesBloc>()
@@ -128,7 +132,9 @@ class EngageIndex extends StatelessWidget {
                   RecentBibleSeriesRequested(amount: 15),
                 );
             },
-            child: EngageLayoutWidget(parentContextBibleSeriesBloc: parentContextBibleSeriesBloc, children: children),
+            child: EngageLayoutWidget(
+                parentContextBibleSeriesBloc: parentContextBibleSeriesBloc,
+                children: children),
           );
         }
         return Loader();
@@ -153,8 +159,10 @@ class EngageLayoutWidget extends StatelessWidget {
     return RefreshIndicator(
       onRefresh: () async {
         parentContextBibleSeriesBloc..add(HasActiveBibleSeriesRequested());
-        BlocProvider.of<AchievementsBloc>(context)..add(WatchAchievementsStarted());
-        BlocProvider.of<BibleSeriesBloc>(context)..add(RecentBibleSeriesRequested(amount: 15));
+        BlocProvider.of<AchievementsBloc>(context)
+          ..add(WatchAchievementsStarted());
+        BlocProvider.of<BibleSeriesBloc>(context)
+          ..add(RecentBibleSeriesRequested(amount: 15));
         BlocProvider.of<MediaBloc>(context)..add(AvailableMediaRequested());
       },
       child: Container(

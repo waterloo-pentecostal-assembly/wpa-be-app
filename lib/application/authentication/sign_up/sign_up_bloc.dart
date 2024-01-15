@@ -138,8 +138,7 @@ Stream<SignUpState> _mapSignUpWithEmailAndPasswordToState(
     required Password password,
     required Name firstName,
     required Name lastName,
-  })
-      signUpFunction,
+  }) signUpFunction,
 ) async* {
   yield state.copyWith(
     submitting: true,

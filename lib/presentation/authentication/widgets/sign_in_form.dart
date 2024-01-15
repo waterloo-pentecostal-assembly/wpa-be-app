@@ -55,7 +55,9 @@ class SignInForm extends StatelessWidget {
                       children: <Widget>[
                         ...{
                           Text(
-                            BlocProvider.of<SignInBloc>(context).state.signInError,
+                            BlocProvider.of<SignInBloc>(context)
+                                .state
+                                .signInError,
                             style: TextStyle(
                               color: kErrorTextColor,
                             ),
@@ -91,41 +93,58 @@ class SignInForm extends StatelessWidget {
                                         ),
                                       ),
                                       child: TextFormField(
-                                        style: getIt<TextFactory>().liteTextStyle(fontSize: 16),
+                                        style: getIt<TextFactory>()
+                                            .liteTextStyle(fontSize: 16),
                                         validator: (_) {
                                           String emailAddressError =
-                                              BlocProvider.of<SignInBloc>(context).state.emailAddressError;
-                                          return emailAddressError != '' ? emailAddressError : null;
+                                              BlocProvider.of<SignInBloc>(
+                                                      context)
+                                                  .state
+                                                  .emailAddressError;
+                                          return emailAddressError != ''
+                                              ? emailAddressError
+                                              : null;
                                         },
                                         onChanged: (value) {
-                                          BlocProvider.of<SignInBloc>(context).add(EmailChanged(email: value));
+                                          BlocProvider.of<SignInBloc>(context)
+                                              .add(EmailChanged(email: value));
                                         },
                                         autocorrect: false,
                                         decoration: InputDecoration(
                                           border: InputBorder.none,
                                           hintText: "Email Address",
-                                          hintStyle: getIt<TextFactory>().hintStyle(fontSize: 16),
+                                          hintStyle: getIt<TextFactory>()
+                                              .hintStyle(fontSize: 16),
                                         ),
                                       ),
                                     ),
                                     Container(
                                       padding: EdgeInsets.all(4.0),
                                       child: TextFormField(
-                                        style: getIt<TextFactory>().liteTextStyle(fontSize: 16),
+                                        style: getIt<TextFactory>()
+                                            .liteTextStyle(fontSize: 16),
                                         validator: (_) {
                                           String passwordError =
-                                              BlocProvider.of<SignInBloc>(context).state.passwordError;
-                                          return passwordError != '' ? passwordError : null;
+                                              BlocProvider.of<SignInBloc>(
+                                                      context)
+                                                  .state
+                                                  .passwordError;
+                                          return passwordError != ''
+                                              ? passwordError
+                                              : null;
                                         },
                                         onChanged: (value) {
-                                          BlocProvider.of<SignInBloc>(context).add(PasswordChanged(password: value));
+                                          BlocProvider.of<SignInBloc>(context)
+                                              .add(PasswordChanged(
+                                                  password: value));
                                         },
                                         obscureText: true,
                                         autocorrect: false,
                                         decoration: InputDecoration(
                                           border: InputBorder.none,
                                           hintText: "Password",
-                                          hintStyle: getIt<TextFactory>().hintStyle(fontSize: 16),
+                                          hintStyle: getIt<TextFactory>()
+                                              .hintStyle(fontSize: 16),
                                         ),
                                       ),
                                     ),
@@ -138,9 +157,11 @@ class SignInForm extends StatelessWidget {
                               Align(
                                 alignment: Alignment.topRight,
                                 child: GestureDetector(
-                                  child: getIt<TextFactory>().lite2('Forgot Password?'),
+                                  child: getIt<TextFactory>()
+                                      .lite2('Forgot Password?'),
                                   onTap: () {
-                                    Navigator.pushNamed(context, '/password_reset');
+                                    Navigator.pushNamed(
+                                        context, '/password_reset');
                                   },
                                 ),
                               ),
@@ -154,27 +175,36 @@ class SignInForm extends StatelessWidget {
                                   height: 50,
                                   decoration: BoxDecoration(
                                     gradient: LinearGradient(
-                                      colors: [Color.fromRGBO(0, 146, 214, 1), Color.fromRGBO(0, 146, 214, 0.7)],
+                                      colors: [
+                                        Color.fromRGBO(0, 146, 214, 1),
+                                        Color.fromRGBO(0, 146, 214, 0.7)
+                                      ],
                                     ),
                                   ),
                                   child: TextButton(
                                     style: ButtonStyle(
-                                      backgroundColor: MaterialStateProperty.resolveWith<Color?>(
+                                      backgroundColor: MaterialStateProperty
+                                          .resolveWith<Color?>(
                                         (states) {
-                                          if (states.contains(MaterialState.disabled)) {
+                                          if (states.contains(
+                                              MaterialState.disabled)) {
                                             return Colors.grey.shade400;
                                           }
                                           return null;
                                         },
                                       ),
                                     ),
-                                    onPressed: state.submitting || !state.isSignInFormValid
+                                    onPressed: state.submitting ||
+                                            !state.isSignInFormValid
                                         ? null
-                                        : () => BlocProvider.of<SignInBloc>(context).add(
+                                        : () =>
+                                            BlocProvider.of<SignInBloc>(context)
+                                                .add(
                                               SignInWithEmailAndPassword(),
                                             ),
                                     child: Center(
-                                      child: getIt<TextFactory>().authenticationButton('LOGIN'),
+                                      child: getIt<TextFactory>()
+                                          .authenticationButton('LOGIN'),
                                     ),
                                   ),
                                 ),
@@ -185,12 +215,14 @@ class SignInForm extends StatelessWidget {
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: <Widget>[
-                                  getIt<TextFactory>().lite2('Don\'t have an account?'),
+                                  getIt<TextFactory>()
+                                      .lite2('Don\'t have an account?'),
                                   SizedBox(
                                     width: 3,
                                   ),
                                   GestureDetector(
-                                    child: getIt<TextFactory>().linkLite('Sign Up'),
+                                    child: getIt<TextFactory>()
+                                        .linkLite('Sign Up'),
                                     onTap: () {
                                       Navigator.pushNamed(context, '/sign_up');
                                     },

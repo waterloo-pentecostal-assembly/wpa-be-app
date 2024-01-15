@@ -1,4 +1,3 @@
-
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'entities.dart';
@@ -36,5 +35,6 @@ abstract class IPrayerRequestsRepository {
     required String id,
   });
 
-  Future<PrayerRequest> createPrayerRequest({required String request, required bool isAnonymous});
+  Future<PrayerRequest> createPrayerRequest(
+      {required String request, required bool isAnonymous});
 }

@@ -101,14 +101,14 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
             } else if (state is MyPrayerRequestDeleteComplete) {
               int indexToDelete = getIndexById(state.id);
               _delete(indexToDelete);
-                        } else if (state is NewPrayerRequestError) {
+            } else if (state is NewPrayerRequestError) {
               ToastMessage.showErrorToast(state.message, context);
             } else if (state is PrayerRequestDeleteError) {
               ToastMessage.showErrorToast(state.message, context);
             } else if (state is MyPrayerRequestAnsweredComplete) {
               int indexToDelete = getIndexById(state.id);
               _delete(indexToDelete);
-                        }
+            }
             // No need to handle these two in MyPrayerRequests since this
             // BlocListener will be loaded in either case. If it is also
             // handled in MyPrayerRequests then two toasts will be shown
@@ -133,7 +133,7 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
             } else if (state is PrayerRequestReportedAndRemoved) {
               int indexToDelete = getIndexById(state.id);
               _delete(indexToDelete);
-                          String message = 'Prayer Request has been reported';
+              String message = 'Prayer Request has been reported';
               ToastMessage.showInfoToast(message, context);
             } else if (state is PrayerRequestReportError) {
               ToastMessage.showErrorToast(state.message, context);

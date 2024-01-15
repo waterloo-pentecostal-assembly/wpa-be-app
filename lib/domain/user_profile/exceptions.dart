@@ -1,4 +1,3 @@
-
 import '../common/exceptions.dart';
 
 enum UserProfileExceptionCode { UNABLE_TO_UPLOAD_IMAGE, UNKNOWN }

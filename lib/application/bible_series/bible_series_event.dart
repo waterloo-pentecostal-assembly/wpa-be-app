@@ -64,7 +64,8 @@ class UpdateCompletionDetail extends BibleSeriesEvent {
   final int scsNum;
   final int actNum;
 
-  UpdateCompletionDetail({required this.bibleSeries, required this.actNum, required this.scsNum});
+  UpdateCompletionDetail(
+      {required this.bibleSeries, required this.actNum, required this.scsNum});
 
   @override
   List<Object> get props => [bibleSeries, scsNum, actNum];

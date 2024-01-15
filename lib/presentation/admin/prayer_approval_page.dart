@@ -49,9 +49,7 @@ class _PrayerApprovalPageState extends State<PrayerApprovalPage> {
                 ))
               ],
             ),
-          )
-          )
-          );
+          )));
         } else if (prayerRequestCards.isEmpty) {
           return SafeArea(
               child: Container(

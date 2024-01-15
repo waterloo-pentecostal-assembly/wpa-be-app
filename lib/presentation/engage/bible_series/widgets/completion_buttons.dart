@@ -67,8 +67,9 @@ class CompletionButton extends StatelessWidget {
                   ),
                 ));
           }
-        } else        return Text('Error: ${state.errorMessage}');
-      
+        } else
+          return Text('Error: ${state.errorMessage}');
+
         return Loader();
       },
     );
@@ -111,7 +112,8 @@ class ResponseCompletionButton extends StatelessWidget {
                                     BorderRadius.all(Radius.circular(16)),
                                 child: TextButton(
                                   style: TextButton.styleFrom(
-                                      foregroundColor: Colors.white, minimumSize: Size(90, 30),
+                                      foregroundColor: Colors.white,
+                                      minimumSize: Size(90, 30),
                                       backgroundColor:
                                           kWpaBlue.withOpacity(0.8),
                                       padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
@@ -155,7 +157,8 @@ class ResponseCompletionButton extends StatelessWidget {
                                     BorderRadius.all(Radius.circular(16)),
                                 child: TextButton(
                                   style: TextButton.styleFrom(
-                                      foregroundColor: Colors.white, minimumSize: Size(90, 30),
+                                      foregroundColor: Colors.white,
+                                      minimumSize: Size(90, 30),
                                       backgroundColor:
                                           kWpaBlue.withOpacity(0.8),
                                       padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
@@ -211,8 +214,9 @@ class ResponseCompletionButton extends StatelessWidget {
                   ),
                 ));
           }
-        } else        return Text('Error: ${state.errorMessage}');
-      
+        } else
+          return Text('Error: ${state.errorMessage}');
+
         return Loader();
       },
     );

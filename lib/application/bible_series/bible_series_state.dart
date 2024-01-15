@@ -47,15 +47,15 @@ class BibleSeriesDetail extends BibleSeriesState {
 
 class SeriesContentDetail extends BibleSeriesState {
   final SeriesContent _seriesContentDetail;
-  final CompletionDetails _completionDetail;
+  final CompletionDetails? _completionDetail;
 
   SeriesContentDetail(this._seriesContentDetail, this._completionDetail);
 
   SeriesContent get seriesContentDetail => _seriesContentDetail;
-  CompletionDetails get contentCompletionDetail => _completionDetail;
+  CompletionDetails? get contentCompletionDetail => _completionDetail;
 
   @override
-  List<Object> get props => [_seriesContentDetail, _completionDetail];
+  List<Object> get props => [_seriesContentDetail];
 }
 
 class UpdatedBibleSeries extends BibleSeriesState {

@@ -91,7 +91,7 @@ class CompletionsRepository extends ICompletionsRepository {
           _completionsCollection.doc(completionId).collection("responses");
       if (responses.id != null) {
         await responseCollection.doc(responses.id).set(responsesForFirestore);
-        return responses.id;
+        return responses.id!;
       } else {
         DocumentReference documentReference =
             await responseCollection.add(responsesForFirestore);
@@ -100,12 +100,11 @@ class CompletionsRepository extends ICompletionsRepository {
     } on Exception catch (e) {
       throw _firebaseFirestoreService.handleException(e);
     }
-    return '';
   }
 
   @override
   Future<Map<String, CompletionDetails>> getAllCompletions({
-    String bibleSeriesId,
+    required String bibleSeriesId,
   }) async {
     QuerySnapshot snapshot;
     final LocalUser user = getIt<LocalUser>();
@@ -121,7 +120,7 @@ class CompletionsRepository extends ICompletionsRepository {
     snapshot.docs.forEach((element) {
       final CompletionDetails _completionDetails =
           CompletionsDto.fromFirestore(element).toDomain();
-      String id = findOrThrowException(element.data(), "content_id");
+      String id = findOrThrowException(element.data() as Map, "content_id");
       completionDetails[id] = _completionDetails;
     });
     return completionDetails;
@@ -129,7 +128,7 @@ class CompletionsRepository extends ICompletionsRepository {
 
   @override
   Future<CompletionDetails> getCompletion({
-    String seriesContentId,
+    required String seriesContentId,
   }) async {
     QuerySnapshot snapshot;
     final LocalUser user = getIt<LocalUser>();
@@ -157,8 +156,8 @@ class CompletionsRepository extends ICompletionsRepository {
   }
 
   @override
-  Future<CompletionDetails> getCompletionOrNull(
-      {String seriesContentId}) async {
+  Future<CompletionDetails?> getCompletionOrNull(
+      {required String seriesContentId}) async {
     QuerySnapshot snapshot;
     final LocalUser user = getIt<LocalUser>();
     try {
@@ -181,7 +180,7 @@ class CompletionsRepository extends ICompletionsRepository {
 
   @override
   Future<Responses> getResponses({
-    String completionId,
+    required String completionId,
   }) async {
     QuerySnapshot querySnapshot;
     final LocalUser user = getIt<LocalUser>();
@@ -200,7 +199,7 @@ class CompletionsRepository extends ICompletionsRepository {
       DocumentSnapshot document = querySnapshot.docs[0];
       return ResponsesDto.fromFirestore(document).toDomain();
     } else {
-      return Responses();
+      return Responses(responses: Map(), userId: user.id);
     }
     //TODO: change to include throwing exception while still returning empty response for image responses
     // throw CompletionsException(
@@ -211,7 +210,7 @@ class CompletionsRepository extends ICompletionsRepository {
 
   @override
   Future<String> updateComplete(
-      {CompletionDetails completionDetails, String completionId}) async {
+      {required CompletionDetails completionDetails, required String completionId}) async {
     CompletionsDto completionsDto =
         CompletionsDto.fromDomain(completionDetails);
     try {
@@ -223,14 +222,13 @@ class CompletionsRepository extends ICompletionsRepository {
         "completion_date": completionsDto.completionDate,
       });
       return documentReference.id;
-        } on Exception catch (e) {
-      _firthrow ebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
-    return '';
   }
 
   @override
-  UploadTask uploadImage({File file, String userId}) {
+  UploadTask uploadImage({required File file, required String userId}) {
     String fileExt = path.extension(file.path);
     String filePath = '/responses/$userId/${DateTime.now()}$fileExt';
     try {
@@ -245,7 +243,7 @@ class CompletionsRepository extends ICompletionsRepository {
   }
 
   @override
-  List<UploadTask> uploadImages({List<File> images, String userId}) {
+  List<UploadTask> uploadImages({required List<File> images, required String userId}) {
     List<UploadTask> response = [];
     for (File image in images) {
       String fileExt = path.extension(image.path);
@@ -260,7 +258,7 @@ class CompletionsRepository extends ICompletionsRepository {
   }
 
   @override
-  void deleteImage({String gsUrl}) async {
+  void deleteImage({required String gsUrl}) async {
     try {
       await _firebaseStorageService.deleteFile(gsUrl);
     } catch (e) {
@@ -272,7 +270,7 @@ class CompletionsRepository extends ICompletionsRepository {
   }
 
   @override
-  Future<String> getDownloadURL({String gsUrl}) async {
+  Future<String> getDownloadURL({required String gsUrl}) async {
     String downloadURL = await _firebaseStorageService.getDownloadUrl(gsUrl);
     return downloadURL;
   }

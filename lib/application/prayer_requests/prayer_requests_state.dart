@@ -22,7 +22,8 @@ class PrayerRequestsLoaded extends PrayerRequestsState {
   final List<PrayerRequest> prayerRequests;
   final bool isEndOfList;
 
-  PrayerRequestsLoaded({required this.prayerRequests, required this.isEndOfList});
+  PrayerRequestsLoaded(
+      {required this.prayerRequests, required this.isEndOfList});
 
   @override
   // We need each PrayerRequestsLoaded event to be unique to we are using the DateTime.now() to do so
@@ -69,7 +70,8 @@ class MyPrayerRequestAnsweredComplete extends PrayerRequestsState {
   final String id;
   final PrayerRequest prayerRequest;
 
-  MyPrayerRequestAnsweredComplete({required this.id, required this.prayerRequest});
+  MyPrayerRequestAnsweredComplete(
+      {required this.id, required this.prayerRequest});
 
   @override
   List<Object> get props => [id];
@@ -88,7 +90,8 @@ class MorePrayerRequestsLoaded extends PrayerRequestsState {
   final List<PrayerRequest> prayerRequests;
   final bool isEndOfList;
 
-  MorePrayerRequestsLoaded({required this.prayerRequests, required this.isEndOfList});
+  MorePrayerRequestsLoaded(
+      {required this.prayerRequests, required this.isEndOfList});
 
   @override
   // We need each PrayerRequestsLoaded event to be unique to we are using the DateTime.now() to do so

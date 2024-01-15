@@ -15,7 +15,10 @@ class SignInState extends Equatable {
     bool passwordValid = !_toBoolean(passwordError);
     bool emailAddressFilled = _toBoolean(emailAddress);
     bool passwordFilled = _toBoolean(password);
-    return emailAddressValid && passwordValid && emailAddressFilled && passwordFilled;
+    return emailAddressValid &&
+        passwordValid &&
+        emailAddressFilled &&
+        passwordFilled;
   }
 
   SignInState({
@@ -41,13 +44,13 @@ class SignInState extends Equatable {
   }
 
   SignInState copyWith({
-    String emailAddress,
-    String emailAddressError,
-    String password,
-    String passwordError,
-    bool submitting,
-    bool signInSuccess,
-    String signInError,
+    String? emailAddress,
+    String? emailAddressError,
+    String? password,
+    String? passwordError,
+    bool? submitting,
+    bool? signInSuccess,
+    String? signInError,
   }) {
     return SignInState(
       emailAddress: emailAddress ?? this.emailAddress,
@@ -60,7 +63,7 @@ class SignInState extends Equatable {
     );
   }
 
-  bool _toBoolean(String str, [bool strict]) {
+  bool _toBoolean(String str, [bool? strict]) {
     if (strict == true) {
       return str == '1' || str == 'true';
     }

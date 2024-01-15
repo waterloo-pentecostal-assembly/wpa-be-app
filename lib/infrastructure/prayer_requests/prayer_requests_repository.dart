@@ -221,12 +221,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
         }
 
         List<dynamic> prayedBy = documentSnapshot["prayed_by"];
-
-        if (prayedBy == null) {
-          prayedBy = [user.id];
-        } else {
-          prayedBy..add(user.id);
-        }
+        prayedBy..add(user.id);
 
         transaction.update(documentReference, {"prayed_by": prayedBy});
       });

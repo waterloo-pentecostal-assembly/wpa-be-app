@@ -11,14 +11,9 @@ class FirebaseStorageService {
 
   String get storageBucket => _firebaseStorage.bucket;
 
-  Future<String?> getDownloadUrl(String? gsUrl) async {
-    if (gsUrl == null) {
-      return null;
-    }
-
+  Future<String> getDownloadUrl(String gsUrl) async {
     try {
-      String downloadUrl =
-          await _firebaseStorage.refFromURL(gsUrl).getDownloadURL();
+      String downloadUrl = await _firebaseStorage.refFromURL(gsUrl).getDownloadURL();
       return downloadUrl;
     } on FirebaseException catch (e) {
       // See error codes here: https://firebase.google.com/docs/storage/flutter/handle-errors
@@ -42,6 +37,13 @@ class FirebaseStorageService {
         );
       }
     }
+  }
+
+  Future<String?> getNullableDownloadUrl(String? gsUrl) async {
+    if (gsUrl == null) {
+      return null;
+    }
+    return this.getDownloadUrl(gsUrl);
   }
 
   UploadTask startFileUpload(String filePath, File file) {

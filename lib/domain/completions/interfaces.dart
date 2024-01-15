@@ -13,7 +13,8 @@ abstract class ICompletionsRepository {
     required String seriesContentId,
   });
 
-  Future<CompletionDetails> getCompletionOrNull({required String seriesContentId});
+  Future<CompletionDetails?> getCompletionOrNull(
+      {required String seriesContentId});
 
   Future<Responses> getResponses({
     required String completionId,
@@ -40,7 +41,8 @@ abstract class ICompletionsRepository {
 
   UploadTask uploadImage({required File file, required String userId});
 
-  List<UploadTask> uploadImages({required List<File> images, required String userId});
+  List<UploadTask> uploadImages(
+      {required List<File> images, required String userId});
 
   void deleteImage({required String gsUrl});
 
