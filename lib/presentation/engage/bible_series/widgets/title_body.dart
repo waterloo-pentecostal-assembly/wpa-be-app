@@ -6,7 +6,7 @@ import 'package:wpa_app/presentation/common/text_factory.dart';
 class TitleBodyWidget extends StatelessWidget {
   final TitleBody titleBody;
   const TitleBodyWidget({
-    Key key,
+    Key? key,
     required this.titleBody,
   }) : super(key: key);
 

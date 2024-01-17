@@ -13,7 +13,8 @@ class FirebaseStorageService {
 
   Future<String> getDownloadUrl(String gsUrl) async {
     try {
-      String downloadUrl = await _firebaseStorage.refFromURL(gsUrl).getDownloadURL();
+      String downloadUrl =
+          await _firebaseStorage.refFromURL(gsUrl).getDownloadURL();
       return downloadUrl;
     } on FirebaseException catch (e) {
       // See error codes here: https://firebase.google.com/docs/storage/flutter/handle-errors

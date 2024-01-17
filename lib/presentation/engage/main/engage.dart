@@ -21,9 +21,9 @@ import 'widgets/bible_series_widget.dart';
 import 'widgets/prayer_request_widget.dart';
 
 class EngagePage extends IIndexedPage {
-  final GlobalKey<NavigatorState> navigatorKey;
+  final GlobalKey<NavigatorState>? navigatorKey;
 
-  const EngagePage({required Key key, this.navigatorKey}) : super(key: key);
+  const EngagePage({Key? key, this.navigatorKey}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +60,7 @@ class EngagePage extends IIndexedPage {
                   case '/bible_series':
                     getIt<FirebaseAnalytics>()
                         .logEvent(name: 'bible_series_viewed');
-                    Map args = settings.arguments;
+                    Map args = settings.arguments as Map;
                     return BibleSeriesDetailPage(
                       bibleSeriesId: args['bibleSeriesId'],
                     );
@@ -73,7 +73,7 @@ class EngagePage extends IIndexedPage {
                   case '/content_detail':
                     getIt<FirebaseAnalytics>()
                         .logEvent(name: 'engagement_viewed');
-                    Map args = settings.arguments;
+                    Map args = settings.arguments as Map;
                     return ContentDetailPage(
                       seriesContentId: args['seriesContentId'],
                       bibleSeriesId: args['bibleSeriesId'],
@@ -93,7 +93,7 @@ class EngagePage extends IIndexedPage {
 }
 
 class EngageIndex extends StatelessWidget {
-  const EngageIndex({Key key}) : super(key: key);
+  const EngageIndex({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -146,7 +146,7 @@ class EngageIndex extends StatelessWidget {
 
 class EngageLayoutWidget extends StatelessWidget {
   const EngageLayoutWidget({
-    Key key,
+    Key? key,
     required this.parentContextBibleSeriesBloc,
     required this.children,
   }) : super(key: key);

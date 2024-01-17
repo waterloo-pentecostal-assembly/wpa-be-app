@@ -8,7 +8,8 @@ class ResponsesDto {
   final Map<String, Map<String, ResponseDetails>> responses;
   final String userId;
 
-  factory ResponsesDto.fromDomain(Map<String, Map<String, ResponseDetails>> responses, String userId) {
+  factory ResponsesDto.fromDomain(
+      Map<String, Map<String, ResponseDetails>> responses, String userId) {
     return ResponsesDto._(responses: responses, userId: userId);
   }
 
@@ -17,7 +18,8 @@ class ResponsesDto {
     Map<String, Map<String, ResponseDetails>> _responses = {};
     String userId = findOrThrowException(json, 'user_id');
     String responseId = doc.id;
-    Map<String, dynamic> responses = findOrDefaultToGetResponse(json, 'responses', {});
+    Map<String, dynamic> responses =
+        findOrDefaultToGetResponse(json, 'responses', {});
     responses.forEach((String k1, dynamic v1) {
       v1.forEach((String k2, dynamic v2) {
         ResponseDetails responseDetails;
@@ -39,7 +41,8 @@ class ResponsesDto {
         }
       });
     });
-    return ResponsesDto._(id: responseId, responses: _responses, userId: userId);
+    return ResponsesDto._(
+        id: responseId, responses: _responses, userId: userId);
   }
 
   const ResponsesDto._({

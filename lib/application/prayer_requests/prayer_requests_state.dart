@@ -193,9 +193,9 @@ class NewPrayerRequestState extends PrayerRequestsState {
   }
 
   NewPrayerRequestState copyWith({
-    String prayerRequest,
-    bool isAnonymous,
-    String prayerRequestError,
+    String? prayerRequest,
+    bool? isAnonymous,
+    String? prayerRequestError,
   }) {
     return NewPrayerRequestState(
       prayerRequest: prayerRequest ?? this.prayerRequest,
@@ -204,7 +204,7 @@ class NewPrayerRequestState extends PrayerRequestsState {
     );
   }
 
-  bool _toBoolean(String str, [bool strict]) {
+  bool _toBoolean(String str, [bool? strict]) {
     if (strict == true) {
       return str == '1' || str == 'true';
     }

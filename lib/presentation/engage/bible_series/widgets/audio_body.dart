@@ -10,7 +10,7 @@ class AudioBodyWidget extends StatelessWidget {
   final AudioBody audioContentBody;
   final String contentId;
   const AudioBodyWidget({
-    Key key,
+    Key? key,
     this.audioContentBody,
     this.contentId,
   }) : super(key: key);
@@ -49,7 +49,7 @@ class AudioPlayerWidget extends StatelessWidget {
   final String audioFileUrl;
   final String contentId;
   const AudioPlayerWidget({
-    Key key,
+    Key? key,
     this.position,
     this.duration,
     this.playerState,
@@ -134,9 +134,7 @@ class AudioPlayerWidget extends StatelessWidget {
               }
             },
             child: Icon(
-              playerState == PlayerStateEnum.PLAYING
-                  ? Icons.pause_circle_filled
-                  : Icons.play_circle_filled,
+              playerState == PlayerStateEnum.PLAYING ? Icons.pause_circle_filled : Icons.play_circle_filled,
               size: 70,
               color: Colors.black87.withOpacity(0.75),
             ),

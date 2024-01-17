@@ -4,8 +4,7 @@ import 'package:flutter/material.dart';
 class PrayerRequestsErrorWidget extends StatelessWidget {
   final String message;
 
-  const PrayerRequestsErrorWidget({Key key, required this.message})
-      : super(key: key);
+  const PrayerRequestsErrorWidget({Key? key, required this.message}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -80,7 +80,7 @@ class SignUpForm extends StatelessWidget {
                                       decoration: BoxDecoration(
                                         border: Border(
                                           bottom: BorderSide(
-                                            color: Colors.grey[200],
+                                            color: Colors.grey[200]!,
                                           ),
                                         ),
                                       ),
@@ -142,7 +142,7 @@ class SignUpForm extends StatelessWidget {
                                       decoration: BoxDecoration(
                                         border: Border(
                                           bottom: BorderSide(
-                                            color: Colors.grey[200],
+                                            color: Colors.grey[200]!,
                                           ),
                                         ),
                                       ),
@@ -177,7 +177,7 @@ class SignUpForm extends StatelessWidget {
                                       decoration: BoxDecoration(
                                         border: Border(
                                           bottom: BorderSide(
-                                            color: Colors.grey[200],
+                                            color: Colors.grey[200]!,
                                           ),
                                         ),
                                       ),
@@ -233,7 +233,7 @@ class SignUpForm extends StatelessWidget {
                                   child: TextButton(
                                     style: ButtonStyle(backgroundColor:
                                         MaterialStateProperty.resolveWith<
-                                            Color>((states) {
+                                            Color?>((states) {
                                       if (states
                                           .contains(MaterialState.disabled)) {
                                         return Colors.grey[400];

@@ -8,10 +8,10 @@ abstract class CompletionsEvent extends Equatable {
 }
 
 class CompletionDetailRequested extends CompletionsEvent {
-  final CompletionDetails completionDetails;
+  final CompletionDetails? completionDetails;
   CompletionDetailRequested(this.completionDetails);
   @override
-  List<Object> get props => [completionDetails];
+  List<Object> get props => [completionDetails ?? ''];
 }
 
 class MarkAsComplete extends CompletionsEvent {
@@ -81,7 +81,9 @@ class DeleteImage extends CompletionsEvent {
   final CompletionDetails completionDetails;
   final int contentNum;
   DeleteImage(
-      {required this.gsURL, required this.completionDetails, this.contentNum});
+      {required this.gsURL,
+      required this.completionDetails,
+      required this.contentNum});
   @override
   List<Object> get props => [gsURL, completionDetails];
 }

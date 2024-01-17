@@ -125,7 +125,6 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
   @override
   Future<List<PrayerRequest>> getMorePrayerRequests({
     required int limit,
-    required DocumentSnapshot startAtDocument,
   }) async {
     final LocalUser user = getIt<LocalUser>();
     List<PrayerRequest> prayerRequests = [];

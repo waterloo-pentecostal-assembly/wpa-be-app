@@ -1,5 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 import 'entities.dart';
 
 abstract class IPrayerRequestsRepository {
@@ -9,7 +7,6 @@ abstract class IPrayerRequestsRepository {
 
   Future<List<PrayerRequest>> getMorePrayerRequests({
     required int limit,
-    required DocumentSnapshot startAtDocument,
   });
 
   Future<List<PrayerRequest>> getMyPrayerRequests();
@@ -23,7 +20,7 @@ abstract class IPrayerRequestsRepository {
     required String id,
   });
 
-  Future<void> closePrayerRequest({required String id});
+  Future<PrayerRequest> closePrayerRequest({required String id});
 
   /// Reports a Prayer Request. Resets is_approved to false
   /// to reapproval

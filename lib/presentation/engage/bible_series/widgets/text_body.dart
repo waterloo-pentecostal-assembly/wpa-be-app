@@ -7,8 +7,7 @@ import '../../../../domain/bible_series/entities.dart';
 class TextContentBodyWidget extends StatelessWidget {
   final TextBody textContentBody;
 
-  const TextContentBodyWidget({Key key, this.textContentBody})
-      : super(key: key);
+  const TextContentBodyWidget({Key? key, this.textContentBody}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -21,9 +20,7 @@ class TextContentBodyWidget extends StatelessWidget {
           itemBuilder: (BuildContext context, int index) {
             return Padding(
                 padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
-                child: getIt<TextFactory>().selectLite(
-                    textContentBody.properties.paragraphs[index],
-                    fontSize: 16));
+                child: getIt<TextFactory>().selectLite(textContentBody.properties.paragraphs[index], fontSize: 16));
           },
         ));
   }

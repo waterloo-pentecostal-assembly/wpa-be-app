@@ -210,7 +210,8 @@ class CompletionsRepository extends ICompletionsRepository {
 
   @override
   Future<String> updateComplete(
-      {required CompletionDetails completionDetails, required String completionId}) async {
+      {required CompletionDetails completionDetails,
+      required String completionId}) async {
     CompletionsDto completionsDto =
         CompletionsDto.fromDomain(completionDetails);
     try {
@@ -243,7 +244,8 @@ class CompletionsRepository extends ICompletionsRepository {
   }
 
   @override
-  List<UploadTask> uploadImages({required List<File> images, required String userId}) {
+  List<UploadTask> uploadImages(
+      {required List<File> images, required String userId}) {
     List<UploadTask> response = [];
     for (File image in images) {
       String fileExt = path.extension(image.path);

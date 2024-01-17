@@ -21,7 +21,7 @@ class PrayerRequestCard extends StatelessWidget {
   final Animation<double> animation;
 
   const PrayerRequestCard({
-    Key key,
+    Key? key,
     required this.prayerRequest,
     required this.prayButtonOrIndicator,
     required this.animation,
@@ -77,7 +77,7 @@ class PrayerRequestCard extends StatelessWidget {
 class PrayerRequestMenuButton extends StatelessWidget {
   final PrayerRequest prayerRequest;
 
-  const PrayerRequestMenuButton({Key key, required this.prayerRequest})
+  const PrayerRequestMenuButton({Key? key, required this.prayerRequest})
       : super(key: key);
 
   @override
@@ -178,7 +178,7 @@ class PrayerRequestMenuButton extends StatelessWidget {
 class PrayerRequestUserAndDate extends StatelessWidget {
   final PrayerRequest prayerRequest;
 
-  const PrayerRequestUserAndDate({Key key, required this.prayerRequest})
+  const PrayerRequestUserAndDate({Key? key, required this.prayerRequest})
       : super(key: key);
 
   @override
@@ -194,7 +194,7 @@ class PrayerRequestUserAndDate extends StatelessWidget {
                 : FadeInImage.assetNetwork(
                     fit: BoxFit.cover,
                     placeholder: kProfilePhotoPlaceholder,
-                    image: prayerRequest.userSnippet.thumbnailUrl,
+                    image: prayerRequest.userSnippet.thumbnailUrl!,
                   ),
           ),
         ),
@@ -222,7 +222,7 @@ class PrayerRequestUserAndDate extends StatelessWidget {
 class PrayButton extends StatelessWidget {
   final PrayerRequest prayerRequest;
 
-  const PrayButton({Key key, required this.prayerRequest}) : super(key: key);
+  const PrayButton({Key? key, required this.prayerRequest}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -235,7 +235,7 @@ class PrayButton extends StatelessWidget {
 class _PrayButton extends StatelessWidget {
   final PrayerRequest prayerRequest;
 
-  const _PrayButton({Key key, required this.prayerRequest}) : super(key: key);
+  const _PrayButton({Key? key, required this.prayerRequest}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -313,7 +313,7 @@ class _PrayButton extends StatelessWidget {
 class PrayedByIndicator extends StatelessWidget {
   final int amount;
 
-  const PrayedByIndicator({Key key, required this.amount}) : super(key: key);
+  const PrayedByIndicator({Key? key, required this.amount}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

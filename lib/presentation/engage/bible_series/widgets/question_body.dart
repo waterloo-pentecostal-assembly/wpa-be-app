@@ -14,17 +14,12 @@ class QuestionContentBodyWidget extends StatelessWidget {
   final QuestionBody questionContentBody;
   final int contentNum;
 
-  const QuestionContentBodyWidget(
-      {Key key,
-      this.questionContentBody,
-      this.contentNum,
-      this.completionDetails})
+  const QuestionContentBodyWidget({Key? key, this.questionContentBody, this.contentNum, this.completionDetails})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    BlocProvider.of<CompletionsBloc>(context)
-      ..add(LoadResponses(completionDetails));
+    BlocProvider.of<CompletionsBloc>(context)..add(LoadResponses(completionDetails));
     return Container(
         padding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
         child: Column(
@@ -45,41 +40,32 @@ class QuestionContentBodyWidget extends StatelessWidget {
         ));
   }
 
-  Responses toResponses(
-      List<String> responses, String contentNum, ResponseType type) {
+  Responses toResponses(List<String> responses, String contentNum, ResponseType type) {
     Map<String, Map<String, ResponseDetails>> responseMap = new Map();
     responses.forEach((element) {
-      ResponseDetails responseDetails =
-          ResponseDetails(type: type, response: element);
-      responseMap[contentNum] = {
-        responses.indexOf(element).toString(): responseDetails
-      };
+      ResponseDetails responseDetails = ResponseDetails(type: type, response: element);
+      responseMap[contentNum] = {responses.indexOf(element).toString(): responseDetails};
     });
     return Responses(responses: responseMap);
   }
 }
 
-Widget questionContainer(
-    Question question, int contentNum, int questionNum, BuildContext context) {
+Widget questionContainer(Question question, int contentNum, int questionNum, BuildContext context) {
   return Column(
     children: [
       IntrinsicHeight(
         child: Row(
           children: [
             Container(
-                padding:
-                    const EdgeInsets.fromLTRB(0, kTopPaddingQuestionBody, 0, 0),
+                padding: const EdgeInsets.fromLTRB(0, kTopPaddingQuestionBody, 0, 0),
                 alignment: Alignment.topLeft,
                 width: getIt<LayoutFactory>().getDimension(baseDimension: 14.0),
-                child: getIt<TextFactory>().textFormFieldInput(
-                    (question.location[1] + 1).toString() + ".",
-                    fontSize: 16)),
+                child:
+                    getIt<TextFactory>().textFormFieldInput((question.location[1] + 1).toString() + ".", fontSize: 16)),
             Expanded(
                 child: Padding(
-              padding:
-                  const EdgeInsets.fromLTRB(2, kTopPaddingQuestionBody, 2, 8),
-              child: getIt<TextFactory>()
-                  .textFormFieldInput(question.question, fontSize: 16),
+              padding: const EdgeInsets.fromLTRB(2, kTopPaddingQuestionBody, 2, 8),
+              child: getIt<TextFactory>().textFormFieldInput(question.question, fontSize: 16),
             ))
           ],
         ),
@@ -103,12 +89,10 @@ Widget questionContainer(
                     ),
                     onChanged: (value) {
                       if (state.isComplete == true) {
-                        BlocProvider.of<CompletionsBloc>(context)
-                          ..add(MarkAsInComplete(state.id));
+                        BlocProvider.of<CompletionsBloc>(context)..add(MarkAsInComplete(state.id));
                       }
                       BlocProvider.of<CompletionsBloc>(context)
-                        ..add(QuestionResponseChanged(
-                            value, contentNum, questionNum));
+                        ..add(QuestionResponseChanged(value, contentNum, questionNum));
                     },
                   ));
             } else {
@@ -124,8 +108,7 @@ Widget questionContainer(
                     ),
                     onChanged: (value) {
                       BlocProvider.of<CompletionsBloc>(context)
-                        ..add(QuestionResponseChanged(
-                            value, contentNum, questionNum));
+                        ..add(QuestionResponseChanged(value, contentNum, questionNum));
                     },
                   ));
             }
@@ -140,11 +123,8 @@ Widget questionContainer(
 
 String getResponse(CompletionsState state, int contentNum, int questionNum) {
   if (state.responses.responses[contentNum.toString()] != null) {
-    if (state.responses.responses[contentNum.toString()]
-            [questionNum.toString()] !=
-        null) {
-      return state.responses
-          .responses[contentNum.toString()][questionNum.toString()].response;
+    if (state.responses.responses[contentNum.toString()][questionNum.toString()] != null) {
+      return state.responses.responses[contentNum.toString()][questionNum.toString()].response;
     }
   }
   return '';

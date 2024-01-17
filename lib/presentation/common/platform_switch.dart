@@ -2,18 +2,17 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:wpa_app/app/constants.dart';
 
 class PlatformSwitch extends StatefulWidget {
   final bool value;
-  final void Function(bool) onChanged;
-  final Color activeColor;
+  final void Function(bool)? onChanged;
   final bool disabled;
 
   const PlatformSwitch({
-    Key key,
-    this.value,
+    Key? key,
+    this.value = false,
     this.onChanged,
-    this.activeColor,
     this.disabled = false,
   }) : super(key: key);
 
@@ -41,7 +40,7 @@ class _PlatformSwitchState extends State<PlatformSwitch> {
     return CupertinoSwitch(
       value: widget.value,
       onChanged: widget.onChanged,
-      activeColor: widget.activeColor,
+      activeColor: kWpaBlue.withOpacity(0.6),
     );
   }
 
@@ -56,8 +55,8 @@ class _PlatformSwitchState extends State<PlatformSwitch> {
     return Switch(
       value: widget.value,
       onChanged: widget.onChanged,
-      activeTrackColor: widget.activeColor.withOpacity(0.25),
-      activeColor: widget.activeColor,
+      activeTrackColor: kWpaBlue.withOpacity(0.25),
+      activeColor: kWpaBlue.withOpacity(0.6),
     );
   }
 

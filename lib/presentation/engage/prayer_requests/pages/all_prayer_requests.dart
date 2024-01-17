@@ -22,9 +22,9 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
   final _scrollThreshold = 200.0;
   bool _isEndOfList = false;
   bool _moreRequested = false;
-  List<PrayerRequest> _prayerRequests;
+  late List<PrayerRequest> _prayerRequests;
   Widget _child = Loader();
-  int _amountToFetch;
+  late int _amountToFetch;
 
   _AllPrayerRequestsState() {
     _scrollController.addListener(_onScroll);
@@ -60,21 +60,21 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
   // ignore: unused_element
   void _insert(PrayerRequest prayerRequest) {
     _prayerRequests.insert(0, prayerRequest);
-    _allPrayerRequestsListKey.currentState.insertItem(0);
+    _allPrayerRequestsListKey.currentState?.insertItem(0);
   }
 
   void _addMany(List<PrayerRequest> prayerRequests) {
     int insertIndex = _prayerRequests.length - 1;
     _prayerRequests.addAll(prayerRequests);
     for (int offset = 0; offset < prayerRequests.length; offset++) {
-      _allPrayerRequestsListKey.currentState.insertItem(insertIndex + offset);
+      _allPrayerRequestsListKey.currentState?.insertItem(insertIndex + offset);
     }
   }
 
   void _delete(int indexToDelete) {
     PrayerRequest deletedPrayerRequest =
         _prayerRequests.removeAt(indexToDelete);
-    _allPrayerRequestsListKey.currentState.removeItem(
+    _allPrayerRequestsListKey.currentState?.removeItem(
       indexToDelete,
       (context, animation) =>
           _buildDeletedItem(context, deletedPrayerRequest, animation),
@@ -152,7 +152,7 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
 
   int getIndexById(String id) {
     // O(n) ... not the best. Consider passing the index in the bloc event and getting it back in the state
-    int indexToDelete;
+    int indexToDelete = -1;
     for (PrayerRequest prayerRequest in _prayerRequests) {
       int index = _prayerRequests.indexOf(prayerRequest);
       if (prayerRequest.id == id) {
