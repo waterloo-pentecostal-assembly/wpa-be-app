@@ -26,12 +26,10 @@ class CompletionDetails {
 class Responses {
   final String? id;
   final Map<String, Map<String, ResponseDetails>> responses;
-  final String userId;
 
   Responses({
     this.id,
     required this.responses,
-    required this.userId,
   });
 }
 

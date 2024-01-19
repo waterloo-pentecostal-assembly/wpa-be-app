@@ -64,7 +64,7 @@ class ContentDetailWidget extends StatelessWidget {
 
   List<Widget> contentDetailList(
     SeriesContent seriesContent,
-    CompletionDetails completionDetails,
+    CompletionDetails? completionDetails,
     BuildContext context,
   ) {
     List<ISeriesContentBody> body = seriesContent.body;
@@ -73,26 +73,26 @@ class ContentDetailWidget extends StatelessWidget {
     for (int index = 0; index < body.length; index++) {
       if (body[index].type == SeriesContentBodyType.AUDIO) {
         contentBodyList.add(AudioBodyWidget(
-          audioContentBody: body[index],
+          audioContentBody: body[index] as AudioBody,
           contentId: seriesContent.id,
         ));
       } else if (body[index].type == SeriesContentBodyType.TEXT) {
         contentBodyList.add(TextContentBodyWidget(
-          textContentBody: body[index],
+          textContentBody: body[index] as TextBody,
         ));
       } else if (body[index].type == SeriesContentBodyType.SCRIPTURE) {
         contentBodyList.add(ScriptureContentBodyWidget(
-          scriptureContentBody: body[index],
+          scriptureContentBody: body[index] as ScriptureBody,
         ));
       } else if (body[index].type == SeriesContentBodyType.QUESTION) {
         contentBodyList.add(QuestionContentBodyWidget(
-          questionContentBody: body[index],
+          questionContentBody: body[index] as QuestionBody,
           contentNum: index,
           completionDetails: completionDetails,
         ));
       } else if (body[index].type == SeriesContentBodyType.IMAGE_INPUT) {
         contentBodyList.add(ImageInputBodyWidget(
-          imageInputBody: body[index],
+          imageInputBody: body[index] as ImageInputBody,
           contentNum: index,
           completionDetails: completionDetails,
           bibleSeriesId: bibleSeriesId,
@@ -100,11 +100,11 @@ class ContentDetailWidget extends StatelessWidget {
         ));
       } else if (body[index].type == SeriesContentBodyType.LINK) {
         contentBodyList.add(LinkBodyWidget(
-          linkBody: body[index],
+          linkBody: body[index] as LinkBody,
         ));
       } else if (body[index].type == SeriesContentBodyType.TITLE) {
         contentBodyList.add(TitleBodyWidget(
-          titleBody: body[index],
+          titleBody: body[index] as TitleBody,
         ));
       } else if (body[index].type == SeriesContentBodyType.DIVIDER) {
         contentBodyList.add(DividerBodyWidget());
@@ -135,6 +135,7 @@ class ContentDetailWidget extends StatelessWidget {
                 () {
               if (state.seriesContentDetail.isResponsePossible) {
                 CompletionDetails completionDetails = CompletionDetails(
+                    id: state.seriesContentDetail.id,
                     seriesId: bibleSeriesId,
                     contentId: state.seriesContentDetail.id,
                     isDraft: true,
@@ -230,8 +231,9 @@ class ContentDetailWidget extends StatelessWidget {
       );
     } else {
       if (seriesContent.isResponsePossible) {
-        if (!isResponseEmpty(state.responses)) {
+        if (!isResponseEmpty(state.responses!)) {
           CompletionDetails completionDetails = CompletionDetails(
+              id: state.id,
               seriesId: bibleSeriesId,
               contentId: seriesContent.id,
               isDraft: true,
@@ -252,7 +254,7 @@ class ContentDetailWidget extends StatelessWidget {
 class SeriesContentDetailPlaceholder extends StatelessWidget {
   final String seriesContentType;
 
-  const SeriesContentDetailPlaceholder({Key? key, this.seriesContentType}) : super(key: key);
+  const SeriesContentDetailPlaceholder({Key? key, required this.seriesContentType}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -284,7 +286,7 @@ class SeriesContentDetailPlaceholder extends StatelessWidget {
 
 class HeaderWidget extends StatelessWidget {
   final String contentType;
-  const HeaderWidget({Key? key, this.contentType}) : super(key: key);
+  const HeaderWidget({Key? key, required this.contentType}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

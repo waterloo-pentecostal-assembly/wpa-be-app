@@ -199,7 +199,7 @@ class CompletionsRepository extends ICompletionsRepository {
       DocumentSnapshot document = querySnapshot.docs[0];
       return ResponsesDto.fromFirestore(document).toDomain();
     } else {
-      return Responses(responses: Map(), userId: user.id);
+      return Responses(responses: Map());
     }
     //TODO: change to include throwing exception while still returning empty response for image responses
     // throw CompletionsException(

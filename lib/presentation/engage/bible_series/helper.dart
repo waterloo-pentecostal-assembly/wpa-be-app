@@ -24,8 +24,8 @@ bool isResponsesFilled(Responses responses, SeriesContent seriesContent) {
           j < seriesContent.body[i].properties.questions.length;
           j++) {
         if (responses.responses[i.toString()] == null ||
-            responses.responses[i.toString()][j.toString()] == null ||
-            responses.responses[i.toString()][j.toString()].response == "") {
+            responses.responses[i.toString()]![j.toString()] == null ||
+            responses.responses[i.toString()]![j.toString()]!.response == "") {
           check = false;
         }
       }

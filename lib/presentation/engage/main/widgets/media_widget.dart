@@ -91,14 +91,15 @@ class MediaWidgetLoading extends StatelessWidget {
 class MediaCard extends StatelessWidget {
   final Media media;
 
-  const MediaCard({Key? key, this.media}) : super(key: key);
+  const MediaCard({Key? key, required this.media}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        if (await canLaunch(media.link)) {
-          await launch(media.link, forceSafariVC: false);
+        Uri uri = new Uri.https(media.link);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri);
         } else {
           ToastMessage.showErrorToast("Error opening page", context);
         }
@@ -115,8 +116,8 @@ class MediaCard extends StatelessWidget {
                 media.thumbnailUrl,
                 height: getIt<LayoutFactory>().getDimension(baseDimension: kMediaTileHeight),
                 fit: BoxFit.fill,
-                frameBuilder: (BuildContext context, Widget child, int frame, bool wasSynchronouslyLoaded) {
-                  if (frame >= 0) {
+                frameBuilder: (BuildContext context, Widget child, int? frame, bool wasSynchronouslyLoaded) {
+                  if (frame != null && frame >= 0) {
                     return child;
                   } else {
                     return Container(

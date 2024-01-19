@@ -53,10 +53,10 @@ class MarkQuestionAsComplete extends CompletionsEvent {
 }
 
 class LoadResponses extends CompletionsEvent {
-  final CompletionDetails completionDetails;
+  final CompletionDetails? completionDetails;
   LoadResponses(this.completionDetails);
   @override
-  List<Object> get props => [completionDetails];
+  List<Object> get props => [completionDetails ?? ''];
 }
 
 class UploadImage extends CompletionsEvent {

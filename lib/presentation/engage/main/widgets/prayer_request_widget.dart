@@ -113,7 +113,7 @@ class PrayerRequestOptionsSlider extends StatelessWidget {
           GestureDetector(
             onTap: () {
               Navigator.pushNamed(context, '/prayer_requests/mine');
-              OverlayEntry entry;
+              OverlayEntry? entry;
               Overlay.of(context).insert(
                 entry = OverlayEntry(
                   builder: (context) {
@@ -223,7 +223,7 @@ class PrayerRequestOptions extends StatelessWidget {
               child: GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(context, '/prayer_requests/mine');
-                  OverlayEntry entry;
+                  OverlayEntry? entry;
                   Overlay.of(context).insert(
                     entry = OverlayEntry(
                       builder: (context) {

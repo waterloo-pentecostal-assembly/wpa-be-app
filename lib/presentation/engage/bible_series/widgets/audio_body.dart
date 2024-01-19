@@ -11,8 +11,8 @@ class AudioBodyWidget extends StatelessWidget {
   final String contentId;
   const AudioBodyWidget({
     Key? key,
-    this.audioContentBody,
-    this.contentId,
+    required this.audioContentBody,
+    required this.contentId,
   }) : super(key: key);
 
   @override
@@ -43,9 +43,9 @@ class AudioBodyWidget extends StatelessWidget {
 }
 
 class AudioPlayerWidget extends StatelessWidget {
-  final Duration duration;
-  final Duration position;
-  final PlayerStateEnum playerState;
+  final Duration? duration;
+  final Duration? position;
+  final PlayerStateEnum? playerState;
   final String audioFileUrl;
   final String contentId;
   const AudioPlayerWidget({
@@ -53,8 +53,8 @@ class AudioPlayerWidget extends StatelessWidget {
     this.position,
     this.duration,
     this.playerState,
-    this.audioFileUrl,
-    this.contentId,
+    required this.audioFileUrl,
+    required this.contentId,
   }) : super(key: key);
 
   Widget slider() {
@@ -77,8 +77,8 @@ class AudioPlayerWidget extends StatelessWidget {
         ),
         child: Slider(
           min: 0.0,
-          value: position != null ? position.inSeconds.toDouble() : 0.0,
-          max: duration != null ? duration.inSeconds.toDouble() : 0.0,
+          value: position != null ? position!.inSeconds.toDouble() : 0.0,
+          max: duration != null ? duration!.inSeconds.toDouble() : 0.0,
           onChanged: (double value) {
             getIt<AudioPlayerBloc>()
               ..add(Seek(
@@ -90,7 +90,7 @@ class AudioPlayerWidget extends StatelessWidget {
     );
   }
 
-  String _getTimeInSeconds(Duration d) {
+  String _getTimeInSeconds(Duration? d) {
     if (d == null) {
       return '00:00';
     } else {

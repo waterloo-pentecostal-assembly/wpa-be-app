@@ -6,17 +6,15 @@ import '../common/helpers.dart';
 class ResponsesDto {
   final String? id;
   final Map<String, Map<String, ResponseDetails>> responses;
-  final String userId;
 
   factory ResponsesDto.fromDomain(
       Map<String, Map<String, ResponseDetails>> responses, String userId) {
-    return ResponsesDto._(responses: responses, userId: userId);
+    return ResponsesDto._(responses: responses);
   }
 
   factory ResponsesDto.fromFirestore(DocumentSnapshot doc) {
     Map<String, dynamic> json = doc.data() as Map<String, dynamic>;
     Map<String, Map<String, ResponseDetails>> _responses = {};
-    String userId = findOrThrowException(json, 'user_id');
     String responseId = doc.id;
     Map<String, dynamic> responses =
         findOrDefaultToGetResponse(json, 'responses', {});
@@ -42,13 +40,12 @@ class ResponsesDto {
       });
     });
     return ResponsesDto._(
-        id: responseId, responses: _responses, userId: userId);
+        id: responseId, responses: _responses);
   }
 
   const ResponsesDto._({
     this.id,
     required this.responses,
-    required this.userId,
   });
 }
 
@@ -57,7 +54,6 @@ extension ContentCompletionDtoX on ResponsesDto {
     return Responses(
       id: this.id,
       responses: this.responses,
-      userId: this.userId,
     );
   }
 
@@ -85,7 +81,6 @@ extension ContentCompletionDtoX on ResponsesDto {
       });
     });
     return {
-      "user_id": this.userId,
       "responses": _responses,
     };
   }

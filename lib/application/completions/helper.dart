@@ -14,7 +14,7 @@ Responses toResponses(Responses responses, String response, String contentNum,
     responseMap[contentNum] = {questionNum: responseDetails};
   }
 
-  return Responses(responses: responseMap, id: responseId, userId: userId);
+  return Responses(responses: responseMap, id: responseId);
 }
 
 String toThumbnail(String location) {

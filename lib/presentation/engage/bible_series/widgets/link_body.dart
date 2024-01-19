@@ -9,7 +9,7 @@ import 'package:wpa_app/presentation/common/toast_message.dart';
 
 class LinkBodyWidget extends StatelessWidget {
   final LinkBody linkBody;
-  const LinkBodyWidget({Key? key, this.linkBody}) : super(key: key);
+  const LinkBodyWidget({Key? key, required this.linkBody}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Container(

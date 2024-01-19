@@ -39,9 +39,9 @@ class BibleSeriesWidget extends StatefulWidget {
 }
 
 class _BibleSeriesState extends State<BibleSeriesWidget> with TickerProviderStateMixin {
-  int tabLength;
-  TabController _tabController;
-  BibleSeries bibleSeries;
+  late int tabLength;
+  TabController? _tabController;
+  late BibleSeries bibleSeries;
 
   @override
   void initState() {
