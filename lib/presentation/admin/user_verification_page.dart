@@ -16,7 +16,7 @@ class UserVerificationPage extends StatefulWidget {
 
 class _UserVerificationPageState extends State<UserVerificationPage> {
   final key = GlobalKey<AnimatedListState>();
-  late List<LocalUser> userCards;
+  List<LocalUser> userCards = [];
 
   @override
   Widget build(BuildContext context) {

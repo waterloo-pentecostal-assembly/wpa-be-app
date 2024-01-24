@@ -16,7 +16,7 @@ class PrayerApprovalPage extends StatefulWidget {
 
 class _PrayerApprovalPageState extends State<PrayerApprovalPage> {
   final key = GlobalKey<AnimatedListState>();
-  late List<PrayerRequest> prayerRequestCards;
+  List<PrayerRequest> prayerRequestCards = [];
 
   @override
   Widget build(BuildContext context) {

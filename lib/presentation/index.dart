@@ -51,24 +51,24 @@ class IndexPage extends StatelessWidget {
 }
 
 class _IndexPage extends StatelessWidget {
-  final List<IIndexedPage>? indexedPages;
+  final List<IIndexedPage> indexedPages;
 
-  const _IndexPage({Key? key, this.indexedPages}) : super(key: key);
+  const _IndexPage({Key? key, required this.indexedPages}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<NavigationBarBloc, NavigationBarState>(
       builder: (BuildContext context, NavigationBarState state) {
         NavigatorState? routeNavigatorState =
-            indexedPages?[state.tab.index].navigatorKey?.currentState;
+            indexedPages[state.tab.index].navigatorKey?.currentState;
 
         if (routeNavigatorState?.canPop() == true) {
           // clear navigation stack before going to new route
           routeNavigatorState?.popUntil((route) => route.isFirst);
         }
 
-        indexedPages?[state.tab.index].navigatorKey?.currentState?.pushNamed(
-              state.route!,
+        indexedPages[state.tab.index].navigatorKey?.currentState?.pushNamed(
+              state.route ?? '',
               arguments: state.arguments,
             );
 
@@ -82,10 +82,10 @@ class _IndexPage extends StatelessWidget {
 }
 
 class NavigationBar extends StatelessWidget {
-  final int? tabIndex;
-  final List<IIndexedPage>? indexedPages;
+  final int tabIndex;
+  final List<IIndexedPage> indexedPages;
 
-  const NavigationBar({Key? key, this.tabIndex, this.indexedPages})
+  const NavigationBar({Key? key, required this.tabIndex, required this.indexedPages})
       : super(key: key);
 
   void handleOnTap(BuildContext context, int index, String url) async {
@@ -105,8 +105,8 @@ class NavigationBar extends StatelessWidget {
     } else {
       // If the user is re-selecting the tab, the common
       // behavior is to empty the stack.
-      if (indexedPages?[index].navigatorKey?.currentState != null) {
-        indexedPages?[index]
+      if (indexedPages[index].navigatorKey?.currentState != null) {
+        indexedPages[index]
             .navigatorKey
             ?.currentState
             ?.popUntil((route) => route.isFirst);
@@ -171,7 +171,7 @@ class NavigationBar extends StatelessWidget {
           canPop: false,
           onPopInvoked: (bool didPop) async {
             NavigatorState? currentNavigatorState =
-                indexedPages![tabIndex!].navigatorKey?.currentState;
+                indexedPages[tabIndex].navigatorKey?.currentState;
             if (currentNavigatorState?.canPop() == true) {
               await currentNavigatorState?.maybePop();
             } else {
@@ -181,10 +181,10 @@ class NavigationBar extends StatelessWidget {
             body: IndexedStack(
               index: tabIndex,
               children: <Widget>[
-                indexedPages![0],
-                indexedPages![1],
-                indexedPages![2],
-                indexedPages![3],
+                indexedPages[0],
+                indexedPages[1],
+                indexedPages[2],
+                indexedPages[3],
               ],
             ),
             bottomNavigationBar: BottomNavigationBar(
@@ -195,7 +195,7 @@ class NavigationBar extends StatelessWidget {
               unselectedLabelStyle:
                   getIt<TextFactory>().liteTextStyle(fontSize: 10),
               type: BottomNavigationBarType.fixed,
-              currentIndex: tabIndex!,
+              currentIndex: tabIndex,
               onTap: (int index) => handleOnTap(context, index, url),
               items: getNavBarItems(),
             ),
