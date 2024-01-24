@@ -20,8 +20,7 @@ class PrayerRequestsDto {
   final UserSnippetDto userSnippet;
   final bool? isAnswered;
 
-  factory PrayerRequestsDto.newRequestFromDomain(
-      String request, bool isAnonymous, LocalUser user) {
+  factory PrayerRequestsDto.newRequestFromDomain(String request, bool isAnonymous, LocalUser user) {
     return PrayerRequestsDto._(
       userId: user.id,
       request: request,
@@ -31,13 +30,12 @@ class PrayerRequestsDto {
     );
   }
 
-  factory PrayerRequestsDto.fromFirestore(
-      DocumentSnapshot doc, String signedInUserId) {
+  factory PrayerRequestsDto.fromFirestore(DocumentSnapshot doc, String signedInUserId) {
     var data = (doc.data() ?? {}) as Map<String, dynamic>;
     List<String> _prayedBy = [];
     List<String> _reportedBy = [];
-    List<dynamic> _prayedByFirestore = data['prayed_by'];
-    List<dynamic> _reportedByFirestore = data['reported_by'];
+    List<dynamic> _prayedByFirestore = findOrDefaultTo(data, 'prayed_by', []);
+    List<dynamic> _reportedByFirestore = findOrDefaultTo(data, 'reported_by', []);
     String _userId = findOrThrowException(data, 'user_id');
 
     _prayedByFirestore.forEach((element) {
@@ -60,8 +58,7 @@ class PrayerRequestsDto {
         isApproved: findOrDefaultTo(data, 'is_approved', false),
         date: findOrThrowException(data, 'date'),
         isAnonymous: findOrThrowException(data, 'is_anonymous'),
-        userSnippet: UserSnippetDto.fromFirestore(
-            findOrThrowException(data, 'user_snippet')),
+        userSnippet: UserSnippetDto.fromFirestore(findOrThrowException(data, 'user_snippet')),
         isAnswered: findOrDefaultTo(data, 'is_answered', false));
   }
 
@@ -83,8 +80,7 @@ class PrayerRequestsDto {
 }
 
 extension PrayerRequestsDtoX on PrayerRequestsDto {
-  Future<PrayerRequest> toDomain(
-      FirebaseStorageService firebaseStorageService) async {
+  Future<PrayerRequest> toDomain(FirebaseStorageService firebaseStorageService) async {
     return PrayerRequest(
       id: this.id!,
       date: this.date,
@@ -152,11 +148,9 @@ class UserSnippetDto {
 }
 
 extension UserSnippetDtoX on UserSnippetDto {
-  Future<UserSnippet> toDomain(
-      FirebaseStorageService firebaseStorageService) async {
+  Future<UserSnippet> toDomain(FirebaseStorageService firebaseStorageService) async {
     // Convert GS Location to Download URL
-    String? thumbnailUrl =
-        await firebaseStorageService.getNullableDownloadUrl(this.thumbnail);
+    String? thumbnailUrl = await firebaseStorageService.getNullableDownloadUrl(this.thumbnail);
     ;
 
     return UserSnippet(

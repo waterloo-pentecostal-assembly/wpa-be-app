@@ -135,7 +135,7 @@ class PrayerRequestMenuButton extends StatelessWidget {
           ],
         ),
       ));
-      if (!prayerRequest.isAnswered) {
+      if (prayerRequest.isAnswered) {
         popupMenuItems.add(PopupMenuItem(
           value: MenuButtonValue(
               id: prayerRequest.id, action: PrayerActionOptions.MY_CLOSE),
@@ -194,7 +194,7 @@ class PrayerRequestUserAndDate extends StatelessWidget {
                 : FadeInImage.assetNetwork(
                     fit: BoxFit.cover,
                     placeholder: kProfilePhotoPlaceholder,
-                    image: prayerRequest.userSnippet.thumbnailUrl!,
+                    image: prayerRequest.userSnippet.thumbnailUrl ?? '',
                   ),
           ),
         ),

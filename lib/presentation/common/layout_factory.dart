@@ -16,7 +16,7 @@ class LayoutFactory {
   double conversionVal = 1.2;
 
   // Mobile Dimensions
-  double mContentTabHeight = 108;
+  double mContentTabHeight = 120;
   double mContentTabWidth = 70;
   double mAdminTileHeight = 125;
   double mAdminTileWidth = 150;
@@ -34,7 +34,7 @@ class LayoutFactory {
   LayoutFactory(this.deviceType);
 
   double getDimension({LayoutDimension? layoutDimension, double? baseDimension}) {
-    assert(!(baseDimension == null && baseDimension == null), "Either layoutDimension or baseDimension must be provided");
+    // assert(!(baseDimension == null && baseDimension == null), "Either layoutDimension or baseDimension must be provided");
     switch (layoutDimension) {
       case LayoutDimension.CONTENT_TAB_HEIGHT:
         {

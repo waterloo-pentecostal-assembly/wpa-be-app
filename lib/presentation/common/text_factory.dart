@@ -148,7 +148,7 @@ class TextFactory {
 
   Text lite(
     String text, {
-    double fontSize = 14.0,
+    double fontSize = 11.0,
     Color color = Colors.black,
     TextOverflow overflow = TextOverflow.visible,
   }) {
@@ -160,7 +160,7 @@ class TextFactory {
   }
 
   TextStyle liteTextStyle(
-      {double fontSize = 14.0, Color color = Colors.black}) {
+      {double fontSize = 11.0, Color color = Colors.black}) {
     return TextStyle(
       fontFamily: _fontFamily,
       fontWeight: FontWeight.w400,
