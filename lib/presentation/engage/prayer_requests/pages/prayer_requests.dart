@@ -94,6 +94,7 @@ class _TabPrayerRequestWidgetState extends State<TabPrayerRequestWidget> with Si
               indicatorSize: TabBarIndicatorSize.label,
               unselectedLabelColor: Colors.black54,
               labelColor: Colors.black87,
+              tabAlignment: TabAlignment.start,
               tabs: [
                 getIt<TextFactory>().subHeading2('All'),
                 getIt<TextFactory>().subHeading2('My Open Requests'),

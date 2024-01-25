@@ -16,7 +16,7 @@ class LayoutFactory {
   double conversionVal = 1.2;
 
   // Mobile Dimensions
-  double mContentTabHeight = 120;
+  double mContentTabHeight = 108;
   double mContentTabWidth = 70;
   double mAdminTileHeight = 125;
   double mAdminTileWidth = 150;

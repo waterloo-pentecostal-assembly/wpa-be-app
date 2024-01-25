@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:url_launcher/url_launcher_string.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:wpa_app/application/links/links_bloc.dart';
 import 'package:wpa_app/domain/authentication/entities.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
@@ -32,9 +32,7 @@ class IndexPage extends StatelessWidget {
         BlocProvider(
           create: (BuildContext context) => getIt<NavigationBarBloc>(),
         ),
-        BlocProvider(
-            create: (BuildContext context) =>
-                getIt<LinksBloc>()..add(LinksRequested()))
+        BlocProvider(create: (BuildContext context) => getIt<LinksBloc>()..add(LinksRequested()))
       ],
       child: _IndexPage(
         indexedPages: indexedPages,
@@ -59,8 +57,7 @@ class _IndexPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<NavigationBarBloc, NavigationBarState>(
       builder: (BuildContext context, NavigationBarState state) {
-        NavigatorState? routeNavigatorState =
-            indexedPages[state.tab.index].navigatorKey?.currentState;
+        NavigatorState? routeNavigatorState = indexedPages[state.tab.index].navigatorKey?.currentState;
 
         if (routeNavigatorState?.canPop() == true) {
           // clear navigation stack before going to new route
@@ -85,13 +82,13 @@ class NavigationBar extends StatelessWidget {
   final int tabIndex;
   final List<IIndexedPage> indexedPages;
 
-  const NavigationBar({Key? key, required this.tabIndex, required this.indexedPages})
-      : super(key: key);
+  const NavigationBar({Key? key, required this.tabIndex, required this.indexedPages}) : super(key: key);
 
   void handleOnTap(BuildContext context, int index, String url) async {
     if (NavigationTabEnum.values[index] == NavigationTabEnum.GIVE) {
-      if (await canLaunchUrlString(url)) {
-        await launchUrlString(url);
+      Uri uri = Uri.parse(url);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
       } else {
         ToastMessage.showErrorToast("Error opening page", context);
       }
@@ -106,10 +103,7 @@ class NavigationBar extends StatelessWidget {
       // If the user is re-selecting the tab, the common
       // behavior is to empty the stack.
       if (indexedPages[index].navigatorKey?.currentState != null) {
-        indexedPages[index]
-            .navigatorKey
-            ?.currentState
-            ?.popUntil((route) => route.isFirst);
+        indexedPages[index].navigatorKey?.currentState?.popUntil((route) => route.isFirst);
       }
     }
   }
@@ -124,12 +118,10 @@ class NavigationBar extends StatelessWidget {
           Icons.home,
           size: getIt<LayoutFactory>().getDimension(baseDimension: 24),
         ),
-        label:
-            'HOME', // Really the engage page that we are using as "HOME" in phase 1
+        label: 'HOME', // Really the engage page that we are using as "HOME" in phase 1
       ),
       BottomNavigationBarItem(
-        icon: Icon(Icons.favorite,
-            size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0)),
+        icon: Icon(Icons.favorite, size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0)),
         label: 'GIVE',
       ),
       // BottomNavigationBarItem(
@@ -137,8 +129,7 @@ class NavigationBar extends StatelessWidget {
       //   label: 'NOTIFICATIONS',
       // ),
       BottomNavigationBarItem(
-        icon: Icon(Icons.person,
-            size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0)),
+        icon: Icon(Icons.person, size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0)),
         label: 'PROFILE',
       )
     ];
@@ -146,8 +137,7 @@ class NavigationBar extends StatelessWidget {
     if (user.isAdmin) {
       items.add(
         BottomNavigationBarItem(
-          icon: Icon(Icons.admin_panel_settings,
-              size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0)),
+          icon: Icon(Icons.admin_panel_settings, size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0)),
           label: 'ADMIN',
         ),
       );
@@ -170,12 +160,10 @@ class NavigationBar extends StatelessWidget {
         return PopScope(
           canPop: false,
           onPopInvoked: (bool didPop) async {
-            NavigatorState? currentNavigatorState =
-                indexedPages[tabIndex].navigatorKey?.currentState;
+            NavigatorState? currentNavigatorState = indexedPages[tabIndex].navigatorKey?.currentState;
             if (currentNavigatorState?.canPop() == true) {
               await currentNavigatorState?.maybePop();
-            } else {
-            }
+            } else {}
           },
           child: Scaffold(
             body: IndexedStack(
@@ -190,10 +178,8 @@ class NavigationBar extends StatelessWidget {
             bottomNavigationBar: BottomNavigationBar(
               selectedItemColor: kWpaBlue.withOpacity(0.6),
               unselectedItemColor: Colors.grey[500],
-              selectedLabelStyle:
-                  getIt<TextFactory>().regularTextStyle(fontSize: 11),
-              unselectedLabelStyle:
-                  getIt<TextFactory>().liteTextStyle(fontSize: 10),
+              selectedLabelStyle: getIt<TextFactory>().regularTextStyle(fontSize: 11),
+              unselectedLabelStyle: getIt<TextFactory>().liteTextStyle(fontSize: 10),
               type: BottomNavigationBarType.fixed,
               currentIndex: tabIndex,
               onTap: (int index) => handleOnTap(context, index, url),

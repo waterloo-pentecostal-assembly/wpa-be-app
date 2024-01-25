@@ -12,14 +12,14 @@ class LinksRepository extends ILinksRepository {
   }
 
   @override
-  Future<Map<String, String>> getlinks() async {
+  Future<Map<String, dynamic>> getlinks() async {
     QuerySnapshot snapshot;
     try {
       snapshot = await collectionReference.get();
       var docs = snapshot.docs;
       if (docs.isNotEmpty) {
         // only one document in this collection for storing links
-        return (snapshot.docs[0].data() ?? {}) as Map<String, String>;
+        return (snapshot.docs[0].data() ?? {}) as Map<String, dynamic>;
       }
       return {};
     } on Exception catch (e) {

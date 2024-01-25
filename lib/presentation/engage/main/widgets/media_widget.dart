@@ -97,9 +97,9 @@ class MediaCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: () async {
-        Uri uri = new Uri.https(media.link);
+        Uri uri = Uri.parse(media.link);
         if (await canLaunchUrl(uri)) {
-          await launchUrl(uri);
+          await launchUrl(uri, mode: LaunchMode.inAppWebView);
         } else {
           ToastMessage.showErrorToast("Error opening page", context);
         }
