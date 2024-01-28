@@ -75,8 +75,7 @@ class _ColorLoaderState extends State<ColorLoader>
     );
 
     controller.addListener(() {
-      setState(() {
-      });
+      setState(() {});
     });
 
     controller.repeat();
@@ -158,7 +157,11 @@ class Dot extends StatelessWidget {
   final DotType type;
   final Icon icon;
 
-  Dot({required this.radius, required this.color, required this.type, required this.icon});
+  Dot(
+      {required this.radius,
+      required this.color,
+      required this.type,
+      required this.icon});
 
   @override
   Widget build(BuildContext context) {

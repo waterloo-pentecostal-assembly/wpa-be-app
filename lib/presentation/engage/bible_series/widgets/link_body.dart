@@ -14,7 +14,9 @@ class LinkBodyWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
         padding: const EdgeInsets.only(bottom: 8),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.center, children: generateList(context)));
+        child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: generateList(context)));
   }
 
   List<Widget> generateList(BuildContext context) {
@@ -22,19 +24,22 @@ class LinkBodyWidget extends StatelessWidget {
     if (linkBody.properties.title.isNotEmpty) {
       widgetList.add(Container(
         padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
-        child: getIt<TextFactory>().subHeading(linkBody.properties.title, fontSize: 22),
+        child: getIt<TextFactory>()
+            .subHeading(linkBody.properties.title, fontSize: 22),
       ));
     }
     widgetList.add(GestureDetector(
       onTap: () async {
         if (await canLaunch(linkBody.properties.link)) {
-          await launch(linkBody.properties.link, forceWebView: true, enableJavaScript: true);
+          await launch(linkBody.properties.link,
+              forceWebView: true, enableJavaScript: true);
         } else {
           ToastMessage.showErrorToast("Error opening page", context);
         }
       },
       child: Container(
-        width: getIt<LayoutFactory>().getDimension(baseDimension: kLinkButtonWidth),
+        width: getIt<LayoutFactory>()
+            .getDimension(baseDimension: kLinkButtonWidth),
         margin: EdgeInsets.fromLTRB(8, 0, 8, 0),
         padding: EdgeInsets.fromLTRB(8, 8, 8, 8),
         decoration: BoxDecoration(

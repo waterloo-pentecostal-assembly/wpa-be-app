@@ -49,7 +49,8 @@ class ContentDetailPage extends StatelessWidget {
               ),
             ),
         ),
-        BlocProvider<CompletionsBloc>(create: (context) => getIt<CompletionsBloc>()),
+        BlocProvider<CompletionsBloc>(
+            create: (context) => getIt<CompletionsBloc>()),
       ],
       child: ContentDetailWidget(bibleSeriesId, seriesContentType),
     );
@@ -111,10 +112,13 @@ class ContentDetailWidget extends StatelessWidget {
       }
     }
 
-    if (seriesContent.isResponsePossible && !seriesContent.responseContainImage) {
-      contentBodyList.add(ResponseCompletionButton(seriesContent, completionDetails, bibleSeriesId));
+    if (seriesContent.isResponsePossible &&
+        !seriesContent.responseContainImage) {
+      contentBodyList.add(ResponseCompletionButton(
+          seriesContent, completionDetails, bibleSeriesId));
     } else {
-      contentBodyList.add(CompletionButton(seriesContent, completionDetails, bibleSeriesId));
+      contentBodyList.add(
+          CompletionButton(seriesContent, completionDetails, bibleSeriesId));
     }
 
     return contentBodyList;
@@ -126,7 +130,8 @@ class ContentDetailWidget extends StatelessWidget {
       listener: (context, state) {},
       builder: (BuildContext context, BibleSeriesState state) {
         if (state is SeriesContentDetail) {
-          BlocProvider.of<CompletionsBloc>(context)..add(CompletionDetailRequested(state.contentCompletionDetail));
+          BlocProvider.of<CompletionsBloc>(context)
+            ..add(CompletionDetailRequested(state.contentCompletionDetail));
           return WillPopScope(
             onWillPop:
                 // Platform.isIOS
@@ -141,7 +146,8 @@ class ContentDetailWidget extends StatelessWidget {
                     isDraft: true,
                     isOnTime: isOnTime(state.seriesContentDetail.date),
                     completionDate: Timestamp.fromDate(DateTime.now()));
-                BlocProvider.of<CompletionsBloc>(context)..add(MarkAsDraft(completionDetails));
+                BlocProvider.of<CompletionsBloc>(context)
+                  ..add(MarkAsDraft(completionDetails));
               }
               Navigator.pop(context);
               return Future.value(false);
@@ -156,7 +162,8 @@ class ContentDetailWidget extends StatelessWidget {
                       children: [
                         backButton(state.seriesContentDetail),
                         SizedBox(width: 8),
-                        HeaderWidget(contentType: state.seriesContentDetail.contentType),
+                        HeaderWidget(
+                            contentType: state.seriesContentDetail.contentType),
                       ],
                     ),
                   ),
@@ -165,7 +172,8 @@ class ContentDetailWidget extends StatelessWidget {
                       padding: const EdgeInsets.fromLTRB(25, 0, 25, 0),
                       child: ListView(
                         shrinkWrap: true,
-                        children: contentDetailList(state.seriesContentDetail, state.contentCompletionDetail, context),
+                        children: contentDetailList(state.seriesContentDetail,
+                            state.contentCompletionDetail, context),
                       ),
                     ),
                   ),
@@ -201,15 +209,19 @@ class ContentDetailWidget extends StatelessWidget {
     );
   }
 
-  void backFunction(CompletionsState state, BuildContext context, SeriesContent seriesContent) {
+  void backFunction(CompletionsState state, BuildContext context,
+      SeriesContent seriesContent) {
     if (state.uploadTask != null) {
       showDialog(
         context: context,
         builder: (_) => AlertDialog(
           buttonPadding: const EdgeInsets.all(20),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
-          title: getIt<TextFactory>().subHeading2("Uploading Image in Progress"),
-          content: getIt<TextFactory>().lite("Must wait for image to uplaod before exiting this page"),
+          shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.all(Radius.circular(16))),
+          title:
+              getIt<TextFactory>().subHeading2("Uploading Image in Progress"),
+          content: getIt<TextFactory>()
+              .lite("Must wait for image to uplaod before exiting this page"),
           actions: [
             ClipRRect(
               borderRadius: BorderRadius.all(Radius.circular(16)),
@@ -231,7 +243,7 @@ class ContentDetailWidget extends StatelessWidget {
       );
     } else {
       if (seriesContent.isResponsePossible) {
-        if (!isResponseEmpty(state.responses!)) {
+        if (!isResponseEmpty(state.responses)) {
           CompletionDetails completionDetails = CompletionDetails(
               id: state.id,
               seriesId: bibleSeriesId,
@@ -239,9 +251,11 @@ class ContentDetailWidget extends StatelessWidget {
               isDraft: true,
               isOnTime: isOnTime(seriesContent.date),
               completionDate: Timestamp.fromDate(DateTime.now()));
-          BlocProvider.of<CompletionsBloc>(context)..add(MarkAsDraft(completionDetails));
+          BlocProvider.of<CompletionsBloc>(context)
+            ..add(MarkAsDraft(completionDetails));
         } else if (state.id.isNotEmpty) {
-          BlocProvider.of<CompletionsBloc>(context)..add(MarkAsInComplete(state.id));
+          BlocProvider.of<CompletionsBloc>(context)
+            ..add(MarkAsInComplete(state.id));
         }
         Navigator.pop(context);
       } else {
@@ -254,7 +268,9 @@ class ContentDetailWidget extends StatelessWidget {
 class SeriesContentDetailPlaceholder extends StatelessWidget {
   final String seriesContentType;
 
-  const SeriesContentDetailPlaceholder({Key? key, required this.seriesContentType}) : super(key: key);
+  const SeriesContentDetailPlaceholder(
+      {Key? key, required this.seriesContentType})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -270,7 +286,8 @@ class SeriesContentDetailPlaceholder extends StatelessWidget {
                   onTap: () => Navigator.pop(context),
                   child: Icon(
                     Icons.arrow_back,
-                    size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
+                    size: getIt<LayoutFactory>()
+                        .getDimension(baseDimension: 24.0),
                   ),
                 ),
                 SizedBox(width: 8),

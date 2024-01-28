@@ -15,12 +15,14 @@ enum NavigationTabEnum {
 }
 
 class NavigationBarBloc extends Bloc<NavigationBarEvent, NavigationBarState> {
-  NavigationBarBloc() : super(NavigationBarState(tab: NavigationTabEnum.ENGAGE));
+  NavigationBarBloc()
+      : super(NavigationBarState(tab: NavigationTabEnum.ENGAGE));
 
   @override
   Stream<NavigationBarState> mapEventToState(
     NavigationBarEvent event,
   ) async* {
-    yield NavigationBarState(tab: event.tab, route: event.route, arguments: event.arguments);
+    yield NavigationBarState(
+        tab: event.tab, route: event.route, arguments: event.arguments);
   }
 }

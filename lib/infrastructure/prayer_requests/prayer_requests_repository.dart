@@ -17,26 +17,30 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
   late CollectionReference _prayerRequestsCollection;
   DocumentSnapshot? _lastPrayerRequestDocument;
 
-  PrayerRequestsRepository(this._firestore, this._firebaseStorageService, this._firebaseFirestoreService) {
+  PrayerRequestsRepository(this._firestore, this._firebaseStorageService,
+      this._firebaseFirestoreService) {
     _prayerRequestsCollection = _firestore.collection("prayer_requests");
   }
 
   @override
-  Future<PrayerRequest> createPrayerRequest({required String request, required bool isAnonymous}) async {
+  Future<PrayerRequest> createPrayerRequest(
+      {required String request, required bool isAnonymous}) async {
     final LocalUser user = getIt<LocalUser>();
     DocumentReference documentReference;
     DocumentSnapshot documentSnapshot;
 
     try {
       documentReference = await _prayerRequestsCollection.add(
-        PrayerRequestsDto.newRequestFromDomain(request, isAnonymous, user).newRequestToFirestore(),
+        PrayerRequestsDto.newRequestFromDomain(request, isAnonymous, user)
+            .newRequestToFirestore(),
       );
       documentSnapshot = await documentReference.get();
     } on Exception catch (e) {
       throw _firebaseFirestoreService.handleException(e);
     }
 
-    return PrayerRequestsDto.fromFirestore(documentSnapshot, user.id).toDomain(_firebaseStorageService);
+    return PrayerRequestsDto.fromFirestore(documentSnapshot, user.id)
+        .toDomain(_firebaseStorageService);
   }
 
   @override
@@ -67,7 +71,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
 
     for (QueryDocumentSnapshot doc in querySnapshot.docs) {
       PrayerRequest prayerRequest =
-          await PrayerRequestsDto.fromFirestore(doc, user.id).toDomain(_firebaseStorageService);
+          await PrayerRequestsDto.fromFirestore(doc, user.id)
+              .toDomain(_firebaseStorageService);
       myPrayerRequests.add(prayerRequest);
     }
 
@@ -93,7 +98,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
 
     for (QueryDocumentSnapshot doc in querySnapshot.docs) {
       PrayerRequest prayerRequest =
-          await PrayerRequestsDto.fromFirestore(doc, user.id).toDomain(_firebaseStorageService);
+          await PrayerRequestsDto.fromFirestore(doc, user.id)
+              .toDomain(_firebaseStorageService);
       myPrayerRequests.add(prayerRequest);
     }
 
@@ -112,7 +118,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
     } on Exception catch (e) {
       throw _firebaseFirestoreService.handleException(e);
     }
-    return PrayerRequestsDto.fromFirestore(prayerRequestSnapshot, user.id).toDomain(_firebaseStorageService);
+    return PrayerRequestsDto.fromFirestore(prayerRequestSnapshot, user.id)
+        .toDomain(_firebaseStorageService);
   }
 
   @override
@@ -127,7 +134,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
       throw PrayerRequestsException(
           code: PrayerRequestsExceptionCode.NO_STARTING_DOCUMENT,
           message: 'No starting document defined',
-          details: 'No starting document defined. Call [getPrayerRequests] first.');
+          details:
+              'No starting document defined. Call [getPrayerRequests] first.');
     }
 
     try {
@@ -145,7 +153,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
     if (querySnapshot.docs.length > 0) {
       for (QueryDocumentSnapshot doc in querySnapshot.docs) {
         PrayerRequest prayerRequest =
-            await PrayerRequestsDto.fromFirestore(doc, user.id).toDomain(_firebaseStorageService);
+            await PrayerRequestsDto.fromFirestore(doc, user.id)
+                .toDomain(_firebaseStorageService);
         prayerRequests.add(prayerRequest);
       }
       _lastPrayerRequestDocument = querySnapshot.docs.last;
@@ -180,7 +189,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
     if (querySnapshot.docs.length > 0) {
       for (QueryDocumentSnapshot doc in querySnapshot.docs) {
         PrayerRequest prayerRequest =
-            await PrayerRequestsDto.fromFirestore(doc, user.id).toDomain(_firebaseStorageService);
+            await PrayerRequestsDto.fromFirestore(doc, user.id)
+                .toDomain(_firebaseStorageService);
         prayerRequests.add(prayerRequest);
       }
 
@@ -198,7 +208,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
       // Using transaction to avoid stale data
       await _firestore.runTransaction((transaction) async {
         DocumentReference documentReference = _prayerRequestsCollection.doc(id);
-        DocumentSnapshot documentSnapshot = await transaction.get(documentReference);
+        DocumentSnapshot documentSnapshot =
+            await transaction.get(documentReference);
 
         // Check if prayer request exists
         if (documentSnapshot.data() == null) {
@@ -226,7 +237,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
       // Using transaction to avoid stale data
       await _firestore.runTransaction((transaction) async {
         DocumentReference documentReference = _prayerRequestsCollection.doc(id);
-        DocumentSnapshot documentSnapshot = await transaction.get(documentReference);
+        DocumentSnapshot documentSnapshot =
+            await transaction.get(documentReference);
 
         List<dynamic> reportedBy = documentSnapshot["reported_by"] ?? [];
 

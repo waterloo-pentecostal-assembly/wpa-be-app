@@ -7,7 +7,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:wpa_app/application/links/links_bloc.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
-import 'package:wpa_app/presentation/profile/terms_of_use.dart';
 
 import '../../app/constants.dart';
 import '../../app/injection.dart';
@@ -19,7 +18,6 @@ import '../common/interfaces.dart';
 import '../common/platform_switch.dart';
 import '../common/text_factory.dart';
 import '../common/toast_message.dart';
-import 'privacy_policy.dart';
 
 class ProfilePage extends IIndexedPage {
   final GlobalKey<NavigatorState> navigatorKey;
@@ -37,7 +35,7 @@ class ProfilePage extends IIndexedPage {
           create: (BuildContext context) => getIt<UserProfileBloc>(),
         ),
         BlocProvider<NotificationSettingsBloc>(
-          create: (BuildContext context) => getIt<NotificationSettingsBloc>()..add(NotificationSettingsRequested()),
+          create: (BuildContext context) => getIt<NotificationSettingsBloc>(),//..add(NotificationSettingsRequested()),
         ),
       ],
       child: Scaffold(
@@ -47,16 +45,7 @@ class ProfilePage extends IIndexedPage {
             return MaterialPageRoute(
               settings: settings,
               builder: (BuildContext context) {
-                switch (settings.name) {
-                  case '/':
-                    return ProfilePageRoot();
-                  case '/privacy_policy':
-                    return PrivacyPolicyPage();
-                  case '/terms_of_use':
-                    return TermsOfUsePage();
-                  default:
-                    return ProfilePageRoot();
-                }
+                return ProfilePageRoot();
               },
             );
           },
@@ -260,14 +249,28 @@ class LogoutButton extends StatelessWidget {
   }
 }
 
+class NotificationSwitches {
+  bool? isEngagementReminderSwitched;
+  bool? isPrayerNotificationsSwitched;
+
+  String toString() {
+    return 'isEngagementReminderSwitched: $isEngagementReminderSwitched, isPrayerNotificationsSwitched: $isPrayerNotificationsSwitched';
+  }
+}
+
 class NotificationSettings extends StatefulWidget {
+  final switchStates = new NotificationSwitches();
+
   @override
   _NotificationSettingsState createState() => _NotificationSettingsState();
 }
 
 class _NotificationSettingsState extends State<NotificationSettings> {
-  bool? isEngagementReminderSwitched;
-  bool? isPrayerNotificationsSwitched;
+  @override
+  initState() {
+    super.initState();
+    BlocProvider.of<NotificationSettingsBloc>(context)..add(NotificationSettingsRequested());
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -290,22 +293,25 @@ class _NotificationSettingsState extends State<NotificationSettings> {
                   listener: (context, NotificationSettingsState state) {
                     if (state is NotificationSettingsPositions) {
                       setState(() {
-                        isEngagementReminderSwitched = state.notificationSettings.dailyEngagementReminder;
+                        widget.switchStates.isEngagementReminderSwitched =
+                            state.notificationSettings.dailyEngagementReminder;
                       });
                     } else if (state is DailyEngagementReminderError) {
+
                       ToastMessage.showErrorToast(state.message, context);
                       setState(() {
-                        isEngagementReminderSwitched = !isEngagementReminderSwitched!;
+                        widget.switchStates.isEngagementReminderSwitched =
+                            !widget.switchStates.isEngagementReminderSwitched!;
                       });
                     }
                   },
                   builder: (context, NotificationSettingsState state) {
-                    if (isEngagementReminderSwitched != null) {
+                    if (widget.switchStates.isEngagementReminderSwitched != null) {
                       return PlatformSwitch(
-                        value: isEngagementReminderSwitched!,
+                        value: widget.switchStates.isEngagementReminderSwitched!,
                         onChanged: (value) {
                           setState(() {
-                            isEngagementReminderSwitched = value;
+                            widget.switchStates.isEngagementReminderSwitched = value;
                           });
                           if (value) {
                             BlocProvider.of<NotificationSettingsBloc>(context)
@@ -317,7 +323,7 @@ class _NotificationSettingsState extends State<NotificationSettings> {
                         },
                       );
                     } else {
-                      return PlatformSwitch(disabled: true);
+                      return PlatformSwitch(disabled: false);
                     }
                   },
                 ),
@@ -335,22 +341,23 @@ class _NotificationSettingsState extends State<NotificationSettings> {
                   listener: (context, NotificationSettingsState state) {
                     if (state is NotificationSettingsPositions) {
                       setState(() {
-                        isPrayerNotificationsSwitched = state.notificationSettings.prayers;
+                        widget.switchStates.isPrayerNotificationsSwitched = state.notificationSettings.prayers;
                       });
                     } else if (state is PrayerNotificationError) {
                       ToastMessage.showErrorToast(state.message, context);
                       setState(() {
-                        isPrayerNotificationsSwitched = !isPrayerNotificationsSwitched!;
+                        widget.switchStates.isPrayerNotificationsSwitched =
+                            !widget.switchStates.isPrayerNotificationsSwitched!;
                       });
                     }
                   },
                   builder: (context, NotificationSettingsState state) {
-                    if (isPrayerNotificationsSwitched != null) {
+                    if (widget.switchStates.isPrayerNotificationsSwitched != null) {
                       return PlatformSwitch(
-                        value: isPrayerNotificationsSwitched!,
+                        value: widget.switchStates.isPrayerNotificationsSwitched!,
                         onChanged: (value) {
                           setState(() {
-                            isPrayerNotificationsSwitched = value;
+                            widget.switchStates.isPrayerNotificationsSwitched = value;
                           });
                           if (value) {
                             BlocProvider.of<NotificationSettingsBloc>(context)..add(SubscribedToPrayerNotifications());

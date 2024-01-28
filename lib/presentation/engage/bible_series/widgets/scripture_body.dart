@@ -7,7 +7,9 @@ import '../../../../domain/bible_series/entities.dart';
 class ScriptureContentBodyWidget extends StatelessWidget {
   final ScriptureBody scriptureContentBody;
 
-  const ScriptureContentBodyWidget({Key? key, required this.scriptureContentBody}) : super(key: key);
+  const ScriptureContentBodyWidget(
+      {Key? key, required this.scriptureContentBody})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -20,9 +22,12 @@ class ScriptureContentBodyWidget extends StatelessWidget {
                 physics: ClampingScrollPhysics(),
                 itemCount: scriptureContentBody.properties.scriptures.length,
                 itemBuilder: (BuildContext context, int index) {
-                  return scripture(scriptureContentBody.properties.scriptures[index]);
+                  return scripture(
+                      scriptureContentBody.properties.scriptures[index]);
                 }),
-            Align(alignment: Alignment.centerLeft, child: copyright(scriptureContentBody))
+            Align(
+                alignment: Alignment.centerLeft,
+                child: copyright(scriptureContentBody))
           ],
         ));
   }
@@ -40,8 +45,9 @@ List<Widget> buildCombinedScripture(Scripture script, List<int> sortedVerses) {
   List<Widget> combinedScripture = [];
   combinedScripture.add(book(script, sortedVerses));
   if (script.title != null) {
-    combinedScripture.add(
-        Padding(padding: const EdgeInsets.only(bottom: 16), child: getIt<TextFactory>().subHeading3(script.title!)));
+    combinedScripture.add(Padding(
+        padding: const EdgeInsets.only(bottom: 16),
+        child: getIt<TextFactory>().subHeading3(script.title!)));
   }
   combinedScripture.add(
     ListView.builder(
@@ -67,7 +73,8 @@ Widget book(Scripture script, List<int> sortedVerses) {
   String book = script.book;
   String chapter = script.chapter;
   bool fullChapter = script.fullChapter;
-  String text = fullChapter ? "$book $chapter" : "$book $chapter: $start - $end";
+  String text =
+      fullChapter ? "$book $chapter" : "$book $chapter: $start - $end";
   return Padding(
     padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
     child: getIt<TextFactory>().subHeading(text, fontSize: 18),
@@ -84,8 +91,12 @@ Widget copyright(ScriptureBody script) {
 Widget verse(Scripture script, String key) {
   String verseNum = "$key ";
   String verse = script.verses[key]!;
-  return SelectableText.rich(TextSpan(style: getIt<TextFactory>().liteTextStyle(fontSize: 16), children: <TextSpan>[
-    TextSpan(text: verseNum, style: getIt<TextFactory>().smallBoldTextStyle(fontSize: 12.0)),
-    TextSpan(text: verse),
-  ]));
+  return SelectableText.rich(TextSpan(
+      style: getIt<TextFactory>().liteTextStyle(fontSize: 16),
+      children: <TextSpan>[
+        TextSpan(
+            text: verseNum,
+            style: getIt<TextFactory>().smallBoldTextStyle(fontSize: 12.0)),
+        TextSpan(text: verse),
+      ]));
 }

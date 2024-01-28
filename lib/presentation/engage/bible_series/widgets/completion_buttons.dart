@@ -31,7 +31,7 @@ class CompletionButton extends StatelessWidget {
                   child: InkWell(
                     onTap: () {
                       CompletionDetails completionDetails = CompletionDetails(
-                          id: state.id, 
+                          id: state.id,
                           seriesId: bibleId,
                           contentId: seriesContent.id,
                           isDraft: false,
@@ -134,7 +134,7 @@ class ResponseCompletionButton extends StatelessWidget {
                       } else if (!isResponsesFilled(
                           state.responses!, seriesContent)) {
                         CompletionDetails completionDetails = CompletionDetails(
-                          id: state.id,
+                            id: state.id,
                             seriesId: bibleId,
                             contentId: seriesContent.id,
                             isDraft: true,

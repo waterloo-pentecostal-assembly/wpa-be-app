@@ -34,9 +34,9 @@ bool isResponsesFilled(Responses responses, SeriesContent seriesContent) {
   return check;
 }
 
-bool isResponseEmpty(Responses responses) {
+bool isResponseEmpty(Responses? responses) {
   bool check = true;
-  responses.responses.forEach((key, value) {
+  responses?.responses.forEach((key, value) {
     value.forEach((key, value) {
       if (value.response.isNotEmpty) {
         check = false;

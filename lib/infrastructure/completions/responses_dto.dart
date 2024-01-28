@@ -39,8 +39,7 @@ class ResponsesDto {
         }
       });
     });
-    return ResponsesDto._(
-        id: responseId, responses: _responses);
+    return ResponsesDto._(id: responseId, responses: _responses);
   }
 
   const ResponsesDto._({

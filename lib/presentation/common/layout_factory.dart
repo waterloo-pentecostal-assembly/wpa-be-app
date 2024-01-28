@@ -33,7 +33,8 @@ class LayoutFactory {
 
   LayoutFactory(this.deviceType);
 
-  double getDimension({LayoutDimension? layoutDimension, double? baseDimension}) {
+  double getDimension(
+      {LayoutDimension? layoutDimension, double? baseDimension}) {
     // assert(!(baseDimension == null && baseDimension == null), "Either layoutDimension or baseDimension must be provided");
     switch (layoutDimension) {
       case LayoutDimension.CONTENT_TAB_HEIGHT:
