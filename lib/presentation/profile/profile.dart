@@ -261,13 +261,13 @@ class NotificationSwitches {
 // >>>>>> THIS MIGHT HELP <<<<<<
 // https://stackoverflow.com/questions/51224420/flutter-switching-to-tab-reloads-widgets-and-runs-futurebuilder
 class NotificationSettings extends StatefulWidget {
-  final switchStates = new NotificationSwitches();
-
   @override
   _NotificationSettingsState createState() => _NotificationSettingsState();
 }
 
 class _NotificationSettingsState extends State<NotificationSettings> with AutomaticKeepAliveClientMixin{
+  NotificationSwitches switchStates = new NotificationSwitches();
+
   @override
   initState() {
     super.initState();
@@ -299,25 +299,25 @@ class _NotificationSettingsState extends State<NotificationSettings> with Automa
                   listener: (context, NotificationSettingsState state) {
                     if (state is NotificationSettingsPositions) {
                       setState(() {
-                        widget.switchStates.isEngagementReminderSwitched =
+                        switchStates.isEngagementReminderSwitched =
                             state.notificationSettings.dailyEngagementReminder;
                       });
                     } else if (state is DailyEngagementReminderError) {
 
                       ToastMessage.showErrorToast(state.message, context);
                       setState(() {
-                        widget.switchStates.isEngagementReminderSwitched =
-                            !widget.switchStates.isEngagementReminderSwitched!;
+                        switchStates.isEngagementReminderSwitched =
+                            !switchStates.isEngagementReminderSwitched!;
                       });
                     }
                   },
                   builder: (context, NotificationSettingsState state) {
-                    if (widget.switchStates.isEngagementReminderSwitched != null) {
+                    if (switchStates.isEngagementReminderSwitched != null) {
                       return PlatformSwitch(
-                        value: widget.switchStates.isEngagementReminderSwitched!,
+                        value: switchStates.isEngagementReminderSwitched!,
                         onChanged: (value) {
                           setState(() {
-                            widget.switchStates.isEngagementReminderSwitched = value;
+                            switchStates.isEngagementReminderSwitched = value;
                           });
                           if (value) {
                             BlocProvider.of<NotificationSettingsBloc>(context)
@@ -347,23 +347,23 @@ class _NotificationSettingsState extends State<NotificationSettings> with Automa
                   listener: (context, NotificationSettingsState state) {
                     if (state is NotificationSettingsPositions) {
                       setState(() {
-                        widget.switchStates.isPrayerNotificationsSwitched = state.notificationSettings.prayers;
+                        switchStates.isPrayerNotificationsSwitched = state.notificationSettings.prayers;
                       });
                     } else if (state is PrayerNotificationError) {
                       ToastMessage.showErrorToast(state.message, context);
                       setState(() {
-                        widget.switchStates.isPrayerNotificationsSwitched =
-                            !widget.switchStates.isPrayerNotificationsSwitched!;
+                        switchStates.isPrayerNotificationsSwitched =
+                            !switchStates.isPrayerNotificationsSwitched!;
                       });
                     }
                   },
                   builder: (context, NotificationSettingsState state) {
-                    if (widget.switchStates.isPrayerNotificationsSwitched != null) {
+                    if (switchStates.isPrayerNotificationsSwitched != null) {
                       return PlatformSwitch(
-                        value: widget.switchStates.isPrayerNotificationsSwitched!,
+                        value: switchStates.isPrayerNotificationsSwitched!,
                         onChanged: (value) {
                           setState(() {
-                            widget.switchStates.isPrayerNotificationsSwitched = value;
+                            switchStates.isPrayerNotificationsSwitched = value;
                           });
                           if (value) {
                             BlocProvider.of<NotificationSettingsBloc>(context)..add(SubscribedToPrayerNotifications());
