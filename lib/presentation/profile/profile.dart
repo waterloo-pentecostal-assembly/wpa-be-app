@@ -35,7 +35,7 @@ class ProfilePage extends IIndexedPage {
           create: (BuildContext context) => getIt<UserProfileBloc>(),
         ),
         BlocProvider<NotificationSettingsBloc>(
-          create: (BuildContext context) => getIt<NotificationSettingsBloc>(),//..add(NotificationSettingsRequested()),
+          create: (BuildContext context) => getIt<NotificationSettingsBloc>()//..add(NotificationSettingsRequested()),
         ),
       ],
       child: Scaffold(
@@ -258,6 +258,8 @@ class NotificationSwitches {
   }
 }
 
+// >>>>>> THIS MIGHT HELP <<<<<<
+// https://stackoverflow.com/questions/51224420/flutter-switching-to-tab-reloads-widgets-and-runs-futurebuilder
 class NotificationSettings extends StatefulWidget {
   final switchStates = new NotificationSwitches();
 
@@ -265,15 +267,19 @@ class NotificationSettings extends StatefulWidget {
   _NotificationSettingsState createState() => _NotificationSettingsState();
 }
 
-class _NotificationSettingsState extends State<NotificationSettings> {
+class _NotificationSettingsState extends State<NotificationSettings> with AutomaticKeepAliveClientMixin{
   @override
   initState() {
     super.initState();
     BlocProvider.of<NotificationSettingsBloc>(context)..add(NotificationSettingsRequested());
   }
+    
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Padding(
       padding: const EdgeInsets.only(left: 12.0, right: 12.0),
       child: Column(
