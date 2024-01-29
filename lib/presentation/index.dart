@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 import 'package:wpa_app/application/links/links_bloc.dart';
 import 'package:wpa_app/domain/authentication/entities.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
@@ -18,9 +18,6 @@ import 'give/give_page.dart';
 import 'profile/profile.dart';
 
 class IndexPage extends StatelessWidget {
-  // This cases all pages to load even though they are not all shown on
-  // the screen. On startup, only the EngagePage is shown. We need to explore
-  // options for lazy loading here.
   final List<IIndexedPage> indexedPages = [
     EngagePage(navigatorKey: GlobalKey()),
     GivePage(navigatorKey: GlobalKey()),
@@ -56,18 +53,20 @@ class _IndexPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<NavigationBarBloc, NavigationBarState>(
       builder: (BuildContext context, NavigationBarState state) {
-        NavigatorState? routeNavigatorState =
-            indexedPages[state.tab.index].navigatorKey?.currentState;
+        if (state.route != null) {
+          NavigatorState? routeNavigatorState =
+              indexedPages[state.tab.index].navigatorKey?.currentState;
 
-        if (routeNavigatorState?.canPop() == true) {
-          // clear navigation stack before going to new route
-          routeNavigatorState?.popUntil((route) => route.isFirst);
+          if (routeNavigatorState?.canPop() == true) {
+            // clear navigation stack before going to new route
+            routeNavigatorState?.popUntil((route) => route.isFirst);
+          }
+
+          indexedPages[state.tab.index].navigatorKey?.currentState?.pushNamed(
+                state.route ?? '',
+                arguments: state.arguments,
+              );
         }
-
-        indexedPages[state.tab.index].navigatorKey?.currentState?.pushNamed(
-              state.route ?? '',
-              arguments: state.arguments,
-            );
 
         return NavigationBar(
           tabIndex: state.tab.index,
@@ -88,9 +87,8 @@ class NavigationBar extends StatelessWidget {
 
   void handleOnTap(BuildContext context, int index, String url) async {
     if (NavigationTabEnum.values[index] == NavigationTabEnum.GIVE) {
-      Uri uri = Uri.parse(url);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri);
+      if (await canLaunchUrlString(url)) {
+        await launchUrlString(url);
       } else {
         ToastMessage.showErrorToast("Error opening page", context);
       }
@@ -157,10 +155,7 @@ class NavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocConsumer<LinksBloc, LinksState>(
-      listener: (context, state) {
-        // TODO: implement listener
-      },
+    return BlocBuilder<LinksBloc, LinksState>(
       builder: (context, state) {
         String url = '';
         if (state is LinksLoaded) {
@@ -173,7 +168,7 @@ class NavigationBar extends StatelessWidget {
                 indexedPages[tabIndex].navigatorKey?.currentState;
             if (currentNavigatorState?.canPop() == true) {
               await currentNavigatorState?.maybePop();
-            } else {}
+            }
           },
           child: Scaffold(
             body: LazyLoadIndexedStack(
