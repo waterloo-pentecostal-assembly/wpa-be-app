@@ -35,7 +35,7 @@ class ProfilePage extends IIndexedPage {
           create: (BuildContext context) => getIt<UserProfileBloc>(),
         ),
         BlocProvider<NotificationSettingsBloc>(
-          create: (BuildContext context) => getIt<NotificationSettingsBloc>()//..add(NotificationSettingsRequested()),
+          create: (BuildContext context) => getIt<NotificationSettingsBloc>()..add(NotificationSettingsRequested()),
         ),
       ],
       child: Scaffold(
@@ -78,7 +78,8 @@ class ProfilePageRoot extends StatelessWidget {
                 LogoutButton(),
                 Divider(indent: 12, endIndent: 12),
                 SizedBox(height: 18),
-                NotificationSettings(),
+                NotificationSetting(),
+                // NotificationSettings(),
                 SizedBox(height: 18),
                 Other(),
               ],
@@ -107,11 +108,17 @@ class ProfileImageAndName extends StatefulWidget {
   _ProfileImageAndNameState createState() => _ProfileImageAndNameState();
 }
 
-class _ProfileImageAndNameState extends State<ProfileImageAndName> {
+class _ProfileImageAndNameState extends State<ProfileImageAndName> with AutomaticKeepAliveClientMixin {
   ImagePicker imagePicker = ImagePicker();
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     // LocalUser localUser = getIt<LocalUser>();
 
     double profilePhotoDiameter =
@@ -229,6 +236,9 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
       BlocProvider.of<UserProfileBloc>(context)..add(UploadProfilePhoto(profilePhoto: File(selected.path)));
     }
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 class LogoutButton extends StatelessWidget {
@@ -258,28 +268,15 @@ class NotificationSwitches {
   }
 }
 
-// >>>>>> THIS MIGHT HELP <<<<<<
-// https://stackoverflow.com/questions/51224420/flutter-switching-to-tab-reloads-widgets-and-runs-futurebuilder
-class NotificationSettings extends StatefulWidget {
-  @override
-  _NotificationSettingsState createState() => _NotificationSettingsState();
-}
+class NotificationSetting extends StatelessWidget {
+  NotificationSetting({super.key});
 
-class _NotificationSettingsState extends State<NotificationSettings> with AutomaticKeepAliveClientMixin{
-  NotificationSwitches switchStates = new NotificationSwitches();
-
-  @override
-  initState() {
-    super.initState();
-    BlocProvider.of<NotificationSettingsBloc>(context)..add(NotificationSettingsRequested());
-  }
-    
-  @override
-  bool get wantKeepAlive => true;
+  final NotificationSwitches switchStates = new NotificationSwitches();
 
   @override
   Widget build(BuildContext context) {
-    super.build(context);
+    print('build NotificationSetting');
+    print(switchStates);
     return Padding(
       padding: const EdgeInsets.only(left: 12.0, right: 12.0),
       child: Column(
@@ -298,17 +295,16 @@ class _NotificationSettingsState extends State<NotificationSettings> with Automa
                 child: BlocConsumer<NotificationSettingsBloc, NotificationSettingsState>(
                   listener: (context, NotificationSettingsState state) {
                     if (state is NotificationSettingsPositions) {
-                      setState(() {
-                        switchStates.isEngagementReminderSwitched =
-                            state.notificationSettings.dailyEngagementReminder;
-                      });
+                      switchStates.isEngagementReminderSwitched = state.notificationSettings.dailyEngagementReminder;
+                      // setState(() {
+                      //   isEngagementReminderSwitched = state.notificationSettings.dailyEngagementReminder;
+                      // });
                     } else if (state is DailyEngagementReminderError) {
-
+                      switchStates.isEngagementReminderSwitched = !switchStates.isEngagementReminderSwitched!;
                       ToastMessage.showErrorToast(state.message, context);
-                      setState(() {
-                        switchStates.isEngagementReminderSwitched =
-                            !switchStates.isEngagementReminderSwitched!;
-                      });
+                      // setState(() {
+                      //   isEngagementReminderSwitched = !isEngagementReminderSwitched!;
+                      // });
                     }
                   },
                   builder: (context, NotificationSettingsState state) {
@@ -316,9 +312,9 @@ class _NotificationSettingsState extends State<NotificationSettings> with Automa
                       return PlatformSwitch(
                         value: switchStates.isEngagementReminderSwitched!,
                         onChanged: (value) {
-                          setState(() {
-                            switchStates.isEngagementReminderSwitched = value;
-                          });
+                          switchStates.isEngagementReminderSwitched = value;
+                          // setState(() {
+                          // });
                           if (value) {
                             BlocProvider.of<NotificationSettingsBloc>(context)
                               ..add(SubscribedToDailyEngagementReminder());
@@ -329,7 +325,7 @@ class _NotificationSettingsState extends State<NotificationSettings> with Automa
                         },
                       );
                     } else {
-                      return PlatformSwitch(disabled: false);
+                      return PlatformSwitch(disabled: true);
                     }
                   },
                 ),
@@ -346,15 +342,10 @@ class _NotificationSettingsState extends State<NotificationSettings> with Automa
                 child: BlocConsumer<NotificationSettingsBloc, NotificationSettingsState>(
                   listener: (context, NotificationSettingsState state) {
                     if (state is NotificationSettingsPositions) {
-                      setState(() {
-                        switchStates.isPrayerNotificationsSwitched = state.notificationSettings.prayers;
-                      });
+                      switchStates.isPrayerNotificationsSwitched = state.notificationSettings.prayers;
                     } else if (state is PrayerNotificationError) {
                       ToastMessage.showErrorToast(state.message, context);
-                      setState(() {
-                        switchStates.isPrayerNotificationsSwitched =
-                            !switchStates.isPrayerNotificationsSwitched!;
-                      });
+                      switchStates.isPrayerNotificationsSwitched = !switchStates.isPrayerNotificationsSwitched!;
                     }
                   },
                   builder: (context, NotificationSettingsState state) {
@@ -362,9 +353,7 @@ class _NotificationSettingsState extends State<NotificationSettings> with Automa
                       return PlatformSwitch(
                         value: switchStates.isPrayerNotificationsSwitched!,
                         onChanged: (value) {
-                          setState(() {
-                            switchStates.isPrayerNotificationsSwitched = value;
-                          });
+                          switchStates.isPrayerNotificationsSwitched = value;
                           if (value) {
                             BlocProvider.of<NotificationSettingsBloc>(context)..add(SubscribedToPrayerNotifications());
                           } else {
@@ -386,6 +375,139 @@ class _NotificationSettingsState extends State<NotificationSettings> with Automa
       ),
     );
   }
+}
+
+class NotificationSettings extends StatefulWidget {
+  @override
+  _NotificationSettingsState createState() => _NotificationSettingsState();
+}
+
+class _NotificationSettingsState extends State<NotificationSettings> with AutomaticKeepAliveClientMixin {
+  bool? isEngagementReminderSwitched;
+  bool? isPrayerNotificationsSwitched;
+
+  @override
+  void initState() {
+    isEngagementReminderSwitched = true;
+    isPrayerNotificationsSwitched = true;
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return Text('testing');
+  }
+
+  // @override
+  // Widget build(BuildContext context) {
+  //   super.build(context);
+  //   return Padding(
+  //     padding: const EdgeInsets.only(left: 12.0, right: 12.0),
+  //     child: Column(
+  //       crossAxisAlignment: CrossAxisAlignment.start,
+  //       children: [
+  //         Container(
+  //           child: getIt<TextFactory>().regular('NOTIFICATION SETTINGS'),
+  //         ),
+  //         Divider(),
+  //         Row(
+  //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //           children: [
+  //             getIt<TextFactory>().lite("Daily Engagement Reminder"),
+  //             Container(
+  //               height: 30,
+  //               child: BlocConsumer<NotificationSettingsBloc, NotificationSettingsState>(
+  //                 listener: (context, NotificationSettingsState state) {
+  //                   if (state is NotificationSettingsPositions) {
+  //                     setState(() {
+  //                       isEngagementReminderSwitched = state.notificationSettings.dailyEngagementReminder;
+  //                     });
+  //                   } else if (state is DailyEngagementReminderError) {
+
+  //                     ToastMessage.showErrorToast(state.message, context);
+  //                     setState(() {
+  //                       isEngagementReminderSwitched = !isEngagementReminderSwitched!;
+  //                     });
+  //                   }
+  //                 },
+  //                 builder: (context, NotificationSettingsState state) {
+  //                   if (isEngagementReminderSwitched != null) {
+  //                     return PlatformSwitch(
+  //                       value: isEngagementReminderSwitched!,
+  //                       onChanged: (value) {
+  //                         setState(() {
+  //                           isEngagementReminderSwitched = value;
+  //                         });
+  //                         if (value) {
+  //                           BlocProvider.of<NotificationSettingsBloc>(context)
+  //                             ..add(SubscribedToDailyEngagementReminder());
+  //                         } else {
+  //                           BlocProvider.of<NotificationSettingsBloc>(context)
+  //                             ..add(UnsubscribedFromDailyEngagementReminder());
+  //                         }
+  //                       },
+  //                     );
+  //                   } else {
+  //                     return PlatformSwitch(disabled: true);
+  //                   }
+  //                 },
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //         SizedBox(height: 8),
+  //         Row(
+  //           mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  //           children: [
+  //             getIt<TextFactory>().lite("Prayers"),
+  //             Container(
+  //               height: getIt<LayoutFactory>().getDimension(baseDimension: 30.0),
+  //               child: BlocConsumer<NotificationSettingsBloc, NotificationSettingsState>(
+  //                 listener: (context, NotificationSettingsState state) {
+  //                   if (state is NotificationSettingsPositions) {
+  //                     setState(() {
+  //                       isPrayerNotificationsSwitched = state.notificationSettings.prayers;
+  //                     });
+  //                   } else if (state is PrayerNotificationError) {
+  //                     ToastMessage.showErrorToast(state.message, context);
+  //                     setState(() {
+  //                       isPrayerNotificationsSwitched = !isPrayerNotificationsSwitched!;
+  //                     });
+  //                   }
+  //                 },
+  //                 builder: (context, NotificationSettingsState state) {
+  //                   if (isPrayerNotificationsSwitched != null) {
+  //                     return PlatformSwitch(
+  //                       value: isPrayerNotificationsSwitched!,
+  //                       onChanged: (value) {
+  //                         setState(() {
+  //                           isPrayerNotificationsSwitched = value;
+  //                         });
+  //                         if (value) {
+  //                           BlocProvider.of<NotificationSettingsBloc>(context)..add(SubscribedToPrayerNotifications());
+  //                         } else {
+  //                           BlocProvider.of<NotificationSettingsBloc>(context)
+  //                             ..add(UnsubscribedFromPrayerNotifications());
+  //                         }
+  //                       },
+  //                     );
+  //                   } else {
+  //                     return PlatformSwitch(disabled: true);
+  //                   }
+  //                 },
+  //               ),
+  //             ),
+  //           ],
+  //         ),
+  //         Divider(),
+  //       ],
+  //     ),
+  //   );
+  // }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 class Other extends StatelessWidget {
