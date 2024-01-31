@@ -15,26 +15,20 @@ class AdminService implements IAdminService {
   final FirebaseStorageService _firebaseStorageService;
   final FirebaseFirestoreService _firebaseFirestoreService;
 
-  AdminService(this._firestore, this._firebaseFirestoreService,
-      this._firebaseStorageService);
+  AdminService(this._firestore, this._firebaseFirestoreService, this._firebaseStorageService);
 
   @override
   Future<List<LocalUser>> getUnverifiedUsers() async {
     late QuerySnapshot<Map<String, dynamic>> querySnapshot;
     List<LocalUser> localUsers = [];
     try {
-      querySnapshot = await _firestore
-          .collection('users')
-          .where("is_verified", isEqualTo: false)
-          .get();
+      querySnapshot = await _firestore.collection('users').where("is_verified", isEqualTo: false).get();
     } on Exception catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
 
-    for (QueryDocumentSnapshot<Map<String, dynamic>> doc
-        in querySnapshot.docs) {
-      LocalUser localUser = await FirebaseUserDto.fromFirestore(doc)
-          .toDomain(_firebaseStorageService);
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in querySnapshot.docs) {
+      LocalUser localUser = await FirebaseUserDto.fromFirestore(doc).toDomain(_firebaseStorageService);
       localUsers.add(localUser);
     }
 
@@ -45,8 +39,7 @@ class AdminService implements IAdminService {
   Future<void> verifyUser({required String userId}) async {
     try {
       await _firestore.runTransaction((transaction) async {
-        DocumentReference documentReference =
-            _firestore.collection("users").doc(userId);
+        DocumentReference documentReference = _firestore.collection("users").doc(userId);
         transaction.update(documentReference, {'is_verified': true});
       });
     } on Exception catch (e) {
@@ -58,8 +51,7 @@ class AdminService implements IAdminService {
   Future<void> approvePrayerRequest({required String prayerRequestId}) async {
     try {
       await _firestore.runTransaction((transaction) async {
-        DocumentReference documentReference =
-            _firestore.collection("prayer_requests").doc(prayerRequestId);
+        DocumentReference documentReference = _firestore.collection("prayer_requests").doc(prayerRequestId);
         transaction.update(documentReference, {"is_approved": true});
       });
     } on Exception catch (e) {
@@ -73,19 +65,14 @@ class AdminService implements IAdminService {
     late QuerySnapshot<Map<String, dynamic>> querySnapshot;
     List<PrayerRequest> prayerRequests = [];
     try {
-      querySnapshot = await _firestore
-          .collection("prayer_requests")
-          .where("is_approved", isEqualTo: false)
-          .get();
+      querySnapshot = await _firestore.collection("prayer_requests").where("is_approved", isEqualTo: false).get();
     } on Exception catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
 
-    for (QueryDocumentSnapshot<Map<String, dynamic>> doc
-        in querySnapshot.docs) {
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in querySnapshot.docs) {
       PrayerRequest prayerRequest =
-          await PrayerRequestsDto.fromFirestore(doc, user.id)
-              .toDomain(_firebaseStorageService);
+          await PrayerRequestsDto.fromFirestore(doc, user.id).toDomain(_firebaseStorageService);
       prayerRequests.add(prayerRequest);
     }
 
@@ -95,10 +82,7 @@ class AdminService implements IAdminService {
   @override
   Future<void> deletePrayerRequest({required String prayerRequestId}) async {
     try {
-      await _firestore
-          .collection("prayer_requests")
-          .doc(prayerRequestId)
-          .delete();
+      await _firestore.collection("prayer_requests").doc(prayerRequestId).delete();
     } on Exception catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
@@ -108,8 +92,7 @@ class AdminService implements IAdminService {
   Future<void> approveTestimony({required String testimonyId}) async {
     try {
       await _firestore.runTransaction((transaction) async {
-        DocumentReference documentReference =
-            _firestore.collection("testimonies").doc(testimonyId);
+        DocumentReference documentReference = _firestore.collection("testimonies").doc(testimonyId);
         transaction.update(documentReference, {"is_approved": true});
       });
     } on Exception catch (e) {
@@ -123,18 +106,13 @@ class AdminService implements IAdminService {
     late QuerySnapshot<Map<String, dynamic>> querySnapshot;
     List<Testimony> testimonies = [];
     try {
-      querySnapshot = await _firestore
-          .collection("testimonies")
-          .where("is_approved", isEqualTo: false)
-          .get();
+      querySnapshot = await _firestore.collection("testimonies").where("is_approved", isEqualTo: false).get();
     } on Exception catch (e) {
       _firebaseFirestoreService.handleException(e);
     }
 
-    for (QueryDocumentSnapshot<Map<String, dynamic>> doc
-        in querySnapshot.docs) {
-      Testimony testimony = await TestimoniesDto.fromFirestore(doc, user.id)
-          .toDomain(_firebaseStorageService);
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc in querySnapshot.docs) {
+      Testimony testimony = await TestimoniesDto.fromFirestore(doc, user.id).toDomain(_firebaseStorageService);
       testimonies.add(testimony);
     }
 

@@ -64,8 +64,6 @@ class TestimoniesRepository extends ITestimoniesRepository {
           .orderBy("date", descending: true)
           .get();
     } on Exception catch (e) {
-      print("MY ERROR");
-      print(e.toString());
       throw _firebaseFirestoreService.handleException(e);
     }
 
@@ -92,8 +90,6 @@ class TestimoniesRepository extends ITestimoniesRepository {
           .orderBy("date", descending: true)
           .get();
     } on Exception catch (e) {
-      print("ERROR");
-      print(e.toString());
       throw _firebaseFirestoreService.handleException(e);
     }
 
@@ -182,8 +178,6 @@ class TestimoniesRepository extends ITestimoniesRepository {
           .limit(limit)
           .get();
     } on Exception catch (e) {
-      print("ALL ERROR");
-      print(e.toString());
       throw _firebaseFirestoreService.handleException(e);
     }
 

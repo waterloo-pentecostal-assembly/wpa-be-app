@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/presentation/admin/testimony_approval_page.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
 import '../../app/injection.dart';
 import '../../application/admin/admin_bloc.dart';
@@ -31,6 +32,8 @@ class AdminPage extends IIndexedPage {
                         return OptionsList();
                       case '/prayer_request_approval':
                         return PrayerApprovalPage();
+                      case '/testimony_approval':
+                        return TestimonyApprovalPage();
                       case '/user_verification':
                         return UserVerificationPage();
                     }
@@ -143,7 +146,7 @@ class OptionsList extends StatelessWidget {
               GestureDetector(
                 onTap: () {
                   BlocProvider.of<AdminBloc>(context)
-                    ..add(LoadUnverifiedPrayerRequests());
+                    ..add(LoadUnverifiedTestimonies());
                   Navigator.pushNamed(context, '/testimony_approval');
                 },
                 child: Container(
