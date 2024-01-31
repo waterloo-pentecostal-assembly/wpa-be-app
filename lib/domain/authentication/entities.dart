@@ -21,8 +21,8 @@ class LocalUser {
     required this.reports,
     required this.thumbnailUrl,
     required this.thumbnail,
-    required this.profilePhotoUrl,
-    required this.profilePhoto,
+    this.profilePhotoUrl,
+    this.profilePhoto,
     required this.isAdmin,
     required this.isVerified,
   });

@@ -1,13 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:wpa_app/domain/user_profile/entities.dart';
 
-class PrayerRequest {
+class Testimony {
   final String id;
   final String userId;
   final String request;
-  final List<String> prayedBy;
+  final List<String> praisedBy;
   final List<String> reportedBy;
-  bool hasPrayed;
+  bool hasPraised;
   final bool hasReported;
   final bool isMine;
   final bool isApproved;
@@ -16,13 +16,13 @@ class PrayerRequest {
   final UserSnippet userSnippet;
   final bool isAnswered;
 
-  PrayerRequest({
+  Testimony({
     required this.id,
     required this.userId,
     required this.request,
-    required this.prayedBy,
+    required this.praisedBy,
     required this.reportedBy,
-    required this.hasPrayed,
+    required this.hasPraised,
     required this.hasReported,
     required this.isMine,
     required this.isApproved,
@@ -34,8 +34,8 @@ class PrayerRequest {
 
   @override
   String toString() {
-    return '''id: $id, userId: $userId, request: $request, prayedBy: $prayedBy, reportedBy: $reportedBy, 
-              hasPrayed: $hasPrayed, hasReported: $hasReported, date: $date, isAnonymous: $isAnonymous, 
+    return '''id: $id, userId: $userId, request: $request, praisedBy: $praisedBy, reportedBy: $reportedBy, 
+              hasPraised: $hasPraised, hasReported: $hasReported, date: $date, isAnonymous: $isAnonymous, 
               userSnippet: $userSnippet, isApproved: $isApproved''';
   }
 }

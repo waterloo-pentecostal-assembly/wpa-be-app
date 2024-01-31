@@ -1,18 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:wpa_app/domain/testimonies/entities.dart';
 import 'package:wpa_app/domain/user_profile/entities.dart';
 
 import '../../domain/authentication/entities.dart';
-import '../../domain/prayer_requests/entities.dart';
 import '../../services/firebase_storage_service.dart';
 import '../common/helpers.dart';
 
-class PrayerRequestsDto {
+class TestimoniesDto {
   final String? id;
   final String userId;
   final String request;
-  final List<String>? prayedBy;
+  final List<String>? praisedBy;
   final List<String>? reportedBy;
-  final bool? hasPrayed;
+  final bool? hasPraised;
   final bool? hasReported;
   final bool? isMine;
   final bool? isApproved;
@@ -21,9 +21,9 @@ class PrayerRequestsDto {
   final UserSnippetDto userSnippet;
   final bool? isAnswered;
 
-  factory PrayerRequestsDto.newRequestFromDomain(
+  factory TestimoniesDto.newRequestFromDomain(
       String request, bool isAnonymous, LocalUser user) {
-    return PrayerRequestsDto._(
+    return TestimoniesDto._(
       userId: user.id,
       request: request,
       date: Timestamp.now(),
@@ -32,31 +32,31 @@ class PrayerRequestsDto {
     );
   }
 
-  factory PrayerRequestsDto.fromFirestore(
+  factory TestimoniesDto.fromFirestore(
       DocumentSnapshot doc, String signedInUserId) {
     var data = (doc.data() ?? {}) as Map<String, dynamic>;
-    List<String> _prayedBy = [];
+    List<String> _praisedBy = [];
     List<String> _reportedBy = [];
-    List<dynamic> _prayedByFirestore = findOrDefaultTo(data, 'prayed_by', []);
+    List<dynamic> _praisedByFirestore = findOrDefaultTo(data, 'praised_by', []);
     List<dynamic> _reportedByFirestore =
         findOrDefaultTo(data, 'reported_by', []);
     String _userId = findOrThrowException(data, 'user_id');
 
-    _prayedByFirestore.forEach((element) {
-      _prayedBy.add(element.toString());
+    _praisedByFirestore.forEach((element) {
+      _praisedBy.add(element.toString());
     });
 
     _reportedByFirestore.forEach((element) {
       _reportedBy.add(element.toString());
     });
 
-    return PrayerRequestsDto._(
+    return TestimoniesDto._(
         id: doc.id,
         userId: _userId,
         request: findOrThrowException(data, 'request'),
-        prayedBy: _prayedBy,
+        praisedBy: _praisedBy,
         reportedBy: _reportedBy,
-        hasPrayed: _prayedBy.contains(signedInUserId),
+        hasPraised: _praisedBy.contains(signedInUserId),
         hasReported: _reportedBy.contains(signedInUserId),
         isMine: _userId == signedInUserId,
         isApproved: findOrDefaultTo(data, 'is_approved', false),
@@ -64,16 +64,16 @@ class PrayerRequestsDto {
         isAnonymous: findOrThrowException(data, 'is_anonymous'),
         userSnippet: UserSnippetDto.fromFirestore(
             findOrThrowException(data, 'user_snippet')),
-        isAnswered: findOrDefaultTo(data, 'is_answered', false));
+        isAnswered: findOrDefaultTo(data, 'is_archived', false));
   }
 
-  const PrayerRequestsDto._({
+  const TestimoniesDto._({
     this.id,
     required this.userId,
     required this.request,
-    this.prayedBy,
+    this.praisedBy,
     this.reportedBy,
-    this.hasPrayed,
+    this.hasPraised,
     this.hasReported,
     this.isMine,
     this.isApproved,
@@ -84,16 +84,16 @@ class PrayerRequestsDto {
   });
 }
 
-extension PrayerRequestsDtoX on PrayerRequestsDto {
-  Future<PrayerRequest> toDomain(
+extension TestimoniesDtoX on TestimoniesDto {
+  Future<Testimony> toDomain(
       FirebaseStorageService firebaseStorageService) async {
-    return PrayerRequest(
+    return Testimony(
       id: this.id!,
       date: this.date,
       isAnonymous: this.isAnonymous,
-      prayedBy: this.prayedBy!,
+      praisedBy: this.praisedBy!,
       reportedBy: this.reportedBy!,
-      hasPrayed: this.hasPrayed!,
+      hasPraised: this.hasPraised!,
       hasReported: this.hasReported!,
       isMine: this.isMine!,
       isApproved: this.isApproved!,
@@ -109,12 +109,12 @@ extension PrayerRequestsDtoX on PrayerRequestsDto {
       "date": this.date,
       "is_anonymous": this.isAnonymous,
       "is_approved": false,
-      "is_answered": false,
-      // Prayer Request is_safe flag initially set as false.
+      "is_archived": false,
+      // Testimony is_safe flag initially set as false.
       // A backend process, automated or otherwise would have
-      // to set this a true once it is a safe prayer request.
+      // to set this a true once it is a safe Testimony.
       // We would have to notify the user whether or not the
-      // prayer request went live.
+      // Testimony went live.
       "request": this.request,
       "user_id": this.userId,
       "user_snippet": this.userSnippet.newRequestToFirestore(),

@@ -54,8 +54,9 @@ class OptionsList extends StatelessWidget {
         children: [
           HeaderWidget(),
           SizedBox(height: 30),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          Wrap(
+            alignment: WrapAlignment.spaceEvenly,
+            runSpacing: 32.0,
             children: [
               GestureDetector(
                 onTap: () {
@@ -138,9 +139,51 @@ class OptionsList extends StatelessWidget {
                     ],
                   ),
                 ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  BlocProvider.of<AdminBloc>(context)
+                    ..add(LoadUnverifiedPrayerRequests());
+                  Navigator.pushNamed(context, '/testimony_approval');
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  width: getIt<LayoutFactory>().getDimension(
+                      layoutDimension: LayoutDimension.ADMIN_TILE_WIDTH),
+                  height: getIt<LayoutFactory>().getDimension(
+                      layoutDimension: LayoutDimension.ADMIN_TILE_HEIGHT),
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.all(Radius.circular(15)),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.25),
+                          blurRadius: 8.0,
+                          offset: Offset(0, 3),
+                        ),
+                      ]),
+                  child: Column(
+                    children: [
+                      Container(
+                        alignment: Alignment.topLeft,
+                        child: Icon(
+                          Icons.book,
+                          color: Colors.blueAccent[400],
+                          size: getIt<LayoutFactory>().getDimension(
+                              layoutDimension: LayoutDimension.ADMIN_ICON_SIZE),
+                        ),
+                      ),
+                      SizedBox(height: 16),
+                      getIt<TextFactory>().subHeading3('Testimony Approval',
+                          fontSize: getIt<LayoutFactory>().getDimension(
+                              layoutDimension:
+                                  LayoutDimension.ADMIN_TILE_FONT_SIZE)),
+                    ],
+                  ),
+                ),
               )
             ],
-          )
+          ),
         ],
       ),
     );

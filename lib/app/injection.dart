@@ -8,8 +8,11 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:get_it/get_it.dart';
 import 'package:wpa_app/application/audio_player/audio_player_bloc.dart';
 import 'package:wpa_app/application/links/links_bloc.dart';
+import 'package:wpa_app/application/testimonies/testimonies_bloc.dart';
 import 'package:wpa_app/domain/links/interface.dart';
+import 'package:wpa_app/domain/testimonies/interfaces.dart';
 import 'package:wpa_app/infrastructure/links/links_repository.dart';
+import 'package:wpa_app/infrastructure/testimonies/testimonies_repository.dart';
 
 import '../application/achievements/achievements_bloc.dart';
 import '../application/admin/admin_bloc.dart';
@@ -162,6 +165,10 @@ void initializeInjections({
     () => PrayerRequestsBloc(getIt<IPrayerRequestsRepository>()),
   );
 
+  getIt.registerFactory<TestimoniesBloc>(
+    () => TestimoniesBloc(getIt<ITestimoniesRepository>()),
+  );
+
   getIt.registerFactory<UserProfileBloc>(
     () => UserProfileBloc(getIt<IUserProfileRepository>()),
   );
@@ -212,6 +219,14 @@ void initializeInjections({
 
   getIt.registerLazySingleton<IPrayerRequestsRepository>(
     () => PrayerRequestsRepository(
+      getIt<FirebaseFirestore>(),
+      getIt<FirebaseStorageService>(),
+      getIt<FirebaseFirestoreService>(),
+    ),
+  );
+
+  getIt.registerLazySingleton<ITestimoniesRepository>(
+    () => TestimoniesRepository(
       getIt<FirebaseFirestore>(),
       getIt<FirebaseStorageService>(),
       getIt<FirebaseFirestoreService>(),

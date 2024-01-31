@@ -301,17 +301,19 @@ class _NotificationSettingsState extends State<NotificationSettings>
               getIt<TextFactory>().lite("Daily Engagement Reminder"),
               Container(
                 height: 30,
-                child: BlocConsumer<NotificationSettingsBloc, NotificationSettingsState>(
+                child: BlocConsumer<NotificationSettingsBloc,
+                    NotificationSettingsState>(
                   listener: (context, NotificationSettingsState state) {
                     if (state is NotificationSettingsPositions) {
                       setState(() {
-                        isEngagementReminderSwitched = state.notificationSettings.dailyEngagementReminder;
+                        isEngagementReminderSwitched =
+                            state.notificationSettings.dailyEngagementReminder;
                       });
                     } else if (state is DailyEngagementReminderError) {
-
                       ToastMessage.showErrorToast(state.message, context);
                       setState(() {
-                        isEngagementReminderSwitched = !isEngagementReminderSwitched!;
+                        isEngagementReminderSwitched =
+                            !isEngagementReminderSwitched!;
                       });
                     }
                   },
@@ -346,17 +348,21 @@ class _NotificationSettingsState extends State<NotificationSettings>
             children: [
               getIt<TextFactory>().lite("Prayers"),
               Container(
-                height: getIt<LayoutFactory>().getDimension(baseDimension: 30.0),
-                child: BlocConsumer<NotificationSettingsBloc, NotificationSettingsState>(
+                height:
+                    getIt<LayoutFactory>().getDimension(baseDimension: 30.0),
+                child: BlocConsumer<NotificationSettingsBloc,
+                    NotificationSettingsState>(
                   listener: (context, NotificationSettingsState state) {
                     if (state is NotificationSettingsPositions) {
                       setState(() {
-                        isPrayerNotificationsSwitched = state.notificationSettings.prayers;
+                        isPrayerNotificationsSwitched =
+                            state.notificationSettings.prayers;
                       });
                     } else if (state is PrayerNotificationError) {
                       ToastMessage.showErrorToast(state.message, context);
                       setState(() {
-                        isPrayerNotificationsSwitched = !isPrayerNotificationsSwitched!;
+                        isPrayerNotificationsSwitched =
+                            !isPrayerNotificationsSwitched!;
                       });
                     }
                   },
@@ -369,7 +375,8 @@ class _NotificationSettingsState extends State<NotificationSettings>
                             isPrayerNotificationsSwitched = value;
                           });
                           if (value) {
-                            BlocProvider.of<NotificationSettingsBloc>(context)..add(SubscribedToPrayerNotifications());
+                            BlocProvider.of<NotificationSettingsBloc>(context)
+                              ..add(SubscribedToPrayerNotifications());
                           } else {
                             BlocProvider.of<NotificationSettingsBloc>(context)
                               ..add(UnsubscribedFromPrayerNotifications());
@@ -414,9 +421,9 @@ class Other extends StatelessWidget {
                 Divider(),
                 GestureDetector(
                   onTap: () async {
-                    String url = state.linkMap['privacy_policy_link'];
-                    if (await canLaunch(url)) {
-                      await launch(url);
+                    Uri uri = Uri.parse(state.linkMap['privacy_policy_link']);
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri);
                     } else {
                       ToastMessage.showErrorToast(
                           "Error opening page", context);
@@ -438,9 +445,9 @@ class Other extends StatelessWidget {
                 SizedBox(height: 6),
                 GestureDetector(
                   onTap: () async {
-                    String url = state.linkMap['terms_of_use_link'];
-                    if (await canLaunch(url)) {
-                      await launch(url);
+                    Uri uri = Uri.parse(state.linkMap['terms_of_use_link']);
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri);
                     } else {
                       ToastMessage.showErrorToast(
                           "Error opening page", context);
@@ -467,9 +474,8 @@ class Other extends StatelessWidget {
                       path: state.linkMap['help_email'],
                       queryParameters: {'subject': kHelpEmailSubject},
                     );
-
-                    if (await canLaunch(_emailLaunchUri.toString())) {
-                      await launch(_emailLaunchUri.toString());
+                    if (await canLaunchUrl(_emailLaunchUri)) {
+                      await launchUrl(_emailLaunchUri);
                     } else {
                       ToastMessage.showErrorToast(
                           "Error opening page", context);
@@ -497,8 +503,8 @@ class Other extends StatelessWidget {
                       queryParameters: {'subject': kReportEmailSubject},
                     );
 
-                    if (await canLaunch(_emailLaunchUri.toString())) {
-                      await launch(_emailLaunchUri.toString());
+                    if (await canLaunchUrl(_emailLaunchUri)) {
+                      await launchUrl(_emailLaunchUri);
                     } else {
                       ToastMessage.showErrorToast(
                           "Error opening page", context);

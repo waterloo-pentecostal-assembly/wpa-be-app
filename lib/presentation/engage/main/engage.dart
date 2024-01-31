@@ -1,7 +1,10 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/application/testimonies/testimonies_bloc.dart';
 import 'package:wpa_app/presentation/common/loader.dart';
+import 'package:wpa_app/presentation/engage/main/widgets/testimonies_widget.dart';
+import 'package:wpa_app/presentation/engage/testimonies/pages/testimonies.dart';
 
 import '../../../app/injection.dart';
 import '../../../application/achievements/achievements_bloc.dart';
@@ -34,6 +37,8 @@ class EngagePage extends IIndexedPage {
                 getIt<BibleSeriesBloc>()..add(HasActiveBibleSeriesRequested())),
         BlocProvider<PrayerRequestsBloc>(
             create: (BuildContext context) => getIt<PrayerRequestsBloc>()),
+        BlocProvider<TestimoniesBloc>(
+            create: (BuildContext context) => getIt<TestimoniesBloc>()),
         BlocProvider<AchievementsBloc>(
           create: (BuildContext context) => getIt<AchievementsBloc>()
             ..add(
@@ -70,6 +75,10 @@ class EngagePage extends IIndexedPage {
                     return PrayerRequestsPage(tabIndex: 0);
                   case '/prayer_requests/mine':
                     return PrayerRequestsPage(tabIndex: 1);
+                  case '/testimonies':
+                    return TestimoniesPage(tabIndex: 0);
+                  case '/testimonies/mine':
+                    return TestimoniesPage(tabIndex: 1);
                   case '/content_detail':
                     getIt<FirebaseAnalytics>()
                         .logEvent(name: 'engagement_viewed');
@@ -109,6 +118,7 @@ class EngageIndex extends StatelessWidget {
               RecentBibleSeriesWidget(),
               SizedBox(height: 16.0),
               RecentPrayerRequestsWidget(),
+              RecentTestimoniesWidget(),
               SizedBox(height: 16.0),
               MediaWidget(),
             ];
@@ -118,7 +128,7 @@ class EngageIndex extends StatelessWidget {
               SizedBox(height: 16.0),
               RecentBibleSeriesWidget(),
               SizedBox(height: 16.0),
-              RecentPrayerRequestsWidget(),
+              RecentTestimoniesWidget(),
               SizedBox(height: 16.0),
               MediaWidget(),
             ];

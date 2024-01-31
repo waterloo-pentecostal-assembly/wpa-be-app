@@ -3,8 +3,10 @@ import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/domain/admin/interfaces.dart';
 import 'package:wpa_app/domain/authentication/entities.dart';
 import 'package:wpa_app/domain/prayer_requests/entities.dart';
+import 'package:wpa_app/domain/testimonies/entities.dart';
 import 'package:wpa_app/infrastructure/authentication/firebase_user_dto.dart';
 import 'package:wpa_app/infrastructure/prayer_requests/prayer_requests_dto.dart';
+import 'package:wpa_app/infrastructure/testimonies/testimonies_dto.dart';
 import 'package:wpa_app/services/firebase_firestore_service.dart';
 import 'package:wpa_app/services/firebase_storage_service.dart';
 
@@ -97,6 +99,52 @@ class AdminService implements IAdminService {
           .collection("prayer_requests")
           .doc(prayerRequestId)
           .delete();
+    } on Exception catch (e) {
+      _firebaseFirestoreService.handleException(e);
+    }
+  }
+
+  @override
+  Future<void> approveTestimony({required String testimonyId}) async {
+    try {
+      await _firestore.runTransaction((transaction) async {
+        DocumentReference documentReference =
+            _firestore.collection("testimonies").doc(testimonyId);
+        transaction.update(documentReference, {"is_approved": true});
+      });
+    } on Exception catch (e) {
+      _firebaseFirestoreService.handleException(e);
+    }
+  }
+
+  @override
+  Future<List<Testimony>> getUnapprovedTestimonies() async {
+    final LocalUser user = getIt<LocalUser>();
+    late QuerySnapshot<Map<String, dynamic>> querySnapshot;
+    List<Testimony> testimonies = [];
+    try {
+      querySnapshot = await _firestore
+          .collection("testimonies")
+          .where("is_approved", isEqualTo: false)
+          .get();
+    } on Exception catch (e) {
+      _firebaseFirestoreService.handleException(e);
+    }
+
+    for (QueryDocumentSnapshot<Map<String, dynamic>> doc
+        in querySnapshot.docs) {
+      Testimony testimony = await TestimoniesDto.fromFirestore(doc, user.id)
+          .toDomain(_firebaseStorageService);
+      testimonies.add(testimony);
+    }
+
+    return testimonies;
+  }
+
+  @override
+  Future<void> deleteTestimony({required String testimonyId}) async {
+    try {
+      await _firestore.collection("testimonies").doc(testimonyId).delete();
     } on Exception catch (e) {
       _firebaseFirestoreService.handleException(e);
     }

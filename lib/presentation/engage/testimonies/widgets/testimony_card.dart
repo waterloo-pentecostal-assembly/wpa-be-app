@@ -1,29 +1,29 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/application/testimonies/testimonies_bloc.dart';
+import 'package:wpa_app/domain/testimonies/entities.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
 
 import '../../../../app/constants.dart';
 import '../../../../app/injection.dart';
-import '../../../../application/prayer_requests/prayer_requests_bloc.dart';
-import '../../../../domain/prayer_requests/entities.dart';
 import '../../../common/helpers.dart';
 import '../../../common/text_factory.dart';
 
-enum PrayerActionOptions {
+enum TestimonyActionOptions {
   MY_DELETE,
   MY_CLOSE,
   REPORT,
 }
 
-class PrayerRequestCard extends StatelessWidget {
-  final PrayerRequest prayerRequest;
-  final Widget prayButtonOrIndicator;
+class TestimonyCard extends StatelessWidget {
+  final Testimony testimony;
+  final Widget praiseButtonOrIndicator;
   final Animation<double> animation;
 
-  const PrayerRequestCard({
+  const TestimonyCard({
     Key? key,
-    required this.prayerRequest,
-    required this.prayButtonOrIndicator,
+    required this.testimony,
+    required this.praiseButtonOrIndicator,
     required this.animation,
   }) : super(key: key);
 
@@ -53,17 +53,17 @@ class PrayerRequestCard extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                PrayerRequestUserAndDate(prayerRequest: prayerRequest),
-                PrayerRequestMenuButton(prayerRequest: prayerRequest),
+                TestimoniesUserAndDate(testimony: testimony),
+                TestimoniesMenuButton(testimony: testimony),
               ],
             ),
             SizedBox(height: 16),
-            getIt<TextFactory>().lite(prayerRequest.request),
+            getIt<TextFactory>().lite(testimony.request),
             SizedBox(height: 8),
             Container(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.end,
-                children: [prayButtonOrIndicator],
+                children: [praiseButtonOrIndicator],
               ),
             ),
             SizedBox(height: 8),
@@ -74,10 +74,10 @@ class PrayerRequestCard extends StatelessWidget {
   }
 }
 
-class PrayerRequestMenuButton extends StatelessWidget {
-  final PrayerRequest prayerRequest;
+class TestimoniesMenuButton extends StatelessWidget {
+  final Testimony testimony;
 
-  const PrayerRequestMenuButton({Key? key, required this.prayerRequest})
+  const TestimoniesMenuButton({Key? key, required this.testimony})
       : super(key: key);
 
   @override
@@ -94,7 +94,7 @@ class PrayerRequestMenuButton extends StatelessWidget {
       ),
       color: kCardOverlayGrey,
       itemBuilder: (BuildContext context) =>
-          getPrayerRequestCardMenuItems(prayerRequest),
+          getTestimonyCardMenuItems(testimony),
       child: Icon(Icons.more_horiz,
           size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0)),
     );
@@ -102,26 +102,25 @@ class PrayerRequestMenuButton extends StatelessWidget {
 
   void handleMenuButtonSelection(
       MenuButtonValue menuButtonValue, BuildContext context) {
-    if (menuButtonValue.action == PrayerActionOptions.MY_DELETE) {
-      BlocProvider.of<PrayerRequestsBloc>(context)
-        ..add(MyPrayerRequestDeleted(id: menuButtonValue.id));
-    } else if (menuButtonValue.action == PrayerActionOptions.REPORT) {
-      BlocProvider.of<AllPrayerRequestsBloc>(context)
-        ..add(PrayerRequestReported(id: menuButtonValue.id));
-    } else if (menuButtonValue.action == PrayerActionOptions.MY_CLOSE) {
-      BlocProvider.of<PrayerRequestsBloc>(context)
-        ..add(ClosePrayerRequest(id: menuButtonValue.id));
+    if (menuButtonValue.action == TestimonyActionOptions.MY_DELETE) {
+      BlocProvider.of<TestimoniesBloc>(context)
+        ..add(MyTestimonyDeleted(id: menuButtonValue.id));
+    } else if (menuButtonValue.action == TestimonyActionOptions.REPORT) {
+      BlocProvider.of<AllTestimoniesBloc>(context)
+        ..add(TestimonyReported(id: menuButtonValue.id));
+    } else if (menuButtonValue.action == TestimonyActionOptions.MY_CLOSE) {
+      BlocProvider.of<TestimoniesBloc>(context)
+        ..add(CloseTestimony(id: menuButtonValue.id));
     }
   }
 
-  List<PopupMenuItem> getPrayerRequestCardMenuItems(
-      PrayerRequest prayerRequest) {
+  List<PopupMenuItem> getTestimonyCardMenuItems(Testimony testimony) {
     List<PopupMenuItem> popupMenuItems = [];
 
-    if (prayerRequest.isMine) {
+    if (testimony.isMine) {
       popupMenuItems.add(PopupMenuItem(
         value: MenuButtonValue(
-            id: prayerRequest.id, action: PrayerActionOptions.MY_DELETE),
+            id: testimony.id, action: TestimonyActionOptions.MY_DELETE),
         child: Row(
           children: [
             Icon(
@@ -135,10 +134,10 @@ class PrayerRequestMenuButton extends StatelessWidget {
           ],
         ),
       ));
-      if (!prayerRequest.isAnswered) {
+      if (!testimony.isAnswered) {
         popupMenuItems.add(PopupMenuItem(
           value: MenuButtonValue(
-              id: prayerRequest.id, action: PrayerActionOptions.MY_CLOSE),
+              id: testimony.id, action: TestimonyActionOptions.MY_CLOSE),
           child: Row(
             children: [
               Icon(
@@ -147,7 +146,7 @@ class PrayerRequestMenuButton extends StatelessWidget {
               ),
               SizedBox(width: 4),
               Expanded(
-                child: getIt<TextFactory>().lite('PRAYER ANSWERED'),
+                child: getIt<TextFactory>().lite('ARCHIVE'),
               )
             ],
           ),
@@ -156,7 +155,7 @@ class PrayerRequestMenuButton extends StatelessWidget {
     } else {
       popupMenuItems.add(PopupMenuItem(
         value: MenuButtonValue(
-            id: prayerRequest.id, action: PrayerActionOptions.REPORT),
+            id: testimony.id, action: TestimonyActionOptions.REPORT),
         child: Row(
           children: [
             Icon(
@@ -175,10 +174,10 @@ class PrayerRequestMenuButton extends StatelessWidget {
   }
 }
 
-class PrayerRequestUserAndDate extends StatelessWidget {
-  final PrayerRequest prayerRequest;
+class TestimoniesUserAndDate extends StatelessWidget {
+  final Testimony testimony;
 
-  const PrayerRequestUserAndDate({Key? key, required this.prayerRequest})
+  const TestimoniesUserAndDate({Key? key, required this.testimony})
       : super(key: key);
 
   @override
@@ -189,13 +188,13 @@ class PrayerRequestUserAndDate extends StatelessWidget {
           child: Container(
             height: 30,
             width: 30,
-            child: (prayerRequest.isAnonymous ||
-                    prayerRequest.userSnippet.thumbnailUrl == null)
+            child: (testimony.isAnonymous ||
+                    testimony.userSnippet.thumbnailUrl == null)
                 ? Image.asset(kProfilePhotoPlaceholder)
                 : FadeInImage.assetNetwork(
                     fit: BoxFit.cover,
                     placeholder: kProfilePhotoPlaceholder,
-                    image: prayerRequest.userSnippet.thumbnailUrl!,
+                    image: testimony.userSnippet.thumbnailUrl!,
                   ),
           ),
         ),
@@ -204,15 +203,15 @@ class PrayerRequestUserAndDate extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             () {
-              if (prayerRequest.isAnonymous) {
+              if (testimony.isAnonymous) {
                 return getIt<TextFactory>().regular("Anonymous");
               } else {
                 return getIt<TextFactory>().regular(
-                    '${prayerRequest.userSnippet.firstName} ${prayerRequest.userSnippet.lastName}');
+                    '${testimony.userSnippet.firstName} ${testimony.userSnippet.lastName}');
               }
             }(),
             getIt<TextFactory>()
-                .lite(toReadableDate(prayerRequest.date), fontSize: 10.0)
+                .lite(toReadableDate(testimony.date), fontSize: 10.0)
           ],
         )
       ],
@@ -220,45 +219,45 @@ class PrayerRequestUserAndDate extends StatelessWidget {
   }
 }
 
-class PrayButton extends StatelessWidget {
-  final PrayerRequest prayerRequest;
+class PraiseButton extends StatelessWidget {
+  final Testimony testimony;
 
-  const PrayButton({Key? key, required this.prayerRequest}) : super(key: key);
+  const PraiseButton({Key? key, required this.testimony}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return _PrayButton(
-      prayerRequest: prayerRequest,
+    return _PraiseButton(
+      testimony: testimony,
     );
   }
 }
 
-class _PrayButton extends StatelessWidget {
-  final PrayerRequest prayerRequest;
+class _PraiseButton extends StatelessWidget {
+  final Testimony testimony;
 
-  const _PrayButton({Key? key, required this.prayerRequest}) : super(key: key);
+  const _PraiseButton({Key? key, required this.testimony}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AllPrayerRequestsBloc, PrayerRequestsState>(
-      builder: (BuildContext context, PrayerRequestsState state) {
-        if (prayerRequest.hasPrayed) {
-          return _createPrayedButton();
-        } else if (state is PrayForRequestComplete) {
-          if (state.id == prayerRequest.id) {
-            return _createPrayedButton();
+    return BlocBuilder<AllTestimoniesBloc, TestimoniesState>(
+      builder: (BuildContext context, TestimoniesState state) {
+        if (testimony.hasPraised) {
+          return _createPraisedButton();
+        } else if (state is PraiseTestimonyComplete) {
+          if (state.id == testimony.id) {
+            return _createPraisedButton();
           }
-        } else if (state is PrayForRequestLoading) {
-          if (state.id == prayerRequest.id) {
+        } else if (state is PraiseTestimonyLoading) {
+          if (state.id == testimony.id) {
             return _createLoadingButton();
           }
         }
-        return _createPrayButton(context);
+        return _createPraiseButton(context);
       },
     );
   }
 
-  Widget _createPrayButton(BuildContext context) {
+  Widget _createPraiseButton(BuildContext context) {
     return Container(
       child: ClipRRect(
         borderRadius: BorderRadius.all(Radius.circular(
@@ -277,17 +276,17 @@ class _PrayButton extends StatelessWidget {
               backgroundColor: kCardGrey,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap),
           onPressed: () {
-            BlocProvider.of<AllPrayerRequestsBloc>(context).add(PrayForRequest(
-              id: prayerRequest.id,
+            BlocProvider.of<AllTestimoniesBloc>(context).add(PraiseTestimony(
+              id: testimony.id,
             ));
           },
-          child: getIt<TextFactory>().regular('PRAY'),
+          child: getIt<TextFactory>().regular('PRAISE'),
         ),
       ),
     );
   }
 
-  Widget _createPrayedButton() {
+  Widget _createPraisedButton() {
     return TextButton(
       style: TextButton.styleFrom(
         minimumSize: Size(0, 24),
@@ -295,7 +294,7 @@ class _PrayButton extends StatelessWidget {
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
       onPressed: null,
-      child: getIt<TextFactory>().regular('PRAYED!', color: Colors.black54),
+      child: getIt<TextFactory>().regular('PRAISED!', color: Colors.black54),
     );
   }
 
@@ -311,10 +310,10 @@ class _PrayButton extends StatelessWidget {
   }
 }
 
-class PrayedByIndicator extends StatelessWidget {
+class PraisedByIndicator extends StatelessWidget {
   final int amount;
 
-  const PrayedByIndicator({Key? key, required this.amount}) : super(key: key);
+  const PraisedByIndicator({Key? key, required this.amount}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -325,7 +324,7 @@ class PrayedByIndicator extends StatelessWidget {
           tapTargetSize: MaterialTapTargetSize.shrinkWrap),
       onPressed: null,
       child: getIt<TextFactory>().regular(
-          'Prayed by $amount other${getS(amount)}',
+          'Prasied by $amount other${getS(amount)}',
           color: Colors.black54),
     );
   }
@@ -355,7 +354,7 @@ class PendingIndicator extends StatelessWidget {
 
 class MenuButtonValue {
   final String id;
-  final PrayerActionOptions action;
+  final TestimonyActionOptions action;
 
   MenuButtonValue({required this.id, required this.action});
 }

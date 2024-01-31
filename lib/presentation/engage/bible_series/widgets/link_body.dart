@@ -30,9 +30,9 @@ class LinkBodyWidget extends StatelessWidget {
     }
     widgetList.add(GestureDetector(
       onTap: () async {
-        if (await canLaunch(linkBody.properties.link)) {
-          await launch(linkBody.properties.link,
-              forceWebView: true, enableJavaScript: true);
+        Uri uri = Uri.parse(linkBody.properties.link);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri);
         } else {
           ToastMessage.showErrorToast("Error opening page", context);
         }

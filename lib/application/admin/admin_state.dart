@@ -45,6 +45,33 @@ class PrayerRequestsDeleted extends AdminState {
   List<Object> get props => [prayerRequestId];
 }
 
+class UnverifiedTestimoniesLoaded extends AdminState {
+  final List<Testimony> testimonies;
+
+  UnverifiedTestimoniesLoaded({required this.testimonies});
+
+  @override
+  List<Object> get props => [testimonies];
+}
+
+class TestimoniesApproved extends AdminState {
+  final String testimonyId;
+
+  TestimoniesApproved({required this.testimonyId});
+
+  @override
+  List<Object> get props => [testimonyId];
+}
+
+class TestimoniesDeleted extends AdminState {
+  final String testimonyId;
+
+  TestimoniesDeleted({required this.testimonyId});
+
+  @override
+  List<Object> get props => [testimonyId];
+}
+
 class UserVerified extends AdminState {
   final String userId;
 
