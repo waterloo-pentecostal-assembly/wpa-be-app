@@ -128,6 +128,7 @@ class EngageIndex extends StatelessWidget {
               SizedBox(height: 16.0),
               RecentBibleSeriesWidget(),
               SizedBox(height: 16.0),
+              RecentPrayerRequestsWidget(),
               RecentTestimoniesWidget(),
               SizedBox(height: 16.0),
               MediaWidget(),
