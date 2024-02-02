@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/domain/authentication/entities.dart';
 
@@ -9,26 +8,26 @@ import '../../domain/bible_series/interfaces.dart';
 import '../../domain/common/exceptions.dart';
 import '../../services/firebase_firestore_service.dart';
 import '../../services/firebase_storage_service.dart';
-import 'bible_series_dtos.dart';
-import 'series_content_dtos.dart';
+import 'bible_series_dto.dart';
+import 'series_content_dto.dart';
 
 class BibleSeriesRepository implements IBibleSeriesRepository {
-  final FirebaseFirestore _firestore;
-  final FirebaseStorageService _firebaseStorageService;
-  final FirebaseFirestoreService _firebaseFirestoreService;
-  CollectionReference _bibleSeriesCollection;
-  DocumentSnapshot _lastBibleSeriesDocument;
+  late final FirebaseFirestore _firestore;
+  late final FirebaseStorageService _firebaseStorageService;
+  late final FirebaseFirestoreService _firebaseFirestoreService;
+  late CollectionReference _bibleSeriesCollection;
+  DocumentSnapshot? _lastBibleSeriesDocument;
 
   BibleSeriesRepository(this._firestore, this._firebaseStorageService,
       this._firebaseFirestoreService) {
     _bibleSeriesCollection = _firestore.collection("bible_series");
   }
 
-  /// Returns a [List] of the three most recent [BibleSeries].
+  /// Returns a [List] of the [limit] most recent [BibleSeries].
   /// Throws [ApplicationException] or [BibleSeriesException].
   @override
   Future<List<BibleSeries>> getBibleSeries({
-    int limit,
+    required int limit,
   }) async {
     QuerySnapshot querySnapshot;
 
@@ -46,8 +45,8 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
             .limit(limit)
             .get();
       }
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
 
     List<BibleSeries> bibleSeriesList = [];
@@ -76,7 +75,7 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
   /// Throws [ApplicationException] or [BibleSeriesException].
   @override
   Future<List<BibleSeries>> getMoreBibleSeries({
-    @required int limit,
+    required int limit,
   }) async {
     if (_lastBibleSeriesDocument == null) {
       throw BibleSeriesException(
@@ -92,11 +91,11 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
       querySnapshot = await _bibleSeriesCollection
           .orderBy("start_date", descending: true)
           .where("is_visible", isEqualTo: true)
-          .startAfterDocument(_lastBibleSeriesDocument)
+          .startAfterDocument(_lastBibleSeriesDocument!)
           .limit(limit)
           .get();
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
 
     List<BibleSeries> bibleSeriesList = [];
@@ -127,16 +126,16 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
   /// Throws [ApplicationException] or [BibleSeriesException].
   @override
   Future<BibleSeries> getBibleSeriesDetails({
-    @required String bibleSeriesId,
+    required String bibleSeriesId,
   }) async {
     DocumentSnapshot document;
     try {
       document = await _bibleSeriesCollection.doc(bibleSeriesId).get();
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
 
-    if (bibleSeriesId == null) {
+    if (document.data() == null) {
       throw BibleSeriesException(
         code: BibleSeriesExceptionCode.NO_SERIES_CONTENT,
         message: 'Unable to find requested Bible Series',
@@ -154,8 +153,8 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
   /// Throws [ApplicationException] or [BibleSeriesException].
   @override
   Future<SeriesContent> getContentDetails({
-    @required String bibleSeriesId,
-    @required String seriesContentId,
+    required String bibleSeriesId,
+    required String seriesContentId,
   }) async {
     DocumentSnapshot document;
     try {
@@ -164,8 +163,8 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
           .collection("series_content")
           .doc(seriesContentId)
           .get();
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
 
     if (document.data() != null) {
@@ -200,8 +199,8 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
                 .toDomain(_firebaseStorageService);
         return bibleSeriesDto.isActive;
       }
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
 
     return false;

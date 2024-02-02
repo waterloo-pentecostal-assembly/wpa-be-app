@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import '../common/exceptions.dart';
 
 enum PrayerRequestsExceptionCode {
@@ -13,8 +11,8 @@ class PrayerRequestsException implements BaseApplicationException {
   /// Creates an [PrayerRequestsException] with the specified error [type],
   /// [message], and optional error [details].
   PrayerRequestsException({
-    @required this.code,
-    @required this.message,
+    required this.code,
+    required this.message,
     this.details,
   });
 

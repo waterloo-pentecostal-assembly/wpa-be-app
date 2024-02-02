@@ -16,16 +16,16 @@ import 'package:wpa_app/presentation/common/text_factory.dart';
 class ImageInputBodyWidget extends StatelessWidget {
   final ImageInputBody imageInputBody;
   final int contentNum;
-  final CompletionDetails completionDetails;
+  final CompletionDetails? completionDetails;
   final String bibleSeriesId;
   final SeriesContent seriesContent;
   const ImageInputBodyWidget(
-      {Key key,
-      this.imageInputBody,
-      this.contentNum,
+      {Key? key,
+      required this.imageInputBody,
+      required this.contentNum,
       this.completionDetails,
-      this.bibleSeriesId,
-      this.seriesContent})
+      required this.bibleSeriesId,
+      required this.seriesContent})
       : super(key: key);
   @override
   Widget build(BuildContext context) {
@@ -42,15 +42,15 @@ class ImageInputBodyWidget extends StatelessWidget {
 
 class ImageInputBodyState extends StatefulWidget {
   final int contentNum;
-  final CompletionDetails completionDetails;
+  final CompletionDetails? completionDetails;
   final String bibleSeriesId;
   final SeriesContent seriesContent;
   ImageInputBodyState(
-      {Key key,
-      @required this.contentNum,
-      @required this.completionDetails,
-      @required this.bibleSeriesId,
-      @required this.seriesContent})
+      {Key? key,
+      required this.contentNum,
+      required this.completionDetails,
+      required this.bibleSeriesId,
+      required this.seriesContent})
       : super(key: key);
 
   @override
@@ -64,14 +64,11 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
     return BlocConsumer<CompletionsBloc, CompletionsState>(
       listener: (context, state) {},
       builder: (BuildContext context, CompletionsState state) {
-        if (state.uploadTask != null &&
-            state.uploadTask[widget.contentNum.toString()] != null) {
-          return imageLoading(state.uploadTask[widget.contentNum.toString()]);
-        } else if (state.downloadURL != null) {
-          if (state.downloadURL[widget.contentNum.toString()] != null) {
-            return imageLoaded(
-                state, widget.completionDetails, widget.contentNum);
-          }
+        if (state.uploadTask?[widget.contentNum.toString()] != null) {
+          return imageLoading(state.uploadTask![widget.contentNum.toString()]!);
+        } else if (state.downloadURL?[widget.contentNum.toString()] != null) {
+          return imageLoaded(
+              state, widget.completionDetails, widget.contentNum);
         }
 
         return Column(
@@ -97,13 +94,13 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
   }
 
   void selectImageInput() async {
-    PickedFile selected =
-        await imagePicker.getImage(source: ImageSource.gallery);
-    if (selected != null && selected.path != null) {
+    XFile? selectedFile =
+        await imagePicker.pickImage(source: ImageSource.gallery);
+    if (selectedFile != null) {
       BlocProvider.of<CompletionsBloc>(context)
         ..add(
           UploadImage(
-            image: File(selected.path),
+            image: File(selectedFile.path),
             contentNum: widget.contentNum,
             questionNum: 0,
             bibleSeriesId: widget.bibleSeriesId,
@@ -117,13 +114,12 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
     return StreamBuilder(
       stream: uploadTask.snapshotEvents,
       builder: (context, AsyncSnapshot<TaskSnapshot> snapshot) {
-        int bytesTransferred = snapshot?.data?.bytesTransferred;
-        int totalBytes = snapshot?.data?.totalBytes;
+        int bytesTransferred = snapshot.data?.bytesTransferred ?? 0;
+        int? totalBytes = snapshot.data?.totalBytes;
         int progressPercent = 0;
-
-        if (bytesTransferred != null && totalBytes != null) {
-          progressPercent = ((bytesTransferred / totalBytes) * 100).ceil();
-        }
+        progressPercent = totalBytes != null
+            ? ((bytesTransferred / totalBytes) * 100).ceil()
+            : 0;
         return Container(
           padding: const EdgeInsets.all(16),
           child: Center(
@@ -135,7 +131,7 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
   }
 
   Widget imageLoaded(CompletionsState state,
-      CompletionDetails completionDetails, int contentNum) {
+      CompletionDetails? completionDetails, int contentNum) {
     return Column(
       children: [
         Row(
@@ -147,10 +143,10 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
                   BlocProvider.of<CompletionsBloc>(context)
                     ..add(DeleteImage(
                       gsURL: state
-                          .responses
-                          .responses[widget.contentNum.toString()]['0']
+                          .responses!
+                          .responses[widget.contentNum.toString()]!['0']!
                           .response,
-                      completionDetails: completionDetails,
+                      completionDetails: completionDetails!,
                       contentNum: contentNum,
                     ));
                 },
@@ -167,7 +163,7 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
         ),
         GestureDetector(
             onTap: () {
-              return showDialog(
+              showDialog(
                   context: context,
                   builder: (context) {
                     return WillPopScope(
@@ -184,9 +180,8 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
                             child: PhotoView(
                               backgroundDecoration:
                                   BoxDecoration(color: Colors.transparent),
-                              imageProvider: NetworkImage(state
-                                      .downloadURL[widget.contentNum.toString()]
-                                  [0]),
+                              imageProvider: NetworkImage(state.downloadURL![
+                                  widget.contentNum.toString()]![0]),
                               minScale: PhotoViewComputedScale.contained * 0.8,
                               maxScale: PhotoViewComputedScale.covered * 2,
                               loadingBuilder: (context, event) => Center(
@@ -225,13 +220,13 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
 }
 
 Widget imageWidget(CompletionsState state, String contentNum) {
-  if (state.thumbnailURL != null && state.thumbnailURL[contentNum] != null) {
+  if (state.thumbnailURL?[contentNum] != null) {
     return Image.network(
-      state.thumbnailURL[contentNum][0],
+      state.thumbnailURL![contentNum]![0],
       fit: BoxFit.fill,
     );
-  } else if (state.localImage != null && state.localImage[contentNum] != null) {
-    return Image.file(state.localImage[contentNum][0]);
+  } else if (state.localImage?[contentNum] != null) {
+    return Image.file(state.localImage![contentNum]![0]);
   } else {
     return Loader();
   }

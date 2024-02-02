@@ -7,7 +7,7 @@ import '../common/text_factory.dart';
 
 class HeaderWidget extends StatelessWidget {
   final String title;
-  const HeaderWidget({@required this.title});
+  const HeaderWidget({required this.title});
   @override
   Widget build(BuildContext context) {
     return Padding(

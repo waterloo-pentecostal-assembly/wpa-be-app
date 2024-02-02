@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 class Media {
   final String id;
   final String description;
@@ -9,12 +7,12 @@ class Media {
   final String thumbnailGsLocation;
 
   Media({
-    @required this.id,
-    @required this.description,
-    @required this.platform,
-    @required this.link,
-    @required this.thumbnailUrl,
-    @required this.thumbnailGsLocation,
+    required this.id,
+    required this.description,
+    required this.platform,
+    required this.link,
+    required this.thumbnailUrl,
+    required this.thumbnailGsLocation,
   });
 
   @override

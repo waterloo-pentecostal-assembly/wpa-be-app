@@ -12,7 +12,7 @@ class PrayerRequestsLoading extends PrayerRequestsState {}
 class RecentPrayerRequestsLoaded extends PrayerRequestsState {
   final List<PrayerRequest> prayerRequests;
 
-  RecentPrayerRequestsLoaded({@required this.prayerRequests});
+  RecentPrayerRequestsLoaded({required this.prayerRequests});
 
   @override
   List<Object> get props => [prayerRequests];
@@ -23,7 +23,7 @@ class PrayerRequestsLoaded extends PrayerRequestsState {
   final bool isEndOfList;
 
   PrayerRequestsLoaded(
-      {@required this.prayerRequests, @required this.isEndOfList});
+      {required this.prayerRequests, required this.isEndOfList});
 
   @override
   // We need each PrayerRequestsLoaded event to be unique to we are using the DateTime.now() to do so
@@ -33,7 +33,7 @@ class PrayerRequestsLoaded extends PrayerRequestsState {
 class PrayerRequestReportedAndRemoved extends PrayerRequestsState {
   final String id;
 
-  PrayerRequestReportedAndRemoved({@required this.id});
+  PrayerRequestReportedAndRemoved({required this.id});
 
   @override
   List<Object> get props => [id];
@@ -42,7 +42,7 @@ class PrayerRequestReportedAndRemoved extends PrayerRequestsState {
 class MyPrayerRequestsLoaded extends PrayerRequestsState {
   final List<PrayerRequest> prayerRequests;
 
-  MyPrayerRequestsLoaded({@required this.prayerRequests});
+  MyPrayerRequestsLoaded({required this.prayerRequests});
 
   @override
   List<Object> get props => [prayerRequests];
@@ -51,7 +51,7 @@ class MyPrayerRequestsLoaded extends PrayerRequestsState {
 class MyPrayerRequestDeleteComplete extends PrayerRequestsState {
   final String id;
 
-  MyPrayerRequestDeleteComplete({@required this.id});
+  MyPrayerRequestDeleteComplete({required this.id});
 
   @override
   List<Object> get props => [id];
@@ -60,7 +60,7 @@ class MyPrayerRequestDeleteComplete extends PrayerRequestsState {
 class MyAnsweredPrayerRequestsLoaded extends PrayerRequestsState {
   final List<PrayerRequest> prayerRequests;
 
-  MyAnsweredPrayerRequestsLoaded({@required this.prayerRequests});
+  MyAnsweredPrayerRequestsLoaded({required this.prayerRequests});
 
   @override
   List<Object> get props => [prayerRequests];
@@ -71,7 +71,7 @@ class MyPrayerRequestAnsweredComplete extends PrayerRequestsState {
   final PrayerRequest prayerRequest;
 
   MyPrayerRequestAnsweredComplete(
-      {@required this.id, @required this.prayerRequest});
+      {required this.id, required this.prayerRequest});
 
   @override
   List<Object> get props => [id];
@@ -80,7 +80,7 @@ class MyPrayerRequestAnsweredComplete extends PrayerRequestsState {
 class NewPrayerRequestLoaded extends PrayerRequestsState {
   final PrayerRequest prayerRequest;
 
-  NewPrayerRequestLoaded({@required this.prayerRequest});
+  NewPrayerRequestLoaded({required this.prayerRequest});
 
   @override
   List<Object> get props => [prayerRequest];
@@ -91,7 +91,7 @@ class MorePrayerRequestsLoaded extends PrayerRequestsState {
   final bool isEndOfList;
 
   MorePrayerRequestsLoaded(
-      {@required this.prayerRequests, @required this.isEndOfList});
+      {required this.prayerRequests, required this.isEndOfList});
 
   @override
   // We need each PrayerRequestsLoaded event to be unique to we are using the DateTime.now() to do so
@@ -101,7 +101,7 @@ class MorePrayerRequestsLoaded extends PrayerRequestsState {
 class PrayerRequestsError extends PrayerRequestsState {
   final String message;
 
-  PrayerRequestsError({@required this.message});
+  PrayerRequestsError({required this.message});
 
   @override
   List<Object> get props => [message, DateTime.now()];
@@ -110,7 +110,7 @@ class PrayerRequestsError extends PrayerRequestsState {
 class NewPrayerRequestError extends PrayerRequestsState {
   final String message;
 
-  NewPrayerRequestError({@required this.message});
+  NewPrayerRequestError({required this.message});
 
   @override
   List<Object> get props => [message, DateTime.now()];
@@ -119,7 +119,7 @@ class NewPrayerRequestError extends PrayerRequestsState {
 class PrayerRequestDeleteError extends PrayerRequestsState {
   final String message;
 
-  PrayerRequestDeleteError({@required this.message});
+  PrayerRequestDeleteError({required this.message});
 
   @override
   List<Object> get props => [message, DateTime.now()];
@@ -129,7 +129,7 @@ class PrayerRequestReportError extends PrayerRequestsState {
   final String message;
   final DateTime n = DateTime.now();
 
-  PrayerRequestReportError({@required this.message});
+  PrayerRequestReportError({required this.message});
 
   @override
   List<Object> get props => [message, n];
@@ -138,7 +138,7 @@ class PrayerRequestReportError extends PrayerRequestsState {
 class PrayForRequestError extends PrayerRequestsState {
   final String message;
 
-  PrayForRequestError({@required this.message});
+  PrayForRequestError({required this.message});
 
   @override
   List<Object> get props => [message, DateTime.now()];
@@ -147,7 +147,7 @@ class PrayForRequestError extends PrayerRequestsState {
 class PrayForRequestLoading extends PrayerRequestsState {
   final String id;
 
-  PrayForRequestLoading({@required this.id});
+  PrayForRequestLoading({required this.id});
 
   @override
   List<Object> get props => [id];
@@ -156,7 +156,7 @@ class PrayForRequestLoading extends PrayerRequestsState {
 class PrayForRequestComplete extends PrayerRequestsState {
   final String id;
 
-  PrayForRequestComplete({@required this.id});
+  PrayForRequestComplete({required this.id});
 
   @override
   List<Object> get props => [id];
@@ -179,9 +179,9 @@ class NewPrayerRequestState extends PrayerRequestsState {
   }
 
   NewPrayerRequestState({
-    @required this.prayerRequest,
-    @required this.isAnonymous,
-    @required this.prayerRequestError,
+    required this.prayerRequest,
+    required this.isAnonymous,
+    required this.prayerRequestError,
   });
 
   factory NewPrayerRequestState.initial() {
@@ -193,9 +193,9 @@ class NewPrayerRequestState extends PrayerRequestsState {
   }
 
   NewPrayerRequestState copyWith({
-    String prayerRequest,
-    bool isAnonymous,
-    String prayerRequestError,
+    String? prayerRequest,
+    bool? isAnonymous,
+    String? prayerRequestError,
   }) {
     return NewPrayerRequestState(
       prayerRequest: prayerRequest ?? this.prayerRequest,
@@ -204,7 +204,7 @@ class NewPrayerRequestState extends PrayerRequestsState {
     );
   }
 
-  bool _toBoolean(String str, [bool strict]) {
+  bool _toBoolean(String str, [bool? strict]) {
     if (strict == true) {
       return str == '1' || str == 'true';
     }

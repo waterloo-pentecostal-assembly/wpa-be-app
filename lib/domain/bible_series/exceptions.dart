@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-
 import '../common/exceptions.dart';
 
 enum BibleSeriesExceptionCode {
@@ -19,8 +17,8 @@ class BibleSeriesException implements BaseApplicationException {
   /// Creates an [BibleSeriesException] with the specified error [type],
   /// [message], and optional error [details].
   BibleSeriesException({
-    @required this.code,
-    @required this.message,
+    required this.code,
+    required this.message,
     this.details,
   });
 

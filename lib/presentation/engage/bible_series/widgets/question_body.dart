@@ -10,16 +10,16 @@ import '../../../../domain/completions/entities.dart';
 import '../../../common/text_factory.dart';
 
 class QuestionContentBodyWidget extends StatelessWidget {
-  final CompletionDetails completionDetails;
+  final CompletionDetails? completionDetails;
   final QuestionBody questionContentBody;
   final int contentNum;
 
-  const QuestionContentBodyWidget(
-      {Key key,
-      this.questionContentBody,
-      this.contentNum,
-      this.completionDetails})
-      : super(key: key);
+  const QuestionContentBodyWidget({
+    Key? key,
+    required this.questionContentBody,
+    required this.contentNum,
+    this.completionDetails,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +90,7 @@ Widget questionContainer(
         },
         builder: (context, state) {
           if (state.responses != null) {
-            if (state.responses.responses != null) {
+            if (state.responses?.responses != null) {
               return Padding(
                   padding: const EdgeInsets.fromLTRB(18, 0, 24, 8),
                   child: TextFormField(
@@ -139,12 +139,12 @@ Widget questionContainer(
 }
 
 String getResponse(CompletionsState state, int contentNum, int questionNum) {
-  if (state.responses.responses[contentNum.toString()] != null) {
-    if (state.responses.responses[contentNum.toString()]
-            [questionNum.toString()] !=
+  if (state.responses?.responses[contentNum.toString()] != null) {
+    if (state.responses?.responses[contentNum.toString()]
+            ?[questionNum.toString()] !=
         null) {
-      return state.responses
-          .responses[contentNum.toString()][questionNum.toString()].response;
+      return state.responses!
+          .responses[contentNum.toString()]![questionNum.toString()]!.response;
     }
   }
   return '';

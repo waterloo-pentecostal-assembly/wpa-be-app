@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 
 import '../../domain/notification_settings/entities.dart';
 import '../common/helpers.dart';
@@ -9,35 +8,20 @@ class NotificationSettingsDto {
   final bool dailyEngagementReminder;
   final bool prayers;
 
-  factory NotificationSettingsDto.fromJson(Map<String, dynamic> json) {
-    return NotificationSettingsDto._(
-      dailyEngagementReminder:
-          findOrDefaultTo(json, 'daily_engagement_reminder', false),
-      prayers: findOrDefaultTo(json, 'prayers', false),
-    );
-  }
-
   factory NotificationSettingsDto.fromFirestore(DocumentSnapshot doc) {
-    return NotificationSettingsDto.fromJson(doc.data()).copyWith(id: doc.id);
-  }
-
-  NotificationSettingsDto copyWith({
-    String id,
-    String dailyEngagementReminder,
-    String prayers,
-  }) {
+    var data = (doc.data() ?? {}) as Map<String, dynamic>;
     return NotificationSettingsDto._(
-      id: id ?? this.id,
+      id: doc.id,
       dailyEngagementReminder:
-          dailyEngagementReminder ?? this.dailyEngagementReminder,
-      prayers: prayers ?? this.prayers,
+          findOrDefaultTo(data, 'daily_engagement_reminder', false),
+      prayers: findOrDefaultTo(data, 'prayers', false),
     );
   }
 
   NotificationSettingsDto._({
-    this.id,
-    @required this.dailyEngagementReminder,
-    @required this.prayers,
+    required this.id,
+    required this.dailyEngagementReminder,
+    required this.prayers,
   });
 }
 

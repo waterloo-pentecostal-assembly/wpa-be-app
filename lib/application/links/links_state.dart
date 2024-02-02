@@ -12,7 +12,7 @@ class LinksInitial extends LinksState {}
 class LinksLoaded extends LinksState {
   final Map<String, dynamic> linkMap;
 
-  LinksLoaded({@required this.linkMap});
+  LinksLoaded({required this.linkMap});
 
   @override
   List<Object> get props => [linkMap];
@@ -20,7 +20,7 @@ class LinksLoaded extends LinksState {
 
 class LinksError extends LinksState {
   final String message;
-  LinksError({@required this.message});
+  LinksError({required this.message});
   @override
   List<Object> get props => [message];
 }

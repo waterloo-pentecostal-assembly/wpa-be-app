@@ -11,27 +11,25 @@ class CompletionDetails {
   final String contentId;
   final bool isOnTime;
   final bool isDraft;
-  final Timestamp completionDate;
+  final Timestamp? completionDate;
 
   CompletionDetails({
-    this.id,
-    this.seriesId,
-    this.contentId,
-    this.isOnTime,
-    this.isDraft,
+    required this.id,
+    required this.seriesId,
+    required this.contentId,
+    required this.isOnTime,
+    required this.isDraft,
     this.completionDate,
   });
 }
 
 class Responses {
-  final String id;
+  final String? id;
   final Map<String, Map<String, ResponseDetails>> responses;
-  final String userId;
 
   Responses({
     this.id,
-    this.responses,
-    this.userId,
+    required this.responses,
   });
 }
 
@@ -40,7 +38,7 @@ class ResponseDetails {
   final String response;
 
   ResponseDetails({
-    this.type,
-    this.response,
+    required this.type,
+    required this.response,
   });
 }

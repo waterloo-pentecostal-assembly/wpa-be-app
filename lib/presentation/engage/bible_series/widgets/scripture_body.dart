@@ -7,7 +7,8 @@ import '../../../../domain/bible_series/entities.dart';
 class ScriptureContentBodyWidget extends StatelessWidget {
   final ScriptureBody scriptureContentBody;
 
-  const ScriptureContentBodyWidget({Key key, this.scriptureContentBody})
+  const ScriptureContentBodyWidget(
+      {Key? key, required this.scriptureContentBody})
       : super(key: key);
 
   @override
@@ -43,10 +44,10 @@ Widget scripture(Scripture script) {
 List<Widget> buildCombinedScripture(Scripture script, List<int> sortedVerses) {
   List<Widget> combinedScripture = [];
   combinedScripture.add(book(script, sortedVerses));
-  if (script.title != '') {
+  if (script.title != null) {
     combinedScripture.add(Padding(
         padding: const EdgeInsets.only(bottom: 16),
-        child: getIt<TextFactory>().subHeading3(script.title)));
+        child: getIt<TextFactory>().subHeading3(script.title!)));
   }
   combinedScripture.add(
     ListView.builder(
@@ -89,7 +90,7 @@ Widget copyright(ScriptureBody script) {
 
 Widget verse(Scripture script, String key) {
   String verseNum = "$key ";
-  String verse = script.verses[key];
+  String verse = script.verses[key]!;
   return SelectableText.rich(TextSpan(
       style: getIt<TextFactory>().liteTextStyle(fontSize: 16),
       children: <TextSpan>[

@@ -6,11 +6,11 @@ import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/application/navigation_bar/navigation_bar_bloc.dart';
 
 class FirebaseMessagingService {
-  final FirebaseMessaging _firebaseMessaging;
+  late final FirebaseMessaging _firebaseMessaging;
 
   FirebaseMessagingService(this._firebaseMessaging);
 
-  Future<String> getToken() async {
+  Future<String?> getToken() async {
     return _firebaseMessaging.getToken();
   }
 
@@ -73,6 +73,14 @@ class FirebaseMessagingService {
             route: '/prayer_requests/mine',
           ),
         );
+    } else if (payload['notificationType'] == 'testimonyPraised') {
+      getIt<NavigationBarBloc>()
+        ..add(
+          NavigationBarEvent(
+            tab: NavigationTabEnum.ENGAGE,
+            route: '/testimonies/mine',
+          ),
+        );
     } else if (payload['notificationType'] == 'userSignUp') {
       getIt<NavigationBarBloc>()
         ..add(
@@ -90,8 +98,9 @@ class FirebaseMessagingService {
           ),
         );
     } else if (payload['notificationType'] == 'link') {
-      if (await canLaunch(payload['link'])) {
-        await launch(payload['link']);
+      Uri uri = Uri.parse(payload['link']);
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri);
       }
     }
   }

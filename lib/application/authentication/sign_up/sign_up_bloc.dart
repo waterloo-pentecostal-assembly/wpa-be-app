@@ -134,12 +134,11 @@ Stream<SignUpState> _mapSignUpWithEmailAndPasswordToState(
   SignUpWithEmailAndPassword event,
   SignUpState state,
   Future<void> Function({
-    @required EmailAddress emailAddress,
-    @required Password password,
-    @required Name firstName,
-    @required Name lastName,
-  })
-      signUpFunction,
+    required EmailAddress emailAddress,
+    required Password password,
+    required Name firstName,
+    required Name lastName,
+  }) signUpFunction,
 ) async* {
   yield state.copyWith(
     submitting: true,

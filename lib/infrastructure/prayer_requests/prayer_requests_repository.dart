@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:wpa_app/infrastructure/common/helpers.dart';
 
 import '../../app/constants.dart';
 import '../../domain/authentication/entities.dart';
@@ -11,11 +12,11 @@ import '../../services/firebase_storage_service.dart';
 import 'prayer_requests_dto.dart';
 
 class PrayerRequestsRepository extends IPrayerRequestsRepository {
-  final FirebaseFirestore _firestore;
-  final FirebaseFirestoreService _firebaseFirestoreService;
-  final FirebaseStorageService _firebaseStorageService;
-  CollectionReference _prayerRequestsCollection;
-  DocumentSnapshot _lastPrayerRequestDocument;
+  late final FirebaseFirestore _firestore;
+  late final FirebaseFirestoreService _firebaseFirestoreService;
+  late final FirebaseStorageService _firebaseStorageService;
+  late CollectionReference _prayerRequestsCollection;
+  DocumentSnapshot? _lastPrayerRequestDocument;
 
   PrayerRequestsRepository(this._firestore, this._firebaseStorageService,
       this._firebaseFirestoreService) {
@@ -24,7 +25,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
 
   @override
   Future<PrayerRequest> createPrayerRequest(
-      {String request, bool isAnonymous}) async {
+      {required String request, required bool isAnonymous}) async {
     final LocalUser user = getIt<LocalUser>();
     DocumentReference documentReference;
     DocumentSnapshot documentSnapshot;
@@ -35,8 +36,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
             .newRequestToFirestore(),
       );
       documentSnapshot = await documentReference.get();
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
 
     return PrayerRequestsDto.fromFirestore(documentSnapshot, user.id)
@@ -44,11 +45,11 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
   }
 
   @override
-  Future<void> deletePrayerRequest({String id}) async {
+  Future<void> deletePrayerRequest({required String id}) async {
     try {
       await _prayerRequestsCollection.doc(id).delete();
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
   }
 
@@ -63,8 +64,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
           .where("is_answered", isEqualTo: false)
           .orderBy("date", descending: true)
           .get();
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
 
     List<PrayerRequest> myPrayerRequests = [];
@@ -90,8 +91,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
           .where("is_answered", isEqualTo: true)
           .orderBy("date", descending: true)
           .get();
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
 
     List<PrayerRequest> myPrayerRequests = [];
@@ -107,7 +108,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
   }
 
   @override
-  Future<PrayerRequest> closePrayerRequest({String id}) async {
+  Future<PrayerRequest> closePrayerRequest({required String id}) async {
     final LocalUser user = getIt<LocalUser>();
     DocumentReference prayerRequestReference;
     DocumentSnapshot prayerRequestSnapshot;
@@ -115,8 +116,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
       prayerRequestReference = _prayerRequestsCollection.doc(id);
       await prayerRequestReference.update({"is_answered": true});
       prayerRequestSnapshot = await prayerRequestReference.get();
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
     return PrayerRequestsDto.fromFirestore(prayerRequestSnapshot, user.id)
         .toDomain(_firebaseStorageService);
@@ -124,8 +125,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
 
   @override
   Future<List<PrayerRequest>> getMorePrayerRequests({
-    int limit,
-    DocumentSnapshot startAtDocument,
+    required int limit,
   }) async {
     final LocalUser user = getIt<LocalUser>();
     List<PrayerRequest> prayerRequests = [];
@@ -144,11 +144,11 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
           .where("is_approved", isEqualTo: true)
           .where("is_answered", isEqualTo: false)
           .orderBy("date", descending: true)
-          .startAfterDocument(_lastPrayerRequestDocument)
+          .startAfterDocument(_lastPrayerRequestDocument!)
           .limit(limit)
           .get();
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
 
     if (querySnapshot.docs.length > 0) {
@@ -169,7 +169,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
 
   @override
   Future<List<PrayerRequest>> getPrayerRequests({
-    int limit,
+    required int limit,
   }) async {
     final LocalUser user = getIt<LocalUser>();
     QuerySnapshot querySnapshot;
@@ -181,8 +181,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
           .orderBy("date", descending: true)
           .limit(limit)
           .get();
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
 
     List<PrayerRequest> prayerRequests = [];
@@ -203,7 +203,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
   }
 
   @override
-  Future<void> prayForPrayerRequest({String id}) async {
+  Future<void> prayForPrayerRequest({required String id}) async {
     final LocalUser user = getIt<LocalUser>();
     try {
       // Using transaction to avoid stale data
@@ -220,23 +220,18 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
           );
         }
 
-        List<dynamic> prayedBy = documentSnapshot["prayed_by"];
-
-        if (prayedBy == null) {
-          prayedBy = [user.id];
-        } else {
-          prayedBy..add(user.id);
-        }
+        List<dynamic> prayedBy = findOrDefaultTo(documentSnapshot.data() as Map<String, dynamic>, 'prayed_by', []);
+        prayedBy..add(user.id);
 
         transaction.update(documentReference, {"prayed_by": prayedBy});
       });
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
   }
 
   @override
-  Future<void> reportPrayerRequest({String id}) async {
+  Future<void> reportPrayerRequest({required String id}) async {
     final LocalUser user = getIt<LocalUser>();
 
     try {
@@ -264,8 +259,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
       });
     } on PrayerRequestsException catch (_) {
       rethrow;
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
   }
 
@@ -280,8 +275,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
           .where("is_approved", isEqualTo: true)
           .orderBy("date", descending: true)
           .get();
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
 
     if (querySnapshot.docs.length < kPrayerRequestPerUserLimit) {

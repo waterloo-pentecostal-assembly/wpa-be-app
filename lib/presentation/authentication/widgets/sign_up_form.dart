@@ -45,10 +45,7 @@ class SignUpForm extends StatelessWidget {
                     ),
                     child: Column(
                       children: <Widget>[
-                        if (BlocProvider.of<SignUpBloc>(context)
-                                .state
-                                .signUpError !=
-                            null) ...{
+                        ...{
                           Text(
                             BlocProvider.of<SignUpBloc>(context)
                                 .state
@@ -83,7 +80,7 @@ class SignUpForm extends StatelessWidget {
                                       decoration: BoxDecoration(
                                         border: Border(
                                           bottom: BorderSide(
-                                            color: Colors.grey[200],
+                                            color: Colors.grey[200]!,
                                           ),
                                         ),
                                       ),
@@ -145,7 +142,7 @@ class SignUpForm extends StatelessWidget {
                                       decoration: BoxDecoration(
                                         border: Border(
                                           bottom: BorderSide(
-                                            color: Colors.grey[200],
+                                            color: Colors.grey[200]!,
                                           ),
                                         ),
                                       ),
@@ -180,7 +177,7 @@ class SignUpForm extends StatelessWidget {
                                       decoration: BoxDecoration(
                                         border: Border(
                                           bottom: BorderSide(
-                                            color: Colors.grey[200],
+                                            color: Colors.grey[200]!,
                                           ),
                                         ),
                                       ),
@@ -236,7 +233,7 @@ class SignUpForm extends StatelessWidget {
                                   child: TextButton(
                                     style: ButtonStyle(backgroundColor:
                                         MaterialStateProperty.resolveWith<
-                                            Color>((states) {
+                                            Color?>((states) {
                                       if (states
                                           .contains(MaterialState.disabled)) {
                                         return Colors.grey[400];
@@ -288,7 +285,7 @@ _signUpSuccessAlert(BuildContext context, String emailAddress) {
           borderRadius: BorderRadius.all(Radius.circular(16)),
           child: TextButton(
             style: TextButton.styleFrom(
-                primary: Colors.white,
+                foregroundColor: Colors.white,
                 backgroundColor: kWpaBlue.withOpacity(0.8),
                 minimumSize: Size(90, 30),
                 padding: EdgeInsets.fromLTRB(8, 4, 8, 4),

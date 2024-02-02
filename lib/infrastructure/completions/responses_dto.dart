@@ -1,18 +1,21 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
 
 import '../../domain/completions/entities.dart';
 import '../common/helpers.dart';
 
 class ResponsesDto {
-  final String id;
+  final String? id;
   final Map<String, Map<String, ResponseDetails>> responses;
-  final String userId;
 
-  factory ResponsesDto.fromJson(Map<String, dynamic> json) {
+  factory ResponsesDto.fromDomain(
+      Map<String, Map<String, ResponseDetails>> responses, String userId) {
+    return ResponsesDto._(responses: responses);
+  }
+
+  factory ResponsesDto.fromFirestore(DocumentSnapshot doc) {
+    Map<String, dynamic> json = doc.data() as Map<String, dynamic>;
     Map<String, Map<String, ResponseDetails>> _responses = {};
-    String userId = findOrThrowException(json, 'user_id');
+    String responseId = doc.id;
     Map<String, dynamic> responses =
         findOrDefaultToGetResponse(json, 'responses', {});
     responses.forEach((String k1, dynamic v1) {
@@ -30,40 +33,18 @@ class ResponsesDto {
           );
         }
         if (_responses[k1] != null) {
-          _responses[k1][k2] = responseDetails;
+          _responses[k1]![k2] = responseDetails;
         } else {
           _responses[k1] = {k2: responseDetails};
         }
       });
     });
-
-    return ResponsesDto._(responses: _responses, userId: userId);
-  }
-
-  factory ResponsesDto.fromDomain(
-      Map<String, Map<String, ResponseDetails>> responses, String userId) {
-    return ResponsesDto._(responses: responses, userId: userId);
-  }
-
-  factory ResponsesDto.fromFirestore(DocumentSnapshot doc) {
-    return ResponsesDto.fromJson(doc.data()).copyWith(id: doc.id);
-  }
-
-  ResponsesDto copyWith({
-    String id,
-    Map<String, Map<String, ResponseDetails>> responses,
-  }) {
-    return ResponsesDto._(
-      id: id ?? this.id,
-      responses: responses ?? this.responses,
-      userId: userId ?? this.userId,
-    );
+    return ResponsesDto._(id: responseId, responses: _responses);
   }
 
   const ResponsesDto._({
     this.id,
-    @required this.responses,
-    @required this.userId,
+    required this.responses,
   });
 }
 
@@ -72,7 +53,6 @@ extension ContentCompletionDtoX on ResponsesDto {
     return Responses(
       id: this.id,
       responses: this.responses,
-      userId: this.userId,
     );
   }
 
@@ -100,7 +80,6 @@ extension ContentCompletionDtoX on ResponsesDto {
       });
     });
     return {
-      "user_id": this.userId,
       "responses": _responses,
     };
   }

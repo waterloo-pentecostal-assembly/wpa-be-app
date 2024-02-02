@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
+import 'package:wpa_app/domain/testimonies/entities.dart';
 
 import '../../domain/admin/interfaces.dart';
 import '../../domain/authentication/entities.dart';
@@ -22,29 +22,30 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
     AdminEvent event,
   ) async* {
     if (event is LoadUnverifiedUsers) {
-      yield* _mapLoadUnverifiedUsersEventToState(
-          _iAdminService.getUnverifiedUsers);
+      yield* _mapLoadUnverifiedUsersEventToState(_iAdminService.getUnverifiedUsers);
     } else if (event is LoadUnverifiedPrayerRequests) {
-      yield* _mapLoadUnverifiedPrayerRequestsToState(
-          _iAdminService.getUnapprovedPrayerRequest);
+      yield* _mapLoadUnverifiedPrayerRequestsToState(_iAdminService.getUnapprovedPrayerRequest);
     } else if (event is VerifyUser) {
       yield* _mapVerifyUserToState(event, _iAdminService.verifyUser);
     } else if (event is ApprovePrayerRequest) {
-      yield* _mapApprovePrayerRequestToState(
-          event, _iAdminService.approvePrayerRequest);
+      yield* _mapApprovePrayerRequestToState(event, _iAdminService.approvePrayerRequest);
     } else if (event is DeletePrayerRequest) {
-      yield* _mapDeletePrayerRequestToState(
-          event, _iAdminService.deletePrayerRequest);
+      yield* _mapDeletePrayerRequestToState(event, _iAdminService.deletePrayerRequest);
     } else if (event is DeleteUnverifiedUser) {
-      yield* _mapDeleteUnverifiedUserEventToState(
-          event, _iAdminService.deleteUnverifiedUsers);
+      yield* _mapDeleteUnverifiedUserEventToState(event, _iAdminService.deleteUnverifiedUsers);
+    } else if (event is LoadUnverifiedTestimonies) {
+      yield* _mapLoadUnverifiedTestimoniesToState(_iAdminService.getUnapprovedTestimonies);
+    } else if (event is DeleteTestimony) {
+      yield* _mapDeleteTestimonyToState(event, _iAdminService.deleteTestimony);
+    } else if (event is ApproveTestimony) {
+      yield* _mapApproveTestimonyToState(event, _iAdminService.approveTestimony);
     }
   }
 }
 
 Stream<AdminState> _mapDeletePrayerRequestToState(
   DeletePrayerRequest event,
-  Future<void> Function({@required String prayerRequestId}) deletePrayerRequest,
+  Future<void> Function({required String prayerRequestId}) deletePrayerRequest,
 ) async* {
   try {
     await deletePrayerRequest(prayerRequestId: event.prayerRequestId);
@@ -62,8 +63,7 @@ Stream<AdminState> _mapDeletePrayerRequestToState(
 
 Stream<AdminState> _mapApprovePrayerRequestToState(
   ApprovePrayerRequest event,
-  Future<void> Function({@required String prayerRequestId})
-      approvePrayerRequest,
+  Future<void> Function({required String prayerRequestId}) approvePrayerRequest,
 ) async* {
   try {
     await approvePrayerRequest(prayerRequestId: event.prayerRequestId);
@@ -81,7 +81,7 @@ Stream<AdminState> _mapApprovePrayerRequestToState(
 
 Stream<AdminState> _mapVerifyUserToState(
   VerifyUser event,
-  Future<void> Function({@required String userId}) verifyUser,
+  Future<void> Function({required String userId}) verifyUser,
 ) async* {
   try {
     await verifyUser(userId: event.userId);
@@ -132,8 +132,7 @@ Stream<AdminState> _mapLoadUnverifiedUsersEventToState(
 }
 
 Stream<AdminState> _mapDeleteUnverifiedUserEventToState(
-    DeleteUnverifiedUser event,
-    Future<void> Function({@required String userId}) deleteUser) async* {
+    DeleteUnverifiedUser event, Future<void> Function({required String userId}) deleteUser) async* {
   try {
     await deleteUser(userId: event.userId);
     yield UserDeleted(userId: event.userId);
@@ -143,5 +142,58 @@ Stream<AdminState> _mapDeleteUnverifiedUserEventToState(
     );
   } catch (e) {
     yield AdminError(message: 'An unknown error occurred');
+  }
+}
+
+Stream<AdminState> _mapLoadUnverifiedTestimoniesToState(
+  Future<List<Testimony>> Function() getUnapprovedTestimony,
+) async* {
+  try {
+    List<Testimony> testimonies = await getUnapprovedTestimony();
+    yield UnverifiedTestimoniesLoaded(testimonies: testimonies);
+  } on BaseApplicationException catch (e) {
+    yield AdminError(
+      message: e.message,
+    );
+  } catch (e) {
+    yield AdminError(
+      message: 'An unknown error occurred',
+    );
+  }
+}
+
+Stream<AdminState> _mapDeleteTestimonyToState(
+  DeleteTestimony event,
+  Future<void> Function({required String testimonyId}) deleteTestimony,
+) async* {
+  try {
+    await deleteTestimony(testimonyId: event.testimonyId);
+    yield TestimoniesDeleted(testimonyId: event.testimonyId);
+  } on BaseApplicationException catch (e) {
+    yield AdminError(
+      message: e.message,
+    );
+  } catch (e) {
+    yield AdminError(
+      message: 'An unknown error occurred',
+    );
+  }
+}
+
+Stream<AdminState> _mapApproveTestimonyToState(
+  ApproveTestimony event,
+  Future<void> Function({required String testimonyId}) approveTestimony,
+) async* {
+  try {
+    await approveTestimony(testimonyId: event.testimonyId);
+    yield TestimoniesApproved(testimonyId: event.testimonyId);
+  } on BaseApplicationException catch (e) {
+    yield AdminError(
+      message: e.message,
+    );
+  } catch (e) {
+    yield AdminError(
+      message: 'An unknown error occurred',
+    );
   }
 }

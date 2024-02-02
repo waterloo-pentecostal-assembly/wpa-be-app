@@ -34,17 +34,17 @@ class SignUpState extends Equatable {
   }
 
   SignUpState({
-    @required this.emailAddress,
-    @required this.emailAddressError,
-    @required this.password,
-    @required this.passwordError,
-    @required this.firstName,
-    @required this.firstNameError,
-    @required this.lastName,
-    @required this.lastNameError,
-    @required this.submitting,
-    @required this.signUpSuccess,
-    @required this.signUpError,
+    required this.emailAddress,
+    required this.emailAddressError,
+    required this.password,
+    required this.passwordError,
+    required this.firstName,
+    required this.firstNameError,
+    required this.lastName,
+    required this.lastNameError,
+    required this.submitting,
+    required this.signUpSuccess,
+    required this.signUpError,
   });
 
   factory SignUpState.initial() {
@@ -64,17 +64,17 @@ class SignUpState extends Equatable {
   }
 
   SignUpState copyWith({
-    String emailAddress,
-    String emailAddressError,
-    String password,
-    String passwordError,
-    String firstName,
-    String firstNameError,
-    String lastName,
-    String lastNameError,
-    bool submitting,
-    bool signUpSuccess,
-    String signUpError,
+    String? emailAddress,
+    String? emailAddressError,
+    String? password,
+    String? passwordError,
+    String? firstName,
+    String? firstNameError,
+    String? lastName,
+    String? lastNameError,
+    bool? submitting,
+    bool? signUpSuccess,
+    String? signUpError,
   }) {
     return SignUpState(
       emailAddress: emailAddress ?? this.emailAddress,
@@ -91,7 +91,7 @@ class SignUpState extends Equatable {
     );
   }
 
-  bool _toBoolean(String str, [bool strict]) {
+  bool _toBoolean(String str, [bool? strict]) {
     if (strict == true) {
       return str == '1' || str == 'true';
     }

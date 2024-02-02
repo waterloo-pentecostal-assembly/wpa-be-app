@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 
 import '../../domain/achievements/entities.dart';
 import '../../domain/achievements/interfaces.dart';
@@ -16,7 +15,7 @@ class AchievementsBloc extends Bloc<AchievementsEvent, AchievementsState> {
   AchievementsBloc(this._iAchievementsRepository)
       : super(AchievementsLoading());
 
-  StreamSubscription<Achievements> _achievementsStreamSubscription;
+  StreamSubscription<Achievements>? _achievementsStreamSubscription;
 
   @override
   Stream<AchievementsState> mapEventToState(
@@ -43,17 +42,20 @@ class AchievementsBloc extends Bloc<AchievementsEvent, AchievementsState> {
   ) async* {
     await _achievementsStreamSubscription?.cancel();
     _achievementsStreamSubscription =
-        _iAchievementsRepository.watchAchievements().listen((event) {
-      return add(AchievementsReceived(achievements: event));
-    })
-          ..onError((_) {
-            return add(AchievementsErrorReceived());
-          });
+        _iAchievementsRepository.watchAchievements().listen(
+      (event) {
+        return add(AchievementsReceived(achievements: event));
+      },
+    )..onError(
+            (_) {
+              return add(AchievementsErrorReceived());
+            },
+          );
   }
 
   @override
   Future<void> close() async {
-    await _achievementsStreamSubscription.cancel();
+    await _achievementsStreamSubscription?.cancel();
     return super.close();
   }
 }

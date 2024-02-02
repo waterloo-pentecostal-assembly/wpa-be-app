@@ -53,10 +53,7 @@ class SignInForm extends StatelessWidget {
                     ),
                     child: Column(
                       children: <Widget>[
-                        if (BlocProvider.of<SignInBloc>(context)
-                                .state
-                                .signInError !=
-                            null) ...{
+                        ...{
                           Text(
                             BlocProvider.of<SignInBloc>(context)
                                 .state
@@ -91,7 +88,7 @@ class SignInForm extends StatelessWidget {
                                       decoration: BoxDecoration(
                                         border: Border(
                                           bottom: BorderSide(
-                                            color: Colors.grey[200],
+                                            color: Colors.grey.shade200,
                                           ),
                                         ),
                                       ),
@@ -185,15 +182,18 @@ class SignInForm extends StatelessWidget {
                                     ),
                                   ),
                                   child: TextButton(
-                                    style: ButtonStyle(backgroundColor:
-                                        MaterialStateProperty.resolveWith<
-                                            Color>((states) {
-                                      if (states
-                                          .contains(MaterialState.disabled)) {
-                                        return Colors.grey[400];
-                                      }
-                                      return null;
-                                    })),
+                                    style: ButtonStyle(
+                                      backgroundColor: MaterialStateProperty
+                                          .resolveWith<Color?>(
+                                        (states) {
+                                          if (states.contains(
+                                              MaterialState.disabled)) {
+                                            return Colors.grey.shade400;
+                                          }
+                                          return null;
+                                        },
+                                      ),
+                                    ),
                                     onPressed: state.submitting ||
                                             !state.isSignInFormValid
                                         ? null

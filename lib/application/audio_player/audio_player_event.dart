@@ -11,7 +11,7 @@ class DurationChanged extends AudioPlayerEvent {
   final Duration duration;
 
   const DurationChanged({
-    @required this.duration,
+    required this.duration,
   });
 
   @override
@@ -22,7 +22,7 @@ class PositionChanged extends AudioPlayerEvent {
   final Duration position;
 
   const PositionChanged({
-    @required this.position,
+    required this.position,
   });
 
   @override
@@ -41,8 +41,8 @@ class Play extends AudioPlayerEvent {
   final String contentId;
 
   const Play({
-    @required this.sourceUrl,
-    @required this.contentId,
+    required this.sourceUrl,
+    required this.contentId,
   });
 
   @override
@@ -66,7 +66,7 @@ class Reset extends AudioPlayerEvent {
 class Seek extends AudioPlayerEvent {
   final Duration position;
   const Seek({
-    @required this.position,
+    required this.position,
   });
 
   @override

@@ -72,18 +72,18 @@ class CompletionsBloc extends Bloc<CompletionsEvent, CompletionsState> {
 Stream<CompletionsState> _mapCompletionDetailRequestedEventToState(
     CompletionDetailRequested event,
     CompletionsState state,
-    Future<Responses> Function({@required String completionId})
+    Future<Responses> Function({required String completionId})
         getResponses) async* {
   try {
     if (event.completionDetails == null) {
       yield state.copyWith(isComplete: false);
-    } else if (event.completionDetails.isDraft) {
+    } else if (event.completionDetails!.isDraft) {
       yield state.copyWith(
         isComplete: false,
-        id: event.completionDetails.id,
+        id: event.completionDetails!.id,
       );
     } else {
-      yield state.copyWith(isComplete: true, id: event.completionDetails.id);
+      yield state.copyWith(isComplete: true, id: event.completionDetails!.id);
     }
   } on BaseApplicationException catch (e) {
     yield state.copyWith(
@@ -99,29 +99,32 @@ Stream<CompletionsState> _mapCompletionDetailRequestedEventToState(
 Stream<CompletionsState> _mapMarkAsCompleteEventToState(
     MarkAsComplete event,
     CompletionsState state,
-    Future<String> Function({@required CompletionDetails completionDetails})
+    Future<String> Function({required CompletionDetails completionDetails})
         markAsComplete,
     Future<String> Function(
-            {@required String completionId, Responses responses})
+            {required String completionId, required Responses responses})
         putResponses,
     Future<String> Function(
-            {@required CompletionDetails completionDetails,
-            String completionId})
+            {required CompletionDetails completionDetails,
+            required String completionId})
         updateComplete) async* {
+  final LocalUser user = getIt<LocalUser>();
   try {
     String id = state.id;
-    if (id == null || id == '') {
+    if (id == '') {
       id = await markAsComplete(completionDetails: event.completionDetails);
     } else {
       id = await updateComplete(
           completionDetails: event.completionDetails, completionId: id);
     }
     getIt<FirebaseAnalytics>().logEvent(name: 'engagement_completed');
-    if (state.responses != null && state.responses.responses != null) {
+    if (state.responses != null) {
       String responseId =
-          await putResponses(completionId: id, responses: state.responses);
-      Responses newResponse =
-          Responses(id: responseId, responses: state.responses.responses);
+          await putResponses(completionId: id, responses: state.responses!);
+      Responses newResponse = Responses(
+        id: responseId,
+        responses: state.responses!.responses,
+      );
       yield state.copyWith(
           isComplete: true,
           id: id,
@@ -145,22 +148,23 @@ Stream<CompletionsState> _mapMarkAsCompleteEventToState(
 Stream<CompletionsState> _mapMarkAsDraftToState(
     MarkAsDraft event,
     CompletionsState state,
-    Future<String> Function({@required CompletionDetails completionDetails})
+    Future<String> Function({required CompletionDetails completionDetails})
         markAsComplete,
     Future<String> Function(
-            {@required String completionId, Responses responses})
+            {required String completionId, required Responses responses})
         putResponses) async* {
+  final LocalUser user = getIt<LocalUser>();
   try {
-    //checks if saving as draft is nessesary, if not, return original state
-    if (!state.isComplete && state.responses.responses != null) {
+    //checks if saving as draft is necessary, if not, return original state
+    if (state.isComplete == true) {
       String id = state.id;
-      if (id == null || id == '') {
+      if (id == '') {
         id = await markAsComplete(completionDetails: event.completionDetails);
       }
       String responseId =
-          await putResponses(completionId: id, responses: state.responses);
+          await putResponses(completionId: id, responses: state.responses!);
       Responses newResponse =
-          Responses(id: responseId, responses: state.responses.responses);
+          Responses(id: responseId, responses: state.responses!.responses);
       yield state.copyWith(isComplete: false, id: id, responses: newResponse);
     } else {
       yield state;
@@ -180,7 +184,7 @@ Stream<CompletionsState> _mapMarkAsInCompleteEventToState(
     MarkAsInComplete event,
     CompletionsState state,
     Future<void> Function(
-            {@required String completionId, bool isResponsePossible})
+            {required String completionId, required bool isResponsePossible})
         markAsIncomplete) async* {
   try {
     if (state.responses != null) {
@@ -206,15 +210,17 @@ Stream<CompletionsState> _mapQuestionResponseChangedToState(
   QuestionResponseChanged event,
   CompletionsState state,
 ) async* {
+  final LocalUser user = getIt<LocalUser>();
   try {
     yield state.copyWith(
         responses: toResponses(
-            state.responses,
+            state.responses!,
             event.response,
             event.contentNum.toString(),
             event.questionNum.toString(),
             ResponseType.TEXT,
-            state.responses.id));
+            state.responses!.id,
+            user.id));
   } on BaseApplicationException catch (e) {
     yield state.copyWith(
       errorMessage: e.message,
@@ -229,14 +235,15 @@ Stream<CompletionsState> _mapQuestionResponseChangedToState(
 Stream<CompletionsState> _mapMarkQuestionAsCompleteEventToState(
     MarkQuestionAsComplete event,
     CompletionsState state,
-    Future<String> Function({@required CompletionDetails completionDetails})
+    Future<String> Function({required CompletionDetails completionDetails})
         markAsComplete,
-    Future<void> Function({@required String completionId, Responses responses})
+    Future<void> Function(
+            {required String completionId, required Responses responses})
         putResponses) async* {
   try {
     String id =
         await markAsComplete(completionDetails: event.completionDetails);
-    await putResponses(completionId: id, responses: state.responses);
+    await putResponses(completionId: id, responses: state.responses!);
     yield state.copyWith(isComplete: true, id: id);
   } on BaseApplicationException catch (e) {
     yield state.copyWith(
@@ -252,34 +259,32 @@ Stream<CompletionsState> _mapMarkQuestionAsCompleteEventToState(
 Stream<CompletionsState> _mapLoadResponsesEventToState(
     LoadResponses event,
     CompletionsState state,
-    Future<Responses> Function({@required String completionId}) getResponses,
+    Future<Responses> Function({required String completionId}) getResponses,
     ICompletionsRepository completionsRepository) async* {
   try {
     if (event.completionDetails != null) {
       Responses responses =
-          await getResponses(completionId: event.completionDetails.id);
+          await getResponses(completionId: event.completionDetails!.id);
       Map<String, List<String>> downloadMap = Map();
       Map<String, List<String>> thumbnailMap = Map();
-      if (responses.responses != null) {
-        for (var entry1 in responses.responses.entries) {
-          for (var entry2 in entry1.value.entries) {
-            if (entry2.value.type == ResponseType.IMAGE) {
-              List<String> downloadURLList = [];
-              List<String> thumbnailURLList = [];
-              String thumbnail = toThumbnail(entry2.value.response);
-              String thumbnailURL =
-                  await completionsRepository.getDownloadURL(gsUrl: thumbnail);
-              String url = await completionsRepository.getDownloadURL(
-                  gsUrl: entry2.value.response);
-              thumbnailURLList.add(thumbnailURL);
-              downloadURLList.add(url);
-              if (downloadMap.isEmpty) {
-                downloadMap = {entry1.key: downloadURLList};
-                thumbnailMap = {entry1.key: thumbnailURLList};
-              } else {
-                downloadMap[entry1.key] = downloadURLList;
-                thumbnailMap[entry1.key] = thumbnailURLList;
-              }
+      for (var entry1 in responses.responses.entries) {
+        for (var entry2 in entry1.value.entries) {
+          if (entry2.value.type == ResponseType.IMAGE) {
+            List<String> downloadURLList = [];
+            List<String> thumbnailURLList = [];
+            String thumbnail = toThumbnail(entry2.value.response);
+            String thumbnailURL =
+                await completionsRepository.getDownloadURL(gsUrl: thumbnail);
+            String url = await completionsRepository.getDownloadURL(
+                gsUrl: entry2.value.response);
+            thumbnailURLList.add(thumbnailURL);
+            downloadURLList.add(url);
+            if (downloadMap.isEmpty) {
+              downloadMap = {entry1.key: downloadURLList};
+              thumbnailMap = {entry1.key: thumbnailURLList};
+            } else {
+              downloadMap[entry1.key] = downloadURLList;
+              thumbnailMap[entry1.key] = thumbnailURLList;
             }
           }
         }
@@ -293,7 +298,7 @@ Stream<CompletionsState> _mapLoadResponsesEventToState(
             thumbnailURL: thumbnailMap);
       }
     } else {
-      Responses responses = Responses();
+      Responses responses = Responses(responses: Map());
       yield state.copyWith(responses: responses);
     }
   } on BaseApplicationException catch (e) {
@@ -320,23 +325,23 @@ Stream<CompletionsState> _mapUploadImageEventToState(
     };
     yield state.copyWith(uploadTask: uploadTask);
 
-    TaskSnapshot data = await uploadTask[event.contentNum.toString()];
+    TaskSnapshot data = await uploadTask[event.contentNum.toString()]!;
 
     final String imageLocation = 'gs://${data.ref.bucket}/${data.ref.fullPath}';
     final String downloadURL =
         await completionsRepository.getDownloadURL(gsUrl: imageLocation);
-    Map<String, List<String>> downloadMap = state.downloadURL;
     List<String> downloadURLList = [];
+    Map<String, List<String>> downloadMap = state.downloadURL ?? Map();
     if (state.downloadURL != null) {
       downloadURLList =
-          state.downloadURL[event.contentNum.toString()] ?? downloadURLList;
+          state.downloadURL![event.contentNum.toString()] ?? downloadURLList;
       downloadURLList.add(downloadURL);
       downloadMap[event.contentNum.toString()] = downloadURLList;
     } else {
       downloadURLList.add(downloadURL);
       downloadMap = {event.contentNum.toString(): downloadURLList};
     }
-    if (state.id != null && state.id.isNotEmpty) {
+    if (state.id.isNotEmpty) {
       await completionsRepository.markAsIncomplete(
           completionId: state.id, isResponsePossible: true);
     }
@@ -346,12 +351,12 @@ Stream<CompletionsState> _mapUploadImageEventToState(
     Map<String, List<File>> localImage = Map();
     List<File> localImageList = [];
     if (state.localImage != null &&
-        state.localImage[event.contentNum.toString()] != null) {
-      localImageList = state.localImage[event.contentNum.toString()];
+        state.localImage![event.contentNum.toString()] != null) {
+      localImageList = state.localImage![event.contentNum.toString()]!;
     }
     localImageList.add(event.image);
     if (state.localImage != null) {
-      localImage = state.localImage;
+      localImage = state.localImage!;
       localImage[event.contentNum.toString()] = localImageList;
     } else {
       localImage = {event.contentNum.toString(): localImageList};
@@ -359,12 +364,14 @@ Stream<CompletionsState> _mapUploadImageEventToState(
 
     yield state.copyWith(
         responses: toResponses(
-            state.responses,
-            imageLocation,
-            event.contentNum.toString(),
-            responsesIndex,
-            ResponseType.IMAGE,
-            state.responses.id),
+          state.responses!,
+          imageLocation,
+          event.contentNum.toString(),
+          responsesIndex,
+          ResponseType.IMAGE,
+          state.responses!.id,
+          user.id,
+        ),
         downloadURL: downloadMap,
         id: '',
         isComplete: false,
@@ -385,64 +392,61 @@ Stream<CompletionsState> _mapDeleteImageEventToState(
     CompletionsState state,
     ICompletionsRepository completionsRepository) async* {
   try {
-    Map<String, List<String>> downloadMap = state.downloadURL;
-    Map<String, List<String>> thumbnailMap = state.thumbnailURL;
-    Map<String, List<File>> localImage = state.localImage;
-    if (state.responses.responses != null) {
-      completionsRepository.deleteImage(gsUrl: event.gsURL);
-      final String thumbnailgsURL = toThumbnail(event.gsURL);
-      completionsRepository.deleteImage(gsUrl: thumbnailgsURL);
-      downloadMap[event.contentNum.toString()].removeLast();
-      if (thumbnailMap != null &&
-          thumbnailMap[event.contentNum.toString()] != null) {
-        thumbnailMap[event.contentNum.toString()].removeLast();
-      } else {
-        localImage[event.contentNum.toString()].removeLast();
-      }
+    final LocalUser user = getIt<LocalUser>();
+    Map<String, List<String>> downloadMap = state.downloadURL!;
+    Map<String, List<String>> thumbnailMap = state.thumbnailURL!;
+    Map<String, List<File>> localImage = state.localImage!;
+    completionsRepository.deleteImage(gsUrl: event.gsURL);
+    final String thumbnailgsURL = toThumbnail(event.gsURL);
+    completionsRepository.deleteImage(gsUrl: thumbnailgsURL);
+    downloadMap[event.contentNum.toString()]!.removeLast();
+    if (thumbnailMap[event.contentNum.toString()] != null) {
+      thumbnailMap[event.contentNum.toString()]!.removeLast();
+    } else {
+      localImage[event.contentNum.toString()]!.removeLast();
+    }
 
-      String responsesIndex =
-          downloadMap[event.contentNum.toString()].length.toString();
-      if (downloadMap[event.contentNum.toString()].isEmpty) {
-        downloadMap.remove(event.contentNum.toString());
-      }
-      if (thumbnailMap != null &&
-          thumbnailMap[event.contentNum.toString()].isEmpty) {
-        thumbnailMap.remove(event.contentNum.toString());
-      }
-      if (localImage != null &&
-          localImage[event.contentNum.toString()].isEmpty) {
-        localImage.remove(event.contentNum.toString());
-      }
+    String responsesIndex =
+        downloadMap[event.contentNum.toString()]!.length.toString();
+    if (downloadMap[event.contentNum.toString()]!.isEmpty) {
+      downloadMap.remove(event.contentNum.toString());
+    }
+    if (thumbnailMap[event.contentNum.toString()]!.isEmpty) {
+      thumbnailMap.remove(event.contentNum.toString());
+    }
+    if (localImage[event.contentNum.toString()]!.isEmpty) {
+      localImage.remove(event.contentNum.toString());
+    }
 
-      Map<String, Map<String, ResponseDetails>> responses =
-          state.responses.responses;
-      responses[event.contentNum.toString()].remove(responsesIndex);
-      if (responses[event.contentNum.toString()].isEmpty) {
-        responses.remove(event.contentNum.toString());
-      }
-      if (state.id != null && state.id.isNotEmpty) {
-        await completionsRepository.markAsIncomplete(
-            completionId: state.id, isResponsePossible: true);
-      }
+    Map<String, Map<String, ResponseDetails>> responses =
+        state.responses!.responses;
+    responses[event.contentNum.toString()]!.remove(responsesIndex);
+    if (responses[event.contentNum.toString()]!.isEmpty) {
+      responses.remove(event.contentNum.toString());
+    }
+    if (state.id.isNotEmpty) {
+      await completionsRepository.markAsIncomplete(
+          completionId: state.id, isResponsePossible: true);
+    }
 
-      if (responses.isEmpty) {
-        Responses newResponses = Responses();
-        yield state.copyWith(
-            responses: newResponses, id: '', isComplete: false);
-      } else {
-        Responses newResponses = Responses(
-            id: state.responses.id,
-            responses: responses,
-            userId: state.responses.userId);
+    if (responses.isEmpty) {
+      Responses newResponses = Responses(
+        responses: Map(),
+      );
+      yield state.copyWith(responses: newResponses, id: '', isComplete: false);
+    } else {
+      Responses newResponses = Responses(
+        id: state.responses!.id,
+        responses: responses,
+      );
 
-        yield state.copyWith(
-          responses: newResponses,
-          id: '',
-          isComplete: false,
-          downloadURL: downloadMap,
-          //thumbnailURL: thumbnailMap
-        );
-      }
+      yield state.copyWith(
+        responses: newResponses,
+        id: '',
+        isComplete: false,
+        downloadURL: downloadMap,
+        //thumbnailURL: thumbnailMap
+      );
     }
   } on BaseApplicationException catch (e) {
     yield state.copyWith(

@@ -1,7 +1,4 @@
-import 'dart:ffi';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
 
 enum SeriesContentBodyType {
   AUDIO,
@@ -12,6 +9,7 @@ enum SeriesContentBodyType {
   LINK,
   TITLE,
   DIVIDER,
+  EMPTY,
 }
 
 class BibleSeries {
@@ -27,16 +25,16 @@ class BibleSeries {
   final List<SeriesContentSnippet> seriesContentSnippet;
 
   BibleSeries({
-    @required this.id,
-    @required this.title,
-    @required this.subTitle,
-    @required this.imageUrl,
-    @required this.imageGsLocation,
-    @required this.startDate,
-    @required this.endDate,
-    @required this.isActive,
-    @required this.isVisible,
-    @required this.seriesContentSnippet,
+    required this.id,
+    required this.title,
+    required this.subTitle,
+    required this.imageUrl,
+    required this.imageGsLocation,
+    required this.startDate,
+    required this.endDate,
+    required this.isActive,
+    required this.isVisible,
+    required this.seriesContentSnippet,
   });
 
   @override
@@ -50,31 +48,31 @@ class BibleSeries {
 class SeriesContentSnippet {
   final List<AvailableContentType> availableContentTypes;
   final Timestamp date;
-  bool _isCompleted;
-  bool _isOnTime;
-  bool _isDraft;
+  late bool _isCompleted;
+  late bool _isOnTime;
+  late bool _isDraft;
 
   set isCompleted(bool isCompleted) {
     this._isCompleted = isCompleted;
   }
 
-  get isCompleted => _isCompleted;
+  bool get isCompleted => _isCompleted;
 
   set isOnTime(bool isOnTime) {
     this._isOnTime = isOnTime;
   }
 
-  get isOnTime => _isOnTime;
+  bool get isOnTime => _isOnTime;
 
   set isDraft(bool isDraft) {
     this._isDraft = isDraft;
   }
 
-  get isDraft => _isDraft;
+  bool get isDraft => _isDraft;
 
   SeriesContentSnippet({
-    @required this.availableContentTypes,
-    @required this.date,
+    required this.availableContentTypes,
+    required this.date,
   });
 
   @override
@@ -86,31 +84,31 @@ class SeriesContentSnippet {
 class AvailableContentType {
   final String seriesContentType;
   final String contentId;
-  bool _isCompleted;
-  bool _isOnTime;
-  bool _isDraft;
+  late bool _isCompleted;
+  late bool _isOnTime;
+  late bool _isDraft;
 
   set isCompleted(bool isCompleted) {
     this._isCompleted = isCompleted;
   }
 
-  get isCompleted => _isCompleted;
+  bool get isCompleted => _isCompleted;
 
   set isOnTime(bool isOnTime) {
     this._isOnTime = isOnTime;
   }
 
-  get isOnTime => _isOnTime;
+  bool get isOnTime => _isOnTime;
 
   set isDraft(bool isDraft) {
     this._isDraft = isDraft;
   }
 
-  get isDraft => _isDraft;
+  bool get isDraft => _isDraft;
 
   AvailableContentType({
-    @required this.seriesContentType,
-    @required this.contentId,
+    required this.seriesContentType,
+    required this.contentId,
   });
 
   @override
@@ -150,12 +148,12 @@ class SeriesContent {
   }
 
   SeriesContent({
-    @required this.id,
-    @required this.contentType,
-    @required this.date,
-    @required this.title,
-    @required this.subTitle,
-    @required this.body,
+    required this.id,
+    required this.contentType,
+    required this.date,
+    required this.title,
+    required this.subTitle,
+    required this.body,
   });
 
   @override
@@ -171,8 +169,8 @@ class ISeriesContentBody {
   final dynamic properties;
 
   ISeriesContentBody({
-    @required this.type,
-    @required this.properties,
+    required this.type,
+    required this.properties,
   });
 }
 
@@ -181,15 +179,15 @@ class LinkBody implements ISeriesContentBody {
   final LinkBodyProperties properties;
 
   LinkBody({
-    @required this.type,
-    @required this.properties,
+    required this.type,
+    required this.properties,
   });
 }
 
 class LinkBodyProperties {
-  String link;
-  String title;
-  String text;
+  late String link;
+  late String title;
+  late String text;
 }
 
 class AudioBody implements ISeriesContentBody {
@@ -197,18 +195,23 @@ class AudioBody implements ISeriesContentBody {
   final AudioBodyProperties properties;
 
   AudioBody({
-    @required this.type,
-    @required this.properties,
+    required this.type,
+    required this.properties,
   });
 }
 
 class AudioBodyProperties {
-  String audioFileUrl;
-  String title;
+  late String audioFileUrl;
+  late String title;
 }
 
 class DividerBody implements ISeriesContentBody {
   final SeriesContentBodyType type = SeriesContentBodyType.DIVIDER;
+  get properties {}
+}
+
+class DefaultEmptyBody implements ISeriesContentBody {
+  final SeriesContentBodyType type = SeriesContentBodyType.EMPTY;
   get properties {}
 }
 
@@ -217,13 +220,13 @@ class TitleBody implements ISeriesContentBody {
   final TitleBodyProperties properties;
 
   TitleBody({
-    @required this.type,
-    @required this.properties,
+    required this.type,
+    required this.properties,
   });
 }
 
 class TitleBodyProperties {
-  String text;
+  late String text;
 }
 
 class TextBody implements ISeriesContentBody {
@@ -231,13 +234,13 @@ class TextBody implements ISeriesContentBody {
   final TextBodyProperties properties;
 
   TextBody({
-    @required this.type,
-    @required this.properties,
+    required this.type,
+    required this.properties,
   });
 }
 
 class TextBodyProperties {
-  List<String> paragraphs;
+  late List<String> paragraphs;
 }
 
 class ScriptureBody implements ISeriesContentBody {
@@ -245,30 +248,30 @@ class ScriptureBody implements ISeriesContentBody {
   final ScriptureBodyProperties properties;
 
   ScriptureBody({
-    @required this.type,
-    @required this.properties,
+    required this.type,
+    required this.properties,
   });
 }
 
 class ScriptureBodyProperties {
-  String bibleVersion;
-  String attribution;
-  List<Scripture> scriptures;
+  late String bibleVersion;
+  late String attribution;
+  late List<Scripture> scriptures;
 }
 
 class Scripture {
   final String book;
   final String chapter;
-  final String title;
+  final String? title;
   final bool fullChapter;
   final Map<String, String> verses;
 
   Scripture({
-    @required this.book,
-    @required this.chapter,
+    required this.book,
+    required this.chapter,
     this.title,
-    @required this.fullChapter,
-    @required this.verses,
+    required this.fullChapter,
+    required this.verses,
   });
 }
 
@@ -277,13 +280,13 @@ class QuestionBody implements ISeriesContentBody {
   final QuestionBodyProperties properties;
 
   QuestionBody({
-    @required this.type,
-    @required this.properties,
+    required this.type,
+    required this.properties,
   });
 }
 
 class QuestionBodyProperties {
-  List<Question> questions;
+  late List<Question> questions;
 }
 
 class Question {
@@ -291,8 +294,8 @@ class Question {
   final List<int> location;
 
   Question({
-    @required this.question,
-    @required this.location,
+    required this.question,
+    required this.location,
   });
 }
 
@@ -300,7 +303,7 @@ class ImageInputBody implements ISeriesContentBody {
   final SeriesContentBodyType type;
 
   ImageInputBody({
-    @required this.type,
+    required this.type,
   });
 
   @override

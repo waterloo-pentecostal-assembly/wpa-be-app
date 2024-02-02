@@ -58,6 +58,7 @@ class App extends StatelessWidget {
             ],
             child: MaterialApp(
               theme: ThemeData(
+                useMaterial3: false,
                 fontFamily: 'Montserrat',
                 splashColor: Colors.transparent,
                 highlightColor: Colors.transparent,

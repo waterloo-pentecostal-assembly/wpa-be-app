@@ -14,7 +14,7 @@ import '../helper.dart';
 
 class CompletionButton extends StatelessWidget {
   final SeriesContent seriesContent;
-  final CompletionDetails completionDetails;
+  final CompletionDetails? completionDetails;
   final String bibleId;
   CompletionButton(this.seriesContent, this.completionDetails, this.bibleId);
 
@@ -24,13 +24,14 @@ class CompletionButton extends StatelessWidget {
       listener: (BuildContext context, state) {},
       builder: (BuildContext context, state) {
         if (state.isComplete != null) {
-          if (!state.isComplete) {
+          if (!state.isComplete!) {
             return Container(
                 padding: const EdgeInsets.all(20),
                 child: Center(
                   child: InkWell(
                     onTap: () {
                       CompletionDetails completionDetails = CompletionDetails(
+                          id: state.id,
                           seriesId: bibleId,
                           contentId: seriesContent.id,
                           isDraft: false,
@@ -49,7 +50,7 @@ class CompletionButton extends StatelessWidget {
                     splashColor: Colors.lightGreenAccent,
                   ),
                 ));
-          } else if (state.isComplete) {
+          } else if (state.isComplete!) {
             return Container(
                 padding: const EdgeInsets.all(20),
                 child: Center(
@@ -67,9 +68,9 @@ class CompletionButton extends StatelessWidget {
                   ),
                 ));
           }
-        } else if (state.errorMessage != null) {
+        } else
           return Text('Error: ${state.errorMessage}');
-        }
+
         return Loader();
       },
     );
@@ -78,7 +79,7 @@ class CompletionButton extends StatelessWidget {
 
 class ResponseCompletionButton extends StatelessWidget {
   final SeriesContent seriesContent;
-  final CompletionDetails completionDetails;
+  final CompletionDetails? completionDetails;
   final String bibleId;
   ResponseCompletionButton(
       this.seriesContent, this.completionDetails, this.bibleId);
@@ -88,14 +89,14 @@ class ResponseCompletionButton extends StatelessWidget {
       listener: (BuildContext context, state) {},
       builder: (BuildContext context, state) {
         if (state.isComplete != null) {
-          if (!state.isComplete) {
+          if (!state.isComplete!) {
             return Container(
                 padding: const EdgeInsets.all(20),
                 child: Center(
                   child: InkWell(
                     onTap: () {
-                      if (state.responses.responses == null) {
-                        return showDialog(
+                      if (state.responses?.responses == null) {
+                        showDialog(
                           context: context,
                           builder: (_) => AlertDialog(
                             buttonPadding: const EdgeInsets.all(20),
@@ -112,10 +113,10 @@ class ResponseCompletionButton extends StatelessWidget {
                                     BorderRadius.all(Radius.circular(16)),
                                 child: TextButton(
                                   style: TextButton.styleFrom(
+                                      foregroundColor: Colors.white,
                                       minimumSize: Size(90, 30),
                                       backgroundColor:
                                           kWpaBlue.withOpacity(0.8),
-                                      primary: Colors.white,
                                       padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
                                       tapTargetSize:
                                           MaterialTapTargetSize.shrinkWrap),
@@ -131,8 +132,9 @@ class ResponseCompletionButton extends StatelessWidget {
                           ),
                         );
                       } else if (!isResponsesFilled(
-                          state.responses, seriesContent)) {
+                          state.responses!, seriesContent)) {
                         CompletionDetails completionDetails = CompletionDetails(
+                            id: state.id,
                             seriesId: bibleId,
                             contentId: seriesContent.id,
                             isDraft: true,
@@ -140,7 +142,7 @@ class ResponseCompletionButton extends StatelessWidget {
                             completionDate: Timestamp.fromDate(DateTime.now()));
                         BlocProvider.of<CompletionsBloc>(context)
                           ..add(MarkAsDraft(completionDetails));
-                        return showDialog(
+                        showDialog(
                           context: context,
                           builder: (_) => AlertDialog(
                             shape: RoundedRectangleBorder(
@@ -157,10 +159,10 @@ class ResponseCompletionButton extends StatelessWidget {
                                     BorderRadius.all(Radius.circular(16)),
                                 child: TextButton(
                                   style: TextButton.styleFrom(
+                                      foregroundColor: Colors.white,
                                       minimumSize: Size(90, 30),
                                       backgroundColor:
                                           kWpaBlue.withOpacity(0.8),
-                                      primary: Colors.white,
                                       padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
                                       tapTargetSize:
                                           MaterialTapTargetSize.shrinkWrap),
@@ -177,6 +179,7 @@ class ResponseCompletionButton extends StatelessWidget {
                         );
                       } else {
                         CompletionDetails completionDetails = CompletionDetails(
+                            id: state.id,
                             seriesId: bibleId,
                             contentId: seriesContent.id,
                             isDraft: false,
@@ -196,7 +199,7 @@ class ResponseCompletionButton extends StatelessWidget {
                     ),
                   ),
                 ));
-          } else if (state.isComplete) {
+          } else if (state.isComplete!) {
             return Container(
                 padding: const EdgeInsets.all(20),
                 child: Center(
@@ -214,9 +217,9 @@ class ResponseCompletionButton extends StatelessWidget {
                   ),
                 ));
           }
-        } else if (state.errorMessage != null) {
+        } else
           return Text('Error: ${state.errorMessage}');
-        }
+
         return Loader();
       },
     );

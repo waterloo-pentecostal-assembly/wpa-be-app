@@ -50,7 +50,7 @@ class RecentBibleSeriesWidget extends StatelessWidget {
 class RecentBibleSeriesList extends StatelessWidget {
   final List<BibleSeries> bibleSeriesList;
 
-  const RecentBibleSeriesList({Key key, @required this.bibleSeriesList})
+  const RecentBibleSeriesList({Key? key, required this.bibleSeriesList})
       : super(key: key);
 
   @override
@@ -74,7 +74,7 @@ class RecentBibleSeriesList extends StatelessWidget {
 class BibleSeriesCard extends StatelessWidget {
   final BibleSeries bibleSeries;
 
-  const BibleSeriesCard({Key key, @required this.bibleSeries})
+  const BibleSeriesCard({Key? key, required this.bibleSeries})
       : super(key: key);
 
   @override
@@ -104,7 +104,7 @@ class BibleSeriesCard extends StatelessWidget {
                 height: getIt<LayoutFactory>()
                     .getDimension(baseDimension: kRecentBibleSeriesTileHeight),
                 fit: BoxFit.fill,
-                frameBuilder: (BuildContext context, Widget child, int frame,
+                frameBuilder: (BuildContext context, Widget child, int? frame,
                     bool wasSynchronouslyLoaded) {
                   if (frame != null && frame >= 0) {
                     return child;

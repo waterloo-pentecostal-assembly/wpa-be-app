@@ -1,11 +1,11 @@
-import 'dart:math';
-
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wpa_app/application/testimonies/testimonies_bloc.dart';
 import 'package:wpa_app/presentation/common/loader.dart';
+import 'package:wpa_app/presentation/engage/main/widgets/testimonies_widget.dart';
+import 'package:wpa_app/presentation/engage/testimonies/pages/testimonies.dart';
 
-import '../../../domain/bible_series/interfaces.dart';
 import '../../../app/injection.dart';
 import '../../../application/achievements/achievements_bloc.dart';
 import '../../../application/bible_series/bible_series_bloc.dart';
@@ -24,9 +24,9 @@ import 'widgets/bible_series_widget.dart';
 import 'widgets/prayer_request_widget.dart';
 
 class EngagePage extends IIndexedPage {
-  final GlobalKey<NavigatorState> navigatorKey;
+  final GlobalKey<NavigatorState>? navigatorKey;
 
-  const EngagePage({Key key, this.navigatorKey}) : super(key: key);
+  const EngagePage({Key? key, this.navigatorKey}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -37,6 +37,8 @@ class EngagePage extends IIndexedPage {
                 getIt<BibleSeriesBloc>()..add(HasActiveBibleSeriesRequested())),
         BlocProvider<PrayerRequestsBloc>(
             create: (BuildContext context) => getIt<PrayerRequestsBloc>()),
+        BlocProvider<TestimoniesBloc>(
+            create: (BuildContext context) => getIt<TestimoniesBloc>()),
         BlocProvider<AchievementsBloc>(
           create: (BuildContext context) => getIt<AchievementsBloc>()
             ..add(
@@ -63,7 +65,7 @@ class EngagePage extends IIndexedPage {
                   case '/bible_series':
                     getIt<FirebaseAnalytics>()
                         .logEvent(name: 'bible_series_viewed');
-                    Map args = settings.arguments;
+                    Map args = settings.arguments as Map;
                     return BibleSeriesDetailPage(
                       bibleSeriesId: args['bibleSeriesId'],
                     );
@@ -73,10 +75,14 @@ class EngagePage extends IIndexedPage {
                     return PrayerRequestsPage(tabIndex: 0);
                   case '/prayer_requests/mine':
                     return PrayerRequestsPage(tabIndex: 1);
+                  case '/testimonies':
+                    return TestimoniesPage(tabIndex: 0);
+                  case '/testimonies/mine':
+                    return TestimoniesPage(tabIndex: 1);
                   case '/content_detail':
                     getIt<FirebaseAnalytics>()
                         .logEvent(name: 'engagement_viewed');
-                    Map args = settings.arguments;
+                    Map args = settings.arguments as Map;
                     return ContentDetailPage(
                       seriesContentId: args['seriesContentId'],
                       bibleSeriesId: args['bibleSeriesId'],
@@ -96,7 +102,7 @@ class EngagePage extends IIndexedPage {
 }
 
 class EngageIndex extends StatelessWidget {
-  const EngageIndex({Key key}) : super(key: key);
+  const EngageIndex({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -112,6 +118,7 @@ class EngageIndex extends StatelessWidget {
               RecentBibleSeriesWidget(),
               SizedBox(height: 16.0),
               RecentPrayerRequestsWidget(),
+              RecentTestimoniesWidget(),
               SizedBox(height: 16.0),
               MediaWidget(),
             ];
@@ -122,6 +129,7 @@ class EngageIndex extends StatelessWidget {
               RecentBibleSeriesWidget(),
               SizedBox(height: 16.0),
               RecentPrayerRequestsWidget(),
+              RecentTestimoniesWidget(),
               SizedBox(height: 16.0),
               MediaWidget(),
             ];
@@ -149,9 +157,9 @@ class EngageIndex extends StatelessWidget {
 
 class EngageLayoutWidget extends StatelessWidget {
   const EngageLayoutWidget({
-    Key key,
-    @required this.parentContextBibleSeriesBloc,
-    @required this.children,
+    Key? key,
+    required this.parentContextBibleSeriesBloc,
+    required this.children,
   }) : super(key: key);
 
   final BibleSeriesBloc parentContextBibleSeriesBloc;

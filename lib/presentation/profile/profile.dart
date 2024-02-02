@@ -7,7 +7,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:wpa_app/application/links/links_bloc.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
-import 'package:wpa_app/presentation/profile/terms_of_use.dart';
 
 import '../../app/constants.dart';
 import '../../app/injection.dart';
@@ -19,12 +18,11 @@ import '../common/interfaces.dart';
 import '../common/platform_switch.dart';
 import '../common/text_factory.dart';
 import '../common/toast_message.dart';
-import 'privacy_policy.dart';
 
 class ProfilePage extends IIndexedPage {
   final GlobalKey<NavigatorState> navigatorKey;
 
-  const ProfilePage({Key key, @required this.navigatorKey}) : super(key: key);
+  const ProfilePage({Key? key, required this.navigatorKey}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -48,16 +46,7 @@ class ProfilePage extends IIndexedPage {
             return MaterialPageRoute(
               settings: settings,
               builder: (BuildContext context) {
-                switch (settings.name) {
-                  case '/':
-                    return ProfilePageRoot();
-                  case '/privacy_policy':
-                    return PrivacyPolicyPage();
-                  case '/terms_of_use':
-                    return TermsOfUsePage();
-                  default:
-                    return ProfilePageRoot();
-                }
+                return ProfilePageRoot();
               },
             );
           },
@@ -119,11 +108,18 @@ class ProfileImageAndName extends StatefulWidget {
   _ProfileImageAndNameState createState() => _ProfileImageAndNameState();
 }
 
-class _ProfileImageAndNameState extends State<ProfileImageAndName> {
+class _ProfileImageAndNameState extends State<ProfileImageAndName>
+    with AutomaticKeepAliveClientMixin {
   ImagePicker imagePicker = ImagePicker();
 
   @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     // LocalUser localUser = getIt<LocalUser>();
 
     double profilePhotoDiameter = 150 > MediaQuery.of(context).size.width * 0.5
@@ -140,11 +136,13 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
           return StreamBuilder(
             stream: uploadTask.snapshotEvents,
             builder: (context, AsyncSnapshot<TaskSnapshot> snapshot) {
-              int bytesTransferred = snapshot?.data?.bytesTransferred;
-              int totalBytes = snapshot?.data?.totalBytes;
+              int bytesTransferred = snapshot.data?.bytesTransferred ?? 0;
+              int? totalBytes = snapshot.data?.totalBytes;
               int progressPercent = 0;
 
-              if (bytesTransferred != null && totalBytes != null) {
+              if (totalBytes == null) {
+                progressPercent = 0;
+              } else {
                 progressPercent =
                     ((bytesTransferred / totalBytes) * 100).ceil();
               }
@@ -182,7 +180,7 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
           );
         } else {
           LocalUser localUser = getIt<LocalUser>();
-          String photoUrl = localUser.thumbnailUrl;
+          String? photoUrl = localUser.thumbnailUrl;
           Widget imageWidget;
 
           if (state is NewProfilePhotoUploadComplete) {
@@ -239,12 +237,15 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName> {
   }
 
   void selectNewProfileImage() async {
-    XFile selected = await imagePicker.pickImage(source: ImageSource.gallery);
-    if (selected != null && selected.path != null) {
+    XFile? selected = await imagePicker.pickImage(source: ImageSource.gallery);
+    if (selected != null) {
       BlocProvider.of<UserProfileBloc>(context)
         ..add(UploadProfilePhoto(profilePhoto: File(selected.path)));
     }
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 class LogoutButton extends StatelessWidget {
@@ -272,12 +273,19 @@ class NotificationSettings extends StatefulWidget {
   _NotificationSettingsState createState() => _NotificationSettingsState();
 }
 
-class _NotificationSettingsState extends State<NotificationSettings> {
-  bool isEngagementReminderSwitched;
-  bool isPrayerNotificationsSwitched;
+class _NotificationSettingsState extends State<NotificationSettings>
+    with AutomaticKeepAliveClientMixin {
+  bool? isEngagementReminderSwitched;
+  bool? isPrayerNotificationsSwitched;
+
+  @override
+  void initState() {
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Padding(
       padding: const EdgeInsets.only(left: 12.0, right: 12.0),
       child: Column(
@@ -305,14 +313,14 @@ class _NotificationSettingsState extends State<NotificationSettings> {
                       ToastMessage.showErrorToast(state.message, context);
                       setState(() {
                         isEngagementReminderSwitched =
-                            !isEngagementReminderSwitched;
+                            !isEngagementReminderSwitched!;
                       });
                     }
                   },
                   builder: (context, NotificationSettingsState state) {
                     if (isEngagementReminderSwitched != null) {
                       return PlatformSwitch(
-                        value: isEngagementReminderSwitched,
+                        value: isEngagementReminderSwitched!,
                         onChanged: (value) {
                           setState(() {
                             isEngagementReminderSwitched = value;
@@ -325,7 +333,6 @@ class _NotificationSettingsState extends State<NotificationSettings> {
                               ..add(UnsubscribedFromDailyEngagementReminder());
                           }
                         },
-                        activeColor: kWpaBlue.withOpacity(0.6),
                       );
                     } else {
                       return PlatformSwitch(disabled: true);
@@ -355,14 +362,14 @@ class _NotificationSettingsState extends State<NotificationSettings> {
                       ToastMessage.showErrorToast(state.message, context);
                       setState(() {
                         isPrayerNotificationsSwitched =
-                            !isPrayerNotificationsSwitched;
+                            !isPrayerNotificationsSwitched!;
                       });
                     }
                   },
                   builder: (context, NotificationSettingsState state) {
                     if (isPrayerNotificationsSwitched != null) {
                       return PlatformSwitch(
-                        value: isPrayerNotificationsSwitched,
+                        value: isPrayerNotificationsSwitched!,
                         onChanged: (value) {
                           setState(() {
                             isPrayerNotificationsSwitched = value;
@@ -375,7 +382,6 @@ class _NotificationSettingsState extends State<NotificationSettings> {
                               ..add(UnsubscribedFromPrayerNotifications());
                           }
                         },
-                        activeColor: kWpaBlue.withOpacity(0.6),
                       );
                     } else {
                       return PlatformSwitch(disabled: true);
@@ -390,6 +396,9 @@ class _NotificationSettingsState extends State<NotificationSettings> {
       ),
     );
   }
+
+  @override
+  bool get wantKeepAlive => true;
 }
 
 class Other extends StatelessWidget {
@@ -412,9 +421,9 @@ class Other extends StatelessWidget {
                 Divider(),
                 GestureDetector(
                   onTap: () async {
-                    String url = state.linkMap['privacy_policy_link'];
-                    if (await canLaunch(url)) {
-                      await launch(url);
+                    Uri uri = Uri.parse(state.linkMap['privacy_policy_link']);
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri);
                     } else {
                       ToastMessage.showErrorToast(
                           "Error opening page", context);
@@ -436,9 +445,9 @@ class Other extends StatelessWidget {
                 SizedBox(height: 6),
                 GestureDetector(
                   onTap: () async {
-                    String url = state.linkMap['terms_of_use_link'];
-                    if (await canLaunch(url)) {
-                      await launch(url);
+                    Uri uri = Uri.parse(state.linkMap['terms_of_use_link']);
+                    if (await canLaunchUrl(uri)) {
+                      await launchUrl(uri);
                     } else {
                       ToastMessage.showErrorToast(
                           "Error opening page", context);
@@ -465,9 +474,8 @@ class Other extends StatelessWidget {
                       path: state.linkMap['help_email'],
                       queryParameters: {'subject': kHelpEmailSubject},
                     );
-
-                    if (await canLaunch(_emailLaunchUri.toString())) {
-                      await launch(_emailLaunchUri.toString());
+                    if (await canLaunchUrl(_emailLaunchUri)) {
+                      await launchUrl(_emailLaunchUri);
                     } else {
                       ToastMessage.showErrorToast(
                           "Error opening page", context);
@@ -495,8 +503,8 @@ class Other extends StatelessWidget {
                       queryParameters: {'subject': kReportEmailSubject},
                     );
 
-                    if (await canLaunch(_emailLaunchUri.toString())) {
-                      await launch(_emailLaunchUri.toString());
+                    if (await canLaunchUrl(_emailLaunchUri)) {
+                      await launchUrl(_emailLaunchUri);
                     } else {
                       ToastMessage.showErrorToast(
                           "Error opening page", context);
@@ -518,7 +526,7 @@ class Other extends StatelessWidget {
                 SizedBox(height: 8),
                 GestureDetector(
                   onTap: () {
-                    return showDialog(
+                    showDialog(
                       context: context,
                       builder: (_) => AlertDialog(
                         buttonPadding:
@@ -536,10 +544,10 @@ class Other extends StatelessWidget {
                             borderRadius: BorderRadius.all(Radius.circular(16)),
                             child: TextButton(
                               style: TextButton.styleFrom(
+                                  foregroundColor: Colors.white,
                                   minimumSize: Size(90, 30),
                                   backgroundColor:
                                       kDarkGreyColor.withOpacity(0.5),
-                                  primary: Colors.white,
                                   padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
                                   tapTargetSize:
                                       MaterialTapTargetSize.shrinkWrap),
@@ -554,9 +562,9 @@ class Other extends StatelessWidget {
                             borderRadius: BorderRadius.all(Radius.circular(16)),
                             child: TextButton(
                               style: TextButton.styleFrom(
+                                  foregroundColor: Colors.white,
                                   minimumSize: Size(90, 30),
                                   backgroundColor: kWpaBlue.withOpacity(0.8),
-                                  primary: Colors.white,
                                   padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
                                   tapTargetSize:
                                       MaterialTapTargetSize.shrinkWrap),
@@ -590,7 +598,7 @@ class Other extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    getIt<TextFactory>().lite("Version 1.0.1"),
+                    getIt<TextFactory>().lite("Version 1.1.0"),
                   ],
                 ),
                 Divider(),
@@ -613,43 +621,5 @@ class AppVersion extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container();
-  }
-}
-
-class TestImagePicker extends StatefulWidget {
-  @override
-  _TestImagePickerState createState() => _TestImagePickerState();
-}
-
-class _TestImagePickerState extends State<TestImagePicker> {
-  File _image;
-  final picker = ImagePicker();
-
-  Future getImage() async {
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-    setState(() {
-      if (pickedFile != null) {
-        _image = File(pickedFile.path);
-      } else {
-        print('No image selected.');
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Center(
-          child:
-              _image == null ? Text('No image selected.') : Image.file(_image),
-        ),
-        TextButton(
-          onPressed: getImage,
-          child: Icon(Icons.add_a_photo),
-        ),
-      ],
-    );
   }
 }

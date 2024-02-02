@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 import 'package:wpa_app/domain/notification_settings/entities.dart';
 
 import '../../domain/notification_settings/interfaces.dart';

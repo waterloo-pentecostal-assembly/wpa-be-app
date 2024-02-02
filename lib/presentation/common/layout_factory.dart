@@ -33,7 +33,9 @@ class LayoutFactory {
 
   LayoutFactory(this.deviceType);
 
-  double getDimension({LayoutDimension layoutDimension, double baseDimension}) {
+  double getDimension(
+      {LayoutDimension? layoutDimension, double? baseDimension}) {
+    // assert(!(baseDimension == null && baseDimension == null), "Either layoutDimension or baseDimension must be provided");
     switch (layoutDimension) {
       case LayoutDimension.CONTENT_TAB_HEIGHT:
         {
@@ -42,7 +44,6 @@ class LayoutFactory {
           }
           return tContentTabHeight;
         }
-        break;
       case LayoutDimension.CONTENT_TAB_WIDTH:
         {
           if (deviceType == DeviceType.MOBILE) {
@@ -50,7 +51,6 @@ class LayoutFactory {
           }
           return tContentTabWidth;
         }
-        break;
       case LayoutDimension.ADMIN_TILE_HEIGHT:
         {
           if (deviceType == DeviceType.MOBILE) {
@@ -58,7 +58,6 @@ class LayoutFactory {
           }
           return tAdminTileHeight;
         }
-        break;
       case LayoutDimension.ADMIN_TILE_WIDTH:
         {
           if (deviceType == DeviceType.MOBILE) {
@@ -66,7 +65,6 @@ class LayoutFactory {
           }
           return tAdminTileWidth;
         }
-        break;
       case LayoutDimension.ADMIN_TILE_FONT_SIZE:
         {
           if (deviceType == DeviceType.MOBILE) {
@@ -74,7 +72,6 @@ class LayoutFactory {
           }
           return tAdminTileFontSize;
         }
-        break;
       case LayoutDimension.ADMIN_ICON_SIZE:
         {
           if (deviceType == DeviceType.MOBILE) {
@@ -82,15 +79,11 @@ class LayoutFactory {
           }
           return tAdminIconSize;
         }
-        break;
       default:
         if (deviceType == DeviceType.TABLET) {
-          if (baseDimension != null) {
-            return conversionVal * baseDimension;
-          }
+          return conversionVal * baseDimension!;
         }
-        return baseDimension;
-        break;
+        return baseDimension!;
     }
   }
 }

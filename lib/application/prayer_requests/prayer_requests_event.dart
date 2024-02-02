@@ -10,7 +10,7 @@ abstract class PrayerRequestsEvent extends Equatable {
 class RecentPrayerRequestsRequested extends PrayerRequestsEvent {
   final int amount;
 
-  RecentPrayerRequestsRequested({@required this.amount});
+  RecentPrayerRequestsRequested({required this.amount});
   @override
   List<Object> get props => [amount];
 }
@@ -18,7 +18,7 @@ class RecentPrayerRequestsRequested extends PrayerRequestsEvent {
 class PrayerRequestsRequested extends PrayerRequestsEvent {
   final int amount;
 
-  PrayerRequestsRequested({@required this.amount});
+  PrayerRequestsRequested({required this.amount});
 
   @override
   List<Object> get props => [amount];
@@ -27,7 +27,7 @@ class PrayerRequestsRequested extends PrayerRequestsEvent {
 class PrayerRequestReported extends PrayerRequestsEvent {
   final String id;
 
-  PrayerRequestReported({@required this.id});
+  PrayerRequestReported({required this.id});
 
   @override
   List<Object> get props => [id];
@@ -43,7 +43,7 @@ class MyPrayerRequestsRequested extends PrayerRequestsEvent {
 class MyPrayerRequestDeleted extends PrayerRequestsEvent {
   final String id;
 
-  MyPrayerRequestDeleted({@required this.id});
+  MyPrayerRequestDeleted({required this.id});
 
   @override
   List<Object> get props => [id];
@@ -52,7 +52,7 @@ class MyPrayerRequestDeleted extends PrayerRequestsEvent {
 class MorePrayerRequestsRequested extends PrayerRequestsEvent {
   final int amount;
 
-  MorePrayerRequestsRequested({@required this.amount});
+  MorePrayerRequestsRequested({required this.amount});
 
   @override
   List<Object> get props => [amount];
@@ -62,7 +62,7 @@ class NewPrayerRequestCreated extends PrayerRequestsEvent {
   final String request;
   final bool isAnonymous;
 
-  NewPrayerRequestCreated({@required this.request, @required this.isAnonymous});
+  NewPrayerRequestCreated({required this.request, required this.isAnonymous});
 
   @override
   List<Object> get props => [request, isAnonymous];
@@ -71,7 +71,7 @@ class NewPrayerRequestCreated extends PrayerRequestsEvent {
 class PrayForRequest extends PrayerRequestsEvent {
   final String id;
 
-  PrayForRequest({@required this.id});
+  PrayForRequest({required this.id});
 
   @override
   List<Object> get props => [id];
@@ -87,7 +87,7 @@ class NewPrayerRequestStarted extends PrayerRequestsEvent {
 class NewPrayerRequestRequestChanged extends PrayerRequestsEvent {
   final String prayerRequest;
 
-  NewPrayerRequestRequestChanged({@required this.prayerRequest});
+  NewPrayerRequestRequestChanged({required this.prayerRequest});
 
   @override
   List<Object> get props => [prayerRequest];
@@ -96,7 +96,7 @@ class NewPrayerRequestRequestChanged extends PrayerRequestsEvent {
 class NewPrayerRequestAnonymousChanged extends PrayerRequestsEvent {
   final bool isAnonymous;
 
-  NewPrayerRequestAnonymousChanged({@required this.isAnonymous});
+  NewPrayerRequestAnonymousChanged({required this.isAnonymous});
 
   @override
   List<Object> get props => [isAnonymous];
@@ -105,7 +105,7 @@ class NewPrayerRequestAnonymousChanged extends PrayerRequestsEvent {
 class ClosePrayerRequest extends PrayerRequestsEvent {
   final String id;
 
-  ClosePrayerRequest({@required this.id});
+  ClosePrayerRequest({required this.id});
 
   @override
   List<Object> get props => [id];

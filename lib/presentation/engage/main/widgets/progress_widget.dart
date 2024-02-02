@@ -41,7 +41,7 @@ class ProgressWidget extends StatelessWidget {
 class ProgressTile extends StatelessWidget {
   final Achievements achievements;
 
-  const ProgressTile({Key key, @required this.achievements}) : super(key: key);
+  const ProgressTile({Key? key, required this.achievements}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

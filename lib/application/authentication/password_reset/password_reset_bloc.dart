@@ -60,9 +60,8 @@ Stream<PasswordResetState> _mapResetPasswordToState(
   ResetPassword event,
   PasswordResetState state,
   Future Function({
-    @required EmailAddress emailAddress,
-  })
-      passwordResetFunction,
+    required EmailAddress emailAddress,
+  }) passwordResetFunction,
 ) async* {
   yield state.copyWith(
     submitting: true,

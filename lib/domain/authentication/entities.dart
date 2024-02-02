@@ -4,27 +4,27 @@ class LocalUser {
   final String lastName;
   final String email;
   final int reports;
-  final String thumbnailUrl;
-  final String thumbnail;
-  final String profilePhotoUrl;
-  final String profilePhoto;
+  final String? thumbnailUrl;
+  final String? thumbnail;
+  final String? profilePhotoUrl;
+  final String? profilePhoto;
   final bool isAdmin;
   final bool isVerified;
 
   String get fullName => '$firstName $lastName';
 
   LocalUser({
-    this.id,
-    this.firstName,
-    this.lastName,
-    this.email,
-    this.reports,
-    this.thumbnailUrl,
-    this.thumbnail,
+    required this.id,
+    required this.firstName,
+    required this.lastName,
+    required this.email,
+    required this.reports,
+    required this.thumbnailUrl,
+    required this.thumbnail,
     this.profilePhotoUrl,
     this.profilePhoto,
-    this.isAdmin,
-    this.isVerified,
+    required this.isAdmin,
+    required this.isVerified,
   });
 
   @override

@@ -22,9 +22,9 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
   final _scrollThreshold = 200.0;
   bool _isEndOfList = false;
   bool _moreRequested = false;
-  List<PrayerRequest> _prayerRequests;
+  late List<PrayerRequest> _prayerRequests;
   Widget _child = Loader();
-  int _amountToFetch;
+  late int _amountToFetch;
 
   _AllPrayerRequestsState() {
     _scrollController.addListener(_onScroll);
@@ -60,21 +60,21 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
   // ignore: unused_element
   void _insert(PrayerRequest prayerRequest) {
     _prayerRequests.insert(0, prayerRequest);
-    _allPrayerRequestsListKey.currentState.insertItem(0);
+    _allPrayerRequestsListKey.currentState?.insertItem(0);
   }
 
   void _addMany(List<PrayerRequest> prayerRequests) {
     int insertIndex = _prayerRequests.length - 1;
     _prayerRequests.addAll(prayerRequests);
     for (int offset = 0; offset < prayerRequests.length; offset++) {
-      _allPrayerRequestsListKey.currentState.insertItem(insertIndex + offset);
+      _allPrayerRequestsListKey.currentState?.insertItem(insertIndex + offset);
     }
   }
 
   void _delete(int indexToDelete) {
     PrayerRequest deletedPrayerRequest =
         _prayerRequests.removeAt(indexToDelete);
-    _allPrayerRequestsListKey.currentState.removeItem(
+    _allPrayerRequestsListKey.currentState?.removeItem(
       indexToDelete,
       (context, animation) =>
           _buildDeletedItem(context, deletedPrayerRequest, animation),
@@ -100,18 +100,14 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
               // _insert(state.prayerRequest);
             } else if (state is MyPrayerRequestDeleteComplete) {
               int indexToDelete = getIndexById(state.id);
-              if (indexToDelete != null) {
-                _delete(indexToDelete);
-              }
+              _delete(indexToDelete);
             } else if (state is NewPrayerRequestError) {
               ToastMessage.showErrorToast(state.message, context);
             } else if (state is PrayerRequestDeleteError) {
               ToastMessage.showErrorToast(state.message, context);
             } else if (state is MyPrayerRequestAnsweredComplete) {
               int indexToDelete = getIndexById(state.id);
-              if (indexToDelete != null) {
-                _delete(indexToDelete);
-              }
+              _delete(indexToDelete);
             }
             // No need to handle these two in MyPrayerRequests since this
             // BlocListener will be loaded in either case. If it is also
@@ -136,9 +132,7 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
               setChild(PrayerRequestsErrorWidget(message: state.message));
             } else if (state is PrayerRequestReportedAndRemoved) {
               int indexToDelete = getIndexById(state.id);
-              if (indexToDelete != null) {
-                _delete(indexToDelete);
-              }
+              _delete(indexToDelete);
               String message = 'Prayer Request has been reported';
               ToastMessage.showInfoToast(message, context);
             } else if (state is PrayerRequestReportError) {
@@ -158,7 +152,7 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
 
   int getIndexById(String id) {
     // O(n) ... not the best. Consider passing the index in the bloc event and getting it back in the state
-    int indexToDelete;
+    int indexToDelete = -1;
     for (PrayerRequest prayerRequest in _prayerRequests) {
       int index = _prayerRequests.indexOf(prayerRequest);
       if (prayerRequest.id == id) {

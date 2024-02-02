@@ -1,6 +1,5 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:wpa_app/app/injection.dart';
 
@@ -36,7 +35,7 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
             await this.player.setUrl(event.sourceUrl);
           }
         }
-        Duration duration = this.player.duration;
+        Duration duration = this.player.duration!;
         this.player.play();
         emit(state.copyWith(
           PlayerStateEnum.PLAYING,
@@ -99,8 +98,8 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
     this.player.positionStream.listen((Duration position) {
       getIt<AudioPlayerBloc>().add(PositionChanged(position: position));
     });
-    this.player.durationStream.listen((Duration duration) {
-      getIt<AudioPlayerBloc>().add(DurationChanged(duration: duration));
+    this.player.durationStream.listen((Duration? duration) {
+      getIt<AudioPlayerBloc>().add(DurationChanged(duration: duration!));
     });
     this.player.processingStateStream.listen((ProcessingState state) async {
       if (state == ProcessingState.completed) {

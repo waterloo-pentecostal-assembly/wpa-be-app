@@ -15,11 +15,11 @@ class PasswordResetState extends Equatable {
   }
 
   PasswordResetState({
-    @required this.emailAddress,
-    @required this.emailAddressError,
-    @required this.submitting,
-    @required this.passwordResetSuccess,
-    @required this.passwordResetError,
+    required this.emailAddress,
+    required this.emailAddressError,
+    required this.submitting,
+    required this.passwordResetSuccess,
+    required this.passwordResetError,
   });
 
   factory PasswordResetState.initial() {
@@ -33,13 +33,13 @@ class PasswordResetState extends Equatable {
   }
 
   PasswordResetState copyWith({
-    String emailAddress,
-    String emailAddressError,
-    String password,
-    String passwordError,
-    bool submitting,
-    bool passwordResetSuccess,
-    String passwordResetError,
+    String? emailAddress,
+    String? emailAddressError,
+    String? password,
+    String? passwordError,
+    bool? submitting,
+    bool? passwordResetSuccess,
+    String? passwordResetError,
   }) {
     return PasswordResetState(
       emailAddress: emailAddress ?? this.emailAddress,
@@ -50,7 +50,7 @@ class PasswordResetState extends Equatable {
     );
   }
 
-  bool _toBoolean(String str, [bool strict]) {
+  bool _toBoolean(String str, [bool? strict]) {
     if (strict == true) {
       return str == '1' || str == 'true';
     }

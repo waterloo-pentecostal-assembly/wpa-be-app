@@ -20,7 +20,7 @@ class WatchAchievementsStarted extends AchievementsEvent {
 class AchievementsReceived extends AchievementsEvent {
   final Achievements achievements;
 
-  AchievementsReceived({@required this.achievements});
+  AchievementsReceived({required this.achievements});
 
   @override
   List<Object> get props => [achievements];

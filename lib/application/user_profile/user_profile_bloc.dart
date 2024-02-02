@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
 import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/domain/authentication/entities.dart';
 import 'package:wpa_app/domain/user_profile/interfaces.dart';

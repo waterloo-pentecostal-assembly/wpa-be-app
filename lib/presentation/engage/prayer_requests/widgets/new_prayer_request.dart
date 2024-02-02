@@ -9,9 +9,9 @@ import '../../../common/loader.dart';
 import '../../../common/text_factory.dart';
 
 class NewPrayerRequestForm extends StatefulWidget {
-  final OverlayEntry entry;
+  final OverlayEntry? entry;
 
-  const NewPrayerRequestForm({Key key, @required this.entry}) : super(key: key);
+  const NewPrayerRequestForm({Key? key, this.entry}) : super(key: key);
 
   @override
   _NewPrayerRequestFormState createState() =>
@@ -20,14 +20,14 @@ class NewPrayerRequestForm extends StatefulWidget {
 
 class _NewPrayerRequestFormState extends State<NewPrayerRequestForm>
     with TickerProviderStateMixin {
-  final OverlayEntry entry;
+  final OverlayEntry? entry;
   final FocusNode _focusNode = FocusNode();
   final TextEditingController _textEditingController = TextEditingController();
-  AnimationController _controller;
-  Animation<double> _animation;
-  bool _isAnonymous;
+  late AnimationController _controller;
+  late Animation<double> _animation;
+  late bool _isAnonymous;
 
-  _NewPrayerRequestFormState({@required this.entry});
+  _NewPrayerRequestFormState({required this.entry});
 
   initState() {
     super.initState();
@@ -70,7 +70,7 @@ class _NewPrayerRequestFormState extends State<NewPrayerRequestForm>
                 child: Stack(
                   children: [
                     GestureDetector(
-                      onTap: () => entry.remove(),
+                      onTap: () => entry?.remove(),
                       child: Flex(
                         direction: Axis.horizontal,
                         children: [
@@ -196,7 +196,7 @@ class AnonymousCheckbox extends StatefulWidget {
   final Function(bool state) onChanged;
 
   const AnonymousCheckbox(
-      {Key key, @required this.value, @required this.onChanged})
+      {Key? key, required this.value, required this.onChanged})
       : super(key: key);
 
   @override
@@ -208,7 +208,7 @@ class _AnonymousCheckboxState extends State<AnonymousCheckbox> {
   bool value = true;
   final Function(bool state) onChanged;
 
-  _AnonymousCheckboxState({@required this.value, @required this.onChanged});
+  _AnonymousCheckboxState({required this.value, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
@@ -241,14 +241,14 @@ class PostButton extends StatelessWidget {
   final bool isValid;
   final bool isAnonymous;
   final String prayerRequest;
-  final OverlayEntry entry;
+  final OverlayEntry? entry;
 
   const PostButton({
-    Key key,
-    @required this.isValid,
-    @required this.isAnonymous,
-    @required this.prayerRequest,
-    @required this.entry,
+    Key? key,
+    required this.isValid,
+    required this.isAnonymous,
+    required this.prayerRequest,
+    this.entry,
   }) : super(key: key);
 
   @override
@@ -284,7 +284,7 @@ class PostButton extends StatelessWidget {
                     request: prayerRequest,
                     isAnonymous: isAnonymous,
                   ));
-                entry.remove();
+                entry?.remove();
               },
         child: getIt<TextFactory>().regularButton('POST'),
       ),
@@ -293,9 +293,9 @@ class PostButton extends StatelessWidget {
 }
 
 class CancelButton extends StatelessWidget {
-  final OverlayEntry entry;
+  final OverlayEntry? entry;
 
-  const CancelButton({Key key, @required this.entry}) : super(key: key);
+  const CancelButton({Key? key, this.entry}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
@@ -303,7 +303,7 @@ class CancelButton extends StatelessWidget {
           getIt<LayoutFactory>().getDimension(baseDimension: 16.0))),
       child: TextButton(
         style: TextButton.styleFrom(
-          primary: Colors.black,
+          foregroundColor: Colors.black,
           minimumSize: Size(
               getIt<LayoutFactory>().getDimension(baseDimension: 90.0),
               getIt<LayoutFactory>().getDimension(baseDimension: 30.0)),
@@ -311,7 +311,7 @@ class CancelButton extends StatelessWidget {
           padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
-        onPressed: () => entry.remove(),
+        onPressed: () => entry?.remove(),
         child: getIt<TextFactory>().regularButton('CANCEL'),
       ),
     );
