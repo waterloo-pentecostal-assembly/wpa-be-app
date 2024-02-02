@@ -280,7 +280,7 @@ class _PraiseButton extends StatelessWidget {
               id: testimony.id,
             ));
           },
-          child: getIt<TextFactory>().regular('PRAISE'),
+          child: getIt<TextFactory>().regular('AMEN'),
         ),
       ),
     );
@@ -324,7 +324,7 @@ class PraisedByIndicator extends StatelessWidget {
           tapTargetSize: MaterialTapTargetSize.shrinkWrap),
       onPressed: null,
       child: getIt<TextFactory>().regular(
-          'Prasied by $amount other${getS(amount)}',
+          'Praised by $amount other${getS(amount)}',
           color: Colors.black54),
     );
   }

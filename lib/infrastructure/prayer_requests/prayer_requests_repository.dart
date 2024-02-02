@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:wpa_app/infrastructure/common/helpers.dart';
 
 import '../../app/constants.dart';
 import '../../domain/authentication/entities.dart';
@@ -219,7 +220,7 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
           );
         }
 
-        List<dynamic> prayedBy = documentSnapshot["prayed_by"];
+        List<dynamic> prayedBy = findOrDefaultTo(documentSnapshot.data() as Map<String, dynamic>, 'prayed_by', []);
         prayedBy..add(user.id);
 
         transaction.update(documentReference, {"prayed_by": prayedBy});
