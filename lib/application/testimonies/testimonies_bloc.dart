@@ -20,7 +20,11 @@ mixin NewTestimoniesBloc on Bloc<TestimoniesEvent, TestimoniesState> {}
 mixin MyArchivedTestimoniesBloc on Bloc<TestimoniesEvent, TestimoniesState> {}
 
 class TestimoniesBloc extends Bloc<TestimoniesEvent, TestimoniesState>
-    with MyTestimoniesBloc, AllTestimoniesBloc, NewTestimoniesBloc, MyArchivedTestimoniesBloc {
+    with
+        MyTestimoniesBloc,
+        AllTestimoniesBloc,
+        NewTestimoniesBloc,
+        MyArchivedTestimoniesBloc {
   final ITestimoniesRepository _iTestimoniesRepository;
 
   TestimoniesBloc(this._iTestimoniesRepository) : super(TestimoniesLoading());
@@ -75,11 +79,14 @@ class TestimoniesBloc extends Bloc<TestimoniesEvent, TestimoniesState>
     } else if (event is NewTestimonyRequestChanged) {
       yield* _mapNewTestimonyRequestChangedEventToState(state, event.testimony);
     } else if (event is NewTestimonyAnonymousChanged) {
-      yield* _mapNewTestimonyAnonymousChangedEventToState(state, event.isAnonymous);
+      yield* _mapNewTestimonyAnonymousChangedEventToState(
+          state, event.isAnonymous);
     } else if (event is MyArchivedTestimoniesRequested) {
-      yield* _mapAnsweredTestimonyRequestedEventToState(event, _iTestimoniesRepository.getMyArchivedTestimonies);
+      yield* _mapAnsweredTestimonyRequestedEventToState(
+          event, _iTestimoniesRepository.getMyArchivedTestimonies);
     } else if (event is CloseTestimony) {
-      yield* _mapCloseTestimonyEventToState(event, _iTestimoniesRepository.closeTestimony);
+      yield* _mapCloseTestimonyEventToState(
+          event, _iTestimoniesRepository.closeTestimony);
     }
   }
 }
@@ -99,12 +106,15 @@ Stream<TestimoniesState> _mapNewTestimonyRequestChangedEventToState(
   NewTestimonyState newTestimonyState = state as NewTestimonyState;
   try {
     TestimonyBody validatedTestimony = TestimonyBody(testimony);
-    yield newTestimonyState.copyWith(testimony: validatedTestimony.value, testimonyError: '');
+    yield newTestimonyState.copyWith(
+        testimony: validatedTestimony.value, testimonyError: '');
   } on ValueObjectException catch (e) {
-    yield newTestimonyState.copyWith(testimony: testimony, testimonyError: e.message);
+    yield newTestimonyState.copyWith(
+        testimony: testimony, testimonyError: e.message);
   } catch (e) {
     // Should never reach here in normal conditions, just covering all bases.
-    yield newTestimonyState.copyWith(testimony: testimony, testimonyError: 'Unknown Error.');
+    yield newTestimonyState.copyWith(
+        testimony: testimony, testimonyError: 'Unknown Error.');
   }
 }
 
@@ -131,7 +141,8 @@ Stream<TestimoniesState> _mapMyTestimoniesRequestedEventToState(
 }
 
 Stream<TestimoniesState> _mapAnsweredTestimonyRequestedEventToState(
-    MyArchivedTestimoniesRequested event, Future<List<Testimony>> Function() getMyAnsweredTestimonies) async* {
+    MyArchivedTestimoniesRequested event,
+    Future<List<Testimony>> Function() getMyAnsweredTestimonies) async* {
   try {
     List<Testimony> testimonies = await getMyAnsweredTestimonies();
     yield MyArchivedTestimoniesLoaded(testimonies: testimonies);
@@ -152,7 +163,8 @@ Stream<TestimoniesState> _mapTestimoniesRequestedEventToState(
 ) async* {
   try {
     List<Testimony> testimony = await getTestimonies(limit: event.amount);
-    yield TestimoniesLoaded(testimonies: testimony, isEndOfList: testimony.length == 0);
+    yield TestimoniesLoaded(
+        testimonies: testimony, isEndOfList: testimony.length == 0);
   } on BaseApplicationException catch (e) {
     yield TestimoniesError(
       message: e.message,
@@ -179,8 +191,8 @@ Stream<TestimoniesState> _mapMyTestimonyDeletedEventToState(
   }
 }
 
-Stream<TestimoniesState> _mapCloseTestimonyEventToState(
-    CloseTestimony event, Future<Testimony> Function({required String id}) closeTestimony) async* {
+Stream<TestimoniesState> _mapCloseTestimonyEventToState(CloseTestimony event,
+    Future<Testimony> Function({required String id}) closeTestimony) async* {
   try {
     Testimony testimony = await closeTestimony(id: event.id);
     getIt<FirebaseAnalytics>().logEvent(name: 'testimony_answered');
@@ -257,10 +269,13 @@ Stream<TestimoniesState> _mapRecentTestimoniesRequestedEventToState(
 
 Stream<TestimoniesState> _mapTestimonyCreatedEventToState(
   NewTestimonyCreated event,
-  Future<Testimony> Function({required String request, required bool isAnonymous}) createTestimony,
+  Future<Testimony> Function(
+          {required String request, required bool isAnonymous})
+      createTestimony,
 ) async* {
   try {
-    Testimony testimony = await createTestimony(request: event.request, isAnonymous: event.isAnonymous);
+    Testimony testimony = await createTestimony(
+        request: event.request, isAnonymous: event.isAnonymous);
     getIt<FirebaseAnalytics>().logEvent(name: 'testimony_created');
     yield NewTestimonyLoaded(testimony: testimony);
   } catch (e) {
@@ -275,14 +290,10 @@ Stream<TestimoniesState> _mapPraiseTestimonyEventToState(
 ) async* {
   yield PraiseTestimonyLoading(id: event.id);
   try {
-    print("PROCESSING");
     await praiseTestimony(id: event.id);
-    print("2222");
     getIt<FirebaseAnalytics>().logEvent(name: 'amen_testimony');
     yield PraiseTestimonyComplete(id: event.id);
   } catch (e) {
-    print("ERROR");
-    print(e);
     yield PraiseTestimonyError(message: "Unable to complete request.");
   }
 }

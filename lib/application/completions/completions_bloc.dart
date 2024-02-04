@@ -156,7 +156,7 @@ Stream<CompletionsState> _mapMarkAsDraftToState(
   final LocalUser user = getIt<LocalUser>();
   try {
     //checks if saving as draft is necessary, if not, return original state
-    if (state.isComplete == true) {
+    if (state.isComplete == false) {
       String id = state.id;
       if (id == '') {
         id = await markAsComplete(completionDetails: event.completionDetails);
@@ -164,7 +164,7 @@ Stream<CompletionsState> _mapMarkAsDraftToState(
       String responseId =
           await putResponses(completionId: id, responses: state.responses!);
       Responses newResponse =
-          Responses(id: responseId, responses: state.responses!.responses);
+          Responses(id: responseId, responses: state.responses.responses);
       yield state.copyWith(isComplete: false, id: id, responses: newResponse);
     } else {
       yield state;
@@ -174,6 +174,7 @@ Stream<CompletionsState> _mapMarkAsDraftToState(
       errorMessage: e.message,
     );
   } catch (e) {
+
     yield state.copyWith(
       errorMessage: 'An unknown error occured',
     );
@@ -214,7 +215,7 @@ Stream<CompletionsState> _mapQuestionResponseChangedToState(
   try {
     yield state.copyWith(
         responses: toResponses(
-            state.responses!,
+            state.responses,
             event.response,
             event.contentNum.toString(),
             event.questionNum.toString(),

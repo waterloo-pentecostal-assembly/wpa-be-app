@@ -89,7 +89,8 @@ Widget questionContainer(
           // TODO: implement listener
         },
         builder: (context, state) {
-          if (state.responses != null) {
+          if (true) {
+            // if (state.responses?.responses.length == 0) {
             if (state.responses?.responses != null) {
               return Padding(
                   padding: const EdgeInsets.fromLTRB(18, 0, 24, 8),

@@ -13,7 +13,6 @@ Responses toResponses(Responses responses, String response, String contentNum,
   } else {
     responseMap[contentNum] = {questionNum: responseDetails};
   }
-
   return Responses(responses: responseMap, id: responseId);
 }
 

@@ -4,7 +4,7 @@ part of 'completions_bloc.dart';
 class CompletionsState extends Equatable {
   final String? errorMessage;
   final String id;
-  final Responses? responses;
+  final Responses responses;
   final bool? isComplete;
   final Map<String, UploadTask>? uploadTask;
   final Map<String, List<String>>? downloadURL;
@@ -14,7 +14,7 @@ class CompletionsState extends Equatable {
   CompletionsState(
       {this.errorMessage,
       required this.id,
-      this.responses,
+      required this.responses,
       this.isComplete,
       this.uploadTask,
       this.downloadURL,
@@ -25,7 +25,7 @@ class CompletionsState extends Equatable {
     return CompletionsState(
       errorMessage: '',
       id: '',
-      responses: null,
+      responses: new Responses(responses: Map()),
       isComplete: null,
       uploadTask: null,
       downloadURL: null,

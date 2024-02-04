@@ -220,7 +220,8 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
           );
         }
 
-        List<dynamic> prayedBy = findOrDefaultTo(documentSnapshot.data() as Map<String, dynamic>, 'prayed_by', []);
+        List<dynamic> prayedBy = findOrDefaultTo(
+            documentSnapshot.data() as Map<String, dynamic>, 'prayed_by', []);
         prayedBy..add(user.id);
 
         transaction.update(documentReference, {"prayed_by": prayedBy});

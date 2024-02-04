@@ -18,26 +18,30 @@ class TestimoniesRepository extends ITestimoniesRepository {
   late CollectionReference _testimonysCollection;
   DocumentSnapshot? _lastTestimonyDocument;
 
-  TestimoniesRepository(this._firestore, this._firebaseStorageService, this._firebaseFirestoreService) {
+  TestimoniesRepository(this._firestore, this._firebaseStorageService,
+      this._firebaseFirestoreService) {
     _testimonysCollection = _firestore.collection("testimonies");
   }
 
   @override
-  Future<Testimony> createTestimony({required String request, required bool isAnonymous}) async {
+  Future<Testimony> createTestimony(
+      {required String request, required bool isAnonymous}) async {
     final LocalUser user = getIt<LocalUser>();
     DocumentReference documentReference;
     DocumentSnapshot documentSnapshot;
 
     try {
       documentReference = await _testimonysCollection.add(
-        TestimoniesDto.newRequestFromDomain(request, isAnonymous, user).newRequestToFirestore(),
+        TestimoniesDto.newRequestFromDomain(request, isAnonymous, user)
+            .newRequestToFirestore(),
       );
       documentSnapshot = await documentReference.get();
     } on Exception catch (e) {
       throw _firebaseFirestoreService.handleException(e);
     }
 
-    return TestimoniesDto.fromFirestore(documentSnapshot, user.id).toDomain(_firebaseStorageService);
+    return TestimoniesDto.fromFirestore(documentSnapshot, user.id)
+        .toDomain(_firebaseStorageService);
   }
 
   @override
@@ -67,7 +71,8 @@ class TestimoniesRepository extends ITestimoniesRepository {
     List<Testimony> myTestimonies = [];
 
     for (QueryDocumentSnapshot doc in querySnapshot.docs) {
-      Testimony testimony = await TestimoniesDto.fromFirestore(doc, user.id).toDomain(_firebaseStorageService);
+      Testimony testimony = await TestimoniesDto.fromFirestore(doc, user.id)
+          .toDomain(_firebaseStorageService);
       myTestimonies.add(testimony);
     }
 
@@ -92,7 +97,8 @@ class TestimoniesRepository extends ITestimoniesRepository {
     List<Testimony> myTestimonies = [];
 
     for (QueryDocumentSnapshot doc in querySnapshot.docs) {
-      Testimony testimony = await TestimoniesDto.fromFirestore(doc, user.id).toDomain(_firebaseStorageService);
+      Testimony testimony = await TestimoniesDto.fromFirestore(doc, user.id)
+          .toDomain(_firebaseStorageService);
       myTestimonies.add(testimony);
     }
 
@@ -111,7 +117,8 @@ class TestimoniesRepository extends ITestimoniesRepository {
     } on Exception catch (e) {
       throw _firebaseFirestoreService.handleException(e);
     }
-    return TestimoniesDto.fromFirestore(testimonySnapshot, user.id).toDomain(_firebaseStorageService);
+    return TestimoniesDto.fromFirestore(testimonySnapshot, user.id)
+        .toDomain(_firebaseStorageService);
   }
 
   @override
@@ -126,7 +133,8 @@ class TestimoniesRepository extends ITestimoniesRepository {
       throw TestimoniesException(
           code: TestimoniesExceptionCode.NO_STARTING_DOCUMENT,
           message: 'No starting document defined',
-          details: 'No starting document defined. Call [getTestimonies] first.');
+          details:
+              'No starting document defined. Call [getTestimonies] first.');
     }
 
     try {
@@ -143,7 +151,8 @@ class TestimoniesRepository extends ITestimoniesRepository {
 
     if (querySnapshot.docs.length > 0) {
       for (QueryDocumentSnapshot doc in querySnapshot.docs) {
-        Testimony testimony = await TestimoniesDto.fromFirestore(doc, user.id).toDomain(_firebaseStorageService);
+        Testimony testimony = await TestimoniesDto.fromFirestore(doc, user.id)
+            .toDomain(_firebaseStorageService);
         testimonys.add(testimony);
       }
       _lastTestimonyDocument = querySnapshot.docs.last;
@@ -177,7 +186,8 @@ class TestimoniesRepository extends ITestimoniesRepository {
 
     if (querySnapshot.docs.length > 0) {
       for (QueryDocumentSnapshot doc in querySnapshot.docs) {
-        Testimony testimony = await TestimoniesDto.fromFirestore(doc, user.id).toDomain(_firebaseStorageService);
+        Testimony testimony = await TestimoniesDto.fromFirestore(doc, user.id)
+            .toDomain(_firebaseStorageService);
         testimonys.add(testimony);
       }
 
@@ -195,8 +205,8 @@ class TestimoniesRepository extends ITestimoniesRepository {
       // Using transaction to avoid stale data
       await _firestore.runTransaction((transaction) async {
         DocumentReference documentReference = _testimonysCollection.doc(id);
-        DocumentSnapshot documentSnapshot = await transaction.get(documentReference);
-        print("HERE1");
+        DocumentSnapshot documentSnapshot =
+            await transaction.get(documentReference);
 
         // Check if testimony exists
         if (documentSnapshot.data() == null) {
@@ -205,12 +215,11 @@ class TestimoniesRepository extends ITestimoniesRepository {
             message: 'Testimony not found',
           );
         }
-        print("HERE2");
 
-        List<dynamic> praisedBy = findOrDefaultTo(documentSnapshot.data() as Map<String, dynamic>, 'praised_by', []);
+        List<dynamic> praisedBy = findOrDefaultTo(
+            documentSnapshot.data() as Map<String, dynamic>, 'praised_by', []);
         praisedBy..add(user.id);
         transaction.update(documentReference, {"praised_by": praisedBy});
-        print("HERE3");
       });
     } on Exception catch (e) {
       throw _firebaseFirestoreService.handleException(e);
@@ -225,7 +234,8 @@ class TestimoniesRepository extends ITestimoniesRepository {
       // Using transaction to avoid stale data
       await _firestore.runTransaction((transaction) async {
         DocumentReference documentReference = _testimonysCollection.doc(id);
-        DocumentSnapshot documentSnapshot = await transaction.get(documentReference);
+        DocumentSnapshot documentSnapshot =
+            await transaction.get(documentReference);
 
         List<dynamic> reportedBy = documentSnapshot["reported_by"] ?? [];
 
