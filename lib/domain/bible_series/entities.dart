@@ -129,18 +129,7 @@ class SeriesContent {
   bool get isResponsePossible {
     bool check = false;
     this.body.forEach((element) {
-      if (element.type == SeriesContentBodyType.QUESTION ||
-          element.type == SeriesContentBodyType.IMAGE_INPUT) {
-        check = true;
-      }
-    });
-    return check;
-  }
-
-  bool get responseContainImage {
-    bool check = false;
-    this.body.forEach((element) {
-      if (element.type == SeriesContentBodyType.IMAGE_INPUT) {
+      if (element.type == SeriesContentBodyType.QUESTION) {
         check = true;
       }
     });

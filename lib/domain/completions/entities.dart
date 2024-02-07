@@ -31,6 +31,14 @@ class Responses {
     this.id,
     required this.responses,
   });
+
+  @override
+  String toString() {
+    return '''
+    ID: ${this.id},
+    Responses: ${this.responses}
+    ''';
+  }
 }
 
 class ResponseDetails {
@@ -41,4 +49,12 @@ class ResponseDetails {
     required this.type,
     required this.response,
   });
+
+  @override
+  String toString() {
+    return '''
+    Type: ${this.type},
+    Response: ${this.response}
+    ''';
+  }
 }

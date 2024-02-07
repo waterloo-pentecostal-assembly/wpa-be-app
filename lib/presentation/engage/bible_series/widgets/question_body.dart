@@ -23,8 +23,7 @@ class QuestionContentBodyWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    BlocProvider.of<CompletionsBloc>(context)
-      ..add(LoadResponses(completionDetails));
+    BlocProvider.of<CompletionsBloc>(context)..add(LoadResponses(completionDetails));
     return Container(
         padding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
         child: Column(
@@ -45,94 +44,57 @@ class QuestionContentBodyWidget extends StatelessWidget {
         ));
   }
 
-  Responses toResponses(
-      List<String> responses, String contentNum, ResponseType type) {
+  Responses toResponses(List<String> responses, String contentNum, ResponseType type) {
     Map<String, Map<String, ResponseDetails>> responseMap = new Map();
     responses.forEach((element) {
-      ResponseDetails responseDetails =
-          ResponseDetails(type: type, response: element);
-      responseMap[contentNum] = {
-        responses.indexOf(element).toString(): responseDetails
-      };
+      ResponseDetails responseDetails = ResponseDetails(type: type, response: element);
+      responseMap[contentNum] = {responses.indexOf(element).toString(): responseDetails};
     });
     return Responses(responses: responseMap);
   }
 }
 
-Widget questionContainer(
-    Question question, int contentNum, int questionNum, BuildContext context) {
+Widget questionContainer(Question question, int contentNum, int questionNum, BuildContext context) {
   return Column(
     children: [
       IntrinsicHeight(
         child: Row(
           children: [
             Container(
-                padding:
-                    const EdgeInsets.fromLTRB(0, kTopPaddingQuestionBody, 0, 0),
+                padding: const EdgeInsets.fromLTRB(0, kTopPaddingQuestionBody, 0, 0),
                 alignment: Alignment.topLeft,
-                width: getIt<LayoutFactory>().getDimension(baseDimension: 14.0),
-                child: getIt<TextFactory>().textFormFieldInput(
-                    (question.location[1] + 1).toString() + ".",
-                    fontSize: 16)),
+                width: getIt<LayoutFactory>().getDimension(baseDimension: 16.0),
+                child:
+                    getIt<TextFactory>().textFormFieldInput((question.location[1] + 1).toString() + ".", fontSize: 16)),
             Expanded(
                 child: Padding(
-              padding:
-                  const EdgeInsets.fromLTRB(2, kTopPaddingQuestionBody, 2, 8),
-              child: getIt<TextFactory>()
-                  .textFormFieldInput(question.question, fontSize: 16),
+              padding: const EdgeInsets.fromLTRB(2, kTopPaddingQuestionBody, 2, 8),
+              child: getIt<TextFactory>().textFormFieldInput(question.question, fontSize: 16),
             ))
           ],
         ),
       ),
-      BlocConsumer<CompletionsBloc, CompletionsState>(
-        listener: (context, state) {
-          // TODO: implement listener
-        },
+      BlocBuilder<CompletionsBloc, CompletionsState>(
         builder: (context, state) {
-          if (true) {
-            // if (state.responses?.responses.length == 0) {
-            if (state.responses?.responses != null) {
-              return Padding(
-                  padding: const EdgeInsets.fromLTRB(18, 0, 24, 8),
-                  child: TextFormField(
-                    style: getIt<TextFactory>().liteTextStyle(fontSize: 16),
-                    maxLines: null,
-                    initialValue: getResponse(state, contentNum, questionNum),
-                    decoration: const InputDecoration.collapsed(
-                      hintText: "Share your thoughts ...",
-                      border: UnderlineInputBorder(),
-                    ),
-                    onChanged: (value) {
-                      if (state.isComplete == true) {
-                        BlocProvider.of<CompletionsBloc>(context)
-                          ..add(MarkAsInComplete(state.id));
-                      }
-                      BlocProvider.of<CompletionsBloc>(context)
-                        ..add(QuestionResponseChanged(
-                            value, contentNum, questionNum));
-                    },
-                  ));
-            } else {
-              return Padding(
-                  padding: const EdgeInsets.fromLTRB(18, 0, 24, 8),
-                  child: TextFormField(
-                    style: getIt<TextFactory>().liteTextStyle(fontSize: 16),
-                    maxLines: null,
-                    initialValue: '',
-                    decoration: const InputDecoration.collapsed(
-                      hintText: "Share your thoughts ...",
-                      border: UnderlineInputBorder(),
-                    ),
-                    onChanged: (value) {
-                      BlocProvider.of<CompletionsBloc>(context)
-                        ..add(QuestionResponseChanged(
-                            value, contentNum, questionNum));
-                    },
-                  ));
-            }
-          } else {
-            return Text('...');
-          }
+          return Padding(
+              key: ObjectKey(state.responses.responses),
+              padding: const EdgeInsets.fromLTRB(18, 0, 24, 8),
+              child: TextFormField(
+                initialValue: getResponse(state, contentNum, questionNum),
+                style: getIt<TextFactory>().liteTextStyle(fontSize: 16),
+                maxLines: null,
+                decoration: const InputDecoration.collapsed(
+                  hintText: "Share your thoughts ...",
+                  border: UnderlineInputBorder(),
+                ),
+                onChanged: (value) {
+                  if (state.isComplete == true) {
+                    BlocProvider.of<CompletionsBloc>(context)..add(MarkAsInComplete(state.id));
+                  }
+                  BlocProvider.of<CompletionsBloc>(context)
+                    ..add(QuestionResponseChanged(value, contentNum, questionNum));
+                },
+          ));
         },
       ),
     ],
@@ -140,12 +102,9 @@ Widget questionContainer(
 }
 
 String getResponse(CompletionsState state, int contentNum, int questionNum) {
-  if (state.responses?.responses[contentNum.toString()] != null) {
-    if (state.responses?.responses[contentNum.toString()]
-            ?[questionNum.toString()] !=
-        null) {
-      return state.responses!
-          .responses[contentNum.toString()]![questionNum.toString()]!.response;
+  if (state.responses.responses[contentNum.toString()] != null) {
+    if (state.responses.responses[contentNum.toString()]?[questionNum.toString()] != null) {
+      return state.responses.responses[contentNum.toString()]![questionNum.toString()]!.response;
     }
   }
   return '';

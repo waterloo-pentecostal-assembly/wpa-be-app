@@ -95,7 +95,7 @@ class ResponseCompletionButton extends StatelessWidget {
                 child: Center(
                   child: InkWell(
                     onTap: () {
-                      if (state.responses?.responses == null) {
+                      if (state.responses.responses.length == 0) {
                         showDialog(
                           context: context,
                           builder: (_) => AlertDialog(
@@ -132,7 +132,7 @@ class ResponseCompletionButton extends StatelessWidget {
                           ),
                         );
                       } else if (!isResponsesFilled(
-                          state.responses!, seriesContent)) {
+                          state.responses, seriesContent)) {
                         CompletionDetails completionDetails = CompletionDetails(
                             id: state.id,
                             seriesId: bibleId,

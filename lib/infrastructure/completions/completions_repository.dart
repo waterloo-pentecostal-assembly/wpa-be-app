@@ -184,7 +184,6 @@ class CompletionsRepository extends ICompletionsRepository {
   }) async {
     QuerySnapshot querySnapshot;
     final LocalUser user = getIt<LocalUser>();
-
     try {
       querySnapshot = await _completionsCollection
           .doc(completionId)

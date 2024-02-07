@@ -44,10 +44,11 @@ class CompletionsState extends Equatable {
     Map<String, List<String>>? thumbnailURL,
     Map<String, List<File>>? localImage,
   }) {
+    Responses _responses = responses ?? this.responses;
     return CompletionsState(
       errorMessage: errorMessage ?? this.errorMessage,
       id: id ?? this.id,
-      responses: responses ?? this.responses,
+      responses: _responses,
       isComplete: isComplete ?? this.isComplete,
       uploadTask: uploadTask ??
           null, //null to ensure upload task is only present in state during upload
@@ -58,5 +59,6 @@ class CompletionsState extends Equatable {
   }
 
   @override
-  List<Object> get props => [id];
+  List<Object> get props =>
+      [errorMessage ?? '', id, responses, isComplete ?? '', uploadTask ?? '', downloadURL ?? ''];
 }
