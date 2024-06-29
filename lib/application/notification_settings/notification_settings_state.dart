@@ -36,6 +36,15 @@ class PrayerNotificationError extends NotificationSettingsState {
   List<Object> get props => [message, DateTime.now()];
 }
 
+class TestimonyNotificationError extends NotificationSettingsState {
+  final String message;
+
+  const TestimonyNotificationError({required this.message});
+
+  @override
+  List<Object> get props => [message, DateTime.now()];
+}
+
 class NotificationSettingsError extends NotificationSettingsState {
   final String message;
 

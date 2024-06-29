@@ -59,6 +59,12 @@ class CompletionsState extends Equatable {
   }
 
   @override
-  List<Object> get props =>
-      [errorMessage ?? '', id, responses, isComplete ?? '', uploadTask ?? '', downloadURL ?? ''];
+  List<Object> get props => [
+        errorMessage ?? '',
+        id,
+        responses,
+        isComplete ?? '',
+        uploadTask ?? '',
+        downloadURL ?? ''
+      ];
 }

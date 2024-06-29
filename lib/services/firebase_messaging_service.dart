@@ -51,7 +51,7 @@ class FirebaseMessagingService {
     });
   }
 
-  void navigationHandler(Map<String, dynamic> payload) async {
+  static void navigationHandler(Map<String, dynamic> payload) async {
     if (payload['notificationType'] == 'dailyEngagementReminder') {
       getIt<FirebaseAnalytics>()
           .logEvent(name: 'daily_engagement_notification_clicked');

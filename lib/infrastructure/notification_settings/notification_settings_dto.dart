@@ -7,6 +7,7 @@ class NotificationSettingsDto {
   final String id;
   final bool dailyEngagementReminder;
   final bool prayers;
+  final bool testimonies;
 
   factory NotificationSettingsDto.fromFirestore(DocumentSnapshot doc) {
     var data = (doc.data() ?? {}) as Map<String, dynamic>;
@@ -15,6 +16,7 @@ class NotificationSettingsDto {
       dailyEngagementReminder:
           findOrDefaultTo(data, 'daily_engagement_reminder', false),
       prayers: findOrDefaultTo(data, 'prayers', false),
+      testimonies: findOrDefaultTo(data, 'testimonies', false),
     );
   }
 
@@ -22,6 +24,7 @@ class NotificationSettingsDto {
     required this.id,
     required this.dailyEngagementReminder,
     required this.prayers,
+    required this.testimonies,
   });
 }
 
@@ -31,6 +34,7 @@ extension NotificationSettingsDtoX on NotificationSettingsDto {
       id: this.id,
       dailyEngagementReminder: this.dailyEngagementReminder,
       prayers: this.prayers,
+      testimonies: this.testimonies,
     );
   }
 }

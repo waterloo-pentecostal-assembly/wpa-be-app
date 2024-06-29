@@ -73,8 +73,12 @@ Widget book(Scripture script, List<int> sortedVerses) {
   String book = script.book;
   String chapter = script.chapter;
   bool fullChapter = script.fullChapter;
-  String text =
-      fullChapter ? "$book $chapter" : "$book $chapter: $start - $end";
+  String text;
+  if (start == end) {
+    text = fullChapter ? "$book $chapter" : "$book $chapter: $start";
+  } else {
+    text = fullChapter ? "$book $chapter" : "$book $chapter: $start - $end";
+  }
   return Padding(
     padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
     child: getIt<TextFactory>().subHeading(text, fontSize: 18),

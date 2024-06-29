@@ -277,6 +277,7 @@ class _NotificationSettingsState extends State<NotificationSettings>
     with AutomaticKeepAliveClientMixin {
   bool? isEngagementReminderSwitched;
   bool? isPrayerNotificationsSwitched;
+  bool? isTestimonyNotificationsSwitched;
 
   @override
   void initState() {
@@ -380,6 +381,55 @@ class _NotificationSettingsState extends State<NotificationSettings>
                           } else {
                             BlocProvider.of<NotificationSettingsBloc>(context)
                               ..add(UnsubscribedFromPrayerNotifications());
+                          }
+                        },
+                      );
+                    } else {
+                      return PlatformSwitch(disabled: true);
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              getIt<TextFactory>().lite("Testimonies"),
+              Container(
+                height:
+                    getIt<LayoutFactory>().getDimension(baseDimension: 30.0),
+                child: BlocConsumer<NotificationSettingsBloc,
+                    NotificationSettingsState>(
+                  listener: (context, NotificationSettingsState state) {
+                    if (state is NotificationSettingsPositions) {
+                      setState(() {
+                        isTestimonyNotificationsSwitched =
+                            state.notificationSettings.testimonies;
+                      });
+                    } else if (state is TestimonyNotificationError) {
+                      ToastMessage.showErrorToast(state.message, context);
+                      setState(() {
+                        isTestimonyNotificationsSwitched =
+                            !isTestimonyNotificationsSwitched!;
+                      });
+                    }
+                  },
+                  builder: (context, NotificationSettingsState state) {
+                    if (isTestimonyNotificationsSwitched != null) {
+                      return PlatformSwitch(
+                        value: isTestimonyNotificationsSwitched!,
+                        onChanged: (value) {
+                          setState(() {
+                            isTestimonyNotificationsSwitched = value;
+                          });
+                          if (value) {
+                            BlocProvider.of<NotificationSettingsBloc>(context)
+                              ..add(SubscribedToTestimonyNotifications());
+                          } else {
+                            BlocProvider.of<NotificationSettingsBloc>(context)
+                              ..add(UnsubscribedFromTestimonyNotifications());
                           }
                         },
                       );

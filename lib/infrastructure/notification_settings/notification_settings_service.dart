@@ -41,6 +41,16 @@ class NotificationSettingsService implements INotificationSettingsService {
     _setNotificationSetting({"prayers": false});
   }
 
+  @override
+  Future<void> subscribeToTestimonyNotifications() async {
+    _setNotificationSetting({"testimonies": true});
+  }
+
+  @override
+  Future<void> unsubscribeFromTestimonyNotifications() async {
+    _setNotificationSetting({"testimonies": false});
+  }
+
   Future<void> _setNotificationSetting(
       Map<String, dynamic> notificationSetting) async {
     final LocalUser user = getIt<LocalUser>();
