@@ -44,7 +44,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "church.wpa.beapp"
+        applicationId "church.wpassembly.beapp"
         minSdkVersion 23
         targetSdkVersion 33
         versionCode flutterVersionCode.toInteger()

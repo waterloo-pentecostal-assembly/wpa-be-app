@@ -1,4 +1,4 @@
-package church.wpa.beapp
+package church.wpassembly.beapp
 
 import io.flutter.app.FlutterApplication
 import io.flutter.plugin.common.PluginRegistry
