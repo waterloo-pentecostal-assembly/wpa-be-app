@@ -6,18 +6,14 @@ import '../../domain/notification_settings/entities.dart';
 import '../../domain/notification_settings/exceptions.dart';
 import '../../domain/notification_settings/interfaces.dart';
 import '../../services/firebase_firestore_service.dart';
-import '../../services/firebase_messaging_service.dart';
 import 'notification_settings_dto.dart';
 
 class NotificationSettingsService implements INotificationSettingsService {
-  // ignore: unused_field
-  final FirebaseMessagingService _firebaseMessagingService;
-  final FirebaseFirestoreService _firebaseFirestoreService;
-  final FirebaseFirestore _firestore;
-  String notificationSettingsId;
+  late final FirebaseFirestoreService _firebaseFirestoreService;
+  late final FirebaseFirestore _firestore;
+  late String? notificationSettingsId;
 
-  NotificationSettingsService(this._firebaseMessagingService, this._firestore,
-      this._firebaseFirestoreService);
+  NotificationSettingsService(this._firestore, this._firebaseFirestoreService);
 
   @override
   Future<void> subscribeToDailyEngagementReminder() async {
@@ -45,13 +41,23 @@ class NotificationSettingsService implements INotificationSettingsService {
     _setNotificationSetting({"prayers": false});
   }
 
+  @override
+  Future<void> subscribeToTestimonyNotifications() async {
+    _setNotificationSetting({"testimonies": true});
+  }
+
+  @override
+  Future<void> unsubscribeFromTestimonyNotifications() async {
+    _setNotificationSetting({"testimonies": false});
+  }
+
   Future<void> _setNotificationSetting(
       Map<String, dynamic> notificationSetting) async {
     final LocalUser user = getIt<LocalUser>();
 
     // Should always be available.  This is just a fail-safe
     String _notificationSettingsId =
-        notificationSettingsId ?? _getNotificationSettingsId();
+        notificationSettingsId ?? await _getNotificationSettingsId();
 
     try {
       // Update flag in users/<user-doc>/notification_settings/<single-notification-settings-doc>
@@ -63,8 +69,8 @@ class NotificationSettingsService implements INotificationSettingsService {
             .doc(_notificationSettingsId);
         transaction.update(documentReference, notificationSetting);
       });
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
   }
 
@@ -78,8 +84,8 @@ class NotificationSettingsService implements INotificationSettingsService {
           .doc(user.id)
           .collection("notification_settings")
           .get();
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
 
     if (querySnapshot.docs.length > 0) {
@@ -106,8 +112,8 @@ class NotificationSettingsService implements INotificationSettingsService {
           .doc(user.id)
           .collection("notification_settings")
           .get();
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
 
     if (querySnapshot.docs.length > 0) {

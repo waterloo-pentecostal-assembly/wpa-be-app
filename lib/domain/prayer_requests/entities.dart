@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
+import 'package:wpa_app/domain/user_profile/entities.dart';
 
 class PrayerRequest {
   final String id;
@@ -17,19 +17,19 @@ class PrayerRequest {
   final bool isAnswered;
 
   PrayerRequest({
-    @required this.id,
-    @required this.userId,
-    @required this.request,
-    @required this.prayedBy,
-    @required this.reportedBy,
-    @required this.hasPrayed,
-    @required this.hasReported,
-    @required this.isMine,
-    @required this.isApproved,
-    @required this.date,
-    @required this.isAnonymous,
-    @required this.userSnippet,
-    @required this.isAnswered,
+    required this.id,
+    required this.userId,
+    required this.request,
+    required this.prayedBy,
+    required this.reportedBy,
+    required this.hasPrayed,
+    required this.hasReported,
+    required this.isMine,
+    required this.isApproved,
+    required this.date,
+    required this.isAnonymous,
+    required this.userSnippet,
+    required this.isAnswered,
   });
 
   @override
@@ -37,24 +37,5 @@ class PrayerRequest {
     return '''id: $id, userId: $userId, request: $request, prayedBy: $prayedBy, reportedBy: $reportedBy, 
               hasPrayed: $hasPrayed, hasReported: $hasReported, date: $date, isAnonymous: $isAnonymous, 
               userSnippet: $userSnippet, isApproved: $isApproved''';
-  }
-}
-
-class UserSnippet {
-  final String firstName;
-  final String lastName;
-  final String thumbnailUrl;
-  final String thumbnail;
-
-  UserSnippet({
-    @required this.firstName,
-    @required this.lastName,
-    @required this.thumbnailUrl,
-    @required this.thumbnail,
-  });
-
-  @override
-  String toString() {
-    return '''firstName: $firstName, lastName: $lastName, thumbnailUrl: $thumbnailUrl''';
   }
 }

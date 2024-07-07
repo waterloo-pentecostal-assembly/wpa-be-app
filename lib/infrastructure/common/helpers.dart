@@ -1,6 +1,6 @@
 import '../../domain/common/exceptions.dart';
 
-dynamic findOrThrowException(Map map, dynamic key, {String message}) {
+dynamic findOrThrowException(Map map, dynamic key, {String? message}) {
   if (map[key] == null) {
     throw ApplicationException(
       message: message ?? 'Missing key ',

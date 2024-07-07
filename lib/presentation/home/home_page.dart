@@ -9,9 +9,9 @@ import '../../domain/authentication/entities.dart';
 import '../common/interfaces.dart';
 
 class HomePage extends IIndexedPage {
-  final GlobalKey<NavigatorState> navigatorKey;
+  final GlobalKey<NavigatorState>? navigatorKey;
 
-  const HomePage({Key key, this.navigatorKey}) : super(key: key);
+  const HomePage({Key? key, this.navigatorKey}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

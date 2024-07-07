@@ -14,7 +14,7 @@ import 'my_prayer_requests.dart';
 class PrayerRequestsPage extends StatelessWidget {
   final int tabIndex;
 
-  const PrayerRequestsPage({Key key, @required this.tabIndex})
+  const PrayerRequestsPage({Key? key, required this.tabIndex})
       : super(key: key);
 
   @override
@@ -55,7 +55,7 @@ class PrayerRequestsPage extends StatelessWidget {
 class TabPrayerRequestWidget extends StatefulWidget {
   final int tabIndex;
 
-  const TabPrayerRequestWidget({Key key, @required this.tabIndex})
+  const TabPrayerRequestWidget({Key? key, required this.tabIndex})
       : super(key: key);
 
   @override
@@ -65,7 +65,7 @@ class TabPrayerRequestWidget extends StatefulWidget {
 
 class _TabPrayerRequestWidgetState extends State<TabPrayerRequestWidget>
     with SingleTickerProviderStateMixin {
-  TabController _tabController;
+  late TabController _tabController;
   final int tabIndex;
 
   @override
@@ -101,6 +101,7 @@ class _TabPrayerRequestWidgetState extends State<TabPrayerRequestWidget>
               indicatorSize: TabBarIndicatorSize.label,
               unselectedLabelColor: Colors.black54,
               labelColor: Colors.black87,
+              tabAlignment: TabAlignment.start,
               tabs: [
                 getIt<TextFactory>().subHeading2('All'),
                 getIt<TextFactory>().subHeading2('My Open Requests'),
@@ -129,7 +130,7 @@ class _TabPrayerRequestWidgetState extends State<TabPrayerRequestWidget>
 
 class PrayerRequestsTitleBar extends StatelessWidget {
   const PrayerRequestsTitleBar({
-    Key key,
+    Key? key,
   }) : super(key: key);
 
   @override
@@ -155,7 +156,7 @@ class PrayerRequestsTitleBar extends StatelessWidget {
           ),
           GestureDetector(
             onTap: () {
-              OverlayEntry entry;
+              OverlayEntry? entry;
               Overlay.of(context).insert(
                 entry = OverlayEntry(
                   builder: (context) {

@@ -1,14 +1,12 @@
-import 'package:flutter/material.dart';
-
 import 'entities.dart';
 
 abstract class IPrayerRequestsRepository {
   Future<List<PrayerRequest>> getPrayerRequests({
-    @required int limit,
+    required int limit,
   });
 
   Future<List<PrayerRequest>> getMorePrayerRequests({
-    @required int limit,
+    required int limit,
   });
 
   Future<List<PrayerRequest>> getMyPrayerRequests();
@@ -19,21 +17,21 @@ abstract class IPrayerRequestsRepository {
   Future<bool> canAddPrayerRequest();
 
   Future<void> deletePrayerRequest({
-    @required String id,
+    required String id,
   });
 
-  Future<void> closePrayerRequest({@required String id});
+  Future<PrayerRequest> closePrayerRequest({required String id});
 
   /// Reports a Prayer Request. Resets is_approved to false
   /// to reapproval
   Future<void> reportPrayerRequest({
-    @required String id,
+    required String id,
   });
 
   Future<void> prayForPrayerRequest({
-    @required String id,
+    required String id,
   });
 
   Future<PrayerRequest> createPrayerRequest(
-      {@required String request, @required bool isAnonymous});
+      {required String request, required bool isAnonymous});
 }

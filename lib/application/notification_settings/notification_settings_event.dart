@@ -42,3 +42,17 @@ class UnsubscribedFromPrayerNotifications extends NotificationSettingsEvent {
   @override
   List<Object> get props => [];
 }
+
+class SubscribedToTestimonyNotifications extends NotificationSettingsEvent {
+  SubscribedToTestimonyNotifications();
+
+  @override
+  List<Object> get props => [];
+}
+
+class UnsubscribedFromTestimonyNotifications extends NotificationSettingsEvent {
+  UnsubscribedFromTestimonyNotifications();
+
+  @override
+  List<Object> get props => [];
+}

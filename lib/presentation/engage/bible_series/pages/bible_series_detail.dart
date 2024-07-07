@@ -5,7 +5,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/application/audio_player/audio_player_bloc.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
-import 'package:wpa_app/presentation/engage/bible_series/widgets/audio_body.dart';
 
 import '../../../../app/constants.dart';
 import '../../../../app/injection.dart';
@@ -16,7 +15,7 @@ import '../../../common/text_factory.dart';
 class BibleSeriesDetailPage extends StatelessWidget {
   final String bibleSeriesId;
 
-  const BibleSeriesDetailPage({Key key, @required this.bibleSeriesId})
+  const BibleSeriesDetailPage({Key? key, required this.bibleSeriesId})
       : super(key: key);
 
   @override
@@ -42,9 +41,9 @@ class BibleSeriesWidget extends StatefulWidget {
 
 class _BibleSeriesState extends State<BibleSeriesWidget>
     with TickerProviderStateMixin {
-  int tabLength;
-  TabController _tabController;
-  BibleSeries bibleSeries;
+  late int tabLength;
+  TabController? _tabController;
+  late BibleSeries bibleSeries;
 
   @override
   void initState() {
@@ -127,10 +126,11 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                     labelPadding: EdgeInsets.all(8),
                     controller: _tabController,
                     isScrollable: true,
-                    indicator: BoxDecoration(),
+                    indicator: BoxDecoration(color: Colors.transparent),
                     indicatorSize: TabBarIndicatorSize.label,
                     unselectedLabelColor: Colors.black45,
                     labelColor: Colors.black87,
+                    tabAlignment: TabAlignment.start,
                     tabs: _buildContentTabs(bibleSeries.seriesContentSnippet),
                   ),
                 ),

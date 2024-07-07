@@ -5,9 +5,9 @@ import '../common/interfaces.dart';
 import '../common/text_factory.dart';
 
 class NotificationsPage extends IIndexedPage {
-  final GlobalKey<NavigatorState> navigatorKey;
+  final GlobalKey<NavigatorState>? navigatorKey;
 
-  const NotificationsPage({Key key, this.navigatorKey}) : super(key: key);
+  const NotificationsPage({Key? key, this.navigatorKey}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {

@@ -10,16 +10,16 @@ import '../../../../domain/completions/entities.dart';
 import '../../../common/text_factory.dart';
 
 class QuestionContentBodyWidget extends StatelessWidget {
-  final CompletionDetails completionDetails;
+  final CompletionDetails? completionDetails;
   final QuestionBody questionContentBody;
   final int contentNum;
 
-  const QuestionContentBodyWidget(
-      {Key key,
-      this.questionContentBody,
-      this.contentNum,
-      this.completionDetails})
-      : super(key: key);
+  const QuestionContentBodyWidget({
+    Key? key,
+    required this.questionContentBody,
+    required this.contentNum,
+    this.completionDetails,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +70,7 @@ Widget questionContainer(
                 padding:
                     const EdgeInsets.fromLTRB(0, kTopPaddingQuestionBody, 0, 0),
                 alignment: Alignment.topLeft,
-                width: getIt<LayoutFactory>().getDimension(baseDimension: 14.0),
+                width: getIt<LayoutFactory>().getDimension(baseDimension: 16.0),
                 child: getIt<TextFactory>().textFormFieldInput(
                     (question.location[1] + 1).toString() + ".",
                     fontSize: 16)),
@@ -84,54 +84,29 @@ Widget questionContainer(
           ],
         ),
       ),
-      BlocConsumer<CompletionsBloc, CompletionsState>(
-        listener: (context, state) {
-          // TODO: implement listener
-        },
+      BlocBuilder<CompletionsBloc, CompletionsState>(
         builder: (context, state) {
-          if (state.responses != null) {
-            if (state.responses.responses != null) {
-              return Padding(
-                  padding: const EdgeInsets.fromLTRB(18, 0, 24, 8),
-                  child: TextFormField(
-                    style: getIt<TextFactory>().liteTextStyle(fontSize: 16),
-                    maxLines: null,
-                    initialValue: getResponse(state, contentNum, questionNum),
-                    decoration: const InputDecoration.collapsed(
-                      hintText: "Share your thoughts ...",
-                      border: UnderlineInputBorder(),
-                    ),
-                    onChanged: (value) {
-                      if (state.isComplete == true) {
-                        BlocProvider.of<CompletionsBloc>(context)
-                          ..add(MarkAsInComplete(state.id));
-                      }
-                      BlocProvider.of<CompletionsBloc>(context)
-                        ..add(QuestionResponseChanged(
-                            value, contentNum, questionNum));
-                    },
-                  ));
-            } else {
-              return Padding(
-                  padding: const EdgeInsets.fromLTRB(18, 0, 24, 8),
-                  child: TextFormField(
-                    style: getIt<TextFactory>().liteTextStyle(fontSize: 16),
-                    maxLines: null,
-                    initialValue: '',
-                    decoration: const InputDecoration.collapsed(
-                      hintText: "Share your thoughts ...",
-                      border: UnderlineInputBorder(),
-                    ),
-                    onChanged: (value) {
-                      BlocProvider.of<CompletionsBloc>(context)
-                        ..add(QuestionResponseChanged(
-                            value, contentNum, questionNum));
-                    },
-                  ));
-            }
-          } else {
-            return Text('...');
-          }
+          return Padding(
+              key: ObjectKey(state.responses.responses),
+              padding: const EdgeInsets.fromLTRB(18, 0, 24, 8),
+              child: TextFormField(
+                initialValue: getResponse(state, contentNum, questionNum),
+                style: getIt<TextFactory>().liteTextStyle(fontSize: 16),
+                maxLines: null,
+                decoration: const InputDecoration.collapsed(
+                  hintText: "Share your thoughts ...",
+                  border: UnderlineInputBorder(),
+                ),
+                onChanged: (value) {
+                  if (state.isComplete == true) {
+                    BlocProvider.of<CompletionsBloc>(context)
+                      ..add(MarkAsInComplete(state.id));
+                  }
+                  BlocProvider.of<CompletionsBloc>(context)
+                    ..add(QuestionResponseChanged(
+                        value, contentNum, questionNum));
+                },
+              ));
         },
       ),
     ],
@@ -141,10 +116,10 @@ Widget questionContainer(
 String getResponse(CompletionsState state, int contentNum, int questionNum) {
   if (state.responses.responses[contentNum.toString()] != null) {
     if (state.responses.responses[contentNum.toString()]
-            [questionNum.toString()] !=
+            ?[questionNum.toString()] !=
         null) {
       return state.responses
-          .responses[contentNum.toString()][questionNum.toString()].response;
+          .responses[contentNum.toString()]![questionNum.toString()]!.response;
     }
   }
   return '';

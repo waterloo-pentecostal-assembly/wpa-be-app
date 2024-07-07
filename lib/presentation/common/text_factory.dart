@@ -149,7 +149,7 @@ class TextFactory {
   Text lite(
     String text, {
     double fontSize = 14.0,
-    Color color: Colors.black,
+    Color color = Colors.black,
     TextOverflow overflow = TextOverflow.visible,
   }) {
     return Text(
@@ -171,7 +171,7 @@ class TextFactory {
 
   SelectableText selectLite(String text,
       {double fontSize = 14.0,
-      Color color: Colors.black,
+      Color color = Colors.black,
       TextOverflow overflow = TextOverflow.visible}) {
     return SelectableText(
       text,
@@ -204,7 +204,7 @@ class TextFactory {
   Text linkLite(
     String text, {
     double fontSize = 14.0,
-    Color color: kWpaBlue,
+    Color color = kWpaBlue,
     TextOverflow overflow = TextOverflow.visible,
   }) {
     return Text(
@@ -227,7 +227,7 @@ class TextFactory {
   Text liteSmall(
     String text, {
     double fontSize = 10.0,
-    Color color: Colors.black,
+    Color color = Colors.black,
     TextOverflow overflow = TextOverflow.visible,
   }) {
     return Text(
@@ -260,7 +260,7 @@ class TextFactory {
   Text authenticationButton(
     String text, {
     double fontSize = 16.0,
-    Color color: Colors.white,
+    Color color = Colors.white,
     TextOverflow overflow = TextOverflow.visible,
   }) {
     return Text(

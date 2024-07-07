@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:flutter/material.dart';
 import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/domain/prayer_requests/exceptions.dart';
 
@@ -163,7 +162,7 @@ Stream<PrayerRequestsState> _mapAnsweredPrayerRequestRequestedEventToState(
 
 Stream<PrayerRequestsState> _mapPrayerRequestsRequestedEventToState(
   PrayerRequestsRequested event,
-  Future<List<PrayerRequest>> Function({@required int limit}) getPrayerRequests,
+  Future<List<PrayerRequest>> Function({required int limit}) getPrayerRequests,
 ) async* {
   try {
     List<PrayerRequest> prayerRequest =
@@ -183,7 +182,7 @@ Stream<PrayerRequestsState> _mapPrayerRequestsRequestedEventToState(
 
 Stream<PrayerRequestsState> _mapMyPrayerRequestDeletedEventToState(
   MyPrayerRequestDeleted event,
-  Future<void> Function({@required String id}) deletePrayerRequest,
+  Future<void> Function({required String id}) deletePrayerRequest,
 ) async* {
   try {
     await deletePrayerRequest(id: event.id);
@@ -198,7 +197,7 @@ Stream<PrayerRequestsState> _mapMyPrayerRequestDeletedEventToState(
 
 Stream<PrayerRequestsState> _mapClosePrayerRequestEventToState(
     ClosePrayerRequest event,
-    Future<PrayerRequest> Function({@required String id})
+    Future<PrayerRequest> Function({required String id})
         closePrayerRequest) async* {
   try {
     PrayerRequest prayerRequest = await closePrayerRequest(id: event.id);
@@ -218,7 +217,7 @@ Stream<PrayerRequestsState> _mapClosePrayerRequestEventToState(
 
 Stream<PrayerRequestsState> _mapPrayerRequestReportedEventToState(
   PrayerRequestReported event,
-  Future<void> Function({@required String id}) reportPrayerRequest,
+  Future<void> Function({required String id}) reportPrayerRequest,
 ) async* {
   try {
     await reportPrayerRequest(id: event.id);
@@ -238,7 +237,7 @@ Stream<PrayerRequestsState> _mapPrayerRequestReportedEventToState(
 Stream<PrayerRequestsState> _mapMorePrayerRequestsRequestedEventToState(
   MorePrayerRequestsRequested event,
   state,
-  Future<List<PrayerRequest>> Function({@required int limit})
+  Future<List<PrayerRequest>> Function({required int limit})
       getMorePrayerRequests,
 ) async* {
   try {
@@ -261,7 +260,7 @@ Stream<PrayerRequestsState> _mapMorePrayerRequestsRequestedEventToState(
 
 Stream<PrayerRequestsState> _mapRecentPrayerRequestsRequestedEventToState(
   RecentPrayerRequestsRequested event,
-  Future<List<PrayerRequest>> Function({@required int limit}) getPrayerRequests,
+  Future<List<PrayerRequest>> Function({required int limit}) getPrayerRequests,
 ) async* {
   try {
     List<PrayerRequest> prayerRequest =
@@ -281,7 +280,7 @@ Stream<PrayerRequestsState> _mapRecentPrayerRequestsRequestedEventToState(
 Stream<PrayerRequestsState> _mapPrayerRequestCreatedEventToState(
   NewPrayerRequestCreated event,
   Future<PrayerRequest> Function(
-          {@required String request, @required bool isAnonymous})
+          {required String request, required bool isAnonymous})
       createPrayerRequest,
 ) async* {
   try {
@@ -297,7 +296,7 @@ Stream<PrayerRequestsState> _mapPrayerRequestCreatedEventToState(
 
 Stream<PrayerRequestsState> _mapPrayForRequestEventToState(
   PrayForRequest event,
-  Future<void> Function({@required String id}) prayForRequest,
+  Future<void> Function({required String id}) prayForRequest,
 ) async* {
   yield PrayForRequestLoading(id: event.id);
   try {

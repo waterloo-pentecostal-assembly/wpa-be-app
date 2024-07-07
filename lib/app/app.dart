@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/application/audio_player/audio_player_bloc.dart';
@@ -19,6 +20,12 @@ class App extends StatelessWidget {
   Future<void> initializeServices() async {
     await Firebase.initializeApp();
     await getIt<FirebaseMessagingService>().initialize();
+    FirebaseMessaging.instance
+        .getInitialMessage()
+        .then((RemoteMessage? message) => {
+              if (message != null)
+                {FirebaseMessagingService.navigationHandler(message.data)}
+            });
   }
 
   @override
@@ -58,6 +65,7 @@ class App extends StatelessWidget {
             ],
             child: MaterialApp(
               theme: ThemeData(
+                useMaterial3: false,
                 fontFamily: 'Montserrat',
                 splashColor: Colors.transparent,
                 highlightColor: Colors.transparent,

@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 
 import '../../domain/bible_series/entities.dart';
 import '../../domain/bible_series/interfaces.dart';
@@ -58,14 +57,12 @@ class BibleSeriesBloc extends Bloc<BibleSeriesEvent, BibleSeriesState> {
 Stream<BibleSeriesState> _mapContentDetailRequestedEventToState(
   ContentDetailRequested event,
   Future<SeriesContent> Function({
-    @required String seriesContentId,
-    @required String bibleSeriesId,
-  })
-      getContentDetails,
+    required String seriesContentId,
+    required String bibleSeriesId,
+  }) getContentDetails,
   Future<CompletionDetails> Function({
-    @required String seriesContentId,
-  })
-      getCompletionDetails,
+    required String seriesContentId,
+  }) getCompletionDetails,
 ) async* {
   try {
     SeriesContent seriesContentDetail = await getContentDetails(
@@ -94,7 +91,7 @@ Stream<BibleSeriesState> _mapContentDetailRequestedEventToState(
 
 Stream<BibleSeriesState> _mapGetRecentBibleSeriesEventToState(
   RecentBibleSeriesRequested event,
-  Future<List<BibleSeries>> Function({@required int limit})
+  Future<List<BibleSeries>> Function({required int limit})
       getBibleSeriesFunction,
 ) async* {
   yield FetchingBibleSeries();
@@ -115,10 +112,10 @@ Stream<BibleSeriesState> _mapGetRecentBibleSeriesEventToState(
 
 Stream<BibleSeriesState> _mapBibleSeriesDetailRequestedEventToState(
   BibleSeriesDetailRequested event,
-  Future<BibleSeries> Function({@required String bibleSeriesId})
+  Future<BibleSeries> Function({required String bibleSeriesId})
       getBibleSeriesDetailsFunction,
   Future<Map<String, CompletionDetails>> Function(
-          {@required String bibleSeriesId})
+          {required String bibleSeriesId})
       getAllCompletionDetailsFunction,
 ) async* {
   try {
@@ -149,12 +146,11 @@ Stream<BibleSeriesState> _mapBibleSeriesDetailRequestedEventToState(
 
 Stream<BibleSeriesState> _mapUpdateCompletionDetailEventToState(
     UpdateCompletionDetail event,
-    Future<CompletionDetails> Function({
-  @required String seriesContentId,
-})
-        getCompletionDetails) async* {
+    Future<CompletionDetails?> Function({
+      required String seriesContentId,
+    }) getCompletionDetails) async* {
   try {
-    CompletionDetails completionDetails = await getCompletionDetails(
+    CompletionDetails? completionDetails = await getCompletionDetails(
         seriesContentId: event.bibleSeries.seriesContentSnippet[event.scsNum]
             .availableContentTypes[event.actNum].contentId);
     BibleSeries newBibleSeries = updateCompletionDetailToSeries(

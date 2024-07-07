@@ -7,7 +7,7 @@ import '../../../../domain/bible_series/entities.dart';
 class TextContentBodyWidget extends StatelessWidget {
   final TextBody textContentBody;
 
-  const TextContentBodyWidget({Key key, this.textContentBody})
+  const TextContentBodyWidget({Key? key, required this.textContentBody})
       : super(key: key);
 
   @override

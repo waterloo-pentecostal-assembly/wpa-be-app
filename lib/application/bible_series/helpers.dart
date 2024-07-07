@@ -5,7 +5,7 @@ BibleSeries addCompletionDetailsToSeries(
   BibleSeries bibleSeries,
   Map<String, CompletionDetails> completionDetails,
 ) {
-  bibleSeries.seriesContentSnippet.forEach((date) {
+  bibleSeries.seriesContentSnippet.forEach((SeriesContentSnippet date) {
     int isCompletedCount = 0;
     int isOnTimeCount = 0;
     int isDraftCount = 0;
@@ -21,7 +21,7 @@ BibleSeries addCompletionDetailsToSeries(
 
       if (completionDetails.containsKey(contentType.contentId)) {
         CompletionDetails currentCompletionDetails =
-            completionDetails[contentType.contentId];
+            completionDetails[contentType.contentId]!;
 
         if (currentCompletionDetails.isDraft) {
           contentType.isDraft = true;
@@ -51,7 +51,7 @@ BibleSeries addCompletionDetailsToSeries(
 }
 
 BibleSeries updateCompletionDetailToSeries(BibleSeries bibleSeries,
-    CompletionDetails completionDetails, int scsNum, int actNum) {
+    CompletionDetails? completionDetails, int scsNum, int actNum) {
   int isCompletedCount = 0;
   int isOnTimeCount = 0;
   int isDraftCount = 0;

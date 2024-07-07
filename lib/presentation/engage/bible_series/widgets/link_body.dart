@@ -9,7 +9,7 @@ import 'package:wpa_app/presentation/common/toast_message.dart';
 
 class LinkBodyWidget extends StatelessWidget {
   final LinkBody linkBody;
-  const LinkBodyWidget({Key key, this.linkBody}) : super(key: key);
+  const LinkBodyWidget({Key? key, required this.linkBody}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -30,9 +30,9 @@ class LinkBodyWidget extends StatelessWidget {
     }
     widgetList.add(GestureDetector(
       onTap: () async {
-        if (await canLaunch(linkBody.properties.link)) {
-          await launch(linkBody.properties.link,
-              forceWebView: true, enableJavaScript: true);
+        Uri uri = Uri.parse(linkBody.properties.link);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri);
         } else {
           ToastMessage.showErrorToast("Error opening page", context);
         }

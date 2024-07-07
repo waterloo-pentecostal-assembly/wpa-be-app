@@ -12,7 +12,7 @@ class UserProfileInitial extends UserProfileState {}
 class NewProfilePhotoUploadStarted extends UserProfileState {
   final UploadTask uploadTask;
 
-  NewProfilePhotoUploadStarted({@required this.uploadTask});
+  NewProfilePhotoUploadStarted({required this.uploadTask});
 
   @override
   List<Object> get props => [uploadTask];
@@ -21,7 +21,7 @@ class NewProfilePhotoUploadStarted extends UserProfileState {
 class NewProfilePhotoUploadComplete extends UserProfileState {
   final File profilePhoto;
 
-  NewProfilePhotoUploadComplete({@required this.profilePhoto});
+  NewProfilePhotoUploadComplete({required this.profilePhoto});
   @override
   List<Object> get props => [];
 }
@@ -29,7 +29,7 @@ class NewProfilePhotoUploadComplete extends UserProfileState {
 class UploadProfilePhotoError extends UserProfileState {
   final String message;
 
-  UploadProfilePhotoError({@required this.message});
+  UploadProfilePhotoError({required this.message});
 
   @override
   List<Object> get props => [message, DateTime.now()];

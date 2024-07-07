@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
 import 'package:wpa_app/domain/notification_settings/entities.dart';
 
 import '../../domain/notification_settings/interfaces.dart';
@@ -35,6 +34,12 @@ class NotificationSettingsBloc
           _iNotificationSettingsService);
     } else if (event is UnsubscribedFromPrayerNotifications) {
       yield* _mapUnsubscribedFromPrayerNotificationsToState(
+          _iNotificationSettingsService);
+    } else if (event is SubscribedToTestimonyNotifications) {
+      yield* _mapSubscribedToTestimonyNotificationsToState(
+          _iNotificationSettingsService);
+    } else if (event is UnsubscribedFromTestimonyNotifications) {
+      yield* _mapUnsubscribedFromTestimonyNotificationsToState(
           _iNotificationSettingsService);
     }
   }
@@ -94,5 +99,26 @@ Stream<NotificationSettingsState>
     await notificationSettingsService.unsubscribeFromPrayerNotifications();
   } catch (e) {
     yield PrayerNotificationError(message: "Unable to unsubscribe");
+  }
+}
+
+Stream<NotificationSettingsState> _mapSubscribedToTestimonyNotificationsToState(
+  INotificationSettingsService notificationSettingsService,
+) async* {
+  try {
+    await notificationSettingsService.subscribeToTestimonyNotifications();
+  } catch (e) {
+    yield TestimonyNotificationError(message: "Unable to subscribe");
+  }
+}
+
+Stream<NotificationSettingsState>
+    _mapUnsubscribedFromTestimonyNotificationsToState(
+  INotificationSettingsService notificationSettingsService,
+) async* {
+  try {
+    await notificationSettingsService.unsubscribeFromTestimonyNotifications();
+  } catch (e) {
+    yield TestimonyNotificationError(message: "Unable to unsubscribe");
   }
 }

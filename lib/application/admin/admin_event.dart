@@ -20,6 +20,8 @@ class LoadUnverifiedUsers extends AdminEvent {}
 
 class LoadUnverifiedPrayerRequests extends AdminEvent {}
 
+class LoadUnverifiedTestimonies extends AdminEvent {}
+
 class ApprovePrayerRequest extends AdminEvent {
   final String prayerRequestId;
 
@@ -45,4 +47,22 @@ class DeleteUnverifiedUser extends AdminEvent {
 
   @override
   List<Object> get props => [userId];
+}
+
+class ApproveTestimony extends AdminEvent {
+  final String testimonyId;
+
+  ApproveTestimony(this.testimonyId);
+
+  @override
+  List<Object> get props => [testimonyId];
+}
+
+class DeleteTestimony extends AdminEvent {
+  final String testimonyId;
+
+  DeleteTestimony(this.testimonyId);
+
+  @override
+  List<Object> get props => [testimonyId];
 }

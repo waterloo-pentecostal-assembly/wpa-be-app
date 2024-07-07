@@ -12,7 +12,7 @@ class AchievementsLoading extends AchievementsState {}
 class AchievementsLoaded extends AchievementsState {
   final Achievements achievements;
 
-  AchievementsLoaded({@required this.achievements});
+  AchievementsLoaded({required this.achievements});
 
   @override
   List<Object> get props => [achievements];

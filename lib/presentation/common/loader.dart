@@ -28,9 +28,9 @@ class ColorLoader extends StatefulWidget {
   final Icon dotIcon;
 
   ColorLoader({
-    @required this.dotOneColor,
-    @required this.dotTwoColor,
-    @required this.dotThreeColor,
+    required this.dotOneColor,
+    required this.dotTwoColor,
+    required this.dotThreeColor,
     this.duration = const Duration(milliseconds: 1000),
     this.dotType = DotType.circle,
     this.dotIcon = const Icon(Icons.blur_on),
@@ -42,10 +42,10 @@ class ColorLoader extends StatefulWidget {
 
 class _ColorLoaderState extends State<ColorLoader>
     with SingleTickerProviderStateMixin {
-  Animation<double> animation_1;
-  Animation<double> animation_2;
-  Animation<double> animation_3;
-  AnimationController controller;
+  late Animation<double> animation_1;
+  late Animation<double> animation_2;
+  late Animation<double> animation_3;
+  late AnimationController controller;
 
   @override
   void initState() {
@@ -75,9 +75,7 @@ class _ColorLoaderState extends State<ColorLoader>
     );
 
     controller.addListener(() {
-      setState(() {
-        //print(animation_1.value);
-      });
+      setState(() {});
     });
 
     controller.repeat();
@@ -159,7 +157,11 @@ class Dot extends StatelessWidget {
   final DotType type;
   final Icon icon;
 
-  Dot({this.radius, this.color, this.type, this.icon});
+  Dot(
+      {required this.radius,
+      required this.color,
+      required this.type,
+      required this.icon});
 
   @override
   Widget build(BuildContext context) {

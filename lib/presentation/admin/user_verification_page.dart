@@ -16,7 +16,7 @@ class UserVerificationPage extends StatefulWidget {
 
 class _UserVerificationPageState extends State<UserVerificationPage> {
   final key = GlobalKey<AnimatedListState>();
-  List<LocalUser> userCards;
+  List<LocalUser> userCards = [];
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,7 @@ class _UserVerificationPageState extends State<UserVerificationPage> {
         }
       },
       builder: (BuildContext context, state) {
-        if (userCards != null) {
+        if (userCards.isNotEmpty) {
           return SafeArea(
               child: Scaffold(
             body: RefreshIndicator(
@@ -53,7 +53,7 @@ class _UserVerificationPageState extends State<UserVerificationPage> {
               ),
             ),
           ));
-        } else if (userCards == null) {
+        } else if (userCards.isEmpty) {
           return SafeArea(
               child: Container(
             child: Scaffold(
@@ -84,7 +84,7 @@ class _UserVerificationPageState extends State<UserVerificationPage> {
   void removeItem(int index) {
     setState(() {
       final item = userCards.removeAt(index);
-      key.currentState.removeItem(
+      key.currentState?.removeItem(
           index, (context, animation) => buildItem(item, index, animation));
     });
   }

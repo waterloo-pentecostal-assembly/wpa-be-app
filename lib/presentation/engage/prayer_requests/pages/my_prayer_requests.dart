@@ -16,7 +16,7 @@ class _MyPrayerRequestsState extends State<MyPrayerRequests>
     with AutomaticKeepAliveClientMixin {
   final GlobalKey<AnimatedListState> _myPrayerRequestsListKey =
       GlobalKey<AnimatedListState>();
-  List<PrayerRequest> _prayerRequests;
+  late List<PrayerRequest> _prayerRequests;
   Widget _child = Loader();
 
   @override
@@ -62,13 +62,13 @@ class _MyPrayerRequestsState extends State<MyPrayerRequests>
 
   void _insertAtTop(PrayerRequest prayerRequest) {
     _prayerRequests.insert(0, prayerRequest);
-    _myPrayerRequestsListKey.currentState.insertItem(0);
+    _myPrayerRequestsListKey.currentState?.insertItem(0);
   }
 
   void _delete(int indexToDelete) {
     PrayerRequest deletedPrayerRequest =
         _prayerRequests.removeAt(indexToDelete);
-    _myPrayerRequestsListKey.currentState.removeItem(
+    _myPrayerRequestsListKey.currentState?.removeItem(
       indexToDelete,
       (context, animation) =>
           _buildDeletedItem(context, deletedPrayerRequest, animation),
@@ -84,16 +84,12 @@ class _MyPrayerRequestsState extends State<MyPrayerRequests>
           listener: (context, state) {
             if (state is MyPrayerRequestDeleteComplete) {
               int indexToDelete = getIndexToDelete(state.id);
-              if (indexToDelete != null) {
-                _delete(indexToDelete);
-              }
+              _delete(indexToDelete);
             } else if (state is NewPrayerRequestLoaded) {
               _insertAtTop(state.prayerRequest);
             } else if (state is MyPrayerRequestAnsweredComplete) {
               int indexToDelete = getIndexToDelete(state.id);
-              if (indexToDelete != null) {
-                _delete(indexToDelete);
-              }
+              _delete(indexToDelete);
             }
           },
         ),
@@ -113,7 +109,7 @@ class _MyPrayerRequestsState extends State<MyPrayerRequests>
   }
 
   int getIndexToDelete(String id) {
-    int indexToDelete;
+    int indexToDelete = -1;
     for (PrayerRequest prayerRequest in _prayerRequests) {
       int index = _prayerRequests.indexOf(prayerRequest);
       if (prayerRequest.id == id) {

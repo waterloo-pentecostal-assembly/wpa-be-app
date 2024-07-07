@@ -22,9 +22,12 @@ const kMediaTileWidth = 150.0;
 const kMediaTileHeight = 75.0;
 const kPrayerRequestButtonHeight = 50.0;
 const kPrayerRequestButtonWidth = 150.0;
+const kTestimonyButtonHeight = 50.0;
+const kTestimonyButtonWidth = 150.0;
 const kLinkButtonWidth = 100.0;
 const kMediaTileDescriptionHeight = 60.0;
 const kAllPrayerRequestsCardHeight = 100.0;
+const kAllTestimoniesCardHeight = 100.0;
 const kHeadingPadding = 16.0;
 const kAdminTileHeight = 125.0;
 const kAdminTileWidth = 150.0;
@@ -33,6 +36,8 @@ const kContentChildrenHeight = 60.0;
 // Limits
 const kPrayerRequestsReportsLimit = 2;
 const kPrayerRequestPerUserLimit = 10;
+const kTestimoniesReportsLimit = 2;
+const kTestimoniesPerUserLimit = 10;
 
 // Images
 const kWpaLogoLoc = 'assets/images/wpa-logo.png';
@@ -46,6 +51,7 @@ const kEmailRegex =
 // Restrictions
 const kMaxResponseBody = 4000;
 const kMaxPrayerRequestBody = 500;
+const kMaxTestimonyBody = 500;
 const kMaxActivePrayerRequests = 10;
 
 // URLs

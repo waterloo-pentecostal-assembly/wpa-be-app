@@ -46,10 +46,7 @@ class PasswordResetForm extends StatelessWidget {
                     ),
                     child: Column(
                       children: <Widget>[
-                        if (BlocProvider.of<PasswordResetBloc>(context)
-                                .state
-                                .passwordResetError !=
-                            null) ...{
+                        ...{
                           Text(
                             BlocProvider.of<PasswordResetBloc>(context)
                                 .state
@@ -131,7 +128,7 @@ class PasswordResetForm extends StatelessWidget {
                                   child: TextButton(
                                     style: ButtonStyle(backgroundColor:
                                         MaterialStateProperty.resolveWith<
-                                            Color>((states) {
+                                            Color?>((states) {
                                       if (states
                                           .contains(MaterialState.disabled)) {
                                         return Colors.grey[400];

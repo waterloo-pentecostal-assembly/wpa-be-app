@@ -10,7 +10,7 @@ abstract class UserProfileEvent extends Equatable {
 class UploadProfilePhoto extends UserProfileEvent {
   final File profilePhoto;
 
-  UploadProfilePhoto({@required this.profilePhoto});
+  UploadProfilePhoto({required this.profilePhoto});
 
   @override
   List<Object> get props => [profilePhoto];

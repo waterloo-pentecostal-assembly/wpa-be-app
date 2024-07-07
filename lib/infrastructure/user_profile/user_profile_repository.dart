@@ -61,12 +61,11 @@ class UserProfileRepository implements IUserProfileRepository {
   }
 
   @override
-  // ignore: missing_return
   Future<void> updateUserCollection(Map<String, dynamic> data, String userId) {
     try {
       return _firestore.collection('users').doc(userId).update(data);
-    } catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
     }
   }
 }

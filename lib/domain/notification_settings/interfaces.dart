@@ -7,5 +7,7 @@ abstract class INotificationSettingsService {
   Future<void> unsubscribeFromDailyEngagementReminder();
   Future<void> subscribeToPrayerNotifications();
   Future<void> unsubscribeFromPrayerNotifications();
+  Future<void> subscribeToTestimonyNotifications();
+  Future<void> unsubscribeFromTestimonyNotifications();
   Future<NotificationSettingsEntity> getNotificationSettings();
 }
