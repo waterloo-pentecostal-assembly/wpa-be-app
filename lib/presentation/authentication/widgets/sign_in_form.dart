@@ -187,7 +187,7 @@ class SignInForm extends StatelessWidget {
                                           .resolveWith<Color?>(
                                         (states) {
                                           if (states.contains(
-                                              MaterialState.disabled)) {
+                                              WidgetState.disabled)) {
                                             return Colors.grey.shade400;
                                           }
                                           return null;
