@@ -12,34 +12,19 @@ part 'achievements_state.dart';
 class AchievementsBloc extends Bloc<AchievementsEvent, AchievementsState> {
   final IAchievementsRepository _iAchievementsRepository;
 
-  AchievementsBloc(this._iAchievementsRepository)
-      : super(AchievementsLoading());
+  AchievementsBloc(this._iAchievementsRepository) : super(AchievementsLoading()) {
+    on<WatchAchievementsStarted>(_onWatchAchievementsStarted);
+    on<AchievementsReceived>(_onAchievementsReceived);
+    on<AchievementsErrorReceived>(_onAchievementsErrorReceived);
+    on<AchievementsRequested>(_onAchievementsRequested);
+  }
 
   StreamSubscription<Achievements>? _achievementsStreamSubscription;
 
-  @override
-  Stream<AchievementsState> mapEventToState(
-    AchievementsEvent event,
-  ) async* {
-    if (event is WatchAchievementsStarted) {
-      yield* _mapWatchAchievementsStartedToState(event);
-    } else if (event is AchievementsReceived) {
-      yield AchievementsLoaded(
-        achievements: event.achievements,
-      );
-    } else if (event is AchievementsErrorReceived) {
-      yield AchievementsError();
-    } else if (event is AchievementsRequested) {
-      yield* _mapAchievementsRequestedToState(
-        event,
-        _iAchievementsRepository.getAchievements,
-      );
-    }
-  }
-
-  Stream<AchievementsState> _mapWatchAchievementsStartedToState(
+  Future<void> _onWatchAchievementsStarted(
     WatchAchievementsStarted event,
-  ) async* {
+    Emitter<AchievementsState> emit,
+  ) async {
     await _achievementsStreamSubscription?.cancel();
     _achievementsStreamSubscription =
         _iAchievementsRepository.watchAchievements().listen(
@@ -53,24 +38,40 @@ class AchievementsBloc extends Bloc<AchievementsEvent, AchievementsState> {
           );
   }
 
+  Future<void> _onAchievementsReceived(
+    AchievementsReceived event,
+    Emitter<AchievementsState> emit,
+  ) async {
+    emit(AchievementsLoaded(
+      achievements: event.achievements,
+    ));
+  }
+
+  Future<void> _onAchievementsErrorReceived(
+    AchievementsErrorReceived event,
+    Emitter<AchievementsState> emit,
+  ) async {
+    emit(AchievementsError());
+  }
+
+  Future<void> _onAchievementsRequested(
+    AchievementsRequested event,
+    Emitter<AchievementsState> emit,
+  ) async {
+    emit(AchievementsLoading());
+    try {
+      Achievements achievements = await _iAchievementsRepository.getAchievements();
+      emit(AchievementsLoaded(
+        achievements: achievements,
+      ));
+    } catch (_) {
+      emit(AchievementsError());
+    }
+  }
+
   @override
   Future<void> close() async {
     await _achievementsStreamSubscription?.cancel();
     return super.close();
-  }
-}
-
-Stream<AchievementsState> _mapAchievementsRequestedToState(
-  AchievementsEvent event,
-  Future<Achievements> Function() getAchievementsFunction,
-) async* {
-  yield AchievementsLoading();
-  try {
-    Achievements achievements = await getAchievementsFunction();
-    yield AchievementsLoaded(
-      achievements: achievements,
-    );
-  } catch (_) {
-    yield AchievementsError();
   }
 }

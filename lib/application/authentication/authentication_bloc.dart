@@ -14,37 +14,48 @@ class AuthenticationBloc
     extends Bloc<AuthenticationEvent, AuthenticationState> {
   final IAuthenticationFacade _iAuthenticationFacade;
 
-  AuthenticationBloc(this._iAuthenticationFacade)
-      : super(AuthenticationInitial());
+  AuthenticationBloc(this._iAuthenticationFacade) : super(AuthenticationInitial()) {
+    on<RequestAuthenticationState>(_onRequestAuthenticationState);
+    on<SignOut>(_onSignOut);
+    on<InitiateDelete>(_onInitiateDelete);
+  }
 
-  @override
-  Stream<AuthenticationState> mapEventToState(
-    AuthenticationEvent event,
-  ) async* {
-    if (event is RequestAuthenticationState) {
-      try {
-        LocalUser localUser = await _iAuthenticationFacade.getSignedInUser();
+  Future<void> _onRequestAuthenticationState(
+    RequestAuthenticationState event,
+    Emitter<AuthenticationState> emit,
+  ) async {
+    try {
+      LocalUser localUser = await _iAuthenticationFacade.getSignedInUser();
 
-        // Register user infomation with getIt to have access to it throughout the application
-        if (!getIt.isRegistered<LocalUser>()) {
-          getIt.registerLazySingleton(() => localUser);
-        }
-
-        yield Authenticated(localUser);
-      } catch (_) {
-        yield Unauthenticated();
+      // Register user infomation with getIt to have access to it throughout the application
+      if (!getIt.isRegistered<LocalUser>()) {
+        getIt.registerLazySingleton(() => localUser);
       }
-    } else if (event is SignOut) {
-      await _iAuthenticationFacade.signOut();
-      yield Unauthenticated();
-    } else if (event is InitiateDelete) {
-      try {
-        final LocalUser user = getIt<LocalUser>();
-        await _iAuthenticationFacade.initiateDelete(user.id);
-        yield Unauthenticated();
-      } catch (e) {
-        yield Error("Unable to initiate account deletion");
-      }
+
+      emit(Authenticated(localUser));
+    } catch (_) {
+      emit(Unauthenticated());
+    }
+  }
+
+  Future<void> _onSignOut(
+    SignOut event,
+    Emitter<AuthenticationState> emit,
+  ) async {
+    await _iAuthenticationFacade.signOut();
+    emit(Unauthenticated());
+  }
+
+  Future<void> _onInitiateDelete(
+    InitiateDelete event,
+    Emitter<AuthenticationState> emit,
+  ) async {
+    try {
+      final LocalUser user = getIt<LocalUser>();
+      await _iAuthenticationFacade.initiateDelete(user.id);
+      emit(Unauthenticated());
+    } catch (e) {
+      emit(Error("Unable to initiate account deletion"));
     }
   }
 }

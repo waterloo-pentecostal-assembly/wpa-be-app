@@ -16,121 +16,107 @@ part 'sign_in_state.dart';
 class SignInBloc extends Bloc<SignInEvent, SignInState> {
   final IAuthenticationFacade _iAuthenticationFacade;
 
-  SignInBloc(this._iAuthenticationFacade) : super(SignInState.initial());
+  SignInBloc(this._iAuthenticationFacade) : super(SignInState.initial()) {
+    on<EmailChanged>(_onEmailChanged);
+    on<PasswordChanged>(_onPasswordChanged);
+    on<SignInWithEmailAndPassword>(_onSignInWithEmailAndPassword);
+  }
 
-  @override
-  Stream<SignInState> mapEventToState(
-    SignInEvent event,
-  ) async* {
-    if (event is EmailChanged) {
-      yield* _mapEmailChangedToState(event, state);
-    } else if (event is PasswordChanged) {
-      yield* _mapPasswordChangedToState(event, state);
-    } else if (event is SignInWithEmailAndPassword) {
-      yield* _mapSignInWithEmailAndPasswordToState(
-        event,
-        state,
-        _iAuthenticationFacade,
+  Future<void> _onEmailChanged(
+    EmailChanged event,
+    Emitter<SignInState> emit,
+  ) async {
+    try {
+      EmailAddress email = EmailAddress(event.email);
+      emit(state.copyWith(
+        emailAddress: email.value,
+        emailAddressError: '',
+      ));
+    } on ValueObjectException catch (e) {
+      emit(state.copyWith(
+        emailAddress: event.email,
+        emailAddressError: e.message,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        emailAddress: event.email,
+        emailAddressError: 'An unknown error occurred',
+      ));
+    }
+  }
+
+  Future<void> _onPasswordChanged(
+    PasswordChanged event,
+    Emitter<SignInState> emit,
+  ) async {
+    try {
+      Password password = Password(event.password);
+      emit(state.copyWith(
+        password: password.value,
+        passwordError: '',
+      ));
+    } on ValueObjectException catch (e) {
+      emit(state.copyWith(
+        password: event.password,
+        passwordError: e.message,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        password: event.password,
+        passwordError: 'An unknown error occurred',
+      ));
+    }
+  }
+
+  Future<void> _onSignInWithEmailAndPassword(
+    SignInWithEmailAndPassword event,
+    Emitter<SignInState> emit,
+  ) async {
+    emit(state.copyWith(
+      submitting: true,
+    ));
+
+    try {
+      LocalUser localUser =
+          await _iAuthenticationFacade.signInWithEmailAndPassword(
+        emailAddress: EmailAddress(state.emailAddress),
+        password: Password(state.password),
       );
+
+      // Register user infomation with getIt to have access to it throughout the application
+      if (getIt.isRegistered<LocalUser>()) {
+        getIt.unregister<LocalUser>();
+      }
+      getIt.registerLazySingleton(() => localUser);
+
+      // Check if device token is saved
+      bool deviceTokenExists =
+          await _iAuthenticationFacade.deviceTokenExists(localUser.id);
+
+      // If not, save it on login
+      if (!deviceTokenExists) {
+        _iAuthenticationFacade.addDeviceToken(localUser.id);
+      }
+
+      emit(state.copyWith(
+        submitting: false,
+        signInSuccess: true,
+        signInError: null,
+      ));
+    } on BaseApplicationException catch (e) {
+      _iAuthenticationFacade.signOut();
+      emit(state.copyWith(
+        submitting: false,
+        signInSuccess: false,
+        signInError: e.message,
+      ));
+    } catch (e) {
+      _iAuthenticationFacade.signOut();
+      emit(state.copyWith(
+        submitting: false,
+        signInSuccess: false,
+        signInError: 'An unknown error occurred',
+      ));
     }
-  }
-}
-
-Stream<SignInState> _mapEmailChangedToState(
-  EmailChanged event,
-  SignInState state,
-) async* {
-  try {
-    EmailAddress email = EmailAddress(event.email);
-    yield state.copyWith(
-      emailAddress: email.value,
-      emailAddressError: '',
-    );
-  } on ValueObjectException catch (e) {
-    yield state.copyWith(
-      emailAddress: event.email,
-      emailAddressError: e.message,
-    );
-  } catch (e) {
-    yield state.copyWith(
-      emailAddress: event.email,
-      emailAddressError: 'An unknown error occurred',
-    );
-  }
-}
-
-Stream<SignInState> _mapPasswordChangedToState(
-  PasswordChanged event,
-  SignInState state,
-) async* {
-  try {
-    Password password = Password(event.password);
-    yield state.copyWith(
-      password: password.value,
-      passwordError: '',
-    );
-  } on ValueObjectException catch (e) {
-    yield state.copyWith(
-      password: event.password,
-      passwordError: e.message,
-    );
-  } catch (e) {
-    yield state.copyWith(
-      password: event.password,
-      passwordError: 'An unknown error occurred',
-    );
-  }
-}
-
-Stream<SignInState> _mapSignInWithEmailAndPasswordToState(
-  SignInWithEmailAndPassword event,
-  SignInState state,
-  IAuthenticationFacade iAuthenticationFacade,
-) async* {
-  yield state.copyWith(
-    submitting: true,
-  );
-
-  try {
-    LocalUser localUser =
-        await iAuthenticationFacade.signInWithEmailAndPassword(
-      emailAddress: EmailAddress(state.emailAddress),
-      password: Password(state.password),
-    );
-
-    // Register user infomation with getIt to have access to it throughout the application
-    if (getIt.isRegistered<LocalUser>()) {
-      getIt.unregister<LocalUser>();
-    }
-    getIt.registerLazySingleton(() => localUser);
-
-    // Check if device token is saved
-    bool deviceTokenExists =
-        await iAuthenticationFacade.deviceTokenExists(localUser.id);
-
-    // If not, save it on login
-    if (!deviceTokenExists) {
-      iAuthenticationFacade.addDeviceToken(localUser.id);
-    }
-
-    yield state.copyWith(
-      submitting: false,
-      signInSuccess: true,
-      signInError: null,
-    );
-  } on BaseApplicationException catch (e) {
-    iAuthenticationFacade.signOut();
-    yield state.copyWith(
-      submitting: false,
-      signInSuccess: false,
-      signInError: e.message,
-    );
-  } catch (e) {
-    iAuthenticationFacade.signOut();
-    yield state.copyWith(
-      submitting: false,
-      signInSuccess: false,
-      signInError: 'An unknown error occurred',
-    );
   }
 }
