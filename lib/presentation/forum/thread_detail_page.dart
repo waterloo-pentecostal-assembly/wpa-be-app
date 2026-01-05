@@ -8,7 +8,7 @@ import 'package:timeago/timeago.dart' as timeago;
 
 import '../../application/authentication/authentication_bloc.dart';
 
-class ThreadDetailPage extends StatelessWidget {
+class ThreadDetailPage extends StatefulWidget {
   final String threadId;
   final String forumId;
   final String title;
@@ -23,12 +23,27 @@ class ThreadDetailPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  _ThreadDetailPageState createState() => _ThreadDetailPageState();
+}
+
+class _ThreadDetailPageState extends State<ThreadDetailPage> {
+  String? _replyToCommentId;
+  String? _replyToAuthorName;
+  final TextEditingController _textController = TextEditingController();
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) =>
-          getIt<ThreadBloc>()..add(LoadThreadComments(threadId, forumId)),
+      create: (context) => getIt<ThreadBloc>()
+        ..add(LoadThreadComments(widget.threadId, widget.forumId)),
       child: Scaffold(
-        appBar: AppBar(title: Text(title)),
+        appBar: AppBar(title: Text(widget.title)),
         body: Builder(builder: (context) {
           return Column(
             children: [
@@ -42,11 +57,18 @@ class ThreadDetailPage extends StatelessWidget {
                         return Center(
                             child: Text("No comments yet. Be the first!"));
                       }
+
+                      final sortedComments = _getSortedComments(state.comments);
+
                       return ListView.builder(
-                        itemCount: state.comments.length,
+                        itemCount: sortedComments.length,
                         itemBuilder: (context, index) {
-                          final comment = state.comments[index];
-                          return _buildCommentTile(context, comment);
+                          final comment = sortedComments[index];
+                          final isReply = comment.parentId != null;
+                          return Padding(
+                            padding: EdgeInsets.only(left: isReply ? 32.0 : 0),
+                            child: _buildCommentTile(context, comment),
+                          );
                         },
                       );
                     } else if (state is ThreadError) {
@@ -56,8 +78,8 @@ class ThreadDetailPage extends StatelessWidget {
                   },
                 ),
               ),
-              if (!isFrozen) _buildInputArea(context),
-              if (isFrozen)
+              if (!widget.isFrozen) _buildInputArea(context),
+              if (widget.isFrozen)
                 Padding(
                   padding: EdgeInsets.all(16),
                   child: Text("This thread is frozen.",
@@ -68,6 +90,25 @@ class ThreadDetailPage extends StatelessWidget {
         }),
       ),
     );
+  }
+
+  List<Comment> _getSortedComments(List<Comment> comments) {
+    final parentComments = comments.where((c) => c.parentId == null).toList();
+    final childComments = comments.where((c) => c.parentId != null).toList();
+
+    // Sort parents by time
+    parentComments.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
+    final List<Comment> result = [];
+    for (var parent in parentComments) {
+      result.add(parent);
+      // Find children for this parent
+      final children =
+          childComments.where((c) => c.parentId == parent.id).toList();
+      children.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      result.addAll(children);
+    }
+    return result;
   }
 
   Widget _buildCommentTile(BuildContext context, Comment comment) {
@@ -98,13 +139,15 @@ class ThreadDetailPage extends StatelessWidget {
                     onSelected: (value) {
                       if (value == 'report') {
                         BlocProvider.of<ThreadBloc>(context).add(ReportComment(
-                            comment.id, threadId, forumId, "User Report"));
+                            comment.id,
+                            widget.threadId,
+                            widget.forumId,
+                            "User Report"));
                         ScaffoldMessenger.of(context)
                             .showSnackBar(SnackBar(content: Text("Reported")));
                       } else if (value == 'delete') {
-                        // Check ownership or admin status ideally
-                        BlocProvider.of<ThreadBloc>(context)
-                            .add(DeleteComment(comment.id, threadId, forumId));
+                        BlocProvider.of<ThreadBloc>(context).add(DeleteComment(
+                            comment.id, widget.threadId, widget.forumId));
                       }
                     },
                     itemBuilder: (context) => [
@@ -121,11 +164,24 @@ class ThreadDetailPage extends StatelessWidget {
                 IconButton(
                   icon: Icon(Icons.thumb_up_alt_outlined, size: 16),
                   onPressed: () {
-                    BlocProvider.of<ThreadBloc>(context)
-                        .add(LikeComment(comment.id, threadId, forumId));
+                    BlocProvider.of<ThreadBloc>(context).add(LikeComment(
+                        comment.id, widget.threadId, widget.forumId));
                   },
                 ),
                 Text("${comment.likeCount}"),
+                Spacer(),
+                // Only allow replying to parent comments (single level nesting)
+                if (comment.parentId == null && !comment.isDeleted)
+                  TextButton(
+                      onPressed: () {
+                        setState(() {
+                          _replyToCommentId = comment.id;
+                          _replyToAuthorName = comment.authorName;
+                        });
+                        // Focus input
+                        // We might need a FocusNode if we really want to auto-focus
+                      },
+                      child: Text("Reply", style: TextStyle(fontSize: 12)))
               ])
             ])),
       ),
@@ -133,63 +189,89 @@ class ThreadDetailPage extends StatelessWidget {
   }
 
   Widget _buildInputArea(BuildContext context) {
-    final _textController = TextEditingController();
-
     return Container(
       padding: EdgeInsets.all(8),
       color: Colors.white,
-      child: Row(
+      child: Column(
         children: [
-          Expanded(
-            child: TextField(
-              controller: _textController,
-              decoration: InputDecoration(
-                  hintText: "Write a comment...",
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(20)),
-                  contentPadding:
-                      EdgeInsets.symmetric(horizontal: 16, vertical: 8)),
+          if (_replyToCommentId != null)
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              color: Colors.grey.shade200,
+              child: Row(
+                children: [
+                  Text("Replying to $_replyToAuthorName"),
+                  Spacer(),
+                  IconButton(
+                    icon: Icon(Icons.close, size: 16),
+                    onPressed: () {
+                      setState(() {
+                        _replyToCommentId = null;
+                        _replyToAuthorName = null;
+                      });
+                    },
+                  )
+                ],
+              ),
             ),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _textController,
+                  decoration: InputDecoration(
+                      hintText: "Write a comment...",
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(20)),
+                      contentPadding:
+                          EdgeInsets.symmetric(horizontal: 16, vertical: 8)),
+                ),
+              ),
+              IconButton(
+                icon: Icon(Icons.send),
+                onPressed: () {
+                  if (_textController.text.isNotEmpty) {
+                    final authState =
+                        BlocProvider.of<AuthenticationBloc>(context).state;
+                    String authorId = '';
+                    String authorName = 'Anonymous';
+                    String? authorImage;
+
+                    if (authState is Authenticated) {
+                      authorId = authState.user.id;
+                      authorName = authState.user.fullName;
+                      authorImage = authState.user.profilePhotoUrl;
+                    }
+
+                    BlocProvider.of<ThreadBloc>(context).add(
+                      AddComment(
+                          Comment(
+                              id: '',
+                              threadId: widget.threadId,
+                              body: _textController.text,
+                              authorId: authorId,
+                              authorName: authorName,
+                              authorImageUrl: authorImage,
+                              createdAt: Timestamp.now(),
+                              updatedAt: Timestamp.now(),
+                              isHidden: false,
+                              isDeleted: false,
+                              likeCount: 0,
+                              reportCount: 0,
+                              parentId: _replyToCommentId),
+                          widget.forumId),
+                    );
+                    _textController.clear();
+                    setState(() {
+                      _replyToCommentId = null;
+                      _replyToAuthorName = null;
+                    });
+                    FocusScope.of(context).unfocus();
+                  }
+                },
+              )
+            ],
           ),
-          IconButton(
-            icon: Icon(Icons.send),
-            onPressed: () {
-              if (_textController.text.isNotEmpty) {
-                final authState =
-                    BlocProvider.of<AuthenticationBloc>(context).state;
-                String authorId = '';
-                String authorName = 'Anonymous';
-                String? authorImage;
-
-                if (authState is Authenticated) {
-                  authorId = authState.user.id;
-                  authorName = authState.user.fullName;
-                  authorImage = authState.user.profilePhotoUrl;
-                }
-
-                BlocProvider.of<ThreadBloc>(context).add(
-                  AddComment(
-                      Comment(
-                        id: '',
-                        threadId: threadId,
-                        body: _textController.text,
-                        authorId: authorId,
-                        authorName: authorName,
-                        authorImageUrl: authorImage,
-                        createdAt: Timestamp.now(),
-                        updatedAt: Timestamp.now(),
-                        isHidden: false,
-                        isDeleted: false,
-                        likeCount: 0,
-                        reportCount: 0,
-                      ),
-                      forumId),
-                );
-                _textController.clear();
-                FocusScope.of(context).unfocus();
-              }
-            },
-          )
         ],
       ),
     );
