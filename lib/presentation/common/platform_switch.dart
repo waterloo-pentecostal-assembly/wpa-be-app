@@ -56,7 +56,7 @@ class _PlatformSwitchState extends State<PlatformSwitch> {
       value: widget.value,
       onChanged: widget.onChanged,
       activeTrackColor: kWpaBlue.withValues(alpha: 0.25),
-      activeColor: kWpaBlue.withValues(alpha: 0.6),
+      activeThumbColor: kWpaBlue.withValues(alpha: 0.6),
     );
   }
 
