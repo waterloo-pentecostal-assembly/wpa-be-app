@@ -14,6 +14,8 @@ import '../presentation/authentication/sign_up_page.dart';
 import '../presentation/common/layout_factory.dart';
 import '../presentation/index.dart';
 import '../presentation/splash/splash_page.dart';
+import '../presentation/forum/forum_page.dart';
+import '../presentation/forum/thread_detail_page.dart';
 import '../services/firebase_messaging_service.dart';
 import 'injection.dart';
 

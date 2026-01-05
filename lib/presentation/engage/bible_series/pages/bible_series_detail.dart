@@ -112,6 +112,29 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                                 ),
                                 onPressed: () => Navigator.pop(context),
                                 color: Colors.white,
+                              ),
+                              Spacer(),
+                              IconButton(
+                                icon: Icon(
+                                  Icons.forum,
+                                  size: getIt<LayoutFactory>()
+                                      .getDimension(baseDimension: 24.0),
+                                ),
+                                onPressed: () {
+                                  print("Forum clicked");
+                                  print(bibleSeries.id);
+                                  print(bibleSeries.title);
+                                  // Navigator.pushNamed(context, '/prayer_requests');
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/forum',
+                                    arguments: {
+                                      'forumId': bibleSeries.id,
+                                      'title': bibleSeries.title
+                                    },
+                                  );
+                                },
+                                color: Colors.white,
                               )
                             ],
                           ),
