@@ -158,7 +158,7 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName>
                             width: profilePhotoDiameter,
                             child: Image.asset(kProfilePhotoPlaceholder)),
                         Container(
-                          color: Colors.black.withOpacity(0.5),
+                          color: Colors.black.withValues(alpha: 0.5),
                           width: profilePhotoDiameter,
                           height: 30,
                           child: Container(
@@ -214,7 +214,7 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName>
                     GestureDetector(
                       onTap: selectNewProfileImage,
                       child: Container(
-                        color: Colors.black.withOpacity(0.5),
+                        color: Colors.black.withValues(alpha: 0.5),
                         width: profilePhotoDiameter,
                         height: 30,
                         child: Container(
@@ -597,7 +597,7 @@ class Other extends StatelessWidget {
                                   foregroundColor: Colors.white,
                                   minimumSize: Size(90, 30),
                                   backgroundColor:
-                                      kDarkGreyColor.withOpacity(0.5),
+                                      kDarkGreyColor.withValues(alpha: 0.5),
                                   padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
                                   tapTargetSize:
                                       MaterialTapTargetSize.shrinkWrap),
@@ -614,7 +614,8 @@ class Other extends StatelessWidget {
                               style: TextButton.styleFrom(
                                   foregroundColor: Colors.white,
                                   minimumSize: Size(90, 30),
-                                  backgroundColor: kWpaBlue.withOpacity(0.8),
+                                  backgroundColor:
+                                      kWpaBlue.withValues(alpha: 0.8),
                                   padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
                                   tapTargetSize:
                                       MaterialTapTargetSize.shrinkWrap),

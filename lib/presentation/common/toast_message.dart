@@ -7,11 +7,12 @@ import 'text_factory.dart';
 
 class ToastMessage {
   ToastMessage.showErrorToast(String errorMessage, BuildContext context) {
-    this.showToast(errorMessage, context, kErrorTextColor.withOpacity(0.9));
+    this.showToast(
+        errorMessage, context, kErrorTextColor.withValues(alpha: 0.9));
   }
 
   ToastMessage.showInfoToast(String infoMessage, BuildContext context) {
-    this.showToast(infoMessage, context, kSuccessColor.withOpacity(0.9));
+    this.showToast(infoMessage, context, kSuccessColor.withValues(alpha: 0.9));
   }
 
   showToast(String message, BuildContext context, Color color) {

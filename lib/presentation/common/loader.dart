@@ -9,9 +9,9 @@ class Loader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Center(
       child: ColorLoader(
-        dotOneColor: kWpaBlue.withOpacity(1),
-        dotTwoColor: kWpaBlue.withOpacity(0.8),
-        dotThreeColor: kWpaBlue.withOpacity(0.6),
+        dotOneColor: kWpaBlue.withValues(alpha: 1),
+        dotTwoColor: kWpaBlue.withValues(alpha: 0.8),
+        dotThreeColor: kWpaBlue.withValues(alpha: 0.6),
       ),
     );
   }

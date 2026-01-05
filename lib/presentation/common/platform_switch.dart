@@ -40,7 +40,7 @@ class _PlatformSwitchState extends State<PlatformSwitch> {
     return CupertinoSwitch(
       value: widget.value,
       onChanged: widget.onChanged,
-      activeColor: kWpaBlue.withOpacity(0.6),
+      activeTrackColor: kWpaBlue.withValues(alpha: 0.6),
     );
   }
 
@@ -55,8 +55,8 @@ class _PlatformSwitchState extends State<PlatformSwitch> {
     return Switch(
       value: widget.value,
       onChanged: widget.onChanged,
-      activeTrackColor: kWpaBlue.withOpacity(0.25),
-      activeColor: kWpaBlue.withOpacity(0.6),
+      activeTrackColor: kWpaBlue.withValues(alpha: 0.25),
+      activeColor: kWpaBlue.withValues(alpha: 0.6),
     );
   }
 

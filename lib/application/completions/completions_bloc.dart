@@ -63,7 +63,6 @@ class CompletionsBloc extends Bloc<CompletionsEvent, CompletionsState> {
     MarkAsComplete event,
     Emitter<CompletionsState> emit,
   ) async {
-    final LocalUser user = getIt<LocalUser>();
     try {
       String id = state.id;
       if (id == '') {
@@ -74,22 +73,17 @@ class CompletionsBloc extends Bloc<CompletionsEvent, CompletionsState> {
             completionDetails: event.completionDetails, completionId: id);
       }
       getIt<FirebaseAnalytics>().logEvent(name: 'engagement_completed');
-      if (state.responses != null) {
-        String responseId = await _iCompletionsRepository.putResponses(
-            completionId: id, responses: state.responses!);
-        Responses newResponse = Responses(
-          id: responseId,
-          responses: state.responses!.responses,
-        );
-        emit(state.copyWith(
-            isComplete: true,
-            id: id,
-            responses: newResponse,
-            downloadURL: state.downloadURL));
-      } else {
-        emit(state.copyWith(
-            isComplete: true, id: id, downloadURL: state.downloadURL));
-      }
+      String responseId = await _iCompletionsRepository.putResponses(
+          completionId: id, responses: state.responses);
+      Responses newResponse = Responses(
+        id: responseId,
+        responses: state.responses.responses,
+      );
+      emit(state.copyWith(
+          isComplete: true,
+          id: id,
+          responses: newResponse,
+          downloadURL: state.downloadURL));
     } on BaseApplicationException catch (e) {
       emit(state.copyWith(
         errorMessage: e.message,
@@ -105,7 +99,6 @@ class CompletionsBloc extends Bloc<CompletionsEvent, CompletionsState> {
     MarkAsDraft event,
     Emitter<CompletionsState> emit,
   ) async {
-    final LocalUser user = getIt<LocalUser>();
     try {
       //checks if saving as draft is necessary, if not, return original state
       if (state.isComplete == false) {
@@ -115,11 +108,10 @@ class CompletionsBloc extends Bloc<CompletionsEvent, CompletionsState> {
               completionDetails: event.completionDetails);
         }
         String responseId = await _iCompletionsRepository.putResponses(
-            completionId: id, responses: state.responses!);
+            completionId: id, responses: state.responses);
         Responses newResponse =
             Responses(id: responseId, responses: state.responses.responses);
-        emit(
-            state.copyWith(isComplete: false, id: id, responses: newResponse));
+        emit(state.copyWith(isComplete: false, id: id, responses: newResponse));
       } else {
         // yield state; // No-op
       }
@@ -139,7 +131,7 @@ class CompletionsBloc extends Bloc<CompletionsEvent, CompletionsState> {
     Emitter<CompletionsState> emit,
   ) async {
     try {
-      if (state.responses != null) {
+      if (state.responses.responses.isNotEmpty) {
         await _iCompletionsRepository.markAsIncomplete(
             completionId: event.id, isResponsePossible: true);
       } else {
@@ -173,7 +165,7 @@ class CompletionsBloc extends Bloc<CompletionsEvent, CompletionsState> {
               event.contentNum.toString(),
               event.questionNum.toString(),
               ResponseType.TEXT,
-              state.responses!.id,
+              state.responses.id,
               user.id)));
     } on BaseApplicationException catch (e) {
       emit(state.copyWith(
@@ -194,7 +186,7 @@ class CompletionsBloc extends Bloc<CompletionsEvent, CompletionsState> {
       String id = await _iCompletionsRepository.markAsComplete(
           completionDetails: event.completionDetails);
       await _iCompletionsRepository.putResponses(
-          completionId: id, responses: state.responses!);
+          completionId: id, responses: state.responses);
       emit(state.copyWith(isComplete: true, id: id));
     } on BaseApplicationException catch (e) {
       emit(state.copyWith(
@@ -223,8 +215,8 @@ class CompletionsBloc extends Bloc<CompletionsEvent, CompletionsState> {
               List<String> downloadURLList = [];
               List<String> thumbnailURLList = [];
               String thumbnail = toThumbnail(entry2.value.response);
-              String thumbnailURL =
-                  await _iCompletionsRepository.getDownloadURL(gsUrl: thumbnail);
+              String thumbnailURL = await _iCompletionsRepository
+                  .getDownloadURL(gsUrl: thumbnail);
               String url = await _iCompletionsRepository.getDownloadURL(
                   gsUrl: entry2.value.response);
               thumbnailURLList.add(thumbnailURL);
@@ -343,7 +335,6 @@ class CompletionsBloc extends Bloc<CompletionsEvent, CompletionsState> {
     Emitter<CompletionsState> emit,
   ) async {
     try {
-      final LocalUser user = getIt<LocalUser>();
       Map<String, List<String>>? downloadMap = state.downloadURL;
       Map<String, List<String>>? thumbnailMap = state.thumbnailURL;
       Map<String, List<File>>? localImage = state.localImage;
@@ -369,7 +360,7 @@ class CompletionsBloc extends Bloc<CompletionsEvent, CompletionsState> {
       }
 
       Map<String, Map<String, ResponseDetails>> responses =
-          state.responses!.responses;
+          state.responses.responses;
       responses[event.contentNum.toString()]!.remove(responsesIndex);
       if (responses[event.contentNum.toString()]!.isEmpty) {
         responses.remove(event.contentNum.toString());
@@ -383,8 +374,8 @@ class CompletionsBloc extends Bloc<CompletionsEvent, CompletionsState> {
         Responses newResponses = Responses(
           responses: Map(),
         );
-        emit(state.copyWith(
-            responses: newResponses, id: '', isComplete: false));
+        emit(
+            state.copyWith(responses: newResponses, id: '', isComplete: false));
       } else {
         Responses newResponses = Responses(
           id: state.responses.id,

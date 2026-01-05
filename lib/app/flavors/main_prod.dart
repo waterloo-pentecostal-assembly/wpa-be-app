@@ -5,7 +5,8 @@ import '../injection.dart';
 import '../app.dart';
 
 void main() async {
-  initializeInjections(
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeInjections(
       useLocalFirestore: false,
       useLocalAuth: false,
       appConfig: AppConfig(

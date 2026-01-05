@@ -54,7 +54,7 @@ import 'app_config.dart';
 // Global ServiceLocator
 GetIt getIt = GetIt.instance;
 
-void initializeInjections({
+Future<void> initializeInjections({
   required useLocalFirestore,
   required useLocalAuth,
   required AppConfig appConfig,

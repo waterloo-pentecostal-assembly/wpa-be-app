@@ -40,7 +40,7 @@ class PrayerRequestCard extends StatelessWidget {
           color: kCardOverlayGrey,
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withOpacity(0.25),
+              color: Colors.grey.withValues(alpha: 0.25),
               blurRadius: 8.0,
               offset: Offset(0, 3),
             )
@@ -348,7 +348,7 @@ class PendingIndicator extends StatelessWidget {
           tapTargetSize: MaterialTapTargetSize.shrinkWrap),
       onPressed: null,
       child: getIt<TextFactory>()
-          .regular('Pending', color: kWarningColor.withOpacity(0.8)),
+          .regular('Pending', color: kWarningColor.withValues(alpha: 0.8)),
     );
   }
 }

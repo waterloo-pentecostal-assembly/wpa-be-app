@@ -78,7 +78,7 @@ class OptionsList extends StatelessWidget {
                       borderRadius: BorderRadius.all(Radius.circular(15)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.withOpacity(0.25),
+                          color: Colors.grey.withValues(alpha: 0.25),
                           blurRadius: 8.0,
                           offset: Offset(0, 3),
                         ),
@@ -117,7 +117,7 @@ class OptionsList extends StatelessWidget {
                       borderRadius: BorderRadius.all(Radius.circular(15)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.withOpacity(0.25),
+                          color: Colors.grey.withValues(alpha: 0.25),
                           blurRadius: 8.0,
                           offset: Offset(0, 3),
                         ),
@@ -160,7 +160,7 @@ class OptionsList extends StatelessWidget {
                       borderRadius: BorderRadius.all(Radius.circular(15)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.withOpacity(0.25),
+                          color: Colors.grey.withValues(alpha: 0.25),
                           blurRadius: 8.0,
                           offset: Offset(0, 3),
                         ),

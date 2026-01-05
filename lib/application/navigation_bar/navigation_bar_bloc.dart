@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
@@ -15,7 +13,8 @@ enum NavigationTabEnum {
 }
 
 class NavigationBarBloc extends Bloc<NavigationBarEvent, NavigationBarState> {
-  NavigationBarBloc() : super(NavigationBarState(tab: NavigationTabEnum.ENGAGE)) {
+  NavigationBarBloc()
+      : super(NavigationBarState(tab: NavigationTabEnum.ENGAGE)) {
     on<NavigationBarEvent>((event, emit) {
       emit(NavigationBarState(
           tab: event.tab, route: event.route, arguments: event.arguments));
