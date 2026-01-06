@@ -121,10 +121,6 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                                       .getDimension(baseDimension: 24.0),
                                 ),
                                 onPressed: () {
-                                  print("Forum clicked");
-                                  print(bibleSeries.id);
-                                  print(bibleSeries.title);
-                                  // Navigator.pushNamed(context, '/prayer_requests');
                                   Navigator.pushNamed(
                                     context,
                                     '/forum',
