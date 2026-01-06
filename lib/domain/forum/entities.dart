@@ -61,7 +61,7 @@ class Comment {
   final String? parentId; // For 1-level nesting
   final bool isHidden;
   final bool isDeleted;
-  final int likeCount;
+  final List<String> likedBy;
   final int reportCount;
 
   Comment({
@@ -76,7 +76,9 @@ class Comment {
     this.parentId,
     required this.isHidden,
     required this.isDeleted,
-    required this.likeCount,
+    required this.likedBy,
     required this.reportCount,
   });
+
+  int get likeCount => likedBy.length;
 }

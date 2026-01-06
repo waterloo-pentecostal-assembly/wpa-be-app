@@ -75,7 +75,7 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
       LikeComment event, Emitter<ThreadState> emit) async {
     try {
       await _forumRepository.likeComment(
-          event.commentId, event.threadId, event.forumId);
+          event.commentId, event.threadId, event.forumId, event.userId);
     } catch (e) {
       // emit error
     }
@@ -85,7 +85,7 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
       UnlikeComment event, Emitter<ThreadState> emit) async {
     try {
       await _forumRepository.unlikeComment(
-          event.commentId, event.threadId, event.forumId);
+          event.commentId, event.threadId, event.forumId, event.userId);
     } catch (e) {
       // emit error
     }

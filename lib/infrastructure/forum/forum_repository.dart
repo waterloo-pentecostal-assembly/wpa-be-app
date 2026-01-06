@@ -125,7 +125,7 @@ class ForumRepository implements IForumRepository {
           parentId: data['parent_id'],
           isHidden: data['is_hidden'] ?? false,
           isDeleted: data['is_deleted'] ?? false,
-          likeCount: data['like_count'] ?? 0,
+          likedBy: List<String>.from(data['liked_by'] ?? []),
           reportCount: data['report_count'] ?? 0,
         );
       }).toList();
@@ -161,7 +161,7 @@ class ForumRepository implements IForumRepository {
           'parent_id': comment.parentId,
           'is_hidden': false,
           'is_deleted': false,
-          'like_count': 0,
+          'liked_by': [],
           'report_count': 0,
         });
 
@@ -213,9 +213,8 @@ class ForumRepository implements IForumRepository {
 
   @override
   Future<void> likeComment(
-      String commentId, String threadId, String forumId) async {
+      String commentId, String threadId, String forumId, String userId) async {
     try {
-      // Ideally keep track of who liked to prevent double likes, but simpler counter for now as per MVP
       await _firestore
           .collection('forums')
           .doc(forumId)
@@ -223,7 +222,9 @@ class ForumRepository implements IForumRepository {
           .doc(threadId)
           .collection('comments')
           .doc(commentId)
-          .update({'like_count': FieldValue.increment(1)});
+          .update({
+        'liked_by': FieldValue.arrayUnion([userId])
+      });
     } catch (e) {
       throw _firebaseFirestoreService.handleException(e as Exception);
     }
@@ -231,7 +232,7 @@ class ForumRepository implements IForumRepository {
 
   @override
   Future<void> unlikeComment(
-      String commentId, String threadId, String forumId) async {
+      String commentId, String threadId, String forumId, String userId) async {
     try {
       await _firestore
           .collection('forums')
@@ -240,7 +241,9 @@ class ForumRepository implements IForumRepository {
           .doc(threadId)
           .collection('comments')
           .doc(commentId)
-          .update({'like_count': FieldValue.increment(-1)});
+          .update({
+        'liked_by': FieldValue.arrayRemove([userId])
+      });
     } catch (e) {
       throw _firebaseFirestoreService.handleException(e as Exception);
     }

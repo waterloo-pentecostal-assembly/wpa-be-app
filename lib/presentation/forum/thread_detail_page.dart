@@ -185,14 +185,41 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
               style: getIt<TextFactory>().liteTextStyle()),
           SizedBox(height: 4),
           Row(children: [
-            IconButton(
-              icon: Icon(Icons.thumb_up_alt_outlined, size: 16),
-              onPressed: () {
-                BlocProvider.of<ThreadBloc>(context).add(
-                    LikeComment(comment.id, widget.threadId, widget.forumId));
-              },
-            ),
-            getIt<TextFactory>().lite("${comment.likeCount}", fontSize: 12),
+            Builder(builder: (context) {
+              final authState =
+                  BlocProvider.of<AuthenticationBloc>(context).state;
+              bool isJoined = false;
+              String userId = '';
+              if (authState is Authenticated) {
+                isJoined = true;
+                userId = authState.user.id;
+              }
+              final isLiked = comment.likedBy.contains(userId);
+
+              return IconButton(
+                icon: Icon(
+                  isLiked ? Icons.thumb_up : Icons.thumb_up_alt_outlined,
+                  size: 16,
+                  color: isLiked ? Colors.blue : null,
+                ),
+                onPressed: () {
+                  if (!isJoined) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                        content: Text("You need to sign in to like comments")));
+                    return;
+                  }
+                  if (isLiked) {
+                    BlocProvider.of<ThreadBloc>(context).add(UnlikeComment(
+                        comment.id, widget.threadId, widget.forumId, userId));
+                  } else {
+                    BlocProvider.of<ThreadBloc>(context).add(LikeComment(
+                        comment.id, widget.threadId, widget.forumId, userId));
+                  }
+                },
+              );
+            }),
+            getIt<TextFactory>()
+                .lite("${comment.likedBy.length}", fontSize: 12),
             Spacer(),
             // Only allow replying to parent comments (single level nesting)
             if (comment.parentId == null && !comment.isDeleted)
@@ -290,7 +317,7 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
                               updatedAt: Timestamp.now(),
                               isHidden: false,
                               isDeleted: false,
-                              likeCount: 0,
+                              likedBy: [],
                               reportCount: 0,
                               parentId: _replyToCommentId),
                           widget.forumId),

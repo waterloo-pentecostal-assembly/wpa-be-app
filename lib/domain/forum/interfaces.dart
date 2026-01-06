@@ -11,6 +11,8 @@ abstract class IForumRepository {
   Future<void> deleteComment(String commentId, String threadId, String forumId);
   Future<void> reportComment(
       String commentId, String threadId, String forumId, String reason);
-  Future<void> likeComment(String commentId, String threadId, String forumId);
-  Future<void> unlikeComment(String commentId, String threadId, String forumId);
+  Future<void> likeComment(
+      String commentId, String threadId, String forumId, String userId);
+  Future<void> unlikeComment(
+      String commentId, String threadId, String forumId, String userId);
 }

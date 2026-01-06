@@ -63,20 +63,22 @@ class LikeComment extends ThreadEvent {
   final String commentId;
   final String threadId;
   final String forumId;
+  final String userId;
 
-  const LikeComment(this.commentId, this.threadId, this.forumId);
+  const LikeComment(this.commentId, this.threadId, this.forumId, this.userId);
 
   @override
-  List<Object> get props => [commentId, threadId, forumId];
+  List<Object> get props => [commentId, threadId, forumId, userId];
 }
 
 class UnlikeComment extends ThreadEvent {
   final String commentId;
   final String threadId;
   final String forumId;
+  final String userId;
 
-  const UnlikeComment(this.commentId, this.threadId, this.forumId);
+  const UnlikeComment(this.commentId, this.threadId, this.forumId, this.userId);
 
   @override
-  List<Object> get props => [commentId, threadId, forumId];
+  List<Object> get props => [commentId, threadId, forumId, userId];
 }
