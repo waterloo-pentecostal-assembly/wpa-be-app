@@ -7,6 +7,7 @@ import '../../../../app/injection.dart';
 import '../../../../application/bible_series/bible_series_bloc.dart';
 import '../../../../domain/bible_series/entities.dart';
 import '../../../common/date_formatter.dart';
+import '../../../common/loader.dart';
 import '../../../common/text_factory.dart';
 
 class AllBibleSeriesPage extends StatelessWidget {
@@ -43,18 +44,18 @@ class AllBibleSeriesPage extends StatelessWidget {
                   builder: (context, state) {
                     if (state is RecentBibleSeries) {
                       return ListView.builder(
-                        padding: EdgeInsets.symmetric(horizontal: 16),
+                        padding: EdgeInsets.symmetric(horizontal: 8),
                         itemCount: state.bibleSeriesList.length,
                         itemBuilder: (context, index) {
                           return Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
+                            padding: const EdgeInsets.only(bottom: 4.0),
                             child: BibleSeriesListCard(
                                 bibleSeries: state.bibleSeriesList[index]),
                           );
                         },
                       );
                     } else if (state is FetchingBibleSeries) {
-                      return Center(child: CircularProgressIndicator());
+                      return Loader();
                     } else if (state is BibleSeriesError) {
                       return Center(child: Text(state.message));
                     }
@@ -82,42 +83,55 @@ class BibleSeriesListCard extends StatelessWidget {
         Navigator.pushNamed(context, '/bible_series',
             arguments: {'bibleSeriesId': bibleSeries.id});
       },
-      child: Card(
-        clipBehavior: Clip.antiAlias,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Container(
-          height: getIt<LayoutFactory>().getDimension(baseDimension: 100),
-          child: Row(
-            children: [
-              Expanded(
-                flex: 1,
-                child: Image.network(
-                  bibleSeries.imageUrl,
-                  fit: BoxFit.cover,
-                  height: double.infinity,
-                ),
-              ),
-              Expanded(
-                flex: 2,
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      getIt<TextFactory>().subHeading3(bibleSeries.title),
-                      if (bibleSeries.subTitle.isNotEmpty) ...[
-                        SizedBox(height: 4),
-                        getIt<TextFactory>().lite(bibleSeries.subTitle),
-                      ],
-                      SizedBox(height: 4),
-                      getIt<TextFactory>().liteSmall(
-                          '${dateFormatter.timeStampToString(bibleSeries.startDate)} - ${dateFormatter.timeStampToString(bibleSeries.endDate)}'),
-                    ],
+      child: Container(
+        margin: EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withValues(alpha: 0.25),
+              blurRadius: 8.0,
+              offset: Offset(0, 3),
+            )
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            height: getIt<LayoutFactory>().getDimension(baseDimension: 100),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 1,
+                  child: Image.network(
+                    bibleSeries.imageUrl,
+                    fit: BoxFit.cover,
+                    height: double.infinity,
                   ),
                 ),
-              ),
-            ],
+                Expanded(
+                  flex: 2,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        getIt<TextFactory>().subHeading3(bibleSeries.title),
+                        if (bibleSeries.subTitle.isNotEmpty) ...[
+                          SizedBox(height: 4),
+                          getIt<TextFactory>().lite(bibleSeries.subTitle),
+                        ],
+                        SizedBox(height: 4),
+                        getIt<TextFactory>().liteSmall(
+                            '${dateFormatter.timeStampToString(bibleSeries.startDate)} - ${dateFormatter.timeStampToString(bibleSeries.endDate)}'),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
