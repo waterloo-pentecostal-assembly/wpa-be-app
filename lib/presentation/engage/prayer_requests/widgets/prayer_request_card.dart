@@ -106,7 +106,7 @@ class PrayerRequestMenuButton extends StatelessWidget {
       BlocProvider.of<PrayerRequestsBloc>(context)
         ..add(MyPrayerRequestDeleted(id: menuButtonValue.id));
     } else if (menuButtonValue.action == PrayerActionOptions.REPORT) {
-      BlocProvider.of<AllPrayerRequestsBloc>(context)
+      BlocProvider.of<PrayerRequestsBloc>(context)
         ..add(PrayerRequestReported(id: menuButtonValue.id));
     } else if (menuButtonValue.action == PrayerActionOptions.MY_CLOSE) {
       BlocProvider.of<PrayerRequestsBloc>(context)
@@ -240,7 +240,7 @@ class _PrayButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AllPrayerRequestsBloc, PrayerRequestsState>(
+    return BlocBuilder<PrayerRequestsBloc, PrayerRequestsState>(
       builder: (BuildContext context, PrayerRequestsState state) {
         if (prayerRequest.hasPrayed) {
           return _createPrayedButton();
@@ -277,7 +277,7 @@ class _PrayButton extends StatelessWidget {
               backgroundColor: kCardGrey,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap),
           onPressed: () {
-            BlocProvider.of<AllPrayerRequestsBloc>(context).add(PrayForRequest(
+            BlocProvider.of<PrayerRequestsBloc>(context).add(PrayForRequest(
               id: prayerRequest.id,
             ));
           },

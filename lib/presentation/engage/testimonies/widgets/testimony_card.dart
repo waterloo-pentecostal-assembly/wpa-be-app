@@ -106,7 +106,7 @@ class TestimoniesMenuButton extends StatelessWidget {
       BlocProvider.of<TestimoniesBloc>(context)
         ..add(MyTestimonyDeleted(id: menuButtonValue.id));
     } else if (menuButtonValue.action == TestimonyActionOptions.REPORT) {
-      BlocProvider.of<AllTestimoniesBloc>(context)
+      BlocProvider.of<TestimoniesBloc>(context)
         ..add(TestimonyReported(id: menuButtonValue.id));
     } else if (menuButtonValue.action == TestimonyActionOptions.MY_CLOSE) {
       BlocProvider.of<TestimoniesBloc>(context)
@@ -239,7 +239,7 @@ class _PraiseButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AllTestimoniesBloc, TestimoniesState>(
+    return BlocBuilder<TestimoniesBloc, TestimoniesState>(
       builder: (BuildContext context, TestimoniesState state) {
         if (testimony.hasPraised) {
           return _createPraisedButton();
@@ -276,7 +276,7 @@ class _PraiseButton extends StatelessWidget {
               backgroundColor: kCardGrey,
               tapTargetSize: MaterialTapTargetSize.shrinkWrap),
           onPressed: () {
-            BlocProvider.of<AllTestimoniesBloc>(context).add(PraiseTestimony(
+            BlocProvider.of<TestimoniesBloc>(context).add(PraiseTestimony(
               id: testimony.id,
             ));
           },

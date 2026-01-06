@@ -38,9 +38,11 @@ class EngagePage extends IIndexedPage {
             create: (BuildContext context) =>
                 getIt<BibleSeriesBloc>()..add(HasActiveBibleSeriesRequested())),
         BlocProvider<PrayerRequestsBloc>(
-            create: (BuildContext context) => getIt<PrayerRequestsBloc>()),
+            create: (BuildContext context) => getIt<PrayerRequestsBloc>()
+              ..add(RecentPrayerRequestsRequested(amount: 5))),
         BlocProvider<TestimoniesBloc>(
-            create: (BuildContext context) => getIt<TestimoniesBloc>()),
+            create: (BuildContext context) => getIt<TestimoniesBloc>()
+              ..add(RecentTestimoniesRequested(amount: 5))),
         BlocProvider<AchievementsBloc>(
           create: (BuildContext context) => getIt<AchievementsBloc>()
             ..add(
