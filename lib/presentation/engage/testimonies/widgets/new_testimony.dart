@@ -75,7 +75,7 @@ class _NewTestimonyFormState extends State<NewTestimonyForm>
                         children: [
                           Expanded(
                             child: Container(
-                              color: Colors.white.withOpacity(0),
+                              color: Colors.white.withValues(alpha: 0),
                             ),
                           )
                         ],
@@ -134,7 +134,8 @@ class _NewTestimonyFormState extends State<NewTestimonyForm>
                                   ? Text('')
                                   : getIt<TextFactory>().textFormFieldInput(
                                       state.testimonyError,
-                                      color: kErrorTextColor.withOpacity(0.8),
+                                      color: kErrorTextColor.withValues(
+                                          alpha: 0.8),
                                       fontSize: 12.0),
                             ),
                             Wrap(
@@ -220,7 +221,7 @@ class _AnonymousCheckboxState extends State<AnonymousCheckbox> {
         decoration: BoxDecoration(
           border: value ? null : Border.all(color: Colors.grey.shade200),
           borderRadius: BorderRadius.circular(48),
-          color: value ? kWpaBlue.withOpacity(0.65) : Colors.white,
+          color: value ? kWpaBlue.withValues(alpha: 0.65) : Colors.white,
         ),
         child: value
             ? Icon(
@@ -255,22 +256,22 @@ class PostButton extends StatelessWidget {
           getIt<LayoutFactory>().getDimension(baseDimension: 16.0))),
       child: TextButton(
         style: ButtonStyle(
-            minimumSize: MaterialStateProperty.all(Size(
+            minimumSize: WidgetStateProperty.all(Size(
                 getIt<LayoutFactory>().getDimension(baseDimension: 90.0),
                 getIt<LayoutFactory>().getDimension(baseDimension: 30.0))),
-            backgroundColor: MaterialStateProperty.resolveWith<Color>((states) {
-              if (states.contains(MaterialState.disabled)) {
-                return kWpaBlue.withOpacity(0.25);
+            backgroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+              if (states.contains(WidgetState.disabled)) {
+                return kWpaBlue.withValues(alpha: 0.25);
               }
-              return kWpaBlue.withOpacity(0.75);
+              return kWpaBlue.withValues(alpha: 0.75);
             }),
-            foregroundColor: MaterialStateProperty.resolveWith<Color>((states) {
-              if (states.contains(MaterialState.disabled)) {
+            foregroundColor: WidgetStateProperty.resolveWith<Color>((states) {
+              if (states.contains(WidgetState.disabled)) {
                 return Colors.white;
               }
               return Colors.white;
             }),
-            padding: MaterialStateProperty.all(
+            padding: WidgetStateProperty.all(
                 EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8)),
             tapTargetSize: MaterialTapTargetSize.shrinkWrap),
         onPressed: !isValid

@@ -112,6 +112,29 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                                 ),
                                 onPressed: () => Navigator.pop(context),
                                 color: Colors.white,
+                              ),
+                              Spacer(),
+                              IconButton(
+                                icon: Icon(
+                                  Icons.forum,
+                                  size: getIt<LayoutFactory>()
+                                      .getDimension(baseDimension: 24.0),
+                                ),
+                                onPressed: () {
+                                  print("Forum clicked");
+                                  print(bibleSeries.id);
+                                  print(bibleSeries.title);
+                                  // Navigator.pushNamed(context, '/prayer_requests');
+                                  Navigator.pushNamed(
+                                    context,
+                                    '/forum',
+                                    arguments: {
+                                      'forumId': bibleSeries.id,
+                                      'title': bibleSeries.title
+                                    },
+                                  );
+                                },
+                                color: Colors.white,
                               )
                             ],
                           ),
@@ -269,7 +292,7 @@ List<Widget> _buildContentTabs(
                   element.isCompleted, element.isDraft, element.date),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.2),
+                  color: Colors.grey.withValues(alpha: 0.2),
                   blurRadius: 5.0,
                   offset: Offset(0, 5),
                 )
@@ -333,7 +356,7 @@ List<Widget> _buildContentChildren(
                   color: Colors.grey.shade100,
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.grey.withOpacity(0.2),
+                      color: Colors.grey.withValues(alpha: 0.2),
                       blurRadius: 8.0,
                       offset: Offset(0, 3),
                     )
@@ -432,11 +455,11 @@ Color _getStatusColor(bool isCompleted, bool isDraft, Timestamp date) {
   String today = DateTime.now().toLocal().toString().substring(0, 10);
   String d = date.toDate().toLocal().toString().substring(0, 10);
   if (isCompleted) {
-    return Colors.green.withOpacity(0.25);
+    return Colors.green.withValues(alpha: 0.25);
   } else if (isDraft || today == d) {
     return Colors.grey.shade100;
   } else if (date.toDate().toLocal().isBefore(DateTime.now().toLocal())) {
-    return Colors.amber.withOpacity(0.25);
+    return Colors.amber.withValues(alpha: 0.25);
   }
   return Colors.grey.shade100;
 }

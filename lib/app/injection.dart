@@ -27,6 +27,9 @@ import '../application/navigation_bar/navigation_bar_bloc.dart';
 import '../application/notification_settings/notification_settings_bloc.dart';
 import '../application/prayer_requests/prayer_requests_bloc.dart';
 import '../application/user_profile/user_profile_bloc.dart';
+
+import '../application/forum/forum_bloc.dart';
+import '../application/forum/thread_bloc.dart';
 import '../domain/achievements/interfaces.dart';
 import '../domain/admin/interfaces.dart';
 import '../domain/authentication/interfaces.dart';
@@ -36,6 +39,7 @@ import '../domain/media/interfaces.dart';
 import '../domain/notification_settings/interfaces.dart';
 import '../domain/prayer_requests/interfaces.dart';
 import '../domain/user_profile/interfaces.dart';
+import '../domain/forum/interfaces.dart';
 import '../infrastructure/achievements/achievements_repository.dart';
 import '../infrastructure/admin/admin_service.dart';
 import '../infrastructure/authentication/firebase_authentication_facade.dart';
@@ -45,6 +49,7 @@ import '../infrastructure/media/media_repository.dart';
 import '../infrastructure/notification_settings/notification_settings_service.dart';
 import '../infrastructure/prayer_requests/prayer_requests_repository.dart';
 import '../infrastructure/user_profile/user_profile_repository.dart';
+import '../infrastructure/forum/forum_repository.dart';
 import '../presentation/common/text_factory.dart';
 import '../services/firebase_firestore_service.dart';
 import '../services/firebase_messaging_service.dart';
@@ -54,7 +59,7 @@ import 'app_config.dart';
 // Global ServiceLocator
 GetIt getIt = GetIt.instance;
 
-void initializeInjections({
+Future<void> initializeInjections({
   required useLocalFirestore,
   required useLocalAuth,
   required AppConfig appConfig,
@@ -175,6 +180,11 @@ void initializeInjections({
 
   getIt.registerFactory<LinksBloc>(() => LinksBloc(getIt<ILinksRepository>()));
 
+  getIt.registerFactory<ForumBloc>(() => ForumBloc(getIt<IForumRepository>()));
+
+  getIt
+      .registerFactory<ThreadBloc>(() => ThreadBloc(getIt<IForumRepository>()));
+
   getIt.registerLazySingleton<NavigationBarBloc>(
     () => NavigationBarBloc(),
   );
@@ -265,6 +275,9 @@ void initializeInjections({
   );
 
   getIt.registerLazySingleton<ILinksRepository>(() => LinksRepository(
+      getIt<FirebaseFirestore>(), getIt<FirebaseFirestoreService>()));
+
+  getIt.registerLazySingleton<IForumRepository>(() => ForumRepository(
       getIt<FirebaseFirestore>(), getIt<FirebaseFirestoreService>()));
 
   // Factories

@@ -15,193 +15,175 @@ part 'admin_state.dart';
 class AdminBloc extends Bloc<AdminEvent, AdminState> {
   final IAdminService _iAdminService;
 
-  AdminBloc(this._iAdminService) : super(AdminInitial());
+  AdminBloc(this._iAdminService) : super(AdminInitial()) {
+    on<LoadUnverifiedUsers>(_onLoadUnverifiedUsers);
+    on<LoadUnverifiedPrayerRequests>(_onLoadUnverifiedPrayerRequests);
+    on<VerifyUser>(_onVerifyUser);
+    on<ApprovePrayerRequest>(_onApprovePrayerRequest);
+    on<DeletePrayerRequest>(_onDeletePrayerRequest);
+    on<DeleteUnverifiedUser>(_onDeleteUnverifiedUser);
+    on<LoadUnverifiedTestimonies>(_onLoadUnverifiedTestimonies);
+    on<DeleteTestimony>(_onDeleteTestimony);
+    on<ApproveTestimony>(_onApproveTestimony);
+  }
 
-  @override
-  Stream<AdminState> mapEventToState(
-    AdminEvent event,
-  ) async* {
-    if (event is LoadUnverifiedUsers) {
-      yield* _mapLoadUnverifiedUsersEventToState(
-          _iAdminService.getUnverifiedUsers);
-    } else if (event is LoadUnverifiedPrayerRequests) {
-      yield* _mapLoadUnverifiedPrayerRequestsToState(
-          _iAdminService.getUnapprovedPrayerRequest);
-    } else if (event is VerifyUser) {
-      yield* _mapVerifyUserToState(event, _iAdminService.verifyUser);
-    } else if (event is ApprovePrayerRequest) {
-      yield* _mapApprovePrayerRequestToState(
-          event, _iAdminService.approvePrayerRequest);
-    } else if (event is DeletePrayerRequest) {
-      yield* _mapDeletePrayerRequestToState(
-          event, _iAdminService.deletePrayerRequest);
-    } else if (event is DeleteUnverifiedUser) {
-      yield* _mapDeleteUnverifiedUserEventToState(
-          event, _iAdminService.deleteUnverifiedUsers);
-    } else if (event is LoadUnverifiedTestimonies) {
-      yield* _mapLoadUnverifiedTestimoniesToState(
-          _iAdminService.getUnapprovedTestimonies);
-    } else if (event is DeleteTestimony) {
-      yield* _mapDeleteTestimonyToState(event, _iAdminService.deleteTestimony);
-    } else if (event is ApproveTestimony) {
-      yield* _mapApproveTestimonyToState(
-          event, _iAdminService.approveTestimony);
+  Future<void> _onLoadUnverifiedUsers(
+    LoadUnverifiedUsers event,
+    Emitter<AdminState> emit,
+  ) async {
+    try {
+      List<LocalUser> users = await _iAdminService.getUnverifiedUsers();
+      emit(UnverifiedUsersLoaded(users: users));
+    } on BaseApplicationException catch (e) {
+      emit(AdminError(
+        message: e.message,
+      ));
+    } catch (e) {
+      emit(AdminError(
+        message: 'An unknown error occurred',
+      ));
     }
   }
-}
 
-Stream<AdminState> _mapDeletePrayerRequestToState(
-  DeletePrayerRequest event,
-  Future<void> Function({required String prayerRequestId}) deletePrayerRequest,
-) async* {
-  try {
-    await deletePrayerRequest(prayerRequestId: event.prayerRequestId);
-    yield PrayerRequestsDeleted(prayerRequestId: event.prayerRequestId);
-  } on BaseApplicationException catch (e) {
-    yield AdminError(
-      message: e.message,
-    );
-  } catch (e) {
-    yield AdminError(
-      message: 'An unknown error occurred',
-    );
+  Future<void> _onLoadUnverifiedPrayerRequests(
+    LoadUnverifiedPrayerRequests event,
+    Emitter<AdminState> emit,
+  ) async {
+    try {
+      List<PrayerRequest> prayerRequests = await _iAdminService.getUnapprovedPrayerRequest();
+      emit(UnverifiedPrayerRequestsLoaded(prayerRequests: prayerRequests));
+    } on BaseApplicationException catch (e) {
+      emit(AdminError(
+        message: e.message,
+      ));
+    } catch (e) {
+      emit(AdminError(
+        message: 'An unknown error occurred',
+      ));
+    }
   }
-}
 
-Stream<AdminState> _mapApprovePrayerRequestToState(
-  ApprovePrayerRequest event,
-  Future<void> Function({required String prayerRequestId}) approvePrayerRequest,
-) async* {
-  try {
-    await approvePrayerRequest(prayerRequestId: event.prayerRequestId);
-    yield PrayerRequestsApproved(prayerRequestId: event.prayerRequestId);
-  } on BaseApplicationException catch (e) {
-    yield AdminError(
-      message: e.message,
-    );
-  } catch (e) {
-    yield AdminError(
-      message: 'An unknown error occurred',
-    );
+  Future<void> _onVerifyUser(
+    VerifyUser event,
+    Emitter<AdminState> emit,
+  ) async {
+    try {
+      await _iAdminService.verifyUser(userId: event.userId);
+      emit(UserVerified(userId: event.userId));
+    } on BaseApplicationException catch (e) {
+      emit(AdminError(
+        message: e.message,
+      ));
+    } catch (e) {
+      emit(AdminError(
+        message: 'An unknown error occurred',
+      ));
+    }
   }
-}
 
-Stream<AdminState> _mapVerifyUserToState(
-  VerifyUser event,
-  Future<void> Function({required String userId}) verifyUser,
-) async* {
-  try {
-    await verifyUser(userId: event.userId);
-    yield UserVerified(userId: event.userId);
-  } on BaseApplicationException catch (e) {
-    yield AdminError(
-      message: e.message,
-    );
-  } catch (e) {
-    yield AdminError(
-      message: 'An unknown error occurred',
-    );
+  Future<void> _onApprovePrayerRequest(
+    ApprovePrayerRequest event,
+    Emitter<AdminState> emit,
+  ) async {
+    try {
+      await _iAdminService.approvePrayerRequest(prayerRequestId: event.prayerRequestId);
+      emit(PrayerRequestsApproved(prayerRequestId: event.prayerRequestId));
+    } on BaseApplicationException catch (e) {
+      emit(AdminError(
+        message: e.message,
+      ));
+    } catch (e) {
+      emit(AdminError(
+        message: 'An unknown error occurred',
+      ));
+    }
   }
-}
 
-Stream<AdminState> _mapLoadUnverifiedPrayerRequestsToState(
-  Future<List<PrayerRequest>> Function() getUnapprovedPrayerRequest,
-) async* {
-  try {
-    List<PrayerRequest> prayerRequests = await getUnapprovedPrayerRequest();
-    yield UnverifiedPrayerRequestsLoaded(prayerRequests: prayerRequests);
-  } on BaseApplicationException catch (e) {
-    yield AdminError(
-      message: e.message,
-    );
-  } catch (e) {
-    yield AdminError(
-      message: 'An unknown error occurred',
-    );
+  Future<void> _onDeletePrayerRequest(
+    DeletePrayerRequest event,
+    Emitter<AdminState> emit,
+  ) async {
+    try {
+      await _iAdminService.deletePrayerRequest(prayerRequestId: event.prayerRequestId);
+      emit(PrayerRequestsDeleted(prayerRequestId: event.prayerRequestId));
+    } on BaseApplicationException catch (e) {
+      emit(AdminError(
+        message: e.message,
+      ));
+    } catch (e) {
+      emit(AdminError(
+        message: 'An unknown error occurred',
+      ));
+    }
   }
-}
 
-Stream<AdminState> _mapLoadUnverifiedUsersEventToState(
-  Future<List<LocalUser>> Function() getUnverifiedUsers,
-) async* {
-  try {
-    List<LocalUser> users = await getUnverifiedUsers();
-    yield UnverifiedUsersLoaded(users: users);
-  } on BaseApplicationException catch (e) {
-    yield AdminError(
-      message: e.message,
-    );
-  } catch (e) {
-    yield AdminError(
-      message: 'An unknown error occurred',
-    );
-  }
-}
-
-Stream<AdminState> _mapDeleteUnverifiedUserEventToState(
+  Future<void> _onDeleteUnverifiedUser(
     DeleteUnverifiedUser event,
-    Future<void> Function({required String userId}) deleteUser) async* {
-  try {
-    await deleteUser(userId: event.userId);
-    yield UserDeleted(userId: event.userId);
-  } on BaseApplicationException catch (e) {
-    yield AdminError(
-      message: e.message,
-    );
-  } catch (e) {
-    yield AdminError(message: 'An unknown error occurred');
+    Emitter<AdminState> emit,
+  ) async {
+    try {
+      await _iAdminService.deleteUnverifiedUsers(userId: event.userId);
+      emit(UserDeleted(userId: event.userId));
+    } on BaseApplicationException catch (e) {
+      emit(AdminError(
+        message: e.message,
+      ));
+    } catch (e) {
+      emit(AdminError(message: 'An unknown error occurred'));
+    }
   }
-}
 
-Stream<AdminState> _mapLoadUnverifiedTestimoniesToState(
-  Future<List<Testimony>> Function() getUnapprovedTestimony,
-) async* {
-  try {
-    List<Testimony> testimonies = await getUnapprovedTestimony();
-    yield UnverifiedTestimoniesLoaded(testimonies: testimonies);
-  } on BaseApplicationException catch (e) {
-    yield AdminError(
-      message: e.message,
-    );
-  } catch (e) {
-    yield AdminError(
-      message: 'An unknown error occurred',
-    );
+  Future<void> _onLoadUnverifiedTestimonies(
+    LoadUnverifiedTestimonies event,
+    Emitter<AdminState> emit,
+  ) async {
+    try {
+      List<Testimony> testimonies = await _iAdminService.getUnapprovedTestimonies();
+      emit(UnverifiedTestimoniesLoaded(testimonies: testimonies));
+    } on BaseApplicationException catch (e) {
+      emit(AdminError(
+        message: e.message,
+      ));
+    } catch (e) {
+      emit(AdminError(
+        message: 'An unknown error occurred',
+      ));
+    }
   }
-}
 
-Stream<AdminState> _mapDeleteTestimonyToState(
-  DeleteTestimony event,
-  Future<void> Function({required String testimonyId}) deleteTestimony,
-) async* {
-  try {
-    await deleteTestimony(testimonyId: event.testimonyId);
-    yield TestimoniesDeleted(testimonyId: event.testimonyId);
-  } on BaseApplicationException catch (e) {
-    yield AdminError(
-      message: e.message,
-    );
-  } catch (e) {
-    yield AdminError(
-      message: 'An unknown error occurred',
-    );
+  Future<void> _onDeleteTestimony(
+    DeleteTestimony event,
+    Emitter<AdminState> emit,
+  ) async {
+    try {
+      await _iAdminService.deleteTestimony(testimonyId: event.testimonyId);
+      emit(TestimoniesDeleted(testimonyId: event.testimonyId));
+    } on BaseApplicationException catch (e) {
+      emit(AdminError(
+        message: e.message,
+      ));
+    } catch (e) {
+      emit(AdminError(
+        message: 'An unknown error occurred',
+      ));
+    }
   }
-}
 
-Stream<AdminState> _mapApproveTestimonyToState(
-  ApproveTestimony event,
-  Future<void> Function({required String testimonyId}) approveTestimony,
-) async* {
-  try {
-    await approveTestimony(testimonyId: event.testimonyId);
-    yield TestimoniesApproved(testimonyId: event.testimonyId);
-  } on BaseApplicationException catch (e) {
-    yield AdminError(
-      message: e.message,
-    );
-  } catch (e) {
-    yield AdminError(
-      message: 'An unknown error occurred',
-    );
+  Future<void> _onApproveTestimony(
+    ApproveTestimony event,
+    Emitter<AdminState> emit,
+  ) async {
+    try {
+      await _iAdminService.approveTestimony(testimonyId: event.testimonyId);
+      emit(TestimoniesApproved(testimonyId: event.testimonyId));
+    } on BaseApplicationException catch (e) {
+      emit(AdminError(
+        message: e.message,
+      ));
+    } catch (e) {
+      emit(AdminError(
+        message: 'An unknown error occurred',
+      ));
+    }
   }
 }

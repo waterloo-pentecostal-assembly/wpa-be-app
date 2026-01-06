@@ -14,26 +14,19 @@ part 'user_profile_state.dart';
 class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
   final IUserProfileRepository _iUserProfileRepository;
 
-  UserProfileBloc(this._iUserProfileRepository) : super(UserProfileInitial());
-
-  @override
-  Stream<UserProfileState> mapEventToState(
-    UserProfileEvent event,
-  ) async* {
-    if (event is UploadProfilePhoto) {
-      yield* _mapUploadProfilePhotoToState(event, _iUserProfileRepository);
-    }
+  UserProfileBloc(this._iUserProfileRepository) : super(UserProfileInitial()) {
+    on<UploadProfilePhoto>(_onUploadProfilePhoto);
   }
 
-  Stream<UserProfileState> _mapUploadProfilePhotoToState(
+  Future<void> _onUploadProfilePhoto(
     UploadProfilePhoto event,
-    IUserProfileRepository userProfileRepository,
-  ) async* {
+    Emitter<UserProfileState> emit,
+  ) async {
     try {
       final LocalUser user = getIt<LocalUser>();
       UploadTask uploadTask =
-          userProfileRepository.uploadProfilePhoto(event.profilePhoto, user.id);
-      yield NewProfilePhotoUploadStarted(uploadTask: uploadTask);
+          _iUserProfileRepository.uploadProfilePhoto(event.profilePhoto, user.id);
+      emit(NewProfilePhotoUploadStarted(uploadTask: uploadTask));
 
       TaskSnapshot data = await uploadTask;
 
@@ -45,7 +38,7 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
           .replaceAll('image', 'image_200x200');
 
       // Update user collection
-      await userProfileRepository.updateUserCollection(
+      await _iUserProfileRepository.updateUserCollection(
         {
           "thumbnail": thumbnail,
           "profile_photo": profilePhoto,
@@ -54,12 +47,12 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
       );
 
       // update local user
-      await userProfileRepository.updateLocalUser();
+      await _iUserProfileRepository.updateLocalUser();
 
       // yield complete
-      yield NewProfilePhotoUploadComplete(profilePhoto: event.profilePhoto);
+      emit(NewProfilePhotoUploadComplete(profilePhoto: event.profilePhoto));
     } catch (e) {
-      yield UploadProfilePhotoError(message: "Error uploading photo");
+      emit(UploadProfilePhotoError(message: "Error uploading photo"));
     }
   }
 

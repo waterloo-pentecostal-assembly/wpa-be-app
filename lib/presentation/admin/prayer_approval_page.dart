@@ -106,7 +106,7 @@ class _PrayerApprovalPageState extends State<PrayerApprovalPage> {
             color: kCardOverlayGrey,
             boxShadow: [
               BoxShadow(
-                color: Colors.grey.withOpacity(0.25),
+                color: Colors.grey.withValues(alpha: 0.25),
                 blurRadius: 8.0,
                 offset: Offset(0, 3),
               )
@@ -132,7 +132,7 @@ class _PrayerApprovalPageState extends State<PrayerApprovalPage> {
                       },
                       child: Icon(
                         Icons.cancel,
-                        color: kErrorColor.withOpacity(0.8),
+                        color: kErrorColor.withValues(alpha: 0.8),
                         size: getIt<LayoutFactory>()
                             .getDimension(baseDimension: 40.0),
                       ),
@@ -146,7 +146,7 @@ class _PrayerApprovalPageState extends State<PrayerApprovalPage> {
                       },
                       child: Icon(
                         Icons.check_circle_rounded,
-                        color: kSuccessColor.withOpacity(0.8),
+                        color: kSuccessColor.withValues(alpha: 0.8),
                         size: getIt<LayoutFactory>()
                             .getDimension(baseDimension: 40.0),
                       ),

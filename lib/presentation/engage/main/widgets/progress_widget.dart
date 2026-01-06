@@ -68,7 +68,7 @@ class ProgressTile extends StatelessWidget {
                     canScaleToFit: true,
                     axisLineStyle: AxisLineStyle(
                       thickness: 0.2,
-                      color: kWpaBlue.withOpacity(0.15),
+                      color: kWpaBlue.withValues(alpha: 0.15),
                       thicknessUnit: GaugeSizeUnit.factor,
                       // cornerStyle: CornerStyle.bothCurve,
                       // remove bothCurve because of this bug
@@ -76,7 +76,7 @@ class ProgressTile extends StatelessWidget {
                     ),
                     pointers: <GaugePointer>[
                       RangePointer(
-                        color: kWpaBlue.withOpacity(0.5),
+                        color: kWpaBlue.withValues(alpha: 0.5),
                         value: achievements.seriesProgress.toDouble(),
                         width: 0.2,
                         sizeUnit: GaugeSizeUnit.factor,

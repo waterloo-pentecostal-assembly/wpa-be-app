@@ -69,10 +69,10 @@ class AudioPlayerWidget extends StatelessWidget {
           ),
           thumbColor: kWpaBlue,
           overlayShape: RoundSliderOverlayShape(overlayRadius: 14.0),
-          activeTrackColor: kWpaBlue.withOpacity(0.5),
-          inactiveTrackColor: kWpaBlue.withOpacity(0.1),
-          disabledActiveTrackColor: kWpaBlue.withOpacity(0.5),
-          disabledInactiveTrackColor: kWpaBlue.withOpacity(0.1),
+          activeTrackColor: kWpaBlue.withValues(alpha: 0.5),
+          inactiveTrackColor: kWpaBlue.withValues(alpha: 0.1),
+          disabledActiveTrackColor: kWpaBlue.withValues(alpha: 0.5),
+          disabledInactiveTrackColor: kWpaBlue.withValues(alpha: 0.1),
           disabledThumbColor: kWpaBlue,
         ),
         child: Slider(
@@ -138,7 +138,7 @@ class AudioPlayerWidget extends StatelessWidget {
                   ? Icons.pause_circle_filled
                   : Icons.play_circle_filled,
               size: 70,
-              color: Colors.black87.withOpacity(0.75),
+              color: Colors.black87.withValues(alpha: 0.75),
             ),
           ),
           SizedBox(height: 12),

@@ -75,7 +75,7 @@ class SignInForm extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(10),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.grey.withOpacity(0.2),
+                                      color: Colors.grey.withValues(alpha: 0.2),
                                       blurRadius: 20.0,
                                       offset: Offset(0, 10),
                                     ),
@@ -183,11 +183,11 @@ class SignInForm extends StatelessWidget {
                                   ),
                                   child: TextButton(
                                     style: ButtonStyle(
-                                      backgroundColor: MaterialStateProperty
+                                      backgroundColor: WidgetStateProperty
                                           .resolveWith<Color?>(
                                         (states) {
-                                          if (states.contains(
-                                              WidgetState.disabled)) {
+                                          if (states
+                                              .contains(WidgetState.disabled)) {
                                             return Colors.grey.shade400;
                                           }
                                           return null;

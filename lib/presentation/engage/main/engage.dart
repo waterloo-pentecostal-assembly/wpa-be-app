@@ -18,6 +18,8 @@ import '../bible_series/pages/all_bible_series.dart';
 import '../bible_series/pages/bible_series_detail.dart';
 import '../bible_series/pages/series_content_detail.dart';
 import '../prayer_requests/pages/prayer_requests.dart';
+import '../../forum/forum_page.dart';
+import '../../forum/thread_detail_page.dart';
 import 'widgets/media_widget.dart';
 import 'widgets/progress_widget.dart';
 import 'widgets/bible_series_widget.dart';
@@ -88,6 +90,20 @@ class EngagePage extends IIndexedPage {
                       bibleSeriesId: args['bibleSeriesId'],
                       getCompletionDetails: args['getCompletionDetails'],
                       seriesContentType: args['seriesContentType'],
+                    );
+                  case '/forum':
+                    Map args = settings.arguments as Map;
+                    return ForumPage(
+                      forumId: args['forumId'],
+                      title: args['title'],
+                    );
+                  case '/thread_detail':
+                    Map args = settings.arguments as Map;
+                    return ThreadDetailPage(
+                      threadId: args['threadId'],
+                      forumId: args['forumId'],
+                      title: args['title'],
+                      isFrozen: args['isFrozen'] ?? false,
                     );
                 }
                 // Handles case where no routes match

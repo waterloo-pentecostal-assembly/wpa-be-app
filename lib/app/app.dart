@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -13,12 +14,17 @@ import '../presentation/authentication/sign_up_page.dart';
 import '../presentation/common/layout_factory.dart';
 import '../presentation/index.dart';
 import '../presentation/splash/splash_page.dart';
+
 import '../services/firebase_messaging_service.dart';
 import 'injection.dart';
 
 class App extends StatelessWidget {
   Future<void> initializeServices() async {
     await Firebase.initializeApp();
+    await FirebaseAppCheck.instance.activate(
+      providerAndroid: const AndroidDebugProvider(),
+      providerApple: const AppleDebugProvider(),
+    );
     await getIt<FirebaseMessagingService>().initialize();
     FirebaseMessaging.instance
         .getInitialMessage()

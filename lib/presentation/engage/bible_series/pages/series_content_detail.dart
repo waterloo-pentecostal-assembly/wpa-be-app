@@ -131,12 +131,10 @@ class ContentDetailWidget extends StatelessWidget {
         if (state is SeriesContentDetail) {
           BlocProvider.of<CompletionsBloc>(context)
             ..add(CompletionDetailRequested(state.contentCompletionDetail));
-          return WillPopScope(
-            onWillPop:
-                // Platform.isIOS
-                //     ? null
-                //     :
-                () {
+          return PopScope(
+            canPop: false,
+            onPopInvokedWithResult: (bool didPop, dynamic result) {
+              if (didPop) return;
               if (state.seriesContentDetail.isResponsePossible) {
                 CompletionDetails completionDetails = CompletionDetails(
                     id: state.seriesContentDetail.id,
@@ -149,7 +147,6 @@ class ContentDetailWidget extends StatelessWidget {
                   ..add(MarkAsDraft(completionDetails));
               }
               Navigator.pop(context);
-              return Future.value(false);
             },
             child: Scaffold(
               body: SafeArea(
@@ -228,7 +225,7 @@ class ContentDetailWidget extends StatelessWidget {
                 style: TextButton.styleFrom(
                     foregroundColor: Colors.white,
                     minimumSize: Size(90, 30),
-                    backgroundColor: kWpaBlue.withOpacity(0.8),
+                    backgroundColor: kWpaBlue.withValues(alpha: 0.8),
                     padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                 onPressed: () {

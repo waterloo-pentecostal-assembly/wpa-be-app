@@ -14,111 +14,94 @@ class NotificationSettingsBloc
   final INotificationSettingsService _iNotificationSettingsService;
 
   NotificationSettingsBloc(this._iNotificationSettingsService)
-      : super(NotificationSettingsInitial());
+      : super(NotificationSettingsInitial()) {
+    on<NotificationSettingsRequested>(_onNotificationSettingsRequested);
+    on<SubscribedToDailyEngagementReminder>(_onSubscribedToDailyEngagementReminder);
+    on<UnsubscribedFromDailyEngagementReminder>(_onUnsubscribedFromDailyEngagementReminder);
+    on<SubscribedToPrayerNotifications>(_onSubscribedToPrayerNotifications);
+    on<UnsubscribedFromPrayerNotifications>(_onUnsubscribedFromPrayerNotifications);
+    on<SubscribedToTestimonyNotifications>(_onSubscribedToTestimonyNotifications);
+    on<UnsubscribedFromTestimonyNotifications>(_onUnsubscribedFromTestimonyNotifications);
+  }
 
-  @override
-  Stream<NotificationSettingsState> mapEventToState(
-    NotificationSettingsEvent event,
-  ) async* {
-    if (event is NotificationSettingsRequested) {
-      yield* _mapNotificationSettingsRequestedToState(
-          _iNotificationSettingsService);
-    } else if (event is SubscribedToDailyEngagementReminder) {
-      yield* _mapSubscribedToDailyEngagementReminderToState(
-          _iNotificationSettingsService);
-    } else if (event is UnsubscribedFromDailyEngagementReminder) {
-      yield* _mapUnsubscribedFromDailyEngagementReminderToState(
-          _iNotificationSettingsService);
-    } else if (event is SubscribedToPrayerNotifications) {
-      yield* _mapSubscribedToPrayerNotificationsToState(
-          _iNotificationSettingsService);
-    } else if (event is UnsubscribedFromPrayerNotifications) {
-      yield* _mapUnsubscribedFromPrayerNotificationsToState(
-          _iNotificationSettingsService);
-    } else if (event is SubscribedToTestimonyNotifications) {
-      yield* _mapSubscribedToTestimonyNotificationsToState(
-          _iNotificationSettingsService);
-    } else if (event is UnsubscribedFromTestimonyNotifications) {
-      yield* _mapUnsubscribedFromTestimonyNotificationsToState(
-          _iNotificationSettingsService);
+  Future<void> _onNotificationSettingsRequested(
+    NotificationSettingsRequested event,
+    Emitter<NotificationSettingsState> emit,
+  ) async {
+    try {
+      NotificationSettingsEntity notificationSettings =
+          await _iNotificationSettingsService.getNotificationSettings();
+      emit(NotificationSettingsPositions(
+          notificationSettings: notificationSettings));
+    } catch (e) {
+      emit(NotificationSettingsError(
+          message: "Error loading notification settings"));
     }
   }
-}
 
-Stream<NotificationSettingsState> _mapNotificationSettingsRequestedToState(
-  INotificationSettingsService notificationSettingsService,
-) async* {
-  try {
-    NotificationSettingsEntity notificationSettings =
-        await notificationSettingsService.getNotificationSettings();
-    yield NotificationSettingsPositions(
-        notificationSettings: notificationSettings);
-  } catch (e) {
-    yield NotificationSettingsError(
-        message: "Error loading notification settings");
+  Future<void> _onSubscribedToDailyEngagementReminder(
+    SubscribedToDailyEngagementReminder event,
+    Emitter<NotificationSettingsState> emit,
+  ) async {
+    try {
+      await _iNotificationSettingsService.subscribeToDailyEngagementReminder();
+    } catch (e) {
+      emit(DailyEngagementReminderError(message: "Unable to subscribe"));
+    }
   }
-}
 
-Stream<NotificationSettingsState>
-    _mapSubscribedToDailyEngagementReminderToState(
-  INotificationSettingsService notificationSettingsService,
-) async* {
-  try {
-    await notificationSettingsService.subscribeToDailyEngagementReminder();
-  } catch (e) {
-    yield DailyEngagementReminderError(message: "Unable to subscribe");
+  Future<void> _onUnsubscribedFromDailyEngagementReminder(
+    UnsubscribedFromDailyEngagementReminder event,
+    Emitter<NotificationSettingsState> emit,
+  ) async {
+    try {
+      await _iNotificationSettingsService.unsubscribeFromDailyEngagementReminder();
+    } catch (e) {
+      emit(DailyEngagementReminderError(message: "Unable to unsubscribe"));
+    }
   }
-}
 
-Stream<NotificationSettingsState>
-    _mapUnsubscribedFromDailyEngagementReminderToState(
-  INotificationSettingsService notificationSettingsService,
-) async* {
-  try {
-    await notificationSettingsService.unsubscribeFromDailyEngagementReminder();
-  } catch (e) {
-    yield DailyEngagementReminderError(message: "Unable to unsubscribe");
+  Future<void> _onSubscribedToPrayerNotifications(
+    SubscribedToPrayerNotifications event,
+    Emitter<NotificationSettingsState> emit,
+  ) async {
+    try {
+      await _iNotificationSettingsService.subscribeToPrayerNotifications();
+    } catch (e) {
+      emit(PrayerNotificationError(message: "Unable to subscribe"));
+    }
   }
-}
 
-Stream<NotificationSettingsState> _mapSubscribedToPrayerNotificationsToState(
-  INotificationSettingsService notificationSettingsService,
-) async* {
-  try {
-    await notificationSettingsService.subscribeToPrayerNotifications();
-  } catch (e) {
-    yield PrayerNotificationError(message: "Unable to subscribe");
+  Future<void> _onUnsubscribedFromPrayerNotifications(
+    UnsubscribedFromPrayerNotifications event,
+    Emitter<NotificationSettingsState> emit,
+  ) async {
+    try {
+      await _iNotificationSettingsService.unsubscribeFromPrayerNotifications();
+    } catch (e) {
+      emit(PrayerNotificationError(message: "Unable to unsubscribe"));
+    }
   }
-}
 
-Stream<NotificationSettingsState>
-    _mapUnsubscribedFromPrayerNotificationsToState(
-  INotificationSettingsService notificationSettingsService,
-) async* {
-  try {
-    await notificationSettingsService.unsubscribeFromPrayerNotifications();
-  } catch (e) {
-    yield PrayerNotificationError(message: "Unable to unsubscribe");
+  Future<void> _onSubscribedToTestimonyNotifications(
+    SubscribedToTestimonyNotifications event,
+    Emitter<NotificationSettingsState> emit,
+  ) async {
+    try {
+      await _iNotificationSettingsService.subscribeToTestimonyNotifications();
+    } catch (e) {
+      emit(TestimonyNotificationError(message: "Unable to subscribe"));
+    }
   }
-}
 
-Stream<NotificationSettingsState> _mapSubscribedToTestimonyNotificationsToState(
-  INotificationSettingsService notificationSettingsService,
-) async* {
-  try {
-    await notificationSettingsService.subscribeToTestimonyNotifications();
-  } catch (e) {
-    yield TestimonyNotificationError(message: "Unable to subscribe");
-  }
-}
-
-Stream<NotificationSettingsState>
-    _mapUnsubscribedFromTestimonyNotificationsToState(
-  INotificationSettingsService notificationSettingsService,
-) async* {
-  try {
-    await notificationSettingsService.unsubscribeFromTestimonyNotifications();
-  } catch (e) {
-    yield TestimonyNotificationError(message: "Unable to unsubscribe");
+  Future<void> _onUnsubscribedFromTestimonyNotifications(
+    UnsubscribedFromTestimonyNotifications event,
+    Emitter<NotificationSettingsState> emit,
+  ) async {
+    try {
+      await _iNotificationSettingsService.unsubscribeFromTestimonyNotifications();
+    } catch (e) {
+      emit(TestimonyNotificationError(message: "Unable to unsubscribe"));
+    }
   }
 }

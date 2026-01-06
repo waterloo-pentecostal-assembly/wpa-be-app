@@ -67,7 +67,7 @@ class SignUpForm extends StatelessWidget {
                                   borderRadius: BorderRadius.circular(10),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.grey.withOpacity(0.2),
+                                      color: Colors.grey.withValues(alpha: 0.2),
                                       blurRadius: 20.0,
                                       offset: Offset(0, 10),
                                     ),
@@ -232,10 +232,10 @@ class SignUpForm extends StatelessWidget {
                                   ),
                                   child: TextButton(
                                     style: ButtonStyle(backgroundColor:
-                                        MaterialStateProperty.resolveWith<
-                                            Color?>((states) {
+                                        WidgetStateProperty.resolveWith<Color?>(
+                                            (states) {
                                       if (states
-                                          .contains(MaterialState.disabled)) {
+                                          .contains(WidgetState.disabled)) {
                                         return Colors.grey[400];
                                       }
                                       return null;
@@ -286,7 +286,7 @@ _signUpSuccessAlert(BuildContext context, String emailAddress) {
           child: TextButton(
             style: TextButton.styleFrom(
                 foregroundColor: Colors.white,
-                backgroundColor: kWpaBlue.withOpacity(0.8),
+                backgroundColor: kWpaBlue.withValues(alpha: 0.8),
                 minimumSize: Size(90, 30),
                 padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap),

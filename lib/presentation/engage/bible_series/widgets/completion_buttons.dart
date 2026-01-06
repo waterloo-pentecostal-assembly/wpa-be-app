@@ -42,7 +42,7 @@ class CompletionButton extends StatelessWidget {
                     },
                     child: Icon(
                       Icons.check_circle,
-                      color: Colors.black87.withOpacity(0.5),
+                      color: Colors.black87.withValues(alpha: 0.5),
                       size: getIt<LayoutFactory>()
                           .getDimension(baseDimension: 60.0),
                     ),
@@ -61,7 +61,7 @@ class CompletionButton extends StatelessWidget {
                     },
                     child: Icon(
                       Icons.check_circle,
-                      color: kSuccessColor.withOpacity(0.8),
+                      color: kSuccessColor.withValues(alpha: 0.8),
                       size: getIt<LayoutFactory>()
                           .getDimension(baseDimension: 60.0),
                     ),
@@ -116,7 +116,7 @@ class ResponseCompletionButton extends StatelessWidget {
                                       foregroundColor: Colors.white,
                                       minimumSize: Size(90, 30),
                                       backgroundColor:
-                                          kWpaBlue.withOpacity(0.8),
+                                          kWpaBlue.withValues(alpha: 0.8),
                                       padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
                                       tapTargetSize:
                                           MaterialTapTargetSize.shrinkWrap),
@@ -162,7 +162,7 @@ class ResponseCompletionButton extends StatelessWidget {
                                       foregroundColor: Colors.white,
                                       minimumSize: Size(90, 30),
                                       backgroundColor:
-                                          kWpaBlue.withOpacity(0.8),
+                                          kWpaBlue.withValues(alpha: 0.8),
                                       padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
                                       tapTargetSize:
                                           MaterialTapTargetSize.shrinkWrap),
@@ -193,7 +193,7 @@ class ResponseCompletionButton extends StatelessWidget {
                     splashColor: Colors.lightGreenAccent,
                     child: Icon(
                       Icons.check_circle,
-                      color: Colors.black87.withOpacity(0.5),
+                      color: Colors.black87.withValues(alpha: 0.5),
                       size: getIt<LayoutFactory>()
                           .getDimension(baseDimension: 60.0),
                     ),
@@ -210,7 +210,7 @@ class ResponseCompletionButton extends StatelessWidget {
                     },
                     child: Icon(
                       Icons.check_circle,
-                      color: kSuccessColor.withOpacity(0.8),
+                      color: kSuccessColor.withValues(alpha: 0.8),
                       size: getIt<LayoutFactory>()
                           .getDimension(baseDimension: 60.0),
                     ),

@@ -80,7 +80,7 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
                   Icons.add_a_photo,
                   size:
                       getIt<LayoutFactory>().getDimension(baseDimension: 36.0),
-                  color: Colors.black87.withOpacity(0.75),
+                  color: Colors.black87.withValues(alpha: 0.75),
                 ),
                 onTap: selectImageInput,
               ),
@@ -166,10 +166,11 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
               showDialog(
                   context: context,
                   builder: (context) {
-                    return WillPopScope(
-                      onWillPop: () {
+                    return PopScope(
+                      canPop: false,
+                      onPopInvokedWithResult: (bool didPop, dynamic result) {
+                        if (didPop) return;
                         Navigator.of(context, rootNavigator: true).pop();
-                        return Future.value(false);
                       },
                       child: Stack(children: [
                         Center(

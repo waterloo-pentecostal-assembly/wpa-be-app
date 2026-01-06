@@ -12,30 +12,20 @@ part 'media_state.dart';
 class MediaBloc extends Bloc<MediaEvent, MediaState> {
   final IMediaRepository _iMediaRepository;
 
-  MediaBloc(this._iMediaRepository) : super(AvailableMediaLoading());
-
-  @override
-  Stream<MediaState> mapEventToState(
-    MediaEvent event,
-  ) async* {
-    if (event is AvailableMediaRequested) {
-      yield* _mapAvailableMediaRequestedEventToState(
-        event,
-        _iMediaRepository.getAvailableMedia,
-      );
-    }
+  MediaBloc(this._iMediaRepository) : super(AvailableMediaLoading()) {
+    on<AvailableMediaRequested>(_onAvailableMediaRequested);
   }
-}
 
-Stream<MediaState> _mapAvailableMediaRequestedEventToState(
-  MediaEvent event,
-  Future<List<Media>> Function() getAvailableMedia,
-) async* {
-  try {
-    yield AvailableMediaLoading();
-    List<Media> media = await getAvailableMedia();
-    yield AvailableMediaLoaded(media: media);
-  } catch (e) {
-    yield AvailableMediaError(message: 'Unable to load media');
+  Future<void> _onAvailableMediaRequested(
+    AvailableMediaRequested event,
+    Emitter<MediaState> emit,
+  ) async {
+    try {
+      emit(AvailableMediaLoading());
+      List<Media> media = await _iMediaRepository.getAvailableMedia();
+      emit(AvailableMediaLoaded(media: media));
+    } catch (e) {
+      emit(AvailableMediaError(message: 'Unable to load media'));
+    }
   }
 }

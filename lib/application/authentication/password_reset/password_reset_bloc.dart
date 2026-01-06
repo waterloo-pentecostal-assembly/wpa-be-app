@@ -15,78 +15,63 @@ class PasswordResetBloc extends Bloc<PasswordResetEvent, PasswordResetState> {
   final IAuthenticationFacade _iAuthenticationFacade;
 
   PasswordResetBloc(this._iAuthenticationFacade)
-      : super(PasswordResetState.initial());
+      : super(PasswordResetState.initial()) {
+    on<EmailChanged>(_onEmailChanged);
+    on<ResetPassword>(_onResetPassword);
+  }
 
-  @override
-  Stream<PasswordResetState> mapEventToState(
-    PasswordResetEvent event,
-  ) async* {
-    if (event is EmailChanged) {
-      yield* _mapEmailChangedToState(event, state);
-    } else if (event is ResetPassword) {
-      yield* _mapResetPasswordToState(
-        event,
-        state,
-        _iAuthenticationFacade.sendPasswordResetEmail,
-      );
+  Future<void> _onEmailChanged(
+    EmailChanged event,
+    Emitter<PasswordResetState> emit,
+  ) async {
+    try {
+      EmailAddress email = EmailAddress(event.email);
+      emit(state.copyWith(
+        emailAddress: email.value,
+        emailAddressError: '',
+      ));
+    } on ValueObjectException catch (e) {
+      emit(state.copyWith(
+        emailAddress: event.email,
+        emailAddressError: e.message,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        emailAddress: event.email,
+        emailAddressError: 'An unknown error occurred',
+      ));
     }
   }
-}
 
-Stream<PasswordResetState> _mapEmailChangedToState(
-  EmailChanged event,
-  PasswordResetState state,
-) async* {
-  try {
-    EmailAddress email = EmailAddress(event.email);
-    yield state.copyWith(
-      emailAddress: email.value,
-      emailAddressError: '',
-    );
-  } on ValueObjectException catch (e) {
-    yield state.copyWith(
-      emailAddress: event.email,
-      emailAddressError: e.message,
-    );
-  } catch (e) {
-    yield state.copyWith(
-      emailAddress: event.email,
-      emailAddressError: 'An unknown error occurred',
-    );
-  }
-}
+  Future<void> _onResetPassword(
+    ResetPassword event,
+    Emitter<PasswordResetState> emit,
+  ) async {
+    emit(state.copyWith(
+      submitting: true,
+    ));
 
-Stream<PasswordResetState> _mapResetPasswordToState(
-  ResetPassword event,
-  PasswordResetState state,
-  Future Function({
-    required EmailAddress emailAddress,
-  }) passwordResetFunction,
-) async* {
-  yield state.copyWith(
-    submitting: true,
-  );
-
-  try {
-    await passwordResetFunction(
-      emailAddress: EmailAddress(state.emailAddress),
-    );
-    yield state.copyWith(
-      submitting: false,
-      passwordResetSuccess: true,
-      passwordResetError: null,
-    );
-  } on BaseApplicationException catch (e) {
-    yield state.copyWith(
-      submitting: false,
-      passwordResetSuccess: false,
-      passwordResetError: e.message,
-    );
-  } catch (e) {
-    yield state.copyWith(
-      submitting: false,
-      passwordResetSuccess: false,
-      passwordResetError: 'An unknown error occurred',
-    );
+    try {
+      await _iAuthenticationFacade.sendPasswordResetEmail(
+        emailAddress: EmailAddress(state.emailAddress),
+      );
+      emit(state.copyWith(
+        submitting: false,
+        passwordResetSuccess: true,
+        passwordResetError: null,
+      ));
+    } on BaseApplicationException catch (e) {
+      emit(state.copyWith(
+        submitting: false,
+        passwordResetSuccess: false,
+        passwordResetError: e.message,
+      ));
+    } catch (e) {
+      emit(state.copyWith(
+        submitting: false,
+        passwordResetSuccess: false,
+        passwordResetError: 'An unknown error occurred',
+      ));
+    }
   }
 }
