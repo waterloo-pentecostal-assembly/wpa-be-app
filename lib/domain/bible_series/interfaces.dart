@@ -16,6 +16,7 @@ abstract class IBibleSeriesRepository {
   /// Throws [ApplicationException] or [BibleSeriesException].
   Future<List<BibleSeries>> getBibleSeries({
     required int limit,
+    bool isActive = false,
   });
 
   Future<List<BibleSeries>> getMoreBibleSeries({

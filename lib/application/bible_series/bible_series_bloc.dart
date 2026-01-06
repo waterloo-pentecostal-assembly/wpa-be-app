@@ -34,7 +34,10 @@ class BibleSeriesBloc extends Bloc<BibleSeriesEvent, BibleSeriesState> {
     emit(FetchingBibleSeries());
     try {
       List<BibleSeries> bibleSeriesList =
-          await _iBibleSeriesRepository.getBibleSeries(limit: event.amount);
+          await _iBibleSeriesRepository.getBibleSeries(
+        limit: event.amount,
+        isActive: event.isActive,
+      );
       emit(RecentBibleSeries(bibleSeriesList));
     } on BaseApplicationException catch (e) {
       emit(BibleSeriesError(
@@ -52,7 +55,8 @@ class BibleSeriesBloc extends Bloc<BibleSeriesEvent, BibleSeriesState> {
     Emitter<BibleSeriesState> emit,
   ) async {
     try {
-      BibleSeries bibleSeries = await _iBibleSeriesRepository.getBibleSeriesDetails(
+      BibleSeries bibleSeries =
+          await _iBibleSeriesRepository.getBibleSeriesDetails(
         bibleSeriesId: event.bibleSeriesId.toString(),
       );
 
@@ -82,13 +86,15 @@ class BibleSeriesBloc extends Bloc<BibleSeriesEvent, BibleSeriesState> {
     Emitter<BibleSeriesState> emit,
   ) async {
     try {
-      SeriesContent seriesContentDetail = await _iBibleSeriesRepository.getContentDetails(
+      SeriesContent seriesContentDetail =
+          await _iBibleSeriesRepository.getContentDetails(
         seriesContentId: event.seriesContentId.toString(),
         bibleSeriesId: event.bibleSeriesId.toString(),
       );
 
       if (event.getCompletionDetails) {
-        CompletionDetails completionDetails = await _iCompletionsRepository.getCompletion(
+        CompletionDetails completionDetails =
+            await _iCompletionsRepository.getCompletion(
           seriesContentId: event.seriesContentId.toString(),
         );
         emit(SeriesContentDetail(seriesContentDetail, completionDetails));
@@ -111,9 +117,13 @@ class BibleSeriesBloc extends Bloc<BibleSeriesEvent, BibleSeriesState> {
     Emitter<BibleSeriesState> emit,
   ) async {
     try {
-      CompletionDetails? completionDetails = await _iCompletionsRepository.getCompletionOrNull(
-          seriesContentId: event.bibleSeries.seriesContentSnippet[event.scsNum]
-              .availableContentTypes[event.actNum].contentId);
+      CompletionDetails? completionDetails =
+          await _iCompletionsRepository.getCompletionOrNull(
+              seriesContentId: event
+                  .bibleSeries
+                  .seriesContentSnippet[event.scsNum]
+                  .availableContentTypes[event.actNum]
+                  .contentId);
       BibleSeries newBibleSeries = updateCompletionDetailToSeries(
           event.bibleSeries, completionDetails, event.scsNum, event.actNum);
       emit(UpdatedBibleSeries(newBibleSeries));

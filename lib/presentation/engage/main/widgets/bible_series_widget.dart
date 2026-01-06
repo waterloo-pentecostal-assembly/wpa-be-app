@@ -24,11 +24,11 @@ class RecentBibleSeriesWidget extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
                   getIt<TextFactory>().subHeading('Bible Series'),
-                  // GestureDetector(
-                  //   onTap: () =>
-                  //       Navigator.pushNamed(context, '/all_bible_series'),
-                  //   child: getIt<TextFactory>().regular('See all'),
-                  // ),
+                  GestureDetector(
+                    onTap: () =>
+                        Navigator.pushNamed(context, '/all_bible_series'),
+                    child: getIt<TextFactory>().regular('Show all'),
+                  ),
                 ],
               ),
             ),

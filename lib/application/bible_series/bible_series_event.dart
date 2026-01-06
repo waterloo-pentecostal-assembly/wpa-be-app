@@ -6,10 +6,11 @@ abstract class BibleSeriesEvent extends Equatable {
 
 class RecentBibleSeriesRequested extends BibleSeriesEvent {
   final int amount;
+  final bool isActive;
 
-  RecentBibleSeriesRequested({required this.amount});
+  RecentBibleSeriesRequested({required this.amount, this.isActive = false});
   @override
-  List<Object> get props => [amount];
+  List<Object> get props => [amount, isActive];
 }
 
 class HasActiveBibleSeriesRequested extends BibleSeriesEvent {

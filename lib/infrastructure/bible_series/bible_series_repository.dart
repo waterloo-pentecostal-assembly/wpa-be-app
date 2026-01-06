@@ -28,23 +28,24 @@ class BibleSeriesRepository implements IBibleSeriesRepository {
   @override
   Future<List<BibleSeries>> getBibleSeries({
     required int limit,
+    bool isActive = false,
   }) async {
     QuerySnapshot querySnapshot;
 
     try {
       final LocalUser user = getIt<LocalUser>();
-      if (user.isAdmin) {
-        querySnapshot = await _bibleSeriesCollection
-            .orderBy("start_date", descending: true)
-            .limit(limit)
-            .get();
-      } else {
-        querySnapshot = await _bibleSeriesCollection
-            .orderBy("start_date", descending: true)
-            .where("is_visible", isEqualTo: true)
-            .limit(limit)
-            .get();
+      Query query =
+          _bibleSeriesCollection.orderBy("start_date", descending: true);
+
+      if (!user.isAdmin) {
+        query = query.where("is_visible", isEqualTo: true);
       }
+
+      if (isActive) {
+        query = query.where("is_active", isEqualTo: true);
+      }
+
+      querySnapshot = await query.limit(limit).get();
     } on Exception catch (e) {
       throw _firebaseFirestoreService.handleException(e);
     }

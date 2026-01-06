@@ -156,7 +156,7 @@ class EngageIndex extends StatelessWidget {
             create: (BuildContext context) {
               return getIt<BibleSeriesBloc>()
                 ..add(
-                  RecentBibleSeriesRequested(amount: 15),
+                  RecentBibleSeriesRequested(amount: 15, isActive: true),
                 );
             },
             child: EngageLayoutWidget(
@@ -189,7 +189,7 @@ class EngageLayoutWidget extends StatelessWidget {
         BlocProvider.of<AchievementsBloc>(context)
           ..add(WatchAchievementsStarted());
         BlocProvider.of<BibleSeriesBloc>(context)
-          ..add(RecentBibleSeriesRequested(amount: 15));
+          ..add(RecentBibleSeriesRequested(amount: 15, isActive: true));
         BlocProvider.of<MediaBloc>(context)..add(AvailableMediaRequested());
       },
       child: Container(
