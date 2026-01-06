@@ -114,3 +114,14 @@ This document outlines the specifications for introducing a Discussion Forum fea
 * Comment editing by users.
 
 * Visual distinction for admin posts.  
+
+
+**TODO**
+
+1. When a new comment is added and the user is on a thread,
+there should be a toast notification.
+2. When the user is replying to a comment, the comment should be highlighted and scrolled to.
+3. Move notification settings to it's own page and add:
+    * Notification settings for threads
+    * Notification settings for comments
+    * Notification settings for likes

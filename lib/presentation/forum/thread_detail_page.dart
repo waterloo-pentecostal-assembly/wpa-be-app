@@ -32,9 +32,12 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
   String? _replyToCommentId;
   String? _replyToAuthorName;
   final TextEditingController _textController = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+  final Map<String, GlobalKey> _commentKeys = {};
 
   @override
   void dispose() {
+    _focusNode.dispose();
     _textController.dispose();
     super.dispose();
   }
@@ -122,10 +125,13 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       child: Container(
+        key: _commentKeys.putIfAbsent(comment.id, () => GlobalKey()),
         padding: EdgeInsets.all(8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
-          color: kCardOverlayGrey,
+          color: _replyToCommentId == comment.id
+              ? kWpaBlue.withValues(alpha: 0.1)
+              : kCardOverlayGrey,
           boxShadow: [
             BoxShadow(
               color: Colors.grey.withValues(alpha: 0.1),
@@ -229,6 +235,18 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
                       _replyToCommentId = comment.id;
                       _replyToAuthorName = comment.authorName;
                     });
+                    WidgetsBinding.instance.addPostFrameCallback((_) {
+                      _focusNode.requestFocus();
+                      final key = _commentKeys[comment.id];
+                      if (key?.currentContext != null) {
+                        Scrollable.ensureVisible(
+                          key!.currentContext!,
+                          alignment: 0.5,
+                          duration: Duration(milliseconds: 300),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    });
                   },
                   child: Text("Reply", style: TextStyle(fontSize: 12)))
           ])
@@ -270,6 +288,7 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
             children: [
               Expanded(
                 child: TextField(
+                  focusNode: _focusNode,
                   controller: _textController,
                   style: getIt<TextFactory>().liteTextStyle(),
                   decoration: InputDecoration(
