@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:wpa_app/application/links/links_bloc.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
+import 'package:wpa_app/presentation/profile/notification_settings_page.dart';
 
 import '../../app/constants.dart';
 import '../../app/injection.dart';
@@ -15,7 +16,6 @@ import '../../application/notification_settings/notification_settings_bloc.dart'
 import '../../application/user_profile/user_profile_bloc.dart';
 import '../../domain/authentication/entities.dart';
 import '../common/interfaces.dart';
-import '../common/platform_switch.dart';
 import '../common/text_factory.dart';
 import '../common/toast_message.dart';
 
@@ -46,6 +46,9 @@ class ProfilePage extends IIndexedPage {
             return MaterialPageRoute(
               settings: settings,
               builder: (BuildContext context) {
+                if (settings.name == '/notification_settings') {
+                  return NotificationSettingsPage();
+                }
                 return ProfilePageRoot();
               },
             );
@@ -79,7 +82,35 @@ class ProfilePageRoot extends StatelessWidget {
                 LogoutButton(),
                 Divider(indent: 12, endIndent: 12),
                 SizedBox(height: 18),
-                NotificationSettings(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      getIt<TextFactory>().regular('SETTINGS'),
+                      Divider(),
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.of(context)
+                              .pushNamed('/notification_settings');
+                        },
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            getIt<TextFactory>().lite("Notification Settings"),
+                            Icon(
+                              Icons.keyboard_arrow_right,
+                              color: kDarkGreyColor,
+                              size: getIt<LayoutFactory>()
+                                  .getDimension(baseDimension: 24.0),
+                            )
+                          ],
+                        ),
+                      ),
+                      Divider(),
+                    ],
+                  ),
+                ),
                 SizedBox(height: 18),
                 Other(),
               ],
@@ -266,189 +297,6 @@ class LogoutButton extends StatelessWidget {
       ],
     );
   }
-}
-
-class NotificationSettings extends StatefulWidget {
-  @override
-  _NotificationSettingsState createState() => _NotificationSettingsState();
-}
-
-class _NotificationSettingsState extends State<NotificationSettings>
-    with AutomaticKeepAliveClientMixin {
-  bool? isEngagementReminderSwitched;
-  bool? isPrayerNotificationsSwitched;
-  bool? isTestimonyNotificationsSwitched;
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    return Padding(
-      padding: const EdgeInsets.only(left: 12.0, right: 12.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            child: getIt<TextFactory>().regular('NOTIFICATION SETTINGS'),
-          ),
-          Divider(),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              getIt<TextFactory>().lite("Daily Engagement Reminder"),
-              Container(
-                height: 30,
-                child: BlocConsumer<NotificationSettingsBloc,
-                    NotificationSettingsState>(
-                  listener: (context, NotificationSettingsState state) {
-                    if (state is NotificationSettingsPositions) {
-                      setState(() {
-                        isEngagementReminderSwitched =
-                            state.notificationSettings.dailyEngagementReminder;
-                      });
-                    } else if (state is DailyEngagementReminderError) {
-                      ToastMessage.showErrorToast(state.message, context);
-                      setState(() {
-                        isEngagementReminderSwitched =
-                            !isEngagementReminderSwitched!;
-                      });
-                    }
-                  },
-                  builder: (context, NotificationSettingsState state) {
-                    if (isEngagementReminderSwitched != null) {
-                      return PlatformSwitch(
-                        value: isEngagementReminderSwitched!,
-                        onChanged: (value) {
-                          setState(() {
-                            isEngagementReminderSwitched = value;
-                          });
-                          if (value) {
-                            BlocProvider.of<NotificationSettingsBloc>(context)
-                              ..add(SubscribedToDailyEngagementReminder());
-                          } else {
-                            BlocProvider.of<NotificationSettingsBloc>(context)
-                              ..add(UnsubscribedFromDailyEngagementReminder());
-                          }
-                        },
-                      );
-                    } else {
-                      return PlatformSwitch(disabled: true);
-                    }
-                  },
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              getIt<TextFactory>().lite("Prayers"),
-              Container(
-                height:
-                    getIt<LayoutFactory>().getDimension(baseDimension: 30.0),
-                child: BlocConsumer<NotificationSettingsBloc,
-                    NotificationSettingsState>(
-                  listener: (context, NotificationSettingsState state) {
-                    if (state is NotificationSettingsPositions) {
-                      setState(() {
-                        isPrayerNotificationsSwitched =
-                            state.notificationSettings.prayers;
-                      });
-                    } else if (state is PrayerNotificationError) {
-                      ToastMessage.showErrorToast(state.message, context);
-                      setState(() {
-                        isPrayerNotificationsSwitched =
-                            !isPrayerNotificationsSwitched!;
-                      });
-                    }
-                  },
-                  builder: (context, NotificationSettingsState state) {
-                    if (isPrayerNotificationsSwitched != null) {
-                      return PlatformSwitch(
-                        value: isPrayerNotificationsSwitched!,
-                        onChanged: (value) {
-                          setState(() {
-                            isPrayerNotificationsSwitched = value;
-                          });
-                          if (value) {
-                            BlocProvider.of<NotificationSettingsBloc>(context)
-                              ..add(SubscribedToPrayerNotifications());
-                          } else {
-                            BlocProvider.of<NotificationSettingsBloc>(context)
-                              ..add(UnsubscribedFromPrayerNotifications());
-                          }
-                        },
-                      );
-                    } else {
-                      return PlatformSwitch(disabled: true);
-                    }
-                  },
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              getIt<TextFactory>().lite("Testimonies"),
-              Container(
-                height:
-                    getIt<LayoutFactory>().getDimension(baseDimension: 30.0),
-                child: BlocConsumer<NotificationSettingsBloc,
-                    NotificationSettingsState>(
-                  listener: (context, NotificationSettingsState state) {
-                    if (state is NotificationSettingsPositions) {
-                      setState(() {
-                        isTestimonyNotificationsSwitched =
-                            state.notificationSettings.testimonies;
-                      });
-                    } else if (state is TestimonyNotificationError) {
-                      ToastMessage.showErrorToast(state.message, context);
-                      setState(() {
-                        isTestimonyNotificationsSwitched =
-                            !isTestimonyNotificationsSwitched!;
-                      });
-                    }
-                  },
-                  builder: (context, NotificationSettingsState state) {
-                    if (isTestimonyNotificationsSwitched != null) {
-                      return PlatformSwitch(
-                        value: isTestimonyNotificationsSwitched!,
-                        onChanged: (value) {
-                          setState(() {
-                            isTestimonyNotificationsSwitched = value;
-                          });
-                          if (value) {
-                            BlocProvider.of<NotificationSettingsBloc>(context)
-                              ..add(SubscribedToTestimonyNotifications());
-                          } else {
-                            BlocProvider.of<NotificationSettingsBloc>(context)
-                              ..add(UnsubscribedFromTestimonyNotifications());
-                          }
-                        },
-                      );
-                    } else {
-                      return PlatformSwitch(disabled: true);
-                    }
-                  },
-                ),
-              ),
-            ],
-          ),
-          Divider(),
-        ],
-      ),
-    );
-  }
-
-  @override
-  bool get wantKeepAlive => true;
 }
 
 class Other extends StatelessWidget {

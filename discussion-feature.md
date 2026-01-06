@@ -125,3 +125,6 @@ there should be a toast notification.
     * Notification settings for threads
     * Notification settings for comments
     * Notification settings for likes
+4. Default new notifications to be on for each user.
+5. Create a new page for bible series. Only the current one should be shown on the home page
+6. Streak

@@ -51,6 +51,36 @@ class NotificationSettingsService implements INotificationSettingsService {
     _setNotificationSetting({"testimonies": false});
   }
 
+  @override
+  Future<void> subscribeToForumThreads() async {
+    _setNotificationSetting({"forum_threads": true});
+  }
+
+  @override
+  Future<void> unsubscribeFromForumThreads() async {
+    _setNotificationSetting({"forum_threads": false});
+  }
+
+  @override
+  Future<void> subscribeToForumComments() async {
+    _setNotificationSetting({"forum_comments": true});
+  }
+
+  @override
+  Future<void> unsubscribeFromForumComments() async {
+    _setNotificationSetting({"forum_comments": false});
+  }
+
+  @override
+  Future<void> subscribeToForumLikes() async {
+    _setNotificationSetting({"forum_likes": true});
+  }
+
+  @override
+  Future<void> unsubscribeFromForumLikes() async {
+    _setNotificationSetting({"forum_likes": false});
+  }
+
   Future<void> _setNotificationSetting(
       Map<String, dynamic> notificationSetting) async {
     final LocalUser user = getIt<LocalUser>();
