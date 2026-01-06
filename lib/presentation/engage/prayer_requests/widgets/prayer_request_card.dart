@@ -46,27 +46,37 @@ class PrayerRequestCard extends StatelessWidget {
             )
           ],
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        child: Stack(
           children: [
-            SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                PrayerRequestUserAndDate(prayerRequest: prayerRequest),
-                PrayerRequestMenuButton(prayerRequest: prayerRequest),
-              ],
-            ),
-            SizedBox(height: 16),
-            getIt<TextFactory>().lite(prayerRequest.request),
-            SizedBox(height: 8),
-            Container(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [prayButtonOrIndicator],
+            Padding(
+              padding: EdgeInsets.only(bottom: 48), // Reserve space for button
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      PrayerRequestUserAndDate(prayerRequest: prayerRequest),
+                      PrayerRequestMenuButton(prayerRequest: prayerRequest),
+                    ],
+                  ),
+                  SizedBox(height: 16),
+                  getIt<TextFactory>().lite(prayerRequest.request),
+                  SizedBox(height: 8),
+                ],
               ),
             ),
-            SizedBox(height: 8),
+            Positioned(
+              bottom: 8,
+              right: 0,
+              child: Container(
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [prayButtonOrIndicator],
+                ),
+              ),
+            ),
           ],
         ),
       ),
