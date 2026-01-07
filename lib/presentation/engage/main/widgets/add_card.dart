@@ -16,7 +16,7 @@ class AddCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 8.0),
+        margin: EdgeInsets.all(8.0),
         width: 150, // Fixed width for the add card
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
