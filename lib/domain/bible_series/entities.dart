@@ -7,6 +7,7 @@ enum SeriesContentBodyType {
   QUESTION,
   IMAGE_INPUT,
   LINK,
+  VIDEO,
   TITLE,
   DIVIDER,
   EMPTY,
@@ -191,6 +192,21 @@ class AudioBody implements ISeriesContentBody {
 
 class AudioBodyProperties {
   late String audioFileUrl;
+  late String title;
+}
+
+class VideoBody implements ISeriesContentBody {
+  final SeriesContentBodyType type;
+  final VideoBodyProperties properties;
+
+  VideoBody({
+    required this.type,
+    required this.properties,
+  });
+}
+
+class VideoBodyProperties {
+  late String link;
   late String title;
 }
 

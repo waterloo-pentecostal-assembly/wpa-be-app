@@ -20,6 +20,7 @@ import '../widgets/image_body.dart';
 import '../widgets/question_body.dart';
 import '../widgets/scripture_body.dart';
 import '../widgets/text_body.dart';
+import '../widgets/video_body_widget.dart';
 
 class ContentDetailPage extends StatelessWidget {
   final String seriesContentId;
@@ -109,6 +110,10 @@ class ContentDetailWidget extends StatelessWidget {
         ));
       } else if (body[index].type == SeriesContentBodyType.DIVIDER) {
         contentBodyList.add(DividerBodyWidget());
+      } else if (body[index].type == SeriesContentBodyType.VIDEO) {
+        contentBodyList.add(VideoBodyWidget(
+          videoBody: body[index] as VideoBody,
+        ));
       }
     }
 

@@ -86,6 +86,9 @@ class SeriesContentBodyDto {
       _properties['title'] = findOrDefaultTo(json, 'title', '');
       _properties['text'] = findOrThrowException(json, 'text');
       _properties['link'] = findOrThrowException(json, 'link');
+    } else if (_bodyType == 'video') {
+      _properties['link'] = findOrThrowException(json, 'link');
+      _properties['title'] = findOrDefaultTo(json, 'title', '');
     } else if (_bodyType == 'title') {
       _properties['text'] = findOrThrowException(json, 'text');
     } else if (_bodyType == 'divider') {
@@ -198,6 +201,14 @@ extension SeriesContentBodyDtoX on SeriesContentBodyDto {
       properties.link = this.properties['link'];
       return LinkBody(
         type: SeriesContentBodyType.LINK,
+        properties: properties,
+      );
+    } else if (this.bodyType == 'video') {
+      VideoBodyProperties properties = VideoBodyProperties();
+      properties.title = this.properties['title'];
+      properties.link = this.properties['link'];
+      return VideoBody(
+        type: SeriesContentBodyType.VIDEO,
         properties: properties,
       );
     } else if (this.bodyType == 'title') {
