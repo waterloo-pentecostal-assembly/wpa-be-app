@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/application/testimonies/testimonies_bloc.dart';
 import 'package:wpa_app/presentation/common/loader.dart';
+import 'package:wpa_app/presentation/engage/main/widgets/past_bible_series_widget.dart';
 import 'package:wpa_app/presentation/engage/main/widgets/testimonies_widget.dart';
 import 'package:wpa_app/presentation/engage/testimonies/pages/testimonies.dart';
 
@@ -21,8 +22,7 @@ import '../prayer_requests/pages/prayer_requests.dart';
 import '../../forum/forum_page.dart';
 import '../../forum/thread_detail_page.dart';
 import 'widgets/media_widget.dart';
-import 'widgets/progress_widget.dart';
-import 'widgets/bible_series_widget.dart';
+import 'widgets/current_bible_series_widget.dart';
 import 'widgets/prayer_request_widget.dart';
 
 class EngagePage extends IIndexedPage {
@@ -130,10 +130,9 @@ class EngageIndex extends StatelessWidget {
           List<Widget> children;
           if (state.hasActive) {
             children = <Widget>[
-              HeaderWidget(),
-              ProgressWidget(),
               SizedBox(height: 16.0),
-              RecentBibleSeriesWidget(),
+              HeaderWidget(),
+              CurrentBibleSeriesWidget(),
               SizedBox(height: 16.0),
               RecentPrayerRequestsWidget(),
               RecentTestimoniesWidget(),
@@ -142,12 +141,12 @@ class EngageIndex extends StatelessWidget {
             ];
           } else {
             children = <Widget>[
+              SizedBox(height: 16.0),
               HeaderWidget(),
-              SizedBox(height: 16.0),
-              RecentBibleSeriesWidget(),
-              SizedBox(height: 16.0),
               RecentPrayerRequestsWidget(),
               RecentTestimoniesWidget(),
+              SizedBox(height: 16.0),
+              PastBibleSeriesWidget(),
               SizedBox(height: 16.0),
               MediaWidget(),
             ];
@@ -158,12 +157,16 @@ class EngageIndex extends StatelessWidget {
             create: (BuildContext context) {
               return getIt<BibleSeriesBloc>()
                 ..add(
-                  RecentBibleSeriesRequested(amount: 15, isActive: true),
+                  RecentBibleSeriesRequested(
+                    amount: 3,
+                  ),
                 );
             },
             child: EngageLayoutWidget(
-                parentContextBibleSeriesBloc: parentContextBibleSeriesBloc,
-                children: children),
+              parentContextBibleSeriesBloc: parentContextBibleSeriesBloc,
+              children: children,
+              hasActive: state.hasActive,
+            ),
           );
         }
         return Loader();
@@ -178,10 +181,12 @@ class EngageLayoutWidget extends StatelessWidget {
     Key? key,
     required this.parentContextBibleSeriesBloc,
     required this.children,
+    required this.hasActive,
   }) : super(key: key);
 
   final BibleSeriesBloc parentContextBibleSeriesBloc;
   final List<Widget> children;
+  final bool hasActive;
 
   @override
   Widget build(BuildContext context) {
@@ -191,7 +196,10 @@ class EngageLayoutWidget extends StatelessWidget {
         BlocProvider.of<AchievementsBloc>(context)
           ..add(WatchAchievementsStarted());
         BlocProvider.of<BibleSeriesBloc>(context)
-          ..add(RecentBibleSeriesRequested(amount: 15, isActive: true));
+          ..add(RecentBibleSeriesRequested(
+            amount: hasActive ? 15 : 3,
+            isActive: hasActive,
+          ));
         BlocProvider.of<MediaBloc>(context)..add(AvailableMediaRequested());
       },
       child: Container(
@@ -210,9 +218,8 @@ class HeaderWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(color: Colors.grey.shade100),
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 8, 8, 8),
+        padding: const EdgeInsets.fromLTRB(16, 8, 8, 16),
         child: getIt<TextFactory>().heading('Hello, ${localUser.firstName}!'),
       ),
     );

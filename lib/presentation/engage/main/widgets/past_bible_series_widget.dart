@@ -9,7 +9,7 @@ import '../../../../domain/bible_series/entities.dart';
 import '../../../common/date_formatter.dart';
 import '../../../common/text_factory.dart';
 
-class RecentBibleSeriesWidget extends StatelessWidget {
+class PastBibleSeriesWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<BibleSeriesBloc, BibleSeriesState>(
@@ -23,7 +23,7 @@ class RecentBibleSeriesWidget extends StatelessWidget {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  getIt<TextFactory>().subHeading('Bible Series'),
+                  getIt<TextFactory>().subHeading('Past Bible Series'),
                   GestureDetector(
                     onTap: () =>
                         Navigator.pushNamed(context, '/all_bible_series'),
@@ -34,10 +34,10 @@ class RecentBibleSeriesWidget extends StatelessWidget {
             ),
             () {
               if (state is RecentBibleSeries) {
-                return RecentBibleSeriesList(
+                return PastBibleSeriesList(
                     bibleSeriesList: state.bibleSeriesList);
               } else {
-                return RecentBibleSeriesListPlaceholder();
+                return PastBibleSeriesListPlaceholder();
               }
             }()
           ],
@@ -47,18 +47,18 @@ class RecentBibleSeriesWidget extends StatelessWidget {
   }
 }
 
-class RecentBibleSeriesList extends StatelessWidget {
+class PastBibleSeriesList extends StatelessWidget {
   final List<BibleSeries> bibleSeriesList;
 
-  const RecentBibleSeriesList({Key? key, required this.bibleSeriesList})
+  const PastBibleSeriesList({Key? key, required this.bibleSeriesList})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: getIt<LayoutFactory>().getDimension(
-          baseDimension: kRecentBibleSeriesTileHeight +
-              kRecentBibleSeriesTileDescriptionHeight),
+          baseDimension: kPastBibleSeriesTileHeight +
+              kPastBibleSeriesTileDescriptionHeight),
       child: ListView.builder(
         padding: EdgeInsets.only(left: 16),
         scrollDirection: Axis.horizontal,
@@ -86,7 +86,7 @@ class BibleSeriesCard extends StatelessWidget {
       },
       child: Container(
         width: getIt<LayoutFactory>()
-            .getDimension(baseDimension: kRecentBibleSeriesTileWidth),
+            .getDimension(baseDimension: kPastBibleSeriesTileWidth),
         padding: EdgeInsets.only(
           right: 8,
           left: 8,
@@ -102,7 +102,7 @@ class BibleSeriesCard extends StatelessWidget {
               child: Image.network(
                 bibleSeries.imageUrl,
                 height: getIt<LayoutFactory>()
-                    .getDimension(baseDimension: kRecentBibleSeriesTileHeight),
+                    .getDimension(baseDimension: kPastBibleSeriesTileHeight),
                 fit: BoxFit.fill,
                 frameBuilder: (BuildContext context, Widget child, int? frame,
                     bool wasSynchronouslyLoaded) {
@@ -135,24 +135,24 @@ class BibleSeriesCardPlaceholder extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: getIt<LayoutFactory>()
-          .getDimension(baseDimension: kRecentBibleSeriesTileHeight),
+          .getDimension(baseDimension: kPastBibleSeriesTileHeight),
       color: Colors.grey.shade200,
     );
   }
 }
 
-class RecentBibleSeriesListPlaceholder extends StatelessWidget {
+class PastBibleSeriesListPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
       height: getIt<LayoutFactory>()
-          .getDimension(baseDimension: kRecentBibleSeriesTileHeight),
+          .getDimension(baseDimension: kPastBibleSeriesTileHeight),
       child: ListView.builder(
         padding: EdgeInsets.only(left: 16),
         scrollDirection: Axis.horizontal,
         itemCount: (MediaQuery.of(context).size.width /
                 (getIt<LayoutFactory>()
-                    .getDimension(baseDimension: kRecentBibleSeriesTileWidth)))
+                    .getDimension(baseDimension: kPastBibleSeriesTileWidth)))
             .ceil(),
         itemBuilder: (_, __) {
           return ClipRRect(

@@ -15,9 +15,9 @@ Color kCardOverlayGrey = Colors.grey.shade100;
 
 // Size Constants
 const kProgressWidgetWidth = 150.0;
-const kRecentBibleSeriesTileWidth = 250.0;
-const kRecentBibleSeriesTileHeight = 130.0;
-const kRecentBibleSeriesTileDescriptionHeight = 60.0;
+const kPastBibleSeriesTileWidth = 250.0;
+const kPastBibleSeriesTileHeight = 130.0;
+const kPastBibleSeriesTileDescriptionHeight = 60.0;
 const kMediaTileWidth = 150.0;
 const kMediaTileHeight = 75.0;
 const kPrayerRequestButtonHeight = 50.0;
