@@ -59,8 +59,10 @@ class MediaWidgetLoaded extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: getIt<LayoutFactory>().getDimension(
-          baseDimension: kMediaTileHeight + kMediaTileDescriptionHeight),
+      height:
+          getIt<LayoutFactory>().getDimension(baseDimension: kMediaTileHeight) +
+              MediaQuery.of(context).textScaler.scale(getIt<LayoutFactory>()
+                  .getDimension(baseDimension: kMediaTileDescriptionHeight)),
       child: ListView.builder(
         padding: EdgeInsets.only(left: 16),
         scrollDirection: Axis.horizontal,
@@ -81,8 +83,10 @@ class MediaWidgetLoading extends StatelessWidget {
                 .getDimension(baseDimension: kMediaTileWidth)))
         .ceil();
     return Container(
-      height: getIt<LayoutFactory>().getDimension(
-          baseDimension: kMediaTileHeight + kMediaTileDescriptionHeight),
+      height:
+          getIt<LayoutFactory>().getDimension(baseDimension: kMediaTileHeight) +
+              MediaQuery.of(context).textScaler.scale(getIt<LayoutFactory>()
+                  .getDimension(baseDimension: kMediaTileDescriptionHeight)),
       child: ListView.builder(
         padding: EdgeInsets.only(left: 16),
         scrollDirection: Axis.horizontal,

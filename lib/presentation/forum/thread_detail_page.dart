@@ -160,11 +160,20 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
               ),
             ),
             SizedBox(width: 8),
-            getIt<TextFactory>().regular(comment.authorName, fontSize: 14.0),
-            Spacer(),
-            getIt<TextFactory>().lite(
-                timeago.format(comment.createdAt.toDate()),
-                fontSize: 10.0),
+            Expanded(
+              child: Row(
+                children: [
+                  Flexible(
+                    child: getIt<TextFactory>().regular(comment.authorName,
+                        fontSize: 14.0, overflow: TextOverflow.ellipsis),
+                  ),
+                  SizedBox(width: 8),
+                  getIt<TextFactory>().lite(
+                      timeago.format(comment.createdAt.toDate()),
+                      fontSize: 10.0),
+                ],
+              ),
+            ),
             PopupMenuButton<String>(
                 onSelected: (value) {
                   if (value == 'report') {

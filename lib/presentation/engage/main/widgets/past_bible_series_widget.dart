@@ -56,9 +56,11 @@ class PastBibleSeriesList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: getIt<LayoutFactory>().getDimension(
-          baseDimension: kPastBibleSeriesTileHeight +
-              kPastBibleSeriesTileDescriptionHeight),
+      height: getIt<LayoutFactory>()
+              .getDimension(baseDimension: kPastBibleSeriesTileHeight) +
+          MediaQuery.of(context).textScaler.scale(getIt<LayoutFactory>()
+              .getDimension(
+                  baseDimension: kPastBibleSeriesTileDescriptionHeight)),
       child: ListView.builder(
         padding: EdgeInsets.only(left: 16),
         scrollDirection: Axis.horizontal,
@@ -143,10 +145,14 @@ class BibleSeriesCardPlaceholder extends StatelessWidget {
 
 class PastBibleSeriesListPlaceholder extends StatelessWidget {
   @override
+  @override
   Widget build(BuildContext context) {
     return Container(
       height: getIt<LayoutFactory>()
-          .getDimension(baseDimension: kPastBibleSeriesTileHeight),
+              .getDimension(baseDimension: kPastBibleSeriesTileHeight) +
+          MediaQuery.of(context).textScaler.scale(getIt<LayoutFactory>()
+              .getDimension(
+                  baseDimension: kPastBibleSeriesTileDescriptionHeight)),
       child: ListView.builder(
         padding: EdgeInsets.only(left: 16),
         scrollDirection: Axis.horizontal,

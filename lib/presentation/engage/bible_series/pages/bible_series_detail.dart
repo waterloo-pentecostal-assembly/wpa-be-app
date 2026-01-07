@@ -150,7 +150,8 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                     unselectedLabelColor: Colors.black45,
                     labelColor: Colors.black87,
                     tabAlignment: TabAlignment.start,
-                    tabs: _buildContentTabs(bibleSeries.seriesContentSnippet),
+                    tabs: _buildContentTabs(
+                        context, bibleSeries.seriesContentSnippet),
                   ),
                 ),
                 Expanded(
@@ -270,13 +271,14 @@ class SeriesDetailPlaceholder extends StatelessWidget {
 }
 
 List<Widget> _buildContentTabs(
-    List<SeriesContentSnippet> seriesContentSnippets) {
+    BuildContext context, List<SeriesContentSnippet> seriesContentSnippets) {
   List<Widget> tabs = [];
+
   seriesContentSnippets.forEach((element) {
     tabs.add(
       Container(
-        height: getIt<LayoutFactory>()
-            .getDimension(layoutDimension: LayoutDimension.CONTENT_TAB_HEIGHT),
+        height: MediaQuery.of(context).textScaler.scale(getIt<LayoutFactory>()
+            .getDimension(layoutDimension: LayoutDimension.CONTENT_TAB_HEIGHT)),
         width: getIt<LayoutFactory>()
             .getDimension(layoutDimension: LayoutDimension.CONTENT_TAB_WIDTH),
         child: Tab(
@@ -329,8 +331,8 @@ List<Widget> _buildContentChildren(
       listChildren.add(
         Container(
           margin: EdgeInsets.only(top: 0, bottom: 15),
-          height: getIt<LayoutFactory>()
-              .getDimension(baseDimension: kContentChildrenHeight),
+          height: MediaQuery.of(context).textScaler.scale(getIt<LayoutFactory>()
+              .getDimension(baseDimension: kContentChildrenHeight)),
           child: Tab(
             child: GestureDetector(
               onTap: () {
