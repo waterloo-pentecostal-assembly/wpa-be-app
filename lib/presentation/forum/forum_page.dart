@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/app/constants.dart';
@@ -8,6 +7,7 @@ import 'package:wpa_app/application/forum/forum_bloc.dart';
 import 'package:wpa_app/domain/forum/entities.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
 import 'package:wpa_app/presentation/common/text_factory.dart';
+import 'package:wpa_app/presentation/forum/widgets/new_thread_form.dart';
 
 class ForumPage extends StatelessWidget {
   final String forumId;
@@ -110,8 +110,6 @@ class ForumTitleBar extends StatelessWidget {
   }
 
   void _showCreateThreadDialog(BuildContext context, String forumId) {
-    final _titleController = TextEditingController();
-
     // Check authentication before showing dialog
     final authState = BlocProvider.of<AuthenticationBloc>(context).state;
     if (authState is! Authenticated) {
@@ -121,48 +119,18 @@ class ForumTitleBar extends StatelessWidget {
       return;
     }
 
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: Text("New Thread"),
-          content: TextField(
-            controller: _titleController,
-            decoration: InputDecoration(hintText: "Thread Title"),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(dialogContext),
-              child: Text("Cancel"),
-            ),
-            TextButton(
-              onPressed: () {
-                if (_titleController.text.isNotEmpty) {
-                  // Accessing ForumBloc from the context where the dialog was opened
-                  BlocProvider.of<ForumBloc>(context).add(
-                    CreateThread(
-                      ForumThread(
-                        id: '',
-                        forumId: forumId,
-                        title: _titleController.text,
-                        authorId: authState.user.id,
-                        authorName: authState.user.fullName,
-                        authorImageUrl: authState.user.profilePhotoUrl,
-                        createdAt: Timestamp.now(),
-                        updatedAt: Timestamp.now(),
-                        commentCount: 0,
-                        isFrozen: false,
-                      ),
-                    ),
-                  );
-                  Navigator.pop(dialogContext);
-                }
-              },
-              child: Text("Create"),
-            ),
-          ],
-        );
-      },
+    final forumBloc = BlocProvider.of<ForumBloc>(context);
+    OverlayEntry? entry;
+    Overlay.of(context).insert(
+      entry = OverlayEntry(
+        builder: (context) {
+          return NewThreadForm(
+            entry: entry,
+            forumId: forumId,
+            forumBloc: forumBloc,
+          );
+        },
+      ),
     );
   }
 }
