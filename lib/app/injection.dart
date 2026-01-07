@@ -185,7 +185,7 @@ Future<void> initializeInjections({
   getIt
       .registerFactory<ThreadBloc>(() => ThreadBloc(getIt<IForumRepository>()));
 
-  getIt.registerLazySingleton<NavigationBarBloc>(
+  getIt.registerFactory<NavigationBarBloc>(
     () => NavigationBarBloc(),
   );
 

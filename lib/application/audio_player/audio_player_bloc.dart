@@ -1,7 +1,8 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:just_audio/just_audio.dart';
-import 'package:wpa_app/app/injection.dart';
 
 part 'audio_player_event.dart';
 part 'audio_player_state.dart';
@@ -14,6 +15,9 @@ enum PlayerStateEnum {
 
 class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
   final player = AudioPlayer();
+  StreamSubscription<Duration>? _positionSubscription;
+  StreamSubscription<Duration?>? _durationSubscription;
+  StreamSubscription<ProcessingState>? _playerStateSubscription;
 
   AudioPlayerBloc() : super(AudioPlayerState.initial()) {
     on<AudioPlayerEvent>((event, emit) async {
@@ -95,17 +99,40 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
   }
 
   void initAudioPlayer(Emitter<AudioPlayerState> emit) {
-    this.player.positionStream.listen((Duration position) {
-      getIt<AudioPlayerBloc>().add(PositionChanged(position: position));
-    });
-    this.player.durationStream.listen((Duration? duration) {
-      getIt<AudioPlayerBloc>().add(DurationChanged(duration: duration!));
-    });
-    this.player.processingStateStream.listen((ProcessingState state) async {
-      if (state == ProcessingState.completed) {
-        await this.player.stop();
-        getIt<AudioPlayerBloc>().add(Complete());
+    _positionSubscription?.cancel();
+    _durationSubscription?.cancel();
+    _playerStateSubscription?.cancel();
+
+    _positionSubscription =
+        this.player.positionStream.listen((Duration position) {
+      if (!isClosed) {
+        add(PositionChanged(position: position));
       }
     });
+    _durationSubscription =
+        this.player.durationStream.listen((Duration? duration) {
+      if (duration != null && !isClosed) {
+        add(DurationChanged(duration: duration));
+      }
+    });
+
+    _playerStateSubscription =
+        this.player.processingStateStream.listen((ProcessingState state) async {
+      if (state == ProcessingState.completed) {
+        await this.player.stop();
+        if (!isClosed) {
+          add(Complete());
+        }
+      }
+    });
+  }
+
+  @override
+  Future<void> close() {
+    _positionSubscription?.cancel();
+    _durationSubscription?.cancel();
+    _playerStateSubscription?.cancel();
+    player.dispose();
+    return super.close();
   }
 }

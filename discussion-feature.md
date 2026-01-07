@@ -129,3 +129,4 @@ there should be a toast notification.
 5. Create a new page for bible series. Only the current one should be shown on the home page
 6. Streak
 7. Bible series week video - sermon for that week with built in player
+8. Audio player
