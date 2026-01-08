@@ -26,12 +26,12 @@ class App extends StatelessWidget {
       providerApple: const AppleDebugProvider(),
     );
     await getIt<FirebaseMessagingService>().initialize();
-    FirebaseMessaging.instance
-        .getInitialMessage()
-        .then((RemoteMessage? message) => {
-              if (message != null)
-                {FirebaseMessagingService.navigationHandler(message.data)}
-            });
+    RemoteMessage? initialMessage =
+        await FirebaseMessaging.instance.getInitialMessage();
+    print('!!!!!!!!!!!!! $initialMessage');    
+    if (initialMessage != null) {
+      FirebaseMessagingService.navigationHandler(initialMessage.data);
+    }
   }
 
   @override
@@ -49,12 +49,7 @@ class App extends StatelessWidget {
                   ),
               ),
               BlocProvider(
-                create: (context) => getIt<NavigationBarBloc>()
-                  ..add(
-                    NavigationBarEvent(
-                      tab: NavigationTabEnum.ENGAGE,
-                    ),
-                  ),
+                create: (context) => getIt<NavigationBarBloc>(),
               ),
               BlocProvider(
                 create: (context) => getIt<BibleSeriesBloc>()

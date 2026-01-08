@@ -5,6 +5,13 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/application/navigation_bar/navigation_bar_bloc.dart';
 
+@pragma('vm:entry-point')
+Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
+  // If you're going to use other Firebase services in the background, such as Firestore,
+  // make sure you call `await Firebase.initializeApp();` here.
+  print("Handling a background message: ${message.messageId}");
+}
+
 class FirebaseMessagingService {
   late final FirebaseMessaging _firebaseMessaging;
 
@@ -36,6 +43,14 @@ class FirebaseMessagingService {
       provisional: false,
       sound: true,
     );
+
+    await _firebaseMessaging.setForegroundNotificationPresentationOptions(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
     // If you want to test the push notification locally,
     // you need to get the token and input to the Firebase console
@@ -95,6 +110,23 @@ class FirebaseMessagingService {
           NavigationBarEvent(
             tab: NavigationTabEnum.ADMIN,
             route: '/prayer_request_approval',
+          ),
+        );
+    } else if (['newThread', 'newComment', 'likeComment']
+        .contains(payload['notificationType'])) {
+      getIt<FirebaseAnalytics>().logEvent(
+          name: '${payload['notificationType']}_notification_clicked');
+      getIt<NavigationBarBloc>()
+        ..add(
+          NavigationBarEvent(
+            tab: NavigationTabEnum.ENGAGE,
+            route: '/thread_detail',
+            arguments: {
+              'threadId': payload['threadId'],
+              'forumId': payload['forumId'],
+              'title': payload['title'] ?? 'Thread',
+              'focusCommentId': payload['commentId'],
+            },
           ),
         );
     } else if (payload['notificationType'] == 'link') {

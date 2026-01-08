@@ -24,13 +24,6 @@ class EmptyPage extends IIndexedPage {
 }
 
 class IndexPage extends StatelessWidget {
-  final List<IIndexedPage> indexedPages = [
-    EngagePage(navigatorKey: GlobalKey()),
-    EmptyPage(),
-    ProfilePage(navigatorKey: GlobalKey()),
-    AdminPage(navigatorKey: GlobalKey())
-  ];
-
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -42,37 +35,70 @@ class IndexPage extends StatelessWidget {
             create: (BuildContext context) =>
                 getIt<LinksBloc>()..add(LinksRequested()))
       ],
-      child: _IndexPage(
-        indexedPages: indexedPages,
-      ),
+      child: _IndexPage(),
     );
   }
 }
 
-class _IndexPage extends StatelessWidget {
-  final List<IIndexedPage> indexedPages;
+class _IndexPage extends StatefulWidget {
+  const _IndexPage({Key? key}) : super(key: key);
 
-  const _IndexPage({Key? key, required this.indexedPages}) : super(key: key);
+  @override
+  _IndexPageState createState() => _IndexPageState();
+}
+
+class _IndexPageState extends State<_IndexPage> {
+  late List<IIndexedPage> indexedPages;
+
+  @override
+  void initState() {
+    super.initState();
+    indexedPages = [
+      EngagePage(navigatorKey: GlobalKey()),
+      EmptyPage(),
+      ProfilePage(navigatorKey: GlobalKey()),
+      AdminPage(navigatorKey: GlobalKey())
+    ];
+
+    // Handle initial deep link if present
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final state = BlocProvider.of<NavigationBarBloc>(context).state;
+      if (state.route != null) {
+        _handleNavigation(state);
+      }
+    });
+  }
+
+  void _handleNavigation(NavigationBarState state) {
+    if (state.route != null) {
+      if (indexedPages[state.tab.index].navigatorKey?.currentState != null) {
+        NavigatorState? routeNavigatorState =
+            indexedPages[state.tab.index].navigatorKey?.currentState;
+
+        if (routeNavigatorState?.canPop() == true) {
+          routeNavigatorState?.popUntil((route) => route.isFirst);
+        }
+
+        routeNavigatorState?.pushNamed(
+          state.route ?? '',
+          arguments: state.arguments,
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<NavigationBarBloc, NavigationBarState>(
-      builder: (BuildContext context, NavigationBarState state) {
+    return BlocConsumer<NavigationBarBloc, NavigationBarState>(
+      listener: (context, state) {
+        // Schedule navigation after build to ensure Navigator is mounted
         if (state.route != null) {
-          NavigatorState? routeNavigatorState =
-              indexedPages[state.tab.index].navigatorKey?.currentState;
-
-          if (routeNavigatorState?.canPop() == true) {
-            // clear navigation stack before going to new route
-            routeNavigatorState?.popUntil((route) => route.isFirst);
-          }
-
-          indexedPages[state.tab.index].navigatorKey?.currentState?.pushNamed(
-                state.route ?? '',
-                arguments: state.arguments,
-              );
+          WidgetsBinding.instance.addPostFrameCallback((_) {
+            _handleNavigation(state);
+          });
         }
-
+      },
+      builder: (BuildContext context, NavigationBarState state) {
         return NavigationBar(
           tabIndex: state.tab.index,
           indexedPages: indexedPages,

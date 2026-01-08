@@ -15,6 +15,7 @@ class ThreadDetailPage extends StatefulWidget {
   final String forumId;
   final String title;
   final bool isFrozen;
+  final String? focusCommentId;
 
   const ThreadDetailPage({
     Key? key,
@@ -22,6 +23,7 @@ class ThreadDetailPage extends StatefulWidget {
     required this.forumId,
     required this.title,
     required this.isFrozen,
+    this.focusCommentId,
   }) : super(key: key);
 
   @override
@@ -126,6 +128,21 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
                           return Center(
                               child: getIt<TextFactory>()
                                   .lite("No comments yet. Be the first!"));
+                        }
+
+                        // Trigger scroll to focused comment if provided
+                        if (widget.focusCommentId != null) {
+                          WidgetsBinding.instance.addPostFrameCallback((_) {
+                            final key = _commentKeys[widget.focusCommentId];
+                            if (key?.currentContext != null) {
+                              Scrollable.ensureVisible(
+                                key!.currentContext!,
+                                alignment: 0.5,
+                                duration: Duration(milliseconds: 600),
+                                curve: Curves.easeInOut,
+                              );
+                            }
+                          });
                         }
 
                         final sortedComments =
