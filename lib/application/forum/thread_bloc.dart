@@ -20,6 +20,8 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
     on<ReportComment>(_onReportComment);
     on<LikeComment>(_onLikeComment);
     on<UnlikeComment>(_onUnlikeComment);
+    on<FreezeThread>(_onFreezeThread);
+    on<UnfreezeThread>(_onUnfreezeThread);
   }
 
   Future<void> _onLoadThreadComments(
@@ -95,5 +97,23 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
   Future<void> close() {
     _commentsSubscription?.cancel();
     return super.close();
+  }
+
+  Future<void> _onFreezeThread(
+      FreezeThread event, Emitter<ThreadState> emit) async {
+    try {
+      await _forumRepository.freezeThread(event.threadId, event.forumId, true);
+    } catch (e) {
+      // emit error
+    }
+  }
+
+  Future<void> _onUnfreezeThread(
+      UnfreezeThread event, Emitter<ThreadState> emit) async {
+    try {
+      await _forumRepository.freezeThread(event.threadId, event.forumId, false);
+    } catch (e) {
+      // emit error
+    }
   }
 }

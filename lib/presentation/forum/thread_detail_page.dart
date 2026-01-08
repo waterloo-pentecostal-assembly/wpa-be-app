@@ -34,6 +34,13 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
   final TextEditingController _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   final Map<String, GlobalKey> _commentKeys = {};
+  late bool _isFrozen;
+
+  @override
+  void initState() {
+    super.initState();
+    _isFrozen = widget.isFrozen;
+  }
 
   @override
   void dispose() {
@@ -52,7 +59,42 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
           return SafeArea(
             child: Column(
               children: [
-                ThreadTitleBar(title: widget.title),
+                ThreadTitleBar(
+                  title: widget.title,
+                  trailing: Builder(builder: (context) {
+                    final authState =
+                        BlocProvider.of<AuthenticationBloc>(context).state;
+                    if (authState is Authenticated && authState.user.isAdmin) {
+                      return PopupMenuButton<String>(
+                        onSelected: (value) {
+                          if (value == 'freeze') {
+                            BlocProvider.of<ThreadBloc>(context).add(
+                                FreezeThread(widget.threadId, widget.forumId));
+                            setState(() {
+                              _isFrozen = true;
+                            });
+                          } else if (value == 'unfreeze') {
+                            BlocProvider.of<ThreadBloc>(context).add(
+                                UnfreezeThread(
+                                    widget.threadId, widget.forumId));
+                            setState(() {
+                              _isFrozen = false;
+                            });
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          PopupMenuItem(
+                            value: _isFrozen ? 'unfreeze' : 'freeze',
+                            child: Text(_isFrozen
+                                ? 'Unfreeze Thread'
+                                : 'Freeze Thread'),
+                          ),
+                        ],
+                      );
+                    }
+                    return Container();
+                  }),
+                ),
                 Expanded(
                   child: BlocBuilder<ThreadBloc, ThreadState>(
                     builder: (context, state) {
@@ -87,8 +129,8 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
                     },
                   ),
                 ),
-                if (!widget.isFrozen) _buildInputArea(context),
-                if (widget.isFrozen)
+                if (!_isFrozen) _buildInputArea(context),
+                if (_isFrozen)
                   Padding(
                     padding: EdgeInsets.all(16),
                     child: getIt<TextFactory>()
@@ -369,8 +411,10 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
 
 class ThreadTitleBar extends StatelessWidget {
   final String title;
+  final Widget? trailing;
 
-  const ThreadTitleBar({Key? key, required this.title}) : super(key: key);
+  const ThreadTitleBar({Key? key, required this.title, this.trailing})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -387,6 +431,7 @@ class ThreadTitleBar extends StatelessWidget {
           ),
           SizedBox(width: 8),
           Expanded(child: getIt<TextFactory>().subPageHeading(title)),
+          if (trailing != null) trailing!,
         ],
       ),
     );
