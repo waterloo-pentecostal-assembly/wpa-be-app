@@ -39,8 +39,8 @@ class FirebaseMessagingService {
 
     // If you want to test the push notification locally,
     // you need to get the token and input to the Firebase console
-    // String token = await _firebaseMessaging.getToken();
-    // print("FirebaseMessaging token: $token");
+    String? token = await _firebaseMessaging.getToken();
+    print("FirebaseMessaging token: $token");
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
       // print('onMessage.listen: $message');

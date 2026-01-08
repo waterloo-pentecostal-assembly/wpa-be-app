@@ -131,3 +131,4 @@ there should be a toast notification.
 7. Bible series week video - sermon for that week with built in player
 8. Audio player
 9. Add collapse for thread replies
+10. Update notification handling for all notification types
