@@ -82,12 +82,32 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
                             });
                           }
                         },
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.all(
+                            Radius.circular(10.0),
+                          ),
+                        ),
+                        color: kCardOverlayGrey,
+                        child: Icon(Icons.more_horiz,
+                            size: getIt<LayoutFactory>()
+                                .getDimension(baseDimension: 24.0)),
                         itemBuilder: (context) => [
                           PopupMenuItem(
                             value: _isFrozen ? 'unfreeze' : 'freeze',
-                            child: Text(_isFrozen
-                                ? 'Unfreeze Thread'
-                                : 'Freeze Thread'),
+                            child: Row(
+                              children: [
+                                Icon(
+                                  Icons.ac_unit,
+                                  size: getIt<LayoutFactory>()
+                                      .getDimension(baseDimension: 24.0),
+                                ),
+                                SizedBox(width: 4),
+                                Expanded(
+                                    child: getIt<TextFactory>().lite(_isFrozen
+                                        ? 'UNFREEZE THREAD'
+                                        : 'FREEZE THREAD'))
+                              ],
+                            ),
                           ),
                         ],
                       );
@@ -231,10 +251,46 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
                         comment.id, widget.threadId, widget.forumId));
                   }
                 },
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.all(
+                    Radius.circular(10.0),
+                  ),
+                ),
+                color: kCardOverlayGrey,
+                child: Icon(Icons.more_horiz,
+                    size: getIt<LayoutFactory>()
+                        .getDimension(baseDimension: 24.0)),
                 itemBuilder: (context) => [
-                      PopupMenuItem(value: 'report', child: Text('Report')),
+                      PopupMenuItem(
+                        value: 'report',
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.error,
+                              size: getIt<LayoutFactory>()
+                                  .getDimension(baseDimension: 24.0),
+                            ),
+                            SizedBox(width: 4),
+                            Expanded(child: getIt<TextFactory>().lite('REPORT'))
+                          ],
+                        ),
+                      ),
                       if (!comment.isDeleted)
-                        PopupMenuItem(value: 'delete', child: Text('Delete')),
+                        PopupMenuItem(
+                          value: 'delete',
+                          child: Row(
+                            children: [
+                              Icon(
+                                Icons.delete,
+                                size: getIt<LayoutFactory>()
+                                    .getDimension(baseDimension: 24.0),
+                              ),
+                              SizedBox(width: 4),
+                              Expanded(
+                                  child: getIt<TextFactory>().lite('DELETE'))
+                            ],
+                          ),
+                        ),
                     ])
           ]),
           SizedBox(height: 4),
