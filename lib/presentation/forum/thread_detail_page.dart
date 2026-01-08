@@ -34,6 +34,7 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
   final TextEditingController _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   final Map<String, GlobalKey> _commentKeys = {};
+  final Set<String> _collapsedCommentIds = {};
   late bool _isFrozen;
 
   @override
@@ -135,10 +136,13 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
                           itemBuilder: (context, index) {
                             final comment = sortedComments[index];
                             final isReply = comment.parentId != null;
+                            final hasChildren = state.comments
+                                .any((c) => c.parentId == comment.id);
                             return Padding(
                               padding:
                                   EdgeInsets.only(left: isReply ? 32.0 : 0),
-                              child: _buildCommentTile(context, comment),
+                              child: _buildCommentTile(context, comment,
+                                  hasChildren: hasChildren),
                             );
                           },
                         );
@@ -154,7 +158,7 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
                   Padding(
                     padding: EdgeInsets.all(16),
                     child: getIt<TextFactory>()
-                        .lite("This thread is frozen.", color: Colors.grey),
+                        .lite("This thread is read-only.", color: Colors.grey),
                   )
               ],
             ),
@@ -165,25 +169,47 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
   }
 
   List<Comment> _getSortedComments(List<Comment> comments) {
-    final parentComments = comments.where((c) => c.parentId == null).toList();
-    final childComments = comments.where((c) => c.parentId != null).toList();
+    // Deduplicate input comments just in case
+    final uniqueComments = {for (var c in comments) c.id: c}.values.toList();
 
-    // Sort parents by time
-    parentComments.sort((a, b) => a.createdAt.compareTo(b.createdAt));
+    // Comments are already sorted by created_at from server (roots then replies in blocks).
+    // We just need to weave them.
+    final parentComments =
+        uniqueComments.where((c) => c.parentId == null).toList();
+    final childComments =
+        uniqueComments.where((c) => c.parentId != null).toList();
 
     final List<Comment> result = [];
+    final Set<String> addedIds = {};
+
     for (var parent in parentComments) {
+      if (addedIds.contains(parent.id)) continue;
+
       result.add(parent);
+      addedIds.add(parent.id);
+
+      // If parent is collapsed, skip adding children
+      if (_collapsedCommentIds.contains(parent.id)) {
+        continue;
+      }
+
       // Find children for this parent
+      // Note: childComments preserves relative order from server (created_at)
       final children =
           childComments.where((c) => c.parentId == parent.id).toList();
-      children.sort((a, b) => a.createdAt.compareTo(b.createdAt));
-      result.addAll(children);
+
+      for (var child in children) {
+        if (!addedIds.contains(child.id)) {
+          result.add(child);
+          addedIds.add(child.id);
+        }
+      }
     }
     return result;
   }
 
-  Widget _buildCommentTile(BuildContext context, Comment comment) {
+  Widget _buildCommentTile(BuildContext context, Comment comment,
+      {bool hasChildren = false}) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
       child: Container(
@@ -192,11 +218,11 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           color: _replyToCommentId == comment.id
-              ? kWpaBlue.withValues(alpha: 0.1)
+              ? kWpaBlue.withAlpha(25)
               : kCardOverlayGrey,
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withValues(alpha: 0.1),
+              color: Colors.grey.withAlpha(25),
               blurRadius: 4.0,
               offset: Offset(0, 2),
             )
@@ -341,6 +367,9 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
                     setState(() {
                       _replyToCommentId = comment.id;
                       _replyToAuthorName = comment.authorName;
+                      if (_collapsedCommentIds.contains(comment.id)) {
+                        _collapsedCommentIds.remove(comment.id);
+                      }
                     });
                     WidgetsBinding.instance.addPostFrameCallback((_) {
                       _focusNode.requestFocus();
@@ -355,7 +384,25 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
                       }
                     });
                   },
-                  child: Text("Reply", style: TextStyle(fontSize: 12)))
+                  child: Text("Reply", style: TextStyle(fontSize: 12))),
+            if (hasChildren && comment.parentId == null)
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    if (_collapsedCommentIds.contains(comment.id)) {
+                      _collapsedCommentIds.remove(comment.id);
+                    } else {
+                      _collapsedCommentIds.add(comment.id);
+                    }
+                  });
+                },
+                child: Text(
+                  _collapsedCommentIds.contains(comment.id)
+                      ? "Show Replies"
+                      : "Hide Replies",
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              )
           ])
         ]),
       ),
