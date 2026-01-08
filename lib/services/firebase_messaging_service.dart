@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -14,6 +15,11 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 class FirebaseMessagingService {
   late final FirebaseMessaging _firebaseMessaging;
+  final StreamController<RemoteMessage> _foregroundMessageController =
+      StreamController<RemoteMessage>.broadcast();
+
+  Stream<RemoteMessage> get foregroundMessageStream =>
+      _foregroundMessageController.stream;
 
   FirebaseMessagingService(this._firebaseMessaging);
 
@@ -58,7 +64,7 @@ class FirebaseMessagingService {
     print("FirebaseMessaging token: $token");
 
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      // print('onMessage.listen: $message');
+      _foregroundMessageController.add(message);
     });
 
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {

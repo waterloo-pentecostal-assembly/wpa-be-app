@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:wpa_app/services/firebase_messaging_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher_string.dart';
 import 'package:wpa_app/application/links/links_bloc.dart';
@@ -10,6 +12,7 @@ import '../app/constants.dart';
 import '../app/injection.dart';
 import '../application/navigation_bar/navigation_bar_bloc.dart';
 import 'admin/admin_page.dart';
+import 'common/in_app_notification_banner.dart';
 import 'common/interfaces.dart';
 import 'common/text_factory.dart';
 import 'common/toast_message.dart';
@@ -49,6 +52,7 @@ class _IndexPage extends StatefulWidget {
 
 class _IndexPageState extends State<_IndexPage> {
   late List<IIndexedPage> indexedPages;
+  StreamSubscription? _foregroundMessageSubscription;
 
   @override
   void initState() {
@@ -67,6 +71,65 @@ class _IndexPageState extends State<_IndexPage> {
         _handleNavigation(state);
       }
     });
+
+    // Listen for foreground messages
+    _foregroundMessageSubscription = getIt<FirebaseMessagingService>()
+        .foregroundMessageStream
+        .listen((message) {
+      String title = message.notification?.title ?? 'Notification';
+      String body = message.notification?.body ?? 'New notification received';
+
+      // Fallback to payload data if notification object is empty
+      if (message.notification == null) {
+        if (message.data.containsKey('title')) {
+          title = message.data['title'];
+        }
+      }
+
+      showGeneralDialog(
+        context: context,
+        barrierDismissible: true,
+        barrierLabel: 'Dismiss',
+        barrierColor: Colors.transparent,
+        transitionDuration: const Duration(milliseconds: 400),
+        pageBuilder: (context, animation, secondaryAnimation) {
+          return SafeArea(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: InAppNotificationBanner(
+                title: title,
+                body: body,
+                onDismiss: () {
+                  Navigator.of(context, rootNavigator: true).pop();
+                },
+                onView: () {
+                  Navigator.of(context, rootNavigator: true).pop();
+                  FirebaseMessagingService.navigationHandler(message.data);
+                },
+              ),
+            ),
+          );
+        },
+        transitionBuilder: (context, animation, secondaryAnimation, child) {
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0, -1),
+              end: Offset.zero,
+            ).animate(CurvedAnimation(
+              parent: animation,
+              curve: Curves.easeOutCubic,
+            )),
+            child: child,
+          );
+        },
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _foregroundMessageSubscription?.cancel();
+    super.dispose();
   }
 
   void _handleNavigation(NavigationBarState state) {
@@ -82,6 +145,15 @@ class _IndexPageState extends State<_IndexPage> {
         routeNavigatorState?.pushNamed(
           state.route ?? '',
           arguments: state.arguments,
+        );
+
+        // Reset the route state to allow subsequent identical navigations
+        BlocProvider.of<NavigationBarBloc>(context).add(
+          NavigationBarEvent(
+            tab: state.tab,
+            route: null,
+            arguments: null,
+          ),
         );
       }
     }
