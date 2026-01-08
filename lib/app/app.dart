@@ -28,7 +28,6 @@ class App extends StatelessWidget {
     await getIt<FirebaseMessagingService>().initialize();
     RemoteMessage? initialMessage =
         await FirebaseMessaging.instance.getInitialMessage();
-    print('!!!!!!!!!!!!! $initialMessage');    
     if (initialMessage != null) {
       FirebaseMessagingService.navigationHandler(initialMessage.data);
     }
