@@ -129,6 +129,8 @@ class ForumTitleBar extends StatelessWidget {
     }
 
     final forumBloc = BlocProvider.of<ForumBloc>(context);
+    final notificationSettingsBloc =
+        BlocProvider.of<NotificationSettingsBloc>(context);
     OverlayEntry? entry;
     Overlay.of(context).insert(
       entry = OverlayEntry(
@@ -137,6 +139,7 @@ class ForumTitleBar extends StatelessWidget {
             entry: entry,
             forumId: forumId,
             forumBloc: forumBloc,
+            notificationSettingsBloc: notificationSettingsBloc,
           );
         },
       ),

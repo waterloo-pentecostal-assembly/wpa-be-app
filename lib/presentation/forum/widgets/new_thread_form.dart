@@ -8,43 +8,33 @@ import 'package:wpa_app/application/forum/forum_bloc.dart';
 import 'package:wpa_app/domain/forum/entities.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
 import 'package:wpa_app/presentation/common/text_factory.dart';
+import 'package:wpa_app/application/notification_settings/notification_settings_bloc.dart';
 
 class NewThreadForm extends StatefulWidget {
   final OverlayEntry? entry;
   final String forumId;
   final ForumBloc forumBloc;
+  final NotificationSettingsBloc notificationSettingsBloc;
 
   const NewThreadForm({
     Key? key,
     this.entry,
     required this.forumId,
     required this.forumBloc,
+    required this.notificationSettingsBloc,
   }) : super(key: key);
 
   @override
-  _NewThreadFormState createState() => _NewThreadFormState(
-        entry: entry,
-        forumId: forumId,
-        forumBloc: forumBloc,
-      );
+  _NewThreadFormState createState() => _NewThreadFormState();
 }
 
 class _NewThreadFormState extends State<NewThreadForm>
     with TickerProviderStateMixin {
-  final OverlayEntry? entry;
-  final String forumId;
-  final ForumBloc forumBloc;
   final FocusNode _focusNode = FocusNode();
   final TextEditingController _textEditingController = TextEditingController();
   late AnimationController _controller;
   late Animation<double> _animation;
   bool _isValid = false;
-
-  _NewThreadFormState({
-    required this.entry,
-    required this.forumId,
-    required this.forumBloc,
-  });
 
   @override
   void initState() {
@@ -73,8 +63,6 @@ class _NewThreadFormState extends State<NewThreadForm>
 
   @override
   Widget build(BuildContext context) {
-    // We don't need a specific NewThreadBloc, we can use local state for the form
-    // and just dispatch to ForumBloc when ready.
     FocusScope.of(context).requestFocus(_focusNode);
 
     return FadeTransition(
@@ -83,7 +71,7 @@ class _NewThreadFormState extends State<NewThreadForm>
         child: Stack(
           children: [
             GestureDetector(
-              onTap: () => entry?.remove(),
+              onTap: () => widget.entry?.remove(),
               child: Flex(
                 direction: Axis.horizontal,
                 children: [
@@ -146,14 +134,16 @@ class _NewThreadFormState extends State<NewThreadForm>
                       children: [
                         Wrap(
                           children: [
-                            CancelButton(entry: entry),
+                            CancelButton(entry: widget.entry),
                             SizedBox(width: 16),
                             PostButton(
                               isValid: _isValid,
                               title: _textEditingController.text,
-                              forumId: forumId,
-                              forumBloc: forumBloc,
-                              entry: entry,
+                              forumId: widget.forumId,
+                              forumBloc: widget.forumBloc,
+                              notificationSettingsBloc:
+                                  widget.notificationSettingsBloc,
+                              entry: widget.entry,
                             ),
                           ],
                         ),
@@ -175,6 +165,7 @@ class PostButton extends StatelessWidget {
   final String title;
   final String forumId;
   final ForumBloc forumBloc;
+  final NotificationSettingsBloc notificationSettingsBloc;
   final OverlayEntry? entry;
 
   const PostButton({
@@ -183,6 +174,7 @@ class PostButton extends StatelessWidget {
     required this.title,
     required this.forumId,
     required this.forumBloc,
+    required this.notificationSettingsBloc,
     this.entry,
   }) : super(key: key);
 
@@ -217,10 +209,18 @@ class PostButton extends StatelessWidget {
                 final authState =
                     BlocProvider.of<AuthenticationBloc>(context).state;
                 if (authState is Authenticated) {
+                  // Generate ID client-side
+                  final threadId = FirebaseFirestore.instance
+                      .collection('forums')
+                      .doc(forumId)
+                      .collection('threads')
+                      .doc()
+                      .id;
+
                   forumBloc.add(
                     CreateThread(
                       ForumThread(
-                        id: '',
+                        id: threadId,
                         forumId: forumId,
                         title: title,
                         authorId: authState.user.id,
@@ -233,6 +233,8 @@ class PostButton extends StatelessWidget {
                       ),
                     ),
                   );
+                  // Auto-follow
+                  notificationSettingsBloc.add(ThreadFollowed(threadId));
                 }
                 entry?.remove();
               },

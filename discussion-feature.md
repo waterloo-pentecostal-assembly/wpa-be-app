@@ -143,6 +143,7 @@ TODO remaining:
    - Include admin prayer request and new testimony notifications
 2. Update functions-v2/src/notifications/newDeviceSubscribetoTopic.js
 3. Add remaining notification senders to functions-v2/src/notifications
-
+4. Add ability for admin to delete threads
+5. Add ability to mute inapp notifications
 
 dTxkZSWkRIeHHGxFWIj2gX:APA91bH_7vG2v9lRoBRTHaU7StKXEOoi8LurGXlOQyZJGyGrWvR3_dYITIJpIHurTm_f8kNF-_jTVLn1R2DWFfzjDxAX0Z-gPE-Fpm4SY2iUuRC-NzSP16k

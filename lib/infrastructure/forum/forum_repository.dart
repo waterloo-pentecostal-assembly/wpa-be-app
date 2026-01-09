@@ -70,7 +70,8 @@ class ForumRepository implements IForumRepository {
           .collection('forums')
           .doc(thread.forumId)
           .collection('threads')
-          .add({
+          .doc(thread.id.isNotEmpty ? thread.id : null)
+          .set({
         'title': thread.title,
         'author_id': thread.authorId,
         'author_name': thread.authorName,
