@@ -83,6 +83,27 @@ class UnlikeComment extends ThreadEvent {
   List<Object> get props => [commentId, threadId, forumId, userId];
 }
 
+class DeleteThread extends ThreadEvent {
+  final String threadId;
+  final String forumId;
+
+  const DeleteThread(this.threadId, this.forumId);
+
+  @override
+  List<Object> get props => [threadId, forumId];
+}
+
+class HideThread extends ThreadEvent {
+  final String threadId;
+  final String forumId;
+  final bool isHidden;
+
+  const HideThread(this.threadId, this.forumId, this.isHidden);
+
+  @override
+  List<Object> get props => [threadId, forumId, isHidden];
+}
+
 class FreezeThread extends ThreadEvent {
   final String threadId;
   final String forumId;

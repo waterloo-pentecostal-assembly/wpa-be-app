@@ -9,11 +9,12 @@ abstract class ForumEvent extends Equatable {
 
 class LoadForum extends ForumEvent {
   final String forumId;
+  final bool includeHidden;
 
-  const LoadForum(this.forumId);
+  const LoadForum(this.forumId, {this.includeHidden = false});
 
   @override
-  List<Object> get props => [forumId];
+  List<Object> get props => [forumId, includeHidden];
 }
 
 class ForumUpdated extends ForumEvent {
@@ -52,4 +53,15 @@ class FreezeThread extends ForumEvent {
 
   @override
   List<Object> get props => [threadId, forumId, isFrozen];
+}
+
+class HideThread extends ForumEvent {
+  final String threadId;
+  final String forumId;
+  final bool isHidden;
+
+  const HideThread(this.threadId, this.forumId, this.isHidden);
+
+  @override
+  List<Object> get props => [threadId, forumId, isHidden];
 }

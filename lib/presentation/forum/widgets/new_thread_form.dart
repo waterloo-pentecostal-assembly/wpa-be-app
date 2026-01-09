@@ -230,6 +230,7 @@ class PostButton extends StatelessWidget {
                         updatedAt: Timestamp.now(),
                         commentCount: 0,
                         isFrozen: false,
+                        isHidden: false,
                       ),
                     ),
                   );

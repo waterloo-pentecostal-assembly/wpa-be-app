@@ -2,9 +2,10 @@ import 'entities.dart';
 
 abstract class IForumRepository {
   Stream<Forum> watchForum(String forumId);
-  Stream<List<ForumThread>> watchThreads(String forumId);
+  Stream<List<ForumThread>> watchThreads(String forumId, {bool includeHidden});
   Future<void> createThread(ForumThread thread);
   Future<void> freezeThread(String threadId, String forumId, bool isFrozen);
+  Future<void> hideThread(String threadId, String forumId, bool isHidden);
 
   Stream<List<Comment>> watchComments(String threadId, String forumId);
   Future<void> addComment(Comment comment, String forumId);

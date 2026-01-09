@@ -106,6 +106,7 @@ class EngagePage extends IIndexedPage {
                       forumId: args['forumId'],
                       title: args['title'],
                       isFrozen: args['isFrozen'] ?? false,
+                      isHidden: args['isHidden'] ?? false,
                       focusCommentId: args['focusCommentId'],
                     );
                 }

@@ -35,16 +35,21 @@ class ForumRepository implements IForumRepository {
   }
 
   @override
-  Stream<List<ForumThread>> watchThreads(String forumId) {
-    return _firestore
+  Stream<List<ForumThread>> watchThreads(String forumId,
+      {bool includeHidden = false}) {
+    Query query = _firestore
         .collection('forums')
         .doc(forumId)
         .collection('threads')
-        .orderBy('created_at', descending: true)
-        .snapshots()
-        .map((snapshot) {
+        .orderBy('created_at', descending: true);
+
+    if (!includeHidden) {
+      query = query.where('is_hidden', isEqualTo: false);
+    }
+
+    return query.snapshots().map((snapshot) {
       return snapshot.docs.map((doc) {
-        final data = doc.data();
+        final data = doc.data() as Map<String, dynamic>;
         return ForumThread(
           id: doc.id,
           forumId: forumId,
@@ -56,6 +61,7 @@ class ForumRepository implements IForumRepository {
           updatedAt: data['updated_at'] as Timestamp,
           commentCount: data['comment_count'] ?? 0,
           isFrozen: data['is_frozen'] ?? false,
+          isHidden: data['is_hidden'] ?? false,
         );
       }).toList();
     }).handleError((e) {
@@ -80,6 +86,7 @@ class ForumRepository implements IForumRepository {
         'updated_at': FieldValue.serverTimestamp(),
         'comment_count': 0,
         'is_frozen': false,
+        'is_hidden': false,
       });
     } catch (e) {
       throw _firebaseFirestoreService.handleException(e as Exception);
@@ -96,6 +103,21 @@ class ForumRepository implements IForumRepository {
           .collection('threads')
           .doc(threadId)
           .update({'is_frozen': isFrozen});
+    } catch (e) {
+      throw _firebaseFirestoreService.handleException(e as Exception);
+    }
+  }
+
+  @override
+  Future<void> hideThread(
+      String threadId, String forumId, bool isHidden) async {
+    try {
+      await _firestore
+          .collection('forums')
+          .doc(forumId)
+          .collection('threads')
+          .doc(threadId)
+          .update({'is_hidden': isHidden});
     } catch (e) {
       throw _firebaseFirestoreService.handleException(e as Exception);
     }

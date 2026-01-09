@@ -19,6 +19,7 @@ class ForumBloc extends Bloc<ForumEvent, ForumState> {
     on<ThreadsUpdated>(_onThreadsUpdated);
     on<CreateThread>(_onCreateThread);
     on<FreezeThread>(_onFreezeThread);
+    on<HideThread>(_onHideThread);
   }
 
   Future<void> _onLoadForum(LoadForum event, Emitter<ForumState> emit) async {
@@ -33,7 +34,7 @@ class ForumBloc extends Bloc<ForumEvent, ForumState> {
 
       await _threadsSubscription?.cancel();
       _threadsSubscription = _forumRepository
-          .watchThreads(event.forumId)
+          .watchThreads(event.forumId, includeHidden: event.includeHidden)
           .listen((threads) => add(ThreadsUpdated(threads)), onError: (e) {
         // Handle error
       });
@@ -75,6 +76,15 @@ class ForumBloc extends Bloc<ForumEvent, ForumState> {
     try {
       await _forumRepository.freezeThread(
           event.threadId, event.forumId, event.isFrozen);
+    } catch (e) {
+      // emit error
+    }
+  }
+
+  Future<void> _onHideThread(HideThread event, Emitter<ForumState> emit) async {
+    try {
+      await _forumRepository.hideThread(
+          event.threadId, event.forumId, event.isHidden);
     } catch (e) {
       // emit error
     }

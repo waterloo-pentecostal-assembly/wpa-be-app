@@ -16,6 +16,7 @@ class ThreadDetailPage extends StatefulWidget {
   final String forumId;
   final String title;
   final bool isFrozen;
+  final bool isHidden;
   final String? focusCommentId;
 
   const ThreadDetailPage({
@@ -24,6 +25,7 @@ class ThreadDetailPage extends StatefulWidget {
     required this.forumId,
     required this.title,
     required this.isFrozen,
+    required this.isHidden,
     this.focusCommentId,
   }) : super(key: key);
 
@@ -80,8 +82,9 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
                     return BlocBuilder<NotificationSettingsBloc,
                         NotificationSettingsState>(
                       builder: (context, notificationSettingsState) {
+                        Widget? popupMenu;
                         if (authState is Authenticated) {
-                          return PopupMenuButton<String>(
+                          popupMenu = PopupMenuButton<String>(
                             onSelected: (value) {
                               if (value == 'freeze') {
                                 BlocProvider.of<ThreadBloc>(context).add(
@@ -97,6 +100,16 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
                                 setState(() {
                                   _isFrozen = false;
                                 });
+                              } else if (value == 'hide') {
+                                BlocProvider.of<ThreadBloc>(context).add(
+                                    HideThread(
+                                        widget.threadId, widget.forumId, true));
+                                Navigator.pop(context);
+                              } else if (value == 'unhide') {
+                                BlocProvider.of<ThreadBloc>(context).add(
+                                    HideThread(widget.threadId, widget.forumId,
+                                        false));
+                                Navigator.pop(context);
                               } else if (value == 'follow') {
                                 BlocProvider.of<NotificationSettingsBloc>(
                                         context)
@@ -151,6 +164,26 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
                                     ],
                                   ),
                                 ));
+                                items.add(PopupMenuItem(
+                                  value: widget.isHidden ? 'unhide' : 'hide',
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        widget.isHidden
+                                            ? Icons.visibility
+                                            : Icons.visibility_off,
+                                        size: getIt<LayoutFactory>()
+                                            .getDimension(baseDimension: 24.0),
+                                      ),
+                                      SizedBox(width: 4),
+                                      Expanded(
+                                          child: getIt<TextFactory>().lite(
+                                              widget.isHidden
+                                                  ? 'UNHIDE THREAD'
+                                                  : 'HIDE THREAD'))
+                                    ],
+                                  ),
+                                ));
                               }
 
                               // Follow/Unfollow Actions
@@ -185,7 +218,19 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
                             },
                           );
                         }
-                        return Container();
+
+                        return Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (widget.isHidden)
+                              Padding(
+                                padding: const EdgeInsets.only(right: 8.0),
+                                child: Icon(Icons.visibility_off,
+                                    color: Colors.grey.shade600),
+                              ),
+                            if (popupMenu != null) popupMenu,
+                          ],
+                        );
                       },
                     );
                   }),

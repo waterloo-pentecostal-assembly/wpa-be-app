@@ -25,7 +25,16 @@ class ForumPage extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider<ForumBloc>(
-          create: (context) => getIt<ForumBloc>()..add(LoadForum(forumId)),
+          create: (context) {
+            final authState =
+                BlocProvider.of<AuthenticationBloc>(context).state;
+            bool isAdmin = false;
+            if (authState is Authenticated) {
+              isAdmin = authState.user.isAdmin;
+            }
+            return getIt<ForumBloc>()
+              ..add(LoadForum(forumId, includeHidden: isAdmin));
+          },
         ),
         BlocProvider<NotificationSettingsBloc>(
           create: (context) => getIt<NotificationSettingsBloc>()
@@ -164,6 +173,7 @@ class ForumThreadCard extends StatelessWidget {
             'forumId': thread.forumId,
             'title': thread.title,
             'isFrozen': thread.isFrozen,
+            'isHidden': thread.isHidden,
           },
         ).then((_) {
           // Refresh notification settings when returning from thread detail
@@ -221,6 +231,12 @@ class ForumThreadCard extends StatelessWidget {
                   ],
                 ),
                 Spacer(),
+                if (thread.isHidden)
+                  Padding(
+                    padding: const EdgeInsets.only(left: 8.0),
+                    child: Icon(Icons.visibility_off,
+                        size: 20, color: Colors.grey.shade600),
+                  ),
                 BlocBuilder<NotificationSettingsBloc,
                     NotificationSettingsState>(
                   builder: (context, state) {

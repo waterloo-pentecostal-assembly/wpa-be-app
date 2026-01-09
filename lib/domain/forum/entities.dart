@@ -34,6 +34,7 @@ class ForumThread {
   final Timestamp updatedAt;
   final int commentCount;
   final bool isFrozen;
+  final bool isHidden;
 
   ForumThread({
     required this.id,
@@ -46,6 +47,7 @@ class ForumThread {
     required this.updatedAt,
     required this.commentCount,
     required this.isFrozen,
+    required this.isHidden,
   });
 }
 
