@@ -132,6 +132,7 @@ there should be a toast notification.
 8. Audio player
 9. Add collapse for thread replies
 10. Update notification handling for all notification types
+11. New user signup should default notification settings
 
 
 
