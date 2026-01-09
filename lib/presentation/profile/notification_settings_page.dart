@@ -23,7 +23,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
   bool? isForumThreadsSwitched;
   bool? isForumCommentRepliesSwitched;
   bool? isForumThreadCommentsSwitched;
-  bool? isForumLikesSwitched;
+  bool? isForumCommentLikesSwitched;
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +41,8 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                 state.notificationSettings.forumCommentReplies;
             isForumThreadCommentsSwitched =
                 state.notificationSettings.forumThreadComments;
-            isForumLikesSwitched = state.notificationSettings.forumLikes;
+            isForumCommentLikesSwitched =
+                state.notificationSettings.forumCommentLikes;
           });
         } else if (state is NotificationSettingsError) {
           ToastMessage.showErrorToast(state.message, context);
@@ -183,17 +184,17 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                         },
                       ),
                       _buildSwitchTile(
-                        title: "Likes",
-                        subtitle: "Notify me when someone likes my content",
-                        value: isForumLikesSwitched,
+                        title: "Comment Likes",
+                        subtitle: "Notify me when someone likes my comment",
+                        value: isForumCommentLikesSwitched,
                         onChanged: (val) {
-                          setState(() => isForumLikesSwitched = val);
+                          setState(() => isForumCommentLikesSwitched = val);
                           if (val) {
                             BlocProvider.of<NotificationSettingsBloc>(context)
-                                .add(SubscribedToForumLikes());
+                                .add(SubscribedToForumCommentLikes());
                           } else {
                             BlocProvider.of<NotificationSettingsBloc>(context)
-                                .add(UnsubscribedFromForumLikes());
+                                .add(UnsubscribedFromForumCommentLikes());
                           }
                         },
                       ),

@@ -11,7 +11,7 @@ class NotificationSettingsDto {
   final bool forumThreads;
   final bool forumCommentReplies;
   final bool forumThreadComments;
-  final bool forumLikes;
+  final bool forumCommentLikes;
   final List<String> threadsFollowed;
 
   factory NotificationSettingsDto.fromFirestore(DocumentSnapshot doc) {
@@ -27,7 +27,7 @@ class NotificationSettingsDto {
           findOrDefaultTo(data, 'forum_comment_replies', false),
       forumThreadComments:
           findOrDefaultTo(data, 'forum_thread_comments', false),
-      forumLikes: findOrDefaultTo(data, 'forum_likes', false),
+      forumCommentLikes: findOrDefaultTo(data, 'forum_comment_likes', false),
       threadsFollowed:
           (findOrDefaultTo(data, 'threads_followed', <String>[]) as List)
               .map((e) => e as String)
@@ -43,7 +43,7 @@ class NotificationSettingsDto {
     required this.forumThreads,
     required this.forumCommentReplies,
     required this.forumThreadComments,
-    required this.forumLikes,
+    required this.forumCommentLikes,
     required this.threadsFollowed,
   });
 }
@@ -58,7 +58,7 @@ extension NotificationSettingsDtoX on NotificationSettingsDto {
       forumThreads: this.forumThreads,
       forumCommentReplies: this.forumCommentReplies,
       forumThreadComments: this.forumThreadComments,
-      forumLikes: this.forumLikes,
+      forumCommentLikes: this.forumCommentLikes,
       threadsFollowed: this.threadsFollowed,
     );
   }

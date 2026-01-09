@@ -32,8 +32,8 @@ class NotificationSettingsBloc
     on<SubscribedToForumCommentReplies>(_onSubscribedToForumCommentReplies);
     on<UnsubscribedFromForumCommentReplies>(
         _onUnsubscribedFromForumCommentReplies);
-    on<SubscribedToForumLikes>(_onSubscribedToForumLikes);
-    on<UnsubscribedFromForumLikes>(_onUnsubscribedFromForumLikes);
+    on<SubscribedToForumCommentLikes>(_onSubscribedToForumCommentLikes);
+    on<UnsubscribedFromForumCommentLikes>(_onUnsubscribedFromForumCommentLikes);
     on<SubscribedToForumThreadComments>(_onSubscribedToForumThreadComments);
     on<UnsubscribedFromForumThreadComments>(
         _onUnsubscribedFromForumThreadComments);
@@ -168,23 +168,23 @@ class NotificationSettingsBloc
     }
   }
 
-  Future<void> _onSubscribedToForumLikes(
-    SubscribedToForumLikes event,
+  Future<void> _onSubscribedToForumCommentLikes(
+    SubscribedToForumCommentLikes event,
     Emitter<NotificationSettingsState> emit,
   ) async {
     try {
-      await _iNotificationSettingsService.subscribeToForumLikes();
+      await _iNotificationSettingsService.subscribeToForumCommentLikes();
     } catch (e) {
       emit(NotificationSettingsError(message: "Unable to subscribe"));
     }
   }
 
-  Future<void> _onUnsubscribedFromForumLikes(
-    UnsubscribedFromForumLikes event,
+  Future<void> _onUnsubscribedFromForumCommentLikes(
+    UnsubscribedFromForumCommentLikes event,
     Emitter<NotificationSettingsState> emit,
   ) async {
     try {
-      await _iNotificationSettingsService.unsubscribeFromForumLikes();
+      await _iNotificationSettingsService.unsubscribeFromForumCommentLikes();
     } catch (e) {
       emit(NotificationSettingsError(message: "Unable to unsubscribe"));
     }

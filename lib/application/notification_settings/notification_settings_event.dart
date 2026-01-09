@@ -81,14 +81,14 @@ class UnsubscribedFromForumCommentReplies extends NotificationSettingsEvent {
   List<Object> get props => [];
 }
 
-class SubscribedToForumLikes extends NotificationSettingsEvent {
-  SubscribedToForumLikes();
+class SubscribedToForumCommentLikes extends NotificationSettingsEvent {
+  SubscribedToForumCommentLikes();
   @override
   List<Object> get props => [];
 }
 
-class UnsubscribedFromForumLikes extends NotificationSettingsEvent {
-  UnsubscribedFromForumLikes();
+class UnsubscribedFromForumCommentLikes extends NotificationSettingsEvent {
+  UnsubscribedFromForumCommentLikes();
   @override
   List<Object> get props => [];
 }

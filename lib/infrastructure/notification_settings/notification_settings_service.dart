@@ -82,13 +82,13 @@ class NotificationSettingsService implements INotificationSettingsService {
   }
 
   @override
-  Future<void> subscribeToForumLikes() async {
-    _setNotificationSetting({"forum_likes": true});
+  Future<void> subscribeToForumCommentLikes() async {
+    _setNotificationSetting({"forum_comment_likes": true});
   }
 
   @override
-  Future<void> unsubscribeFromForumLikes() async {
-    _setNotificationSetting({"forum_likes": false});
+  Future<void> unsubscribeFromForumCommentLikes() async {
+    _setNotificationSetting({"forum_comment_likes": false});
   }
 
   @override

@@ -6,7 +6,7 @@ class NotificationSettingsEntity {
   final bool forumThreads;
   final bool forumCommentReplies;
   final bool forumThreadComments;
-  final bool forumLikes;
+  final bool forumCommentLikes;
   final List<String> threadsFollowed;
 
   NotificationSettingsEntity({
@@ -17,7 +17,7 @@ class NotificationSettingsEntity {
     required this.forumThreads,
     required this.forumCommentReplies,
     required this.forumThreadComments,
-    required this.forumLikes,
+    required this.forumCommentLikes,
     required this.threadsFollowed,
   });
   NotificationSettingsEntity copyWith({
@@ -28,7 +28,7 @@ class NotificationSettingsEntity {
     bool? forumThreads,
     bool? forumCommentReplies,
     bool? forumThreadComments,
-    bool? forumLikes,
+    bool? forumCommentLikes,
     List<String>? threadsFollowed,
   }) {
     return NotificationSettingsEntity(
@@ -40,7 +40,7 @@ class NotificationSettingsEntity {
       forumThreads: forumThreads ?? this.forumThreads,
       forumCommentReplies: forumCommentReplies ?? this.forumCommentReplies,
       forumThreadComments: forumThreadComments ?? this.forumThreadComments,
-      forumLikes: forumLikes ?? this.forumLikes,
+      forumCommentLikes: forumCommentLikes ?? this.forumCommentLikes,
       threadsFollowed: threadsFollowed ?? this.threadsFollowed,
     );
   }
