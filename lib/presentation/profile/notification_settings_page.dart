@@ -7,80 +7,53 @@ import 'package:wpa_app/presentation/common/platform_switch.dart';
 import 'package:wpa_app/presentation/common/text_factory.dart';
 import 'package:wpa_app/presentation/common/toast_message.dart';
 
-class NotificationSettingsPage extends StatefulWidget {
-  @override
-  _NotificationSettingsPageState createState() =>
-      _NotificationSettingsPageState();
-}
-
-class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
-  // General
-  bool? isEngagementReminderSwitched;
-  bool? isPrayerNotificationsSwitched;
-  bool? isNewPrayerRequestSwitched;
-  bool? isTestimonyNotificationsSwitched;
-  bool? isNewTestimonySwitched;
-
-  // Forum
-  bool? isNewForumThreadSwitched;
-  bool? isForumCommentRepliesSwitched;
-  bool? isForumThreadCommentsSwitched;
-  bool? isForumCommentLikesSwitched;
-
+class NotificationSettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<NotificationSettingsBloc, NotificationSettingsState>(
       listener: (context, state) {
-        if (state is NotificationSettingsPositions) {
-          setState(() {
-            isEngagementReminderSwitched =
-                state.notificationSettings.dailyEngagementReminder;
-            isPrayerNotificationsSwitched = state.notificationSettings.prayers;
-            isNewPrayerRequestSwitched =
-                state.notificationSettings.newPrayerRequest;
-            isTestimonyNotificationsSwitched =
-                state.notificationSettings.testimonies;
-            isNewTestimonySwitched = state.notificationSettings.newTestimony;
-            isNewForumThreadSwitched =
-                state.notificationSettings.newForumThread;
-            isForumCommentRepliesSwitched =
-                state.notificationSettings.forumCommentReplies;
-            isForumThreadCommentsSwitched =
-                state.notificationSettings.forumThreadComments;
-            isForumCommentLikesSwitched =
-                state.notificationSettings.forumCommentLikes;
-          });
-        } else if (state is NotificationSettingsError) {
+        if (state is NotificationSettingsError) {
           ToastMessage.showErrorToast(state.message, context);
         } else if (state is DailyEngagementReminderError) {
           ToastMessage.showErrorToast(state.message, context);
-          setState(() {
-            isEngagementReminderSwitched = !isEngagementReminderSwitched!;
-          });
         } else if (state is PrayerNotificationError) {
           ToastMessage.showErrorToast(state.message, context);
-          setState(() {
-            isPrayerNotificationsSwitched = !isPrayerNotificationsSwitched!;
-            // Reset both for simplicity, or we could track specifically which failed if we passed context.
-            // But since granular error tracking isn't here, we'll leave it simple.
-            // Actually, we should probably check which one triggered it, but the Error event is generic per-feature.
-            // Let's minimally just reset specific ones or generic.
-            // For now, let's just assume simple toggle failure.
-            // Assuming the state is re-emitted correctly by BLoC would be better.
-            // But here we are manually toggling back.
-            // I'll leave the manual toggle for the existing ones and add safe toggles for new ones if I knew
-            // which one failed. Since I don't, and this pattern is a bit brittle,
-            // I will just add the simple assignment in the success block above which is key.
-          });
         } else if (state is TestimonyNotificationError) {
           ToastMessage.showErrorToast(state.message, context);
-          setState(() {
-            isTestimonyNotificationsSwitched =
-                !isTestimonyNotificationsSwitched!;
-          });
         }
       },
       builder: (context, state) {
+        // Defaults
+        bool isEngagementReminderSwitched = false;
+        bool isPrayerNotificationsSwitched = false;
+        bool isNewPrayerRequestSwitched = false;
+        bool isTestimonyNotificationsSwitched = false;
+        bool isNewTestimonySwitched = false;
+        bool isNewForumThreadSwitched = false;
+        bool isForumCommentRepliesSwitched = false;
+        bool isForumThreadCommentsSwitched = false;
+        bool isForumCommentLikesSwitched = false;
+        bool isDisabled = true;
+
+        if (state is NotificationSettingsPositions) {
+          isDisabled = false;
+          isEngagementReminderSwitched =
+              state.notificationSettings.dailyEngagementReminder;
+          isPrayerNotificationsSwitched = state.notificationSettings.prayers;
+          isNewPrayerRequestSwitched =
+              state.notificationSettings.newPrayerRequest;
+          isTestimonyNotificationsSwitched =
+              state.notificationSettings.testimonies;
+          isNewTestimonySwitched = state.notificationSettings.newTestimony;
+          isNewForumThreadSwitched = state.notificationSettings.newForumThread;
+          isForumCommentRepliesSwitched =
+              state.notificationSettings.forumCommentReplies;
+          isForumThreadCommentsSwitched =
+              state.notificationSettings.forumThreadComments;
+          isForumCommentLikesSwitched =
+              state.notificationSettings.forumCommentLikes;
+        }
+
         return Scaffold(
           body: SafeArea(
             child: Column(
@@ -111,8 +84,8 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                       _buildSwitchTile(
                         title: "Daily Engagement Reminder",
                         value: isEngagementReminderSwitched,
+                        enabled: !isDisabled,
                         onChanged: (val) {
-                          setState(() => isEngagementReminderSwitched = val);
                           if (val) {
                             BlocProvider.of<NotificationSettingsBloc>(context)
                                 .add(SubscribedToDailyEngagementReminder());
@@ -126,8 +99,8 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                         title: "Prayers",
                         subtitle: "Notify me when someone prays for my request",
                         value: isPrayerNotificationsSwitched,
+                        enabled: !isDisabled,
                         onChanged: (val) {
-                          setState(() => isPrayerNotificationsSwitched = val);
                           if (val) {
                             BlocProvider.of<NotificationSettingsBloc>(context)
                                 .add(SubscribedToPrayerNotifications());
@@ -142,8 +115,8 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                         subtitle:
                             "Notify me when someone adds a new prayer request",
                         value: isNewPrayerRequestSwitched,
+                        enabled: !isDisabled,
                         onChanged: (val) {
-                          setState(() => isNewPrayerRequestSwitched = val);
                           if (val) {
                             BlocProvider.of<NotificationSettingsBloc>(context)
                                 .add(SubscribedToNewPrayerRequests());
@@ -158,9 +131,8 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                         subtitle:
                             "Notify me when someone reacts to my testimony",
                         value: isTestimonyNotificationsSwitched,
+                        enabled: !isDisabled,
                         onChanged: (val) {
-                          setState(
-                              () => isTestimonyNotificationsSwitched = val);
                           if (val) {
                             BlocProvider.of<NotificationSettingsBloc>(context)
                                 .add(SubscribedToTestimonyNotifications());
@@ -174,8 +146,8 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                         title: "New Testimonies",
                         subtitle: "Notify me when someone adds a new testimony",
                         value: isNewTestimonySwitched,
+                        enabled: !isDisabled,
                         onChanged: (val) {
-                          setState(() => isNewTestimonySwitched = val);
                           if (val) {
                             BlocProvider.of<NotificationSettingsBloc>(context)
                                 .add(SubscribedToNewTestimonies());
@@ -191,8 +163,8 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                         title: "New Threads",
                         subtitle: "Notify me when a new thread is created",
                         value: isNewForumThreadSwitched,
+                        enabled: !isDisabled,
                         onChanged: (val) {
-                          setState(() => isNewForumThreadSwitched = val);
                           if (val) {
                             BlocProvider.of<NotificationSettingsBloc>(context)
                                 .add(SubscribedToNewForumThreads());
@@ -206,8 +178,8 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                         title: "Replies",
                         subtitle: "Notify me of replies to my comments",
                         value: isForumCommentRepliesSwitched,
+                        enabled: !isDisabled,
                         onChanged: (val) {
-                          setState(() => isForumCommentRepliesSwitched = val);
                           if (val) {
                             BlocProvider.of<NotificationSettingsBloc>(context)
                                 .add(SubscribedToForumCommentReplies());
@@ -222,8 +194,8 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                         subtitle:
                             "Notify me of new comments in threads that I am following",
                         value: isForumThreadCommentsSwitched,
+                        enabled: !isDisabled,
                         onChanged: (val) {
-                          setState(() => isForumThreadCommentsSwitched = val);
                           if (val) {
                             BlocProvider.of<NotificationSettingsBloc>(context)
                                 .add(SubscribedToForumThreadComments());
@@ -237,8 +209,8 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                         title: "Comment Likes",
                         subtitle: "Notify me when someone likes my comment",
                         value: isForumCommentLikesSwitched,
+                        enabled: !isDisabled,
                         onChanged: (val) {
-                          setState(() => isForumCommentLikesSwitched = val);
                           if (val) {
                             BlocProvider.of<NotificationSettingsBloc>(context)
                                 .add(SubscribedToForumCommentLikes());
@@ -272,7 +244,8 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
   Widget _buildSwitchTile({
     required String title,
     String? subtitle,
-    required bool? value,
+    required bool value,
+    required bool enabled,
     required ValueChanged<bool> onChanged,
   }) {
     return Padding(
@@ -295,7 +268,7 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
           ),
           Container(
             height: getIt<LayoutFactory>().getDimension(baseDimension: 30.0),
-            child: value != null
+            child: enabled
                 ? PlatformSwitch(
                     value: value,
                     onChanged: onChanged,

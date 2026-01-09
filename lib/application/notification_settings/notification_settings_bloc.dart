@@ -64,10 +64,27 @@ class NotificationSettingsBloc
     SubscribedToDailyEngagementReminder event,
     Emitter<NotificationSettingsState> emit,
   ) async {
-    try {
-      await _iNotificationSettingsService.subscribeToDailyEngagementReminder();
-    } catch (e) {
-      emit(DailyEngagementReminderError(message: "Unable to subscribe"));
+    final currentState = state;
+    if (currentState is NotificationSettingsPositions) {
+      final updatedSettings = currentState.notificationSettings
+          .copyWith(dailyEngagementReminder: true);
+      emit(
+          NotificationSettingsPositions(notificationSettings: updatedSettings));
+      try {
+        await _iNotificationSettingsService
+            .subscribeToDailyEngagementReminder();
+      } catch (e) {
+        emit(currentState);
+        emit(DailyEngagementReminderError(message: "Unable to subscribe"));
+      }
+    } else {
+      try {
+        await _iNotificationSettingsService
+            .subscribeToDailyEngagementReminder();
+        add(NotificationSettingsRequested());
+      } catch (e) {
+        emit(DailyEngagementReminderError(message: "Unable to subscribe"));
+      }
     }
   }
 
@@ -75,11 +92,27 @@ class NotificationSettingsBloc
     UnsubscribedFromDailyEngagementReminder event,
     Emitter<NotificationSettingsState> emit,
   ) async {
-    try {
-      await _iNotificationSettingsService
-          .unsubscribeFromDailyEngagementReminder();
-    } catch (e) {
-      emit(DailyEngagementReminderError(message: "Unable to unsubscribe"));
+    final currentState = state;
+    if (currentState is NotificationSettingsPositions) {
+      final updatedSettings = currentState.notificationSettings
+          .copyWith(dailyEngagementReminder: false);
+      emit(
+          NotificationSettingsPositions(notificationSettings: updatedSettings));
+      try {
+        await _iNotificationSettingsService
+            .unsubscribeFromDailyEngagementReminder();
+      } catch (e) {
+        emit(currentState);
+        emit(DailyEngagementReminderError(message: "Unable to unsubscribe"));
+      }
+    } else {
+      try {
+        await _iNotificationSettingsService
+            .unsubscribeFromDailyEngagementReminder();
+        add(NotificationSettingsRequested());
+      } catch (e) {
+        emit(DailyEngagementReminderError(message: "Unable to unsubscribe"));
+      }
     }
   }
 
@@ -87,10 +120,25 @@ class NotificationSettingsBloc
     SubscribedToPrayerNotifications event,
     Emitter<NotificationSettingsState> emit,
   ) async {
-    try {
-      await _iNotificationSettingsService.subscribeToPrayerNotifications();
-    } catch (e) {
-      emit(PrayerNotificationError(message: "Unable to subscribe"));
+    final currentState = state;
+    if (currentState is NotificationSettingsPositions) {
+      final updatedSettings =
+          currentState.notificationSettings.copyWith(prayers: true);
+      emit(
+          NotificationSettingsPositions(notificationSettings: updatedSettings));
+      try {
+        await _iNotificationSettingsService.subscribeToPrayerNotifications();
+      } catch (e) {
+        emit(currentState);
+        emit(PrayerNotificationError(message: "Unable to subscribe"));
+      }
+    } else {
+      try {
+        await _iNotificationSettingsService.subscribeToPrayerNotifications();
+        add(NotificationSettingsRequested());
+      } catch (e) {
+        emit(PrayerNotificationError(message: "Unable to subscribe"));
+      }
     }
   }
 
@@ -98,10 +146,27 @@ class NotificationSettingsBloc
     UnsubscribedFromPrayerNotifications event,
     Emitter<NotificationSettingsState> emit,
   ) async {
-    try {
-      await _iNotificationSettingsService.unsubscribeFromPrayerNotifications();
-    } catch (e) {
-      emit(PrayerNotificationError(message: "Unable to unsubscribe"));
+    final currentState = state;
+    if (currentState is NotificationSettingsPositions) {
+      final updatedSettings =
+          currentState.notificationSettings.copyWith(prayers: false);
+      emit(
+          NotificationSettingsPositions(notificationSettings: updatedSettings));
+      try {
+        await _iNotificationSettingsService
+            .unsubscribeFromPrayerNotifications();
+      } catch (e) {
+        emit(currentState);
+        emit(PrayerNotificationError(message: "Unable to unsubscribe"));
+      }
+    } else {
+      try {
+        await _iNotificationSettingsService
+            .unsubscribeFromPrayerNotifications();
+        add(NotificationSettingsRequested());
+      } catch (e) {
+        emit(PrayerNotificationError(message: "Unable to unsubscribe"));
+      }
     }
   }
 
@@ -109,10 +174,25 @@ class NotificationSettingsBloc
     SubscribedToNewPrayerRequests event,
     Emitter<NotificationSettingsState> emit,
   ) async {
-    try {
-      await _iNotificationSettingsService.subscribeToNewPrayerRequests();
-    } catch (e) {
-      emit(PrayerNotificationError(message: "Unable to subscribe"));
+    final currentState = state;
+    if (currentState is NotificationSettingsPositions) {
+      final updatedSettings =
+          currentState.notificationSettings.copyWith(newPrayerRequest: true);
+      emit(
+          NotificationSettingsPositions(notificationSettings: updatedSettings));
+      try {
+        await _iNotificationSettingsService.subscribeToNewPrayerRequests();
+      } catch (e) {
+        emit(currentState);
+        emit(PrayerNotificationError(message: "Unable to subscribe"));
+      }
+    } else {
+      try {
+        await _iNotificationSettingsService.subscribeToNewPrayerRequests();
+        add(NotificationSettingsRequested());
+      } catch (e) {
+        emit(PrayerNotificationError(message: "Unable to subscribe"));
+      }
     }
   }
 
@@ -120,10 +200,25 @@ class NotificationSettingsBloc
     UnsubscribedFromNewPrayerRequests event,
     Emitter<NotificationSettingsState> emit,
   ) async {
-    try {
-      await _iNotificationSettingsService.unsubscribeFromNewPrayerRequests();
-    } catch (e) {
-      emit(PrayerNotificationError(message: "Unable to unsubscribe"));
+    final currentState = state;
+    if (currentState is NotificationSettingsPositions) {
+      final updatedSettings =
+          currentState.notificationSettings.copyWith(newPrayerRequest: false);
+      emit(
+          NotificationSettingsPositions(notificationSettings: updatedSettings));
+      try {
+        await _iNotificationSettingsService.unsubscribeFromNewPrayerRequests();
+      } catch (e) {
+        emit(currentState);
+        emit(PrayerNotificationError(message: "Unable to unsubscribe"));
+      }
+    } else {
+      try {
+        await _iNotificationSettingsService.unsubscribeFromNewPrayerRequests();
+        add(NotificationSettingsRequested());
+      } catch (e) {
+        emit(PrayerNotificationError(message: "Unable to unsubscribe"));
+      }
     }
   }
 
@@ -131,10 +226,25 @@ class NotificationSettingsBloc
     SubscribedToTestimonyNotifications event,
     Emitter<NotificationSettingsState> emit,
   ) async {
-    try {
-      await _iNotificationSettingsService.subscribeToTestimonyNotifications();
-    } catch (e) {
-      emit(TestimonyNotificationError(message: "Unable to subscribe"));
+    final currentState = state;
+    if (currentState is NotificationSettingsPositions) {
+      final updatedSettings =
+          currentState.notificationSettings.copyWith(testimonies: true);
+      emit(
+          NotificationSettingsPositions(notificationSettings: updatedSettings));
+      try {
+        await _iNotificationSettingsService.subscribeToTestimonyNotifications();
+      } catch (e) {
+        emit(currentState);
+        emit(TestimonyNotificationError(message: "Unable to subscribe"));
+      }
+    } else {
+      try {
+        await _iNotificationSettingsService.subscribeToTestimonyNotifications();
+        add(NotificationSettingsRequested());
+      } catch (e) {
+        emit(TestimonyNotificationError(message: "Unable to subscribe"));
+      }
     }
   }
 
@@ -142,11 +252,27 @@ class NotificationSettingsBloc
     UnsubscribedFromTestimonyNotifications event,
     Emitter<NotificationSettingsState> emit,
   ) async {
-    try {
-      await _iNotificationSettingsService
-          .unsubscribeFromTestimonyNotifications();
-    } catch (e) {
-      emit(TestimonyNotificationError(message: "Unable to unsubscribe"));
+    final currentState = state;
+    if (currentState is NotificationSettingsPositions) {
+      final updatedSettings =
+          currentState.notificationSettings.copyWith(testimonies: false);
+      emit(
+          NotificationSettingsPositions(notificationSettings: updatedSettings));
+      try {
+        await _iNotificationSettingsService
+            .unsubscribeFromTestimonyNotifications();
+      } catch (e) {
+        emit(currentState);
+        emit(TestimonyNotificationError(message: "Unable to unsubscribe"));
+      }
+    } else {
+      try {
+        await _iNotificationSettingsService
+            .unsubscribeFromTestimonyNotifications();
+        add(NotificationSettingsRequested());
+      } catch (e) {
+        emit(TestimonyNotificationError(message: "Unable to unsubscribe"));
+      }
     }
   }
 
@@ -154,10 +280,25 @@ class NotificationSettingsBloc
     SubscribedToNewTestimonies event,
     Emitter<NotificationSettingsState> emit,
   ) async {
-    try {
-      await _iNotificationSettingsService.subscribeToNewTestimonies();
-    } catch (e) {
-      emit(TestimonyNotificationError(message: "Unable to subscribe"));
+    final currentState = state;
+    if (currentState is NotificationSettingsPositions) {
+      final updatedSettings =
+          currentState.notificationSettings.copyWith(newTestimony: true);
+      emit(
+          NotificationSettingsPositions(notificationSettings: updatedSettings));
+      try {
+        await _iNotificationSettingsService.subscribeToNewTestimonies();
+      } catch (e) {
+        emit(currentState);
+        emit(TestimonyNotificationError(message: "Unable to subscribe"));
+      }
+    } else {
+      try {
+        await _iNotificationSettingsService.subscribeToNewTestimonies();
+        add(NotificationSettingsRequested());
+      } catch (e) {
+        emit(TestimonyNotificationError(message: "Unable to subscribe"));
+      }
     }
   }
 
@@ -165,10 +306,25 @@ class NotificationSettingsBloc
     UnsubscribedFromNewTestimonies event,
     Emitter<NotificationSettingsState> emit,
   ) async {
-    try {
-      await _iNotificationSettingsService.unsubscribeFromNewTestimonies();
-    } catch (e) {
-      emit(TestimonyNotificationError(message: "Unable to unsubscribe"));
+    final currentState = state;
+    if (currentState is NotificationSettingsPositions) {
+      final updatedSettings =
+          currentState.notificationSettings.copyWith(newTestimony: false);
+      emit(
+          NotificationSettingsPositions(notificationSettings: updatedSettings));
+      try {
+        await _iNotificationSettingsService.unsubscribeFromNewTestimonies();
+      } catch (e) {
+        emit(currentState);
+        emit(TestimonyNotificationError(message: "Unable to unsubscribe"));
+      }
+    } else {
+      try {
+        await _iNotificationSettingsService.unsubscribeFromNewTestimonies();
+        add(NotificationSettingsRequested());
+      } catch (e) {
+        emit(TestimonyNotificationError(message: "Unable to unsubscribe"));
+      }
     }
   }
 
@@ -176,10 +332,25 @@ class NotificationSettingsBloc
     SubscribedToNewForumThreads event,
     Emitter<NotificationSettingsState> emit,
   ) async {
-    try {
-      await _iNotificationSettingsService.subscribeToNewForumThreads();
-    } catch (e) {
-      emit(NotificationSettingsError(message: "Unable to subscribe"));
+    final currentState = state;
+    if (currentState is NotificationSettingsPositions) {
+      final updatedSettings =
+          currentState.notificationSettings.copyWith(newForumThread: true);
+      emit(
+          NotificationSettingsPositions(notificationSettings: updatedSettings));
+      try {
+        await _iNotificationSettingsService.subscribeToNewForumThreads();
+      } catch (e) {
+        emit(currentState);
+        emit(NotificationSettingsError(message: "Unable to subscribe"));
+      }
+    } else {
+      try {
+        await _iNotificationSettingsService.subscribeToNewForumThreads();
+        add(NotificationSettingsRequested());
+      } catch (e) {
+        emit(NotificationSettingsError(message: "Unable to subscribe"));
+      }
     }
   }
 
@@ -187,10 +358,25 @@ class NotificationSettingsBloc
     UnsubscribedFromNewForumThreads event,
     Emitter<NotificationSettingsState> emit,
   ) async {
-    try {
-      await _iNotificationSettingsService.unsubscribeFromNewForumThreads();
-    } catch (e) {
-      emit(NotificationSettingsError(message: "Unable to unsubscribe"));
+    final currentState = state;
+    if (currentState is NotificationSettingsPositions) {
+      final updatedSettings =
+          currentState.notificationSettings.copyWith(newForumThread: false);
+      emit(
+          NotificationSettingsPositions(notificationSettings: updatedSettings));
+      try {
+        await _iNotificationSettingsService.unsubscribeFromNewForumThreads();
+      } catch (e) {
+        emit(currentState);
+        emit(NotificationSettingsError(message: "Unable to unsubscribe"));
+      }
+    } else {
+      try {
+        await _iNotificationSettingsService.unsubscribeFromNewForumThreads();
+        add(NotificationSettingsRequested());
+      } catch (e) {
+        emit(NotificationSettingsError(message: "Unable to unsubscribe"));
+      }
     }
   }
 
@@ -198,10 +384,25 @@ class NotificationSettingsBloc
     SubscribedToForumCommentReplies event,
     Emitter<NotificationSettingsState> emit,
   ) async {
-    try {
-      await _iNotificationSettingsService.subscribeToForumCommentReplies();
-    } catch (e) {
-      emit(NotificationSettingsError(message: "Unable to subscribe"));
+    final currentState = state;
+    if (currentState is NotificationSettingsPositions) {
+      final updatedSettings =
+          currentState.notificationSettings.copyWith(forumCommentReplies: true);
+      emit(
+          NotificationSettingsPositions(notificationSettings: updatedSettings));
+      try {
+        await _iNotificationSettingsService.subscribeToForumCommentReplies();
+      } catch (e) {
+        emit(currentState);
+        emit(NotificationSettingsError(message: "Unable to subscribe"));
+      }
+    } else {
+      try {
+        await _iNotificationSettingsService.subscribeToForumCommentReplies();
+        add(NotificationSettingsRequested());
+      } catch (e) {
+        emit(NotificationSettingsError(message: "Unable to subscribe"));
+      }
     }
   }
 
@@ -209,10 +410,27 @@ class NotificationSettingsBloc
     UnsubscribedFromForumCommentReplies event,
     Emitter<NotificationSettingsState> emit,
   ) async {
-    try {
-      await _iNotificationSettingsService.unsubscribeFromForumCommentReplies();
-    } catch (e) {
-      emit(NotificationSettingsError(message: "Unable to unsubscribe"));
+    final currentState = state;
+    if (currentState is NotificationSettingsPositions) {
+      final updatedSettings = currentState.notificationSettings
+          .copyWith(forumCommentReplies: false);
+      emit(
+          NotificationSettingsPositions(notificationSettings: updatedSettings));
+      try {
+        await _iNotificationSettingsService
+            .unsubscribeFromForumCommentReplies();
+      } catch (e) {
+        emit(currentState);
+        emit(NotificationSettingsError(message: "Unable to unsubscribe"));
+      }
+    } else {
+      try {
+        await _iNotificationSettingsService
+            .unsubscribeFromForumCommentReplies();
+        add(NotificationSettingsRequested());
+      } catch (e) {
+        emit(NotificationSettingsError(message: "Unable to unsubscribe"));
+      }
     }
   }
 
@@ -220,10 +438,25 @@ class NotificationSettingsBloc
     SubscribedToForumCommentLikes event,
     Emitter<NotificationSettingsState> emit,
   ) async {
-    try {
-      await _iNotificationSettingsService.subscribeToForumCommentLikes();
-    } catch (e) {
-      emit(NotificationSettingsError(message: "Unable to subscribe"));
+    final currentState = state;
+    if (currentState is NotificationSettingsPositions) {
+      final updatedSettings =
+          currentState.notificationSettings.copyWith(forumCommentLikes: true);
+      emit(
+          NotificationSettingsPositions(notificationSettings: updatedSettings));
+      try {
+        await _iNotificationSettingsService.subscribeToForumCommentLikes();
+      } catch (e) {
+        emit(currentState);
+        emit(NotificationSettingsError(message: "Unable to subscribe"));
+      }
+    } else {
+      try {
+        await _iNotificationSettingsService.subscribeToForumCommentLikes();
+        add(NotificationSettingsRequested());
+      } catch (e) {
+        emit(NotificationSettingsError(message: "Unable to subscribe"));
+      }
     }
   }
 
@@ -231,10 +464,25 @@ class NotificationSettingsBloc
     UnsubscribedFromForumCommentLikes event,
     Emitter<NotificationSettingsState> emit,
   ) async {
-    try {
-      await _iNotificationSettingsService.unsubscribeFromForumCommentLikes();
-    } catch (e) {
-      emit(NotificationSettingsError(message: "Unable to unsubscribe"));
+    final currentState = state;
+    if (currentState is NotificationSettingsPositions) {
+      final updatedSettings =
+          currentState.notificationSettings.copyWith(forumCommentLikes: false);
+      emit(
+          NotificationSettingsPositions(notificationSettings: updatedSettings));
+      try {
+        await _iNotificationSettingsService.unsubscribeFromForumCommentLikes();
+      } catch (e) {
+        emit(currentState);
+        emit(NotificationSettingsError(message: "Unable to unsubscribe"));
+      }
+    } else {
+      try {
+        await _iNotificationSettingsService.unsubscribeFromForumCommentLikes();
+        add(NotificationSettingsRequested());
+      } catch (e) {
+        emit(NotificationSettingsError(message: "Unable to unsubscribe"));
+      }
     }
   }
 
@@ -242,10 +490,25 @@ class NotificationSettingsBloc
     SubscribedToForumThreadComments event,
     Emitter<NotificationSettingsState> emit,
   ) async {
-    try {
-      await _iNotificationSettingsService.subscribeToForumThreadComments();
-    } catch (e) {
-      emit(NotificationSettingsError(message: "Unable to subscribe"));
+    final currentState = state;
+    if (currentState is NotificationSettingsPositions) {
+      final updatedSettings =
+          currentState.notificationSettings.copyWith(forumThreadComments: true);
+      emit(
+          NotificationSettingsPositions(notificationSettings: updatedSettings));
+      try {
+        await _iNotificationSettingsService.subscribeToForumThreadComments();
+      } catch (e) {
+        emit(currentState);
+        emit(NotificationSettingsError(message: "Unable to subscribe"));
+      }
+    } else {
+      try {
+        await _iNotificationSettingsService.subscribeToForumThreadComments();
+        add(NotificationSettingsRequested());
+      } catch (e) {
+        emit(NotificationSettingsError(message: "Unable to subscribe"));
+      }
     }
   }
 
@@ -253,10 +516,27 @@ class NotificationSettingsBloc
     UnsubscribedFromForumThreadComments event,
     Emitter<NotificationSettingsState> emit,
   ) async {
-    try {
-      await _iNotificationSettingsService.unsubscribeFromForumThreadComments();
-    } catch (e) {
-      emit(NotificationSettingsError(message: "Unable to unsubscribe"));
+    final currentState = state;
+    if (currentState is NotificationSettingsPositions) {
+      final updatedSettings = currentState.notificationSettings
+          .copyWith(forumThreadComments: false);
+      emit(
+          NotificationSettingsPositions(notificationSettings: updatedSettings));
+      try {
+        await _iNotificationSettingsService
+            .unsubscribeFromForumThreadComments();
+      } catch (e) {
+        emit(currentState);
+        emit(NotificationSettingsError(message: "Unable to unsubscribe"));
+      }
+    } else {
+      try {
+        await _iNotificationSettingsService
+            .unsubscribeFromForumThreadComments();
+        add(NotificationSettingsRequested());
+      } catch (e) {
+        emit(NotificationSettingsError(message: "Unable to unsubscribe"));
+      }
     }
   }
 
