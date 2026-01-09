@@ -104,3 +104,17 @@ class UnsubscribedFromForumThreadComments extends NotificationSettingsEvent {
   @override
   List<Object> get props => [];
 }
+
+class ThreadFollowed extends NotificationSettingsEvent {
+  final String threadId;
+  ThreadFollowed(this.threadId);
+  @override
+  List<Object> get props => [threadId];
+}
+
+class ThreadUnfollowed extends NotificationSettingsEvent {
+  final String threadId;
+  ThreadUnfollowed(this.threadId);
+  @override
+  List<Object> get props => [threadId];
+}

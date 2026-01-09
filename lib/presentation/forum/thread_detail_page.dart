@@ -6,6 +6,7 @@ import 'package:wpa_app/app/constants.dart';
 import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/application/authentication/authentication_bloc.dart';
 import 'package:wpa_app/application/forum/thread_bloc.dart';
+import 'package:wpa_app/application/notification_settings/notification_settings_bloc.dart';
 import 'package:wpa_app/domain/forum/entities.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
 import 'package:wpa_app/presentation/common/text_factory.dart';
@@ -54,9 +55,17 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => getIt<ThreadBloc>()
-        ..add(LoadThreadComments(widget.threadId, widget.forumId)),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<ThreadBloc>(
+          create: (context) => getIt<ThreadBloc>()
+            ..add(LoadThreadComments(widget.threadId, widget.forumId)),
+        ),
+        BlocProvider<NotificationSettingsBloc>(
+          create: (context) => getIt<NotificationSettingsBloc>()
+            ..add(NotificationSettingsRequested()),
+        ),
+      ],
       child: Scaffold(
         body: Builder(builder: (context) {
           return SafeArea(
@@ -67,55 +76,118 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
                   trailing: Builder(builder: (context) {
                     final authState =
                         BlocProvider.of<AuthenticationBloc>(context).state;
-                    if (authState is Authenticated && authState.user.isAdmin) {
-                      return PopupMenuButton<String>(
-                        onSelected: (value) {
-                          if (value == 'freeze') {
-                            BlocProvider.of<ThreadBloc>(context).add(
-                                FreezeThread(widget.threadId, widget.forumId));
-                            setState(() {
-                              _isFrozen = true;
-                            });
-                          } else if (value == 'unfreeze') {
-                            BlocProvider.of<ThreadBloc>(context).add(
-                                UnfreezeThread(
-                                    widget.threadId, widget.forumId));
-                            setState(() {
-                              _isFrozen = false;
-                            });
-                          }
-                        },
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.all(
-                            Radius.circular(10.0),
-                          ),
-                        ),
-                        color: kCardOverlayGrey,
-                        child: Icon(Icons.more_horiz,
-                            size: getIt<LayoutFactory>()
-                                .getDimension(baseDimension: 24.0)),
-                        itemBuilder: (context) => [
-                          PopupMenuItem(
-                            value: _isFrozen ? 'unfreeze' : 'freeze',
-                            child: Row(
-                              children: [
-                                Icon(
-                                  Icons.ac_unit,
-                                  size: getIt<LayoutFactory>()
-                                      .getDimension(baseDimension: 24.0),
-                                ),
-                                SizedBox(width: 4),
-                                Expanded(
-                                    child: getIt<TextFactory>().lite(_isFrozen
-                                        ? 'UNFREEZE THREAD'
-                                        : 'FREEZE THREAD'))
-                              ],
+
+                    return BlocBuilder<NotificationSettingsBloc,
+                        NotificationSettingsState>(
+                      builder: (context, notificationSettingsState) {
+                        if (authState is Authenticated) {
+                          return PopupMenuButton<String>(
+                            onSelected: (value) {
+                              if (value == 'freeze') {
+                                BlocProvider.of<ThreadBloc>(context).add(
+                                    FreezeThread(
+                                        widget.threadId, widget.forumId));
+                                setState(() {
+                                  _isFrozen = true;
+                                });
+                              } else if (value == 'unfreeze') {
+                                BlocProvider.of<ThreadBloc>(context).add(
+                                    UnfreezeThread(
+                                        widget.threadId, widget.forumId));
+                                setState(() {
+                                  _isFrozen = false;
+                                });
+                              } else if (value == 'follow') {
+                                BlocProvider.of<NotificationSettingsBloc>(
+                                        context)
+                                    .add(ThreadFollowed(widget.threadId));
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("Thread followed"),
+                                    duration: Duration(seconds: 1),
+                                  ),
+                                );
+                              } else if (value == 'unfollow') {
+                                BlocProvider.of<NotificationSettingsBloc>(
+                                        context)
+                                    .add(ThreadUnfollowed(widget.threadId));
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text("Thread unfollowed"),
+                                    duration: Duration(seconds: 1),
+                                  ),
+                                );
+                              }
+                            },
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.all(
+                                Radius.circular(10.0),
+                              ),
                             ),
-                          ),
-                        ],
-                      );
-                    }
-                    return Container();
+                            color: kCardOverlayGrey,
+                            child: Icon(Icons.more_horiz,
+                                size: getIt<LayoutFactory>()
+                                    .getDimension(baseDimension: 24.0)),
+                            itemBuilder: (context) {
+                              List<PopupMenuItem<String>> items = [];
+
+                              // Admin Actions
+                              if (authState.user.isAdmin) {
+                                items.add(PopupMenuItem(
+                                  value: _isFrozen ? 'unfreeze' : 'freeze',
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        Icons.ac_unit,
+                                        size: getIt<LayoutFactory>()
+                                            .getDimension(baseDimension: 24.0),
+                                      ),
+                                      SizedBox(width: 4),
+                                      Expanded(
+                                          child: getIt<TextFactory>().lite(
+                                              _isFrozen
+                                                  ? 'UNFREEZE THREAD'
+                                                  : 'FREEZE THREAD'))
+                                    ],
+                                  ),
+                                ));
+                              }
+
+                              // Follow/Unfollow Actions
+                              if (notificationSettingsState
+                                  is NotificationSettingsPositions) {
+                                final isFollowing = notificationSettingsState
+                                    .notificationSettings.threadsFollowed
+                                    .contains(widget.threadId);
+                                items.add(PopupMenuItem(
+                                  value: isFollowing ? 'unfollow' : 'follow',
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        isFollowing
+                                            ? Icons.notifications_off
+                                            : Icons.notifications_active,
+                                        size: getIt<LayoutFactory>()
+                                            .getDimension(baseDimension: 24.0),
+                                      ),
+                                      SizedBox(width: 4),
+                                      Expanded(
+                                          child: getIt<TextFactory>().lite(
+                                              isFollowing
+                                                  ? 'UNFOLLOW THREAD'
+                                                  : 'FOLLOW THREAD'))
+                                    ],
+                                  ),
+                                ));
+                              }
+
+                              return items;
+                            },
+                          );
+                        }
+                        return Container();
+                      },
+                    );
                   }),
                 ),
                 Expanded(

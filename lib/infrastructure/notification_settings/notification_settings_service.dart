@@ -91,6 +91,20 @@ class NotificationSettingsService implements INotificationSettingsService {
     _setNotificationSetting({"forum_likes": false});
   }
 
+  @override
+  Future<void> followThread(String threadId) async {
+    _setNotificationSetting({
+      "threads_followed": FieldValue.arrayUnion([threadId])
+    });
+  }
+
+  @override
+  Future<void> unfollowThread(String threadId) async {
+    _setNotificationSetting({
+      "threads_followed": FieldValue.arrayRemove([threadId])
+    });
+  }
+
   Future<void> _setNotificationSetting(
       Map<String, dynamic> notificationSetting) async {
     final LocalUser user = getIt<LocalUser>();

@@ -4,6 +4,7 @@ import 'package:wpa_app/app/constants.dart';
 import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/application/authentication/authentication_bloc.dart';
 import 'package:wpa_app/application/forum/forum_bloc.dart';
+import 'package:wpa_app/application/notification_settings/notification_settings_bloc.dart';
 import 'package:wpa_app/domain/forum/entities.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
 import 'package:wpa_app/presentation/common/text_factory.dart';
@@ -21,8 +22,16 @@ class ForumPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => getIt<ForumBloc>()..add(LoadForum(forumId)),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<ForumBloc>(
+          create: (context) => getIt<ForumBloc>()..add(LoadForum(forumId)),
+        ),
+        BlocProvider<NotificationSettingsBloc>(
+          create: (context) => getIt<NotificationSettingsBloc>()
+            ..add(NotificationSettingsRequested()),
+        ),
+      ],
       child: Scaffold(
         body: SafeArea(
           child: Column(
@@ -153,7 +162,12 @@ class ForumThreadCard extends StatelessWidget {
             'title': thread.title,
             'isFrozen': thread.isFrozen,
           },
-        );
+        ).then((_) {
+          // Refresh notification settings when returning from thread detail
+          // to ensure "following" status is up to date
+          BlocProvider.of<NotificationSettingsBloc>(context)
+              .add(NotificationSettingsRequested());
+        });
       },
       child: Container(
         margin: EdgeInsets.all(8.0),
@@ -202,7 +216,24 @@ class ForumThreadCard extends StatelessWidget {
                       fontSize: 10.0,
                     )
                   ],
-                )
+                ),
+                Spacer(),
+                BlocBuilder<NotificationSettingsBloc,
+                    NotificationSettingsState>(
+                  builder: (context, state) {
+                    if (state is NotificationSettingsPositions) {
+                      if (state.notificationSettings.threadsFollowed
+                          .contains(thread.id)) {
+                        return Padding(
+                          padding: const EdgeInsets.only(left: 8.0),
+                          child: Icon(Icons.notifications_active,
+                              size: 20, color: kWpaBlue),
+                        );
+                      }
+                    }
+                    return SizedBox.shrink();
+                  },
+                ),
               ],
             ),
             SizedBox(height: 12),

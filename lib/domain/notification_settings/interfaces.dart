@@ -17,5 +17,7 @@ abstract class INotificationSettingsService {
   Future<void> unsubscribeFromForumThreadComments();
   Future<void> subscribeToForumLikes();
   Future<void> unsubscribeFromForumLikes();
+  Future<void> followThread(String threadId);
+  Future<void> unfollowThread(String threadId);
   Future<NotificationSettingsEntity> getNotificationSettings();
 }

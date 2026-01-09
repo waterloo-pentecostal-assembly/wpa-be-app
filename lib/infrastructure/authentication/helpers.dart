@@ -3,8 +3,11 @@ Map<String, dynamic> defaultNotificationSettings() {
     "daily_engagement_reminder": true,
     "testimonies": true,
     "prayers": true,
-    "forum_threads": true,
-    "forum_likes": true,
-    "forum_comments": true,
+    "new_prayer_request": true,
+    "new_testimony": true,
+    "new_forum_thread": true,
+    "forum_comment_likes": true,
+    "forum_comment_replies": true,
+    "forum_thread_comments": true,
   };
 }

@@ -7,6 +7,7 @@ class NotificationSettingsEntity {
   final bool forumCommentReplies;
   final bool forumThreadComments;
   final bool forumLikes;
+  final List<String> threadsFollowed;
 
   NotificationSettingsEntity({
     required this.id,
@@ -17,5 +18,30 @@ class NotificationSettingsEntity {
     required this.forumCommentReplies,
     required this.forumThreadComments,
     required this.forumLikes,
+    required this.threadsFollowed,
   });
+  NotificationSettingsEntity copyWith({
+    String? id,
+    bool? dailyEngagementReminder,
+    bool? prayers,
+    bool? testimonies,
+    bool? forumThreads,
+    bool? forumCommentReplies,
+    bool? forumThreadComments,
+    bool? forumLikes,
+    List<String>? threadsFollowed,
+  }) {
+    return NotificationSettingsEntity(
+      id: id ?? this.id,
+      dailyEngagementReminder:
+          dailyEngagementReminder ?? this.dailyEngagementReminder,
+      prayers: prayers ?? this.prayers,
+      testimonies: testimonies ?? this.testimonies,
+      forumThreads: forumThreads ?? this.forumThreads,
+      forumCommentReplies: forumCommentReplies ?? this.forumCommentReplies,
+      forumThreadComments: forumThreadComments ?? this.forumThreadComments,
+      forumLikes: forumLikes ?? this.forumLikes,
+      threadsFollowed: threadsFollowed ?? this.threadsFollowed,
+    );
+  }
 }

@@ -37,6 +37,8 @@ class NotificationSettingsBloc
     on<SubscribedToForumThreadComments>(_onSubscribedToForumThreadComments);
     on<UnsubscribedFromForumThreadComments>(
         _onUnsubscribedFromForumThreadComments);
+    on<ThreadFollowed>(_onThreadFollowed);
+    on<ThreadUnfollowed>(_onThreadUnfollowed);
   }
 
   Future<void> _onNotificationSettingsRequested(
@@ -207,6 +209,68 @@ class NotificationSettingsBloc
       await _iNotificationSettingsService.unsubscribeFromForumThreadComments();
     } catch (e) {
       emit(NotificationSettingsError(message: "Unable to unsubscribe"));
+    }
+  }
+
+  Future<void> _onThreadFollowed(
+    ThreadFollowed event,
+    Emitter<NotificationSettingsState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is NotificationSettingsPositions) {
+      final currentSettings = currentState.notificationSettings;
+      final updatedList = List<String>.from(currentSettings.threadsFollowed)
+        ..add(event.threadId);
+      final updatedSettings =
+          currentSettings.copyWith(threadsFollowed: updatedList);
+
+      emit(
+          NotificationSettingsPositions(notificationSettings: updatedSettings));
+
+      try {
+        await _iNotificationSettingsService.followThread(event.threadId);
+      } catch (e) {
+        emit(currentState);
+        emit(NotificationSettingsError(message: "Unable to follow thread"));
+      }
+    } else {
+      try {
+        await _iNotificationSettingsService.followThread(event.threadId);
+        add(NotificationSettingsRequested());
+      } catch (e) {
+        emit(NotificationSettingsError(message: "Unable to follow thread"));
+      }
+    }
+  }
+
+  Future<void> _onThreadUnfollowed(
+    ThreadUnfollowed event,
+    Emitter<NotificationSettingsState> emit,
+  ) async {
+    final currentState = state;
+    if (currentState is NotificationSettingsPositions) {
+      final currentSettings = currentState.notificationSettings;
+      final updatedList = List<String>.from(currentSettings.threadsFollowed)
+        ..remove(event.threadId);
+      final updatedSettings =
+          currentSettings.copyWith(threadsFollowed: updatedList);
+
+      emit(
+          NotificationSettingsPositions(notificationSettings: updatedSettings));
+
+      try {
+        await _iNotificationSettingsService.unfollowThread(event.threadId);
+      } catch (e) {
+        emit(currentState);
+        emit(NotificationSettingsError(message: "Unable to unfollow thread"));
+      }
+    } else {
+      try {
+        await _iNotificationSettingsService.unfollowThread(event.threadId);
+        add(NotificationSettingsRequested());
+      } catch (e) {
+        emit(NotificationSettingsError(message: "Unable to unfollow thread"));
+      }
     }
   }
 }
