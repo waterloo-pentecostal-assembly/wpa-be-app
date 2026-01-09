@@ -93,9 +93,27 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                             bottomLeft: Radius.circular(30.0),
                             bottomRight: Radius.circular(30.0),
                           ),
-                          child: Image.network(
-                            bibleSeries.imageUrl,
-                            fit: BoxFit.cover,
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              Image.network(
+                                bibleSeries.imageUrl,
+                                fit: BoxFit.cover,
+                              ),
+                              Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.topCenter,
+                                    end: Alignment.bottomCenter,
+                                    colors: [
+                                      Colors.black.withValues(alpha: 0.8),
+                                      Colors.transparent,
+                                    ],
+                                    stops: [0.0, 0.4],
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
