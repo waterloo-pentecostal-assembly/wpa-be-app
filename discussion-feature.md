@@ -136,7 +136,13 @@ there should be a toast notification.
 12. Check that thread is not frozen before allowing new comments
 13. Notification when a new prayer request is added
     new testimony
-    
+
+
+TODO remaining:
+1. !!! Update routing in lib/services/firebase_messaging_service.dart
+   - Include admin prayer request and new testimony notifications
+2. Update functions-v2/src/notifications/newDeviceSubscribetoTopic.js
+3. Add remaining notification senders to functions-v2/src/notifications
 
 
 dTxkZSWkRIeHHGxFWIj2gX:APA91bH_7vG2v9lRoBRTHaU7StKXEOoi8LurGXlOQyZJGyGrWvR3_dYITIJpIHurTm_f8kNF-_jTVLn1R2DWFfzjDxAX0Z-gPE-Fpm4SY2iUuRC-NzSP16k
