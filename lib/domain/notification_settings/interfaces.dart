@@ -7,10 +7,14 @@ abstract class INotificationSettingsService {
   Future<void> unsubscribeFromDailyEngagementReminder();
   Future<void> subscribeToPrayerNotifications();
   Future<void> unsubscribeFromPrayerNotifications();
+  Future<void> subscribeToNewPrayerRequests();
+  Future<void> unsubscribeFromNewPrayerRequests();
   Future<void> subscribeToTestimonyNotifications();
   Future<void> unsubscribeFromTestimonyNotifications();
-  Future<void> subscribeToForumThreads();
-  Future<void> unsubscribeFromForumThreads();
+  Future<void> subscribeToNewTestimonies();
+  Future<void> unsubscribeFromNewTestimonies();
+  Future<void> subscribeToNewForumThreads();
+  Future<void> unsubscribeFromNewForumThreads();
   Future<void> subscribeToForumCommentReplies();
   Future<void> unsubscribeFromForumCommentReplies();
   Future<void> subscribeToForumThreadComments();

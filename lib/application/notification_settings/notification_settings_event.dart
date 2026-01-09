@@ -43,6 +43,18 @@ class UnsubscribedFromPrayerNotifications extends NotificationSettingsEvent {
   List<Object> get props => [];
 }
 
+class SubscribedToNewPrayerRequests extends NotificationSettingsEvent {
+  SubscribedToNewPrayerRequests();
+  @override
+  List<Object> get props => [];
+}
+
+class UnsubscribedFromNewPrayerRequests extends NotificationSettingsEvent {
+  UnsubscribedFromNewPrayerRequests();
+  @override
+  List<Object> get props => [];
+}
+
 class SubscribedToTestimonyNotifications extends NotificationSettingsEvent {
   SubscribedToTestimonyNotifications();
 
@@ -57,14 +69,26 @@ class UnsubscribedFromTestimonyNotifications extends NotificationSettingsEvent {
   List<Object> get props => [];
 }
 
-class SubscribedToForumThreads extends NotificationSettingsEvent {
-  SubscribedToForumThreads();
+class SubscribedToNewTestimonies extends NotificationSettingsEvent {
+  SubscribedToNewTestimonies();
   @override
   List<Object> get props => [];
 }
 
-class UnsubscribedFromForumThreads extends NotificationSettingsEvent {
-  UnsubscribedFromForumThreads();
+class UnsubscribedFromNewTestimonies extends NotificationSettingsEvent {
+  UnsubscribedFromNewTestimonies();
+  @override
+  List<Object> get props => [];
+}
+
+class SubscribedToNewForumThreads extends NotificationSettingsEvent {
+  SubscribedToNewForumThreads();
+  @override
+  List<Object> get props => [];
+}
+
+class UnsubscribedFromNewForumThreads extends NotificationSettingsEvent {
+  UnsubscribedFromNewForumThreads();
   @override
   List<Object> get props => [];
 }

@@ -8,7 +8,9 @@ class NotificationSettingsDto {
   final bool dailyEngagementReminder;
   final bool prayers;
   final bool testimonies;
-  final bool forumThreads;
+  final bool newPrayerRequest;
+  final bool newTestimony;
+  final bool newForumThread;
   final bool forumCommentReplies;
   final bool forumThreadComments;
   final bool forumCommentLikes;
@@ -21,8 +23,10 @@ class NotificationSettingsDto {
       dailyEngagementReminder:
           findOrDefaultTo(data, 'daily_engagement_reminder', false),
       prayers: findOrDefaultTo(data, 'prayers', false),
+      newPrayerRequest: findOrDefaultTo(data, 'new_prayer_request', false),
       testimonies: findOrDefaultTo(data, 'testimonies', false),
-      forumThreads: findOrDefaultTo(data, 'forum_threads', false),
+      newTestimony: findOrDefaultTo(data, 'new_testimony', false),
+      newForumThread: findOrDefaultTo(data, 'new_forum_thread', false),
       forumCommentReplies:
           findOrDefaultTo(data, 'forum_comment_replies', false),
       forumThreadComments:
@@ -39,8 +43,10 @@ class NotificationSettingsDto {
     required this.id,
     required this.dailyEngagementReminder,
     required this.prayers,
+    required this.newPrayerRequest,
     required this.testimonies,
-    required this.forumThreads,
+    required this.newTestimony,
+    required this.newForumThread,
     required this.forumCommentReplies,
     required this.forumThreadComments,
     required this.forumCommentLikes,
@@ -54,8 +60,10 @@ extension NotificationSettingsDtoX on NotificationSettingsDto {
       id: this.id,
       dailyEngagementReminder: this.dailyEngagementReminder,
       prayers: this.prayers,
+      newPrayerRequest: this.newPrayerRequest,
       testimonies: this.testimonies,
-      forumThreads: this.forumThreads,
+      newTestimony: this.newTestimony,
+      newForumThread: this.newForumThread,
       forumCommentReplies: this.forumCommentReplies,
       forumThreadComments: this.forumThreadComments,
       forumCommentLikes: this.forumCommentLikes,

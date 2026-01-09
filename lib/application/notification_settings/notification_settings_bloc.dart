@@ -23,12 +23,16 @@ class NotificationSettingsBloc
     on<SubscribedToPrayerNotifications>(_onSubscribedToPrayerNotifications);
     on<UnsubscribedFromPrayerNotifications>(
         _onUnsubscribedFromPrayerNotifications);
+    on<SubscribedToNewPrayerRequests>(_onSubscribedToNewPrayerRequests);
+    on<UnsubscribedFromNewPrayerRequests>(_onUnsubscribedFromNewPrayerRequests);
     on<SubscribedToTestimonyNotifications>(
         _onSubscribedToTestimonyNotifications);
     on<UnsubscribedFromTestimonyNotifications>(
         _onUnsubscribedFromTestimonyNotifications);
-    on<SubscribedToForumThreads>(_onSubscribedToForumThreads);
-    on<UnsubscribedFromForumThreads>(_onUnsubscribedFromForumThreads);
+    on<SubscribedToNewTestimonies>(_onSubscribedToNewTestimonies);
+    on<UnsubscribedFromNewTestimonies>(_onUnsubscribedFromNewTestimonies);
+    on<SubscribedToNewForumThreads>(_onSubscribedToNewForumThreads);
+    on<UnsubscribedFromNewForumThreads>(_onUnsubscribedFromNewForumThreads);
     on<SubscribedToForumCommentReplies>(_onSubscribedToForumCommentReplies);
     on<UnsubscribedFromForumCommentReplies>(
         _onUnsubscribedFromForumCommentReplies);
@@ -101,6 +105,28 @@ class NotificationSettingsBloc
     }
   }
 
+  Future<void> _onSubscribedToNewPrayerRequests(
+    SubscribedToNewPrayerRequests event,
+    Emitter<NotificationSettingsState> emit,
+  ) async {
+    try {
+      await _iNotificationSettingsService.subscribeToNewPrayerRequests();
+    } catch (e) {
+      emit(PrayerNotificationError(message: "Unable to subscribe"));
+    }
+  }
+
+  Future<void> _onUnsubscribedFromNewPrayerRequests(
+    UnsubscribedFromNewPrayerRequests event,
+    Emitter<NotificationSettingsState> emit,
+  ) async {
+    try {
+      await _iNotificationSettingsService.unsubscribeFromNewPrayerRequests();
+    } catch (e) {
+      emit(PrayerNotificationError(message: "Unable to unsubscribe"));
+    }
+  }
+
   Future<void> _onSubscribedToTestimonyNotifications(
     SubscribedToTestimonyNotifications event,
     Emitter<NotificationSettingsState> emit,
@@ -124,23 +150,45 @@ class NotificationSettingsBloc
     }
   }
 
-  Future<void> _onSubscribedToForumThreads(
-    SubscribedToForumThreads event,
+  Future<void> _onSubscribedToNewTestimonies(
+    SubscribedToNewTestimonies event,
     Emitter<NotificationSettingsState> emit,
   ) async {
     try {
-      await _iNotificationSettingsService.subscribeToForumThreads();
+      await _iNotificationSettingsService.subscribeToNewTestimonies();
+    } catch (e) {
+      emit(TestimonyNotificationError(message: "Unable to subscribe"));
+    }
+  }
+
+  Future<void> _onUnsubscribedFromNewTestimonies(
+    UnsubscribedFromNewTestimonies event,
+    Emitter<NotificationSettingsState> emit,
+  ) async {
+    try {
+      await _iNotificationSettingsService.unsubscribeFromNewTestimonies();
+    } catch (e) {
+      emit(TestimonyNotificationError(message: "Unable to unsubscribe"));
+    }
+  }
+
+  Future<void> _onSubscribedToNewForumThreads(
+    SubscribedToNewForumThreads event,
+    Emitter<NotificationSettingsState> emit,
+  ) async {
+    try {
+      await _iNotificationSettingsService.subscribeToNewForumThreads();
     } catch (e) {
       emit(NotificationSettingsError(message: "Unable to subscribe"));
     }
   }
 
-  Future<void> _onUnsubscribedFromForumThreads(
-    UnsubscribedFromForumThreads event,
+  Future<void> _onUnsubscribedFromNewForumThreads(
+    UnsubscribedFromNewForumThreads event,
     Emitter<NotificationSettingsState> emit,
   ) async {
     try {
-      await _iNotificationSettingsService.unsubscribeFromForumThreads();
+      await _iNotificationSettingsService.unsubscribeFromNewForumThreads();
     } catch (e) {
       emit(NotificationSettingsError(message: "Unable to unsubscribe"));
     }

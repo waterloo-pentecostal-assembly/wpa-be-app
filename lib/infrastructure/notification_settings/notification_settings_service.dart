@@ -42,6 +42,16 @@ class NotificationSettingsService implements INotificationSettingsService {
   }
 
   @override
+  Future<void> subscribeToNewPrayerRequests() async {
+    _setNotificationSetting({"new_prayer_request": true});
+  }
+
+  @override
+  Future<void> unsubscribeFromNewPrayerRequests() async {
+    _setNotificationSetting({"new_prayer_request": false});
+  }
+
+  @override
   Future<void> subscribeToTestimonyNotifications() async {
     _setNotificationSetting({"testimonies": true});
   }
@@ -52,13 +62,23 @@ class NotificationSettingsService implements INotificationSettingsService {
   }
 
   @override
-  Future<void> subscribeToForumThreads() async {
-    _setNotificationSetting({"forum_threads": true});
+  Future<void> subscribeToNewTestimonies() async {
+    _setNotificationSetting({"new_testimony": true});
   }
 
   @override
-  Future<void> unsubscribeFromForumThreads() async {
-    _setNotificationSetting({"forum_threads": false});
+  Future<void> unsubscribeFromNewTestimonies() async {
+    _setNotificationSetting({"new_testimony": false});
+  }
+
+  @override
+  Future<void> subscribeToNewForumThreads() async {
+    _setNotificationSetting({"new_forum_thread": true});
+  }
+
+  @override
+  Future<void> unsubscribeFromNewForumThreads() async {
+    _setNotificationSetting({"new_forum_thread": false});
   }
 
   @override
