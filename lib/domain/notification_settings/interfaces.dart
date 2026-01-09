@@ -11,8 +11,10 @@ abstract class INotificationSettingsService {
   Future<void> unsubscribeFromTestimonyNotifications();
   Future<void> subscribeToForumThreads();
   Future<void> unsubscribeFromForumThreads();
-  Future<void> subscribeToForumComments();
-  Future<void> unsubscribeFromForumComments();
+  Future<void> subscribeToForumCommentReplies();
+  Future<void> unsubscribeFromForumCommentReplies();
+  Future<void> subscribeToForumThreadComments();
+  Future<void> unsubscribeFromForumThreadComments();
   Future<void> subscribeToForumLikes();
   Future<void> unsubscribeFromForumLikes();
   Future<NotificationSettingsEntity> getNotificationSettings();

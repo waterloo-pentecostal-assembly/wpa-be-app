@@ -21,7 +21,8 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
 
   // Forum
   bool? isForumThreadsSwitched;
-  bool? isForumCommentsSwitched;
+  bool? isForumCommentRepliesSwitched;
+  bool? isForumThreadCommentsSwitched;
   bool? isForumLikesSwitched;
 
   @override
@@ -36,7 +37,10 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
             isTestimonyNotificationsSwitched =
                 state.notificationSettings.testimonies;
             isForumThreadsSwitched = state.notificationSettings.forumThreads;
-            isForumCommentsSwitched = state.notificationSettings.forumComments;
+            isForumCommentRepliesSwitched =
+                state.notificationSettings.forumCommentReplies;
+            isForumThreadCommentsSwitched =
+                state.notificationSettings.forumThreadComments;
             isForumLikesSwitched = state.notificationSettings.forumLikes;
           });
         } else if (state is NotificationSettingsError) {
@@ -148,17 +152,33 @@ class _NotificationSettingsPageState extends State<NotificationSettingsPage> {
                         },
                       ),
                       _buildSwitchTile(
-                        title: "Comments",
-                        subtitle: "Notify me of replies to my threads/comments",
-                        value: isForumCommentsSwitched,
+                        title: "Replies",
+                        subtitle: "Notify me of replies to my comments",
+                        value: isForumCommentRepliesSwitched,
                         onChanged: (val) {
-                          setState(() => isForumCommentsSwitched = val);
+                          setState(() => isForumCommentRepliesSwitched = val);
                           if (val) {
                             BlocProvider.of<NotificationSettingsBloc>(context)
-                                .add(SubscribedToForumComments());
+                                .add(SubscribedToForumCommentReplies());
                           } else {
                             BlocProvider.of<NotificationSettingsBloc>(context)
-                                .add(UnsubscribedFromForumComments());
+                                .add(UnsubscribedFromForumCommentReplies());
+                          }
+                        },
+                      ),
+                      _buildSwitchTile(
+                        title: "Thread Comments",
+                        subtitle:
+                            "Notify me of new comments in threads that I am following",
+                        value: isForumThreadCommentsSwitched,
+                        onChanged: (val) {
+                          setState(() => isForumThreadCommentsSwitched = val);
+                          if (val) {
+                            BlocProvider.of<NotificationSettingsBloc>(context)
+                                .add(SubscribedToForumThreadComments());
+                          } else {
+                            BlocProvider.of<NotificationSettingsBloc>(context)
+                                .add(UnsubscribedFromForumThreadComments());
                           }
                         },
                       ),

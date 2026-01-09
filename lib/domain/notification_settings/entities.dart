@@ -4,7 +4,8 @@ class NotificationSettingsEntity {
   final bool prayers;
   final bool testimonies;
   final bool forumThreads;
-  final bool forumComments;
+  final bool forumCommentReplies;
+  final bool forumThreadComments;
   final bool forumLikes;
 
   NotificationSettingsEntity({
@@ -13,7 +14,8 @@ class NotificationSettingsEntity {
     required this.prayers,
     required this.testimonies,
     required this.forumThreads,
-    required this.forumComments,
+    required this.forumCommentReplies,
+    required this.forumThreadComments,
     required this.forumLikes,
   });
 }

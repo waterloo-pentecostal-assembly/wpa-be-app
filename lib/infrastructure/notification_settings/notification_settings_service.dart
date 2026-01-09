@@ -62,13 +62,23 @@ class NotificationSettingsService implements INotificationSettingsService {
   }
 
   @override
-  Future<void> subscribeToForumComments() async {
-    _setNotificationSetting({"forum_comments": true});
+  Future<void> subscribeToForumCommentReplies() async {
+    _setNotificationSetting({"forum_comment_replies": true});
   }
 
   @override
-  Future<void> unsubscribeFromForumComments() async {
-    _setNotificationSetting({"forum_comments": false});
+  Future<void> unsubscribeFromForumCommentReplies() async {
+    _setNotificationSetting({"forum_comment_replies": false});
+  }
+
+  @override
+  Future<void> subscribeToForumThreadComments() async {
+    _setNotificationSetting({"forum_thread_comments": true});
+  }
+
+  @override
+  Future<void> unsubscribeFromForumThreadComments() async {
+    _setNotificationSetting({"forum_thread_comments": false});
   }
 
   @override

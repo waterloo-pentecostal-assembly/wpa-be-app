@@ -9,7 +9,8 @@ class NotificationSettingsDto {
   final bool prayers;
   final bool testimonies;
   final bool forumThreads;
-  final bool forumComments;
+  final bool forumCommentReplies;
+  final bool forumThreadComments;
   final bool forumLikes;
 
   factory NotificationSettingsDto.fromFirestore(DocumentSnapshot doc) {
@@ -21,7 +22,10 @@ class NotificationSettingsDto {
       prayers: findOrDefaultTo(data, 'prayers', false),
       testimonies: findOrDefaultTo(data, 'testimonies', false),
       forumThreads: findOrDefaultTo(data, 'forum_threads', false),
-      forumComments: findOrDefaultTo(data, 'forum_comments', false),
+      forumCommentReplies:
+          findOrDefaultTo(data, 'forum_comment_replies', false),
+      forumThreadComments:
+          findOrDefaultTo(data, 'forum_thread_comments', false),
       forumLikes: findOrDefaultTo(data, 'forum_likes', false),
     );
   }
@@ -32,7 +36,8 @@ class NotificationSettingsDto {
     required this.prayers,
     required this.testimonies,
     required this.forumThreads,
-    required this.forumComments,
+    required this.forumCommentReplies,
+    required this.forumThreadComments,
     required this.forumLikes,
   });
 }
@@ -45,7 +50,8 @@ extension NotificationSettingsDtoX on NotificationSettingsDto {
       prayers: this.prayers,
       testimonies: this.testimonies,
       forumThreads: this.forumThreads,
-      forumComments: this.forumComments,
+      forumCommentReplies: this.forumCommentReplies,
+      forumThreadComments: this.forumThreadComments,
       forumLikes: this.forumLikes,
     );
   }
