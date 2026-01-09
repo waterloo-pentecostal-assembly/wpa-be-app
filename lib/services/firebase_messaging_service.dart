@@ -74,11 +74,11 @@ class FirebaseMessagingService {
   }
 
   static void navigationHandler(Map<String, dynamic> payload) async {
-    if (payload['notificationType'] == 'dailyEngagementReminder') {
-      getIt<FirebaseAnalytics>()
-          .logEvent(name: 'daily_engagement_notification_clicked');
-      getIt<NavigationBarBloc>()
-        ..add(
+    switch (payload['notificationType']) {
+      case 'dailyEngagementReminder':
+        getIt<FirebaseAnalytics>()
+            .logEvent(name: 'daily_engagement_notification_clicked');
+        getIt<NavigationBarBloc>().add(
           NavigationBarEvent(
             tab: NavigationTabEnum.ENGAGE,
             route: '/bible_series',
@@ -87,60 +87,89 @@ class FirebaseMessagingService {
             },
           ),
         );
-    } else if (payload['notificationType'] == 'prayerRequestPrayed') {
-      getIt<NavigationBarBloc>()
-        ..add(
+        break;
+      case 'prayerRequestPrayed':
+        getIt<NavigationBarBloc>().add(
           NavigationBarEvent(
             tab: NavigationTabEnum.ENGAGE,
             route: '/prayer_requests/mine',
           ),
         );
-    } else if (payload['notificationType'] == 'testimonyPraised') {
-      getIt<NavigationBarBloc>()
-        ..add(
+        break;
+      case 'testimonyPraised':
+        getIt<NavigationBarBloc>().add(
           NavigationBarEvent(
             tab: NavigationTabEnum.ENGAGE,
             route: '/testimonies/mine',
           ),
         );
-    } else if (payload['notificationType'] == 'userSignUp') {
-      getIt<NavigationBarBloc>()
-        ..add(
+        break;
+      case 'userSignUp':
+        getIt<NavigationBarBloc>().add(
           NavigationBarEvent(
             tab: NavigationTabEnum.ADMIN,
             route: '/user_verification',
           ),
         );
-    } else if (payload['notificationType'] == 'newPrayerRequest') {
-      getIt<NavigationBarBloc>()
-        ..add(
+        break;
+      case 'newPrayerRequestForApproval':
+        getIt<NavigationBarBloc>().add(
           NavigationBarEvent(
             tab: NavigationTabEnum.ADMIN,
             route: '/prayer_request_approval',
           ),
         );
-    } else if (['newThread', 'newComment', 'likeComment']
-        .contains(payload['notificationType'])) {
-      getIt<FirebaseAnalytics>().logEvent(
-          name: '${payload['notificationType']}_notification_clicked');
-      getIt<NavigationBarBloc>()
-        ..add(
+        break;
+      case 'newTestimonyForApproval':
+        getIt<NavigationBarBloc>().add(
+          NavigationBarEvent(
+            tab: NavigationTabEnum.ADMIN,
+            route: '/testimony_approval',
+          ),
+        );
+        break;
+      case 'newPrayerRequest':
+        getIt<NavigationBarBloc>().add(
+          NavigationBarEvent(
+            tab: NavigationTabEnum.ENGAGE,
+            route: '/prayer_requests',
+          ),
+        );
+        break;
+      case 'newTestimony':
+        getIt<NavigationBarBloc>().add(
+          NavigationBarEvent(
+            tab: NavigationTabEnum.ENGAGE,
+            route: '/testimonies',
+          ),
+        );
+        break;
+      case 'newForumThread':
+      case 'newForumComment':
+      case 'forumCommentReply':
+      case 'forumCommentLike':
+        getIt<FirebaseAnalytics>().logEvent(
+            name: '${payload['notificationType']}_notification_clicked');
+        getIt<NavigationBarBloc>().add(
           NavigationBarEvent(
             tab: NavigationTabEnum.ENGAGE,
             route: '/thread_detail',
             arguments: {
               'threadId': payload['threadId'],
               'forumId': payload['forumId'],
+              // Default to 'Thread' if title is missing
               'title': payload['title'] ?? 'Thread',
               'focusCommentId': payload['commentId'],
             },
           ),
         );
-    } else if (payload['notificationType'] == 'link') {
-      Uri uri = Uri.parse(payload['link']);
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri);
-      }
+        break;
+      case 'link':
+        Uri uri = Uri.parse(payload['link']);
+        if (await canLaunchUrl(uri)) {
+          await launchUrl(uri);
+        }
+        break;
     }
   }
 }
