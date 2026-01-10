@@ -56,3 +56,4 @@ app.*.map.json
 !/packages/flutter_tools/test/data/dart_dependencies_test/**/.packages
 
 debug_tokens.md
+discussion-feature.md
