@@ -157,8 +157,6 @@ class FirebaseMessagingService {
             arguments: {
               'threadId': payload['threadId'],
               'forumId': payload['forumId'],
-              // Default to 'Thread' if title is missing
-              'title': payload['title'] ?? 'Thread',
               'focusCommentId': payload['commentId'],
             },
           ),

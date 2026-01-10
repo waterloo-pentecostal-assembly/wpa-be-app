@@ -11,9 +11,11 @@ part 'thread_state.dart';
 class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
   final IForumRepository _forumRepository;
   StreamSubscription<List<Comment>>? _commentsSubscription;
+  StreamSubscription<ForumThread>? _threadSubscription;
 
   ThreadBloc(this._forumRepository) : super(ThreadInitial()) {
-    on<LoadThreadComments>(_onLoadThreadComments);
+    on<LoadThread>(_onLoadThread);
+    on<ThreadUpdated>(_onThreadUpdated);
     on<CommentsUpdated>(_onCommentsUpdated);
     on<AddComment>(_onAddComment);
     on<DeleteComment>(_onDeleteComment);
@@ -25,11 +27,19 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
     on<HideThread>(_onHideThread);
   }
 
-  Future<void> _onLoadThreadComments(
-      LoadThreadComments event, Emitter<ThreadState> emit) async {
+  Future<void> _onLoadThread(
+      LoadThread event, Emitter<ThreadState> emit) async {
     emit(ThreadLoading());
     try {
       await _commentsSubscription?.cancel();
+      await _threadSubscription?.cancel();
+
+      _threadSubscription = _forumRepository
+          .watchThread(event.threadId, event.forumId)
+          .listen((thread) => add(ThreadUpdated(thread)), onError: (e) {
+        // Handle error
+      });
+
       _commentsSubscription = _forumRepository
           .watchComments(event.threadId, event.forumId)
           .listen((comments) => add(CommentsUpdated(comments)), onError: (e) {
@@ -40,9 +50,22 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
     }
   }
 
+  Future<void> _onThreadUpdated(
+      ThreadUpdated event, Emitter<ThreadState> emit) async {
+    if (state is ThreadLoaded) {
+      emit((state as ThreadLoaded).copyWith(thread: event.thread));
+    } else {
+      emit(ThreadLoaded(comments: [], thread: event.thread));
+    }
+  }
+
   Future<void> _onCommentsUpdated(
       CommentsUpdated event, Emitter<ThreadState> emit) async {
-    emit(ThreadLoaded(comments: event.comments));
+    if (state is ThreadLoaded) {
+      emit((state as ThreadLoaded).copyWith(comments: event.comments));
+    } else {
+      emit(ThreadLoaded(comments: event.comments, thread: ForumThread.empty()));
+    }
   }
 
   Future<void> _onAddComment(

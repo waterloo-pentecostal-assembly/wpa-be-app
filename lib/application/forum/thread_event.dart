@@ -7,14 +7,23 @@ abstract class ThreadEvent extends Equatable {
   List<Object> get props => [];
 }
 
-class LoadThreadComments extends ThreadEvent {
+class LoadThread extends ThreadEvent {
   final String threadId;
   final String forumId;
 
-  const LoadThreadComments(this.threadId, this.forumId);
+  const LoadThread(this.threadId, this.forumId);
 
   @override
   List<Object> get props => [threadId, forumId];
+}
+
+class ThreadUpdated extends ThreadEvent {
+  final ForumThread thread;
+
+  const ThreadUpdated(this.thread);
+
+  @override
+  List<Object> get props => [thread];
 }
 
 class CommentsUpdated extends ThreadEvent {

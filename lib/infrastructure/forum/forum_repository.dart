@@ -36,16 +36,16 @@ class ForumRepository implements IForumRepository {
 
   @override
   Stream<List<ForumThread>> watchThreads(String forumId,
-      {bool includeHidden = false}) {
+      {bool isAdmin = false}) {
     Query query = _firestore
         .collection('forums')
         .doc(forumId)
         .collection('threads')
         .orderBy('created_at', descending: true);
 
-    if (!includeHidden) {
-      query = query.where('is_hidden', isEqualTo: false);
-    }
+    // if (!isAdmin) {
+    //   query = query.where('is_hidden', isEqualTo: false);
+    // }
 
     return query.snapshots().map((snapshot) {
       return snapshot.docs.map((doc) {
@@ -64,6 +64,37 @@ class ForumRepository implements IForumRepository {
           isHidden: data['is_hidden'] ?? false,
         );
       }).toList();
+    }).handleError((e) {
+      throw _firebaseFirestoreService.handleException(e);
+    });
+  }
+
+  @override
+  Stream<ForumThread> watchThread(String threadId, String forumId) {
+    return _firestore
+        .collection('forums')
+        .doc(forumId)
+        .collection('threads')
+        .doc(threadId)
+        .snapshots()
+        .map((doc) {
+      if (!doc.exists) {
+        return ForumThread.empty();
+      }
+      final data = doc.data() as Map<String, dynamic>;
+      return ForumThread(
+        id: doc.id,
+        forumId: forumId,
+        title: data['title'] ?? '',
+        authorId: data['author_id'] ?? '',
+        authorName: data['author_name'] ?? '',
+        authorImageUrl: data['author_image_url'],
+        createdAt: data['created_at'] as Timestamp,
+        updatedAt: data['updated_at'] as Timestamp,
+        commentCount: data['comment_count'] ?? 0,
+        isFrozen: data['is_frozen'] ?? false,
+        isHidden: data['is_hidden'] ?? false,
+      );
     }).handleError((e) {
       throw _firebaseFirestoreService.handleException(e);
     });

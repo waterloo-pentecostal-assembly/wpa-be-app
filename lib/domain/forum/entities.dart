@@ -49,6 +49,21 @@ class ForumThread {
     required this.isFrozen,
     required this.isHidden,
   });
+
+  factory ForumThread.empty() {
+    return ForumThread(
+      id: '',
+      forumId: '',
+      title: '',
+      authorId: '',
+      authorName: '',
+      createdAt: Timestamp.now(),
+      updatedAt: Timestamp.now(),
+      commentCount: 0,
+      isFrozen: false,
+      isHidden: false,
+    );
+  }
 }
 
 class Comment {

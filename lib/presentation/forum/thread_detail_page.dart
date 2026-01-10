@@ -14,18 +14,12 @@ import 'package:wpa_app/presentation/common/text_factory.dart';
 class ThreadDetailPage extends StatefulWidget {
   final String threadId;
   final String forumId;
-  final String title;
-  final bool isFrozen;
-  final bool isHidden;
   final String? focusCommentId;
 
   const ThreadDetailPage({
     Key? key,
     required this.threadId,
     required this.forumId,
-    required this.title,
-    required this.isFrozen,
-    required this.isHidden,
     this.focusCommentId,
   }) : super(key: key);
 
@@ -40,13 +34,6 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
   final FocusNode _focusNode = FocusNode();
   final Map<String, GlobalKey> _commentKeys = {};
   final Set<String> _collapsedCommentIds = {};
-  late bool _isFrozen;
-
-  @override
-  void initState() {
-    super.initState();
-    _isFrozen = widget.isFrozen;
-  }
 
   @override
   void dispose() {
@@ -61,7 +48,7 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
       providers: [
         BlocProvider<ThreadBloc>(
           create: (context) => getIt<ThreadBloc>()
-            ..add(LoadThreadComments(widget.threadId, widget.forumId)),
+            ..add(LoadThread(widget.threadId, widget.forumId)),
         ),
         BlocProvider<NotificationSettingsBloc>(
           create: (context) => getIt<NotificationSettingsBloc>()
@@ -73,167 +60,189 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
           return SafeArea(
             child: Column(
               children: [
-                ThreadTitleBar(
-                  title: widget.title,
-                  trailing: Builder(builder: (context) {
-                    final authState =
-                        BlocProvider.of<AuthenticationBloc>(context).state;
+                BlocBuilder<ThreadBloc, ThreadState>(
+                  buildWhen: (previous, current) {
+                    // Only rebuild title bar when thread data changes or loads
+                    if (current is ThreadLoaded) {
+                      if (previous is! ThreadLoaded) return true;
+                      return previous.thread != current.thread;
+                    }
+                    return false;
+                  },
+                  builder: (context, state) {
+                    String title = 'Thread';
+                    bool isFrozen = false;
+                    bool isHidden = false;
 
-                    return BlocBuilder<NotificationSettingsBloc,
-                        NotificationSettingsState>(
-                      builder: (context, notificationSettingsState) {
-                        Widget? popupMenu;
-                        if (authState is Authenticated) {
-                          popupMenu = PopupMenuButton<String>(
-                            onSelected: (value) {
-                              if (value == 'freeze') {
-                                BlocProvider.of<ThreadBloc>(context).add(
-                                    FreezeThread(
-                                        widget.threadId, widget.forumId));
-                                setState(() {
-                                  _isFrozen = true;
-                                });
-                              } else if (value == 'unfreeze') {
-                                BlocProvider.of<ThreadBloc>(context).add(
-                                    UnfreezeThread(
-                                        widget.threadId, widget.forumId));
-                                setState(() {
-                                  _isFrozen = false;
-                                });
-                              } else if (value == 'hide') {
-                                BlocProvider.of<ThreadBloc>(context).add(
-                                    HideThread(
-                                        widget.threadId, widget.forumId, true));
-                                Navigator.pop(context);
-                              } else if (value == 'unhide') {
-                                BlocProvider.of<ThreadBloc>(context).add(
-                                    HideThread(widget.threadId, widget.forumId,
-                                        false));
-                                Navigator.pop(context);
-                              } else if (value == 'follow') {
-                                BlocProvider.of<NotificationSettingsBloc>(
-                                        context)
-                                    .add(ThreadFollowed(widget.threadId));
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text("Thread followed"),
-                                    duration: Duration(seconds: 1),
-                                  ),
-                                );
-                              } else if (value == 'unfollow') {
-                                BlocProvider.of<NotificationSettingsBloc>(
-                                        context)
-                                    .add(ThreadUnfollowed(widget.threadId));
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  SnackBar(
-                                    content: Text("Thread unfollowed"),
-                                    duration: Duration(seconds: 1),
-                                  ),
-                                );
-                              }
-                            },
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.all(
-                                Radius.circular(10.0),
-                              ),
-                            ),
-                            color: kCardOverlayGrey,
-                            child: Icon(Icons.more_horiz,
-                                size: getIt<LayoutFactory>()
-                                    .getDimension(baseDimension: 24.0)),
-                            itemBuilder: (context) {
-                              List<PopupMenuItem<String>> items = [];
+                    if (state is ThreadLoaded) {
+                      title = state.thread.title;
+                      isFrozen = state.thread.isFrozen;
+                      isHidden = state.thread.isHidden;
+                    }
 
-                              // Admin Actions
-                              if (authState.user.isAdmin) {
-                                items.add(PopupMenuItem(
-                                  value: _isFrozen ? 'unfreeze' : 'freeze',
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        Icons.ac_unit,
-                                        size: getIt<LayoutFactory>()
-                                            .getDimension(baseDimension: 24.0),
+                    return ThreadTitleBar(
+                      title: title,
+                      trailing: Builder(builder: (context) {
+                        final authState =
+                            BlocProvider.of<AuthenticationBloc>(context).state;
+
+                        return BlocBuilder<NotificationSettingsBloc,
+                            NotificationSettingsState>(
+                          builder: (context, notificationSettingsState) {
+                            Widget? popupMenu;
+                            if (authState is Authenticated) {
+                              popupMenu = PopupMenuButton<String>(
+                                onSelected: (value) {
+                                  if (value == 'freeze') {
+                                    BlocProvider.of<ThreadBloc>(context).add(
+                                        FreezeThread(
+                                            widget.threadId, widget.forumId));
+                                  } else if (value == 'unfreeze') {
+                                    BlocProvider.of<ThreadBloc>(context).add(
+                                        UnfreezeThread(
+                                            widget.threadId, widget.forumId));
+                                  } else if (value == 'hide') {
+                                    BlocProvider.of<ThreadBloc>(context).add(
+                                        HideThread(widget.threadId,
+                                            widget.forumId, true));
+                                    Navigator.pop(context);
+                                  } else if (value == 'unhide') {
+                                    BlocProvider.of<ThreadBloc>(context).add(
+                                        HideThread(widget.threadId,
+                                            widget.forumId, false));
+                                    Navigator.pop(context);
+                                  } else if (value == 'follow') {
+                                    BlocProvider.of<NotificationSettingsBloc>(
+                                            context)
+                                        .add(ThreadFollowed(widget.threadId));
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text("Thread followed"),
+                                        duration: Duration(seconds: 1),
                                       ),
-                                      SizedBox(width: 4),
-                                      Expanded(
-                                          child: getIt<TextFactory>().lite(
-                                              _isFrozen
-                                                  ? 'UNFREEZE THREAD'
-                                                  : 'FREEZE THREAD'))
-                                    ],
-                                  ),
-                                ));
-                                items.add(PopupMenuItem(
-                                  value: widget.isHidden ? 'unhide' : 'hide',
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        widget.isHidden
-                                            ? Icons.visibility
-                                            : Icons.visibility_off,
-                                        size: getIt<LayoutFactory>()
-                                            .getDimension(baseDimension: 24.0),
+                                    );
+                                  } else if (value == 'unfollow') {
+                                    BlocProvider.of<NotificationSettingsBloc>(
+                                            context)
+                                        .add(ThreadUnfollowed(widget.threadId));
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text("Thread unfollowed"),
+                                        duration: Duration(seconds: 1),
                                       ),
-                                      SizedBox(width: 4),
-                                      Expanded(
-                                          child: getIt<TextFactory>().lite(
-                                              widget.isHidden
-                                                  ? 'UNHIDE THREAD'
-                                                  : 'HIDE THREAD'))
-                                    ],
+                                    );
+                                  }
+                                },
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.all(
+                                    Radius.circular(10.0),
                                   ),
-                                ));
-                              }
+                                ),
+                                color: kCardOverlayGrey,
+                                child: Icon(Icons.more_horiz,
+                                    size: getIt<LayoutFactory>()
+                                        .getDimension(baseDimension: 24.0)),
+                                itemBuilder: (context) {
+                                  List<PopupMenuItem<String>> items = [];
 
-                              // Follow/Unfollow Actions
-                              if (notificationSettingsState
-                                  is NotificationSettingsPositions) {
-                                final isFollowing = notificationSettingsState
-                                    .notificationSettings.threadsFollowed
-                                    .contains(widget.threadId);
-                                items.add(PopupMenuItem(
-                                  value: isFollowing ? 'unfollow' : 'follow',
-                                  child: Row(
-                                    children: [
-                                      Icon(
-                                        isFollowing
-                                            ? Icons.notifications_off
-                                            : Icons.notifications_active,
-                                        size: getIt<LayoutFactory>()
-                                            .getDimension(baseDimension: 24.0),
+                                  // Admin Actions
+                                  if (authState.user.isAdmin) {
+                                    items.add(PopupMenuItem(
+                                      value: isFrozen ? 'unfreeze' : 'freeze',
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.ac_unit,
+                                            size: getIt<LayoutFactory>()
+                                                .getDimension(
+                                                    baseDimension: 24.0),
+                                          ),
+                                          SizedBox(width: 4),
+                                          Expanded(
+                                              child: getIt<TextFactory>().lite(
+                                                  isFrozen
+                                                      ? 'UNFREEZE THREAD'
+                                                      : 'FREEZE THREAD'))
+                                        ],
                                       ),
-                                      SizedBox(width: 4),
-                                      Expanded(
-                                          child: getIt<TextFactory>().lite(
-                                              isFollowing
-                                                  ? 'UNFOLLOW THREAD'
-                                                  : 'FOLLOW THREAD'))
-                                    ],
+                                    ));
+                                    items.add(PopupMenuItem(
+                                      value: isHidden ? 'unhide' : 'hide',
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            isHidden
+                                                ? Icons.visibility
+                                                : Icons.visibility_off,
+                                            size: getIt<LayoutFactory>()
+                                                .getDimension(
+                                                    baseDimension: 24.0),
+                                          ),
+                                          SizedBox(width: 4),
+                                          Expanded(
+                                              child: getIt<TextFactory>().lite(
+                                                  isHidden
+                                                      ? 'UNHIDE THREAD'
+                                                      : 'HIDE THREAD'))
+                                        ],
+                                      ),
+                                    ));
+                                  }
+
+                                  // Follow/Unfollow Actions
+                                  if (notificationSettingsState
+                                      is NotificationSettingsPositions) {
+                                    final isFollowing =
+                                        notificationSettingsState
+                                            .notificationSettings
+                                            .threadsFollowed
+                                            .contains(widget.threadId);
+                                    items.add(PopupMenuItem(
+                                      value:
+                                          isFollowing ? 'unfollow' : 'follow',
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            isFollowing
+                                                ? Icons.notifications_off
+                                                : Icons.notifications_active,
+                                            size: getIt<LayoutFactory>()
+                                                .getDimension(
+                                                    baseDimension: 24.0),
+                                          ),
+                                          SizedBox(width: 4),
+                                          Expanded(
+                                              child: getIt<TextFactory>().lite(
+                                                  isFollowing
+                                                      ? 'UNFOLLOW THREAD'
+                                                      : 'FOLLOW THREAD'))
+                                        ],
+                                      ),
+                                    ));
+                                  }
+
+                                  return items;
+                                },
+                              );
+                            }
+
+                            return Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (isHidden)
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 8.0),
+                                    child: Icon(Icons.visibility_off,
+                                        color: Colors.grey.shade600),
                                   ),
-                                ));
-                              }
-
-                              return items;
-                            },
-                          );
-                        }
-
-                        return Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (widget.isHidden)
-                              Padding(
-                                padding: const EdgeInsets.only(right: 8.0),
-                                child: Icon(Icons.visibility_off,
-                                    color: Colors.grey.shade600),
-                              ),
-                            if (popupMenu != null) popupMenu,
-                          ],
+                                if (popupMenu != null) popupMenu,
+                              ],
+                            );
+                          },
                         );
-                      },
+                      }),
                     );
-                  }),
+                  },
                 ),
                 Expanded(
                   child: BlocBuilder<ThreadBloc, ThreadState>(
@@ -287,13 +296,32 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
                     },
                   ),
                 ),
-                if (!_isFrozen) _buildInputArea(context),
-                if (_isFrozen)
-                  Padding(
-                    padding: EdgeInsets.all(16),
-                    child: getIt<TextFactory>()
-                        .lite("This thread is read-only.", color: Colors.grey),
-                  )
+                BlocBuilder<ThreadBloc, ThreadState>(
+                  buildWhen: (previous, current) {
+                    if (current is ThreadLoaded) {
+                      if (previous is! ThreadLoaded) return true;
+                      return previous.thread.isFrozen !=
+                          current.thread.isFrozen;
+                    }
+                    return false;
+                  },
+                  builder: (context, state) {
+                    bool isFrozen = false;
+                    if (state is ThreadLoaded) {
+                      isFrozen = state.thread.isFrozen;
+                    }
+
+                    if (!isFrozen) return _buildInputArea(context);
+                    if (isFrozen)
+                      return Padding(
+                        padding: EdgeInsets.all(16),
+                        child: getIt<TextFactory>().lite(
+                            "This thread is read-only.",
+                            color: Colors.grey),
+                      );
+                    return Container();
+                  },
+                ),
               ],
             ),
           );

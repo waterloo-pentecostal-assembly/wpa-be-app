@@ -171,9 +171,6 @@ class ForumThreadCard extends StatelessWidget {
           arguments: {
             'threadId': thread.id,
             'forumId': thread.forumId,
-            'title': thread.title,
-            'isFrozen': thread.isFrozen,
-            'isHidden': thread.isHidden,
           },
         ).then((_) {
           // Refresh notification settings when returning from thread detail

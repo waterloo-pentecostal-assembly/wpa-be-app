@@ -2,7 +2,8 @@ import 'entities.dart';
 
 abstract class IForumRepository {
   Stream<Forum> watchForum(String forumId);
-  Stream<List<ForumThread>> watchThreads(String forumId, {bool includeHidden});
+  Stream<List<ForumThread>> watchThreads(String forumId, {bool isAdmin});
+  Stream<ForumThread> watchThread(String threadId, String forumId);
   Future<void> createThread(ForumThread thread);
   Future<void> freezeThread(String threadId, String forumId, bool isFrozen);
   Future<void> hideThread(String threadId, String forumId, bool isHidden);

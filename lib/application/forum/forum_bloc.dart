@@ -34,7 +34,7 @@ class ForumBloc extends Bloc<ForumEvent, ForumState> {
 
       await _threadsSubscription?.cancel();
       _threadsSubscription = _forumRepository
-          .watchThreads(event.forumId, includeHidden: event.includeHidden)
+          .watchThreads(event.forumId, isAdmin: event.includeHidden)
           .listen((threads) => add(ThreadsUpdated(threads)), onError: (e) {
         // Handle error
       });
