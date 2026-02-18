@@ -14,7 +14,8 @@ class AuthenticationBloc
     extends Bloc<AuthenticationEvent, AuthenticationState> {
   final IAuthenticationFacade _iAuthenticationFacade;
 
-  AuthenticationBloc(this._iAuthenticationFacade) : super(AuthenticationInitial()) {
+  AuthenticationBloc(this._iAuthenticationFacade)
+      : super(AuthenticationInitial()) {
     on<RequestAuthenticationState>(_onRequestAuthenticationState);
     on<SignOut>(_onSignOut);
     on<InitiateDelete>(_onInitiateDelete);
@@ -28,9 +29,10 @@ class AuthenticationBloc
       LocalUser localUser = await _iAuthenticationFacade.getSignedInUser();
 
       // Register user infomation with getIt to have access to it throughout the application
-      if (!getIt.isRegistered<LocalUser>()) {
-        getIt.registerLazySingleton(() => localUser);
+      if (getIt.isRegistered<LocalUser>()) {
+        getIt.unregister<LocalUser>();
       }
+      getIt.registerLazySingleton(() => localUser);
 
       emit(Authenticated(localUser));
     } catch (_) {
@@ -43,6 +45,9 @@ class AuthenticationBloc
     Emitter<AuthenticationState> emit,
   ) async {
     await _iAuthenticationFacade.signOut();
+    if (getIt.isRegistered<LocalUser>()) {
+      getIt.unregister<LocalUser>();
+    }
     emit(Unauthenticated());
   }
 

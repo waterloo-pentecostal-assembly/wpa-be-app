@@ -132,11 +132,16 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                                 color: Colors.white,
                               ),
                               Spacer(),
-                              IconButton(
-                                icon: Icon(
-                                  Icons.forum,
-                                  size: getIt<LayoutFactory>()
-                                      .getDimension(baseDimension: 24.0),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.white,
+                                  foregroundColor: Colors.black,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(24),
+                                  ),
+                                  padding: EdgeInsets.symmetric(
+                                      horizontal: 16, vertical: 8),
+                                  elevation: 0,
                                 ),
                                 onPressed: () {
                                   Navigator.pushNamed(
@@ -148,7 +153,8 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                                     },
                                   );
                                 },
-                                color: Colors.white,
+                                child:
+                                    getIt<TextFactory>().regular('Discussion'),
                               )
                             ],
                           ),

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/app/constants.dart';
@@ -8,7 +9,7 @@ import 'package:wpa_app/application/notification_settings/notification_settings_
 import 'package:wpa_app/domain/forum/entities.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
 import 'package:wpa_app/presentation/common/text_factory.dart';
-import 'package:wpa_app/presentation/forum/widgets/new_thread_form.dart';
+import 'package:wpa_app/presentation/forum/widgets/thread_form.dart';
 
 class ForumPage extends StatelessWidget {
   final String forumId;
@@ -144,11 +145,42 @@ class ForumTitleBar extends StatelessWidget {
     Overlay.of(context).insert(
       entry = OverlayEntry(
         builder: (context) {
-          return NewThreadForm(
-            entry: entry,
-            forumId: forumId,
-            forumBloc: forumBloc,
-            notificationSettingsBloc: notificationSettingsBloc,
+          return ThreadForm(
+            onCancel: () => entry?.remove(),
+            onSave: (title) {
+              final authState =
+                  BlocProvider.of<AuthenticationBloc>(context).state;
+              if (authState is Authenticated) {
+                // Generate ID client-side
+                final threadId = FirebaseFirestore.instance
+                    .collection('forums')
+                    .doc(forumId)
+                    .collection('threads')
+                    .doc()
+                    .id;
+
+                forumBloc.add(
+                  CreateThread(
+                    ForumThread(
+                      id: threadId,
+                      forumId: forumId,
+                      title: title,
+                      authorId: authState.user.id,
+                      authorName: authState.user.fullName,
+                      authorImageUrl: authState.user.profilePhotoUrl,
+                      createdAt: Timestamp.now(),
+                      updatedAt: Timestamp.now(),
+                      commentCount: 0,
+                      isFrozen: false,
+                      isHidden: false,
+                    ),
+                  ),
+                );
+                // Auto-follow
+                notificationSettingsBloc.add(ThreadFollowed(threadId));
+              }
+              entry?.remove();
+            },
           );
         },
       ),
@@ -253,7 +285,7 @@ class ForumThreadCard extends StatelessWidget {
               ],
             ),
             SizedBox(height: 12),
-            getIt<TextFactory>().subHeading2(thread.title),
+            getIt<TextFactory>().subHeading3(thread.title),
             SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,

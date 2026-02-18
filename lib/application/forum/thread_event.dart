@@ -132,3 +132,27 @@ class UnfreezeThread extends ThreadEvent {
   @override
   List<Object> get props => [threadId, forumId];
 }
+
+class UpdateThread extends ThreadEvent {
+  final String threadId;
+  final String forumId;
+  final String newTitle;
+
+  const UpdateThread(this.threadId, this.forumId, this.newTitle);
+
+  @override
+  List<Object> get props => [threadId, forumId, newTitle];
+}
+
+class UpdateComment extends ThreadEvent {
+  final String commentId;
+  final String threadId;
+  final String forumId;
+  final String newBody;
+
+  const UpdateComment(
+      this.commentId, this.threadId, this.forumId, this.newBody);
+
+  @override
+  List<Object> get props => [commentId, threadId, forumId, newBody];
+}

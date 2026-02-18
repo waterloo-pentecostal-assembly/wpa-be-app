@@ -10,6 +10,8 @@ import 'package:wpa_app/application/notification_settings/notification_settings_
 import 'package:wpa_app/domain/forum/entities.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
 import 'package:wpa_app/presentation/common/text_factory.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:wpa_app/presentation/forum/widgets/thread_form.dart';
 
 class ThreadDetailPage extends StatefulWidget {
   final String threadId;
@@ -30,10 +32,15 @@ class ThreadDetailPage extends StatefulWidget {
 class _ThreadDetailPageState extends State<ThreadDetailPage> {
   String? _replyToCommentId;
   String? _replyToAuthorName;
+  Comment? _editingComment;
   final TextEditingController _textController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
   final Map<String, GlobalKey> _commentKeys = {};
   final Set<String> _collapsedCommentIds = {};
+  bool _hasScrolledToFocus = false;
+  final ItemScrollController _itemScrollController = ItemScrollController();
+  final ItemPositionsListener _itemPositionsListener =
+      ItemPositionsListener.create();
 
   @override
   void dispose() {
@@ -82,6 +89,7 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
 
                     return ThreadTitleBar(
                       title: title,
+                      onEdit: () => _showEditThreadDialog(context, title),
                       trailing: Builder(builder: (context) {
                         final authState =
                             BlocProvider.of<AuthenticationBloc>(context).state;
@@ -93,7 +101,9 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
                             if (authState is Authenticated) {
                               popupMenu = PopupMenuButton<String>(
                                 onSelected: (value) {
-                                  if (value == 'freeze') {
+                                  if (value == 'edit') {
+                                    _showEditThreadDialog(context, title);
+                                  } else if (value == 'freeze') {
                                     BlocProvider.of<ThreadBloc>(context).add(
                                         FreezeThread(
                                             widget.threadId, widget.forumId));
@@ -144,6 +154,50 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
                                         .getDimension(baseDimension: 24.0)),
                                 itemBuilder: (context) {
                                   List<PopupMenuItem<String>> items = [];
+
+                                  final isAuthor = state is ThreadLoaded &&
+                                      authState.user.id ==
+                                          state.thread.authorId;
+                                  final isRecent = state is ThreadLoaded &&
+                                      DateTime.now()
+                                              .difference(state.thread.createdAt
+                                                  .toDate())
+                                              .inMinutes <
+                                          15;
+
+                                  if (state is ThreadLoaded) {
+                                    print('DEBUG: isAuthor: $isAuthor');
+                                    print('DEBUG: isRecent: $isRecent');
+                                    print(
+                                        'DEBUG: authUserId: ${authState.user.id}');
+                                    print(
+                                        'DEBUG: threadAuthorId: ${state.thread.authorId}');
+                                    print(
+                                        'DEBUG: threadCreatedAt: ${state.thread.createdAt.toDate()}');
+                                    print('DEBUG: now: ${DateTime.now()}');
+                                    print(
+                                        'DEBUG: difference: ${DateTime.now().difference(state.thread.createdAt.toDate()).inMinutes}');
+                                  }
+
+                                  if (isAuthor && isRecent) {
+                                    items.add(PopupMenuItem(
+                                      value: 'edit',
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            Icons.edit,
+                                            size: getIt<LayoutFactory>()
+                                                .getDimension(
+                                                    baseDimension: 24.0),
+                                          ),
+                                          SizedBox(width: 4),
+                                          Expanded(
+                                              child: getIt<TextFactory>()
+                                                  .lite('EDIT THREAD'))
+                                        ],
+                                      ),
+                                    ));
+                                  }
 
                                   // Admin Actions
                                   if (authState.user.isAdmin) {
@@ -256,26 +310,28 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
                                   .lite("No comments yet. Be the first!"));
                         }
 
+                        final sortedComments =
+                            _getSortedComments(state.comments);
+
                         // Trigger scroll to focused comment if provided
-                        if (widget.focusCommentId != null) {
+                        if (widget.focusCommentId != null &&
+                            !_hasScrolledToFocus) {
                           WidgetsBinding.instance.addPostFrameCallback((_) {
-                            final key = _commentKeys[widget.focusCommentId];
-                            if (key?.currentContext != null) {
-                              Scrollable.ensureVisible(
-                                key!.currentContext!,
-                                alignment: 0.5,
-                                duration: Duration(milliseconds: 600),
-                                curve: Curves.easeInOut,
-                              );
+                            int index = sortedComments.indexWhere(
+                                (c) => c.id == widget.focusCommentId);
+                            if (index != -1) {
+                              _itemScrollController.jumpTo(index: index);
+                              setState(() {
+                                _hasScrolledToFocus = true;
+                              });
                             }
                           });
                         }
 
-                        final sortedComments =
-                            _getSortedComments(state.comments);
-
-                        return ListView.builder(
+                        return ScrollablePositionedList.builder(
                           itemCount: sortedComments.length,
+                          itemScrollController: _itemScrollController,
+                          itemPositionsListener: _itemPositionsListener,
                           itemBuilder: (context, index) {
                             final comment = sortedComments[index];
                             final isReply = comment.parentId != null;
@@ -425,61 +481,95 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
               ),
             ),
             PopupMenuButton<String>(
-                onSelected: (value) {
-                  if (value == 'report') {
-                    BlocProvider.of<ThreadBloc>(context).add(ReportComment(
-                        comment.id,
-                        widget.threadId,
-                        widget.forumId,
-                        "User Report"));
-                    ScaffoldMessenger.of(context)
-                        .showSnackBar(SnackBar(content: Text("Reported")));
-                  } else if (value == 'delete') {
-                    BlocProvider.of<ThreadBloc>(context).add(DeleteComment(
-                        comment.id, widget.threadId, widget.forumId));
-                  }
-                },
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(10.0),
-                  ),
+              onSelected: (value) {
+                if (value == 'report') {
+                  BlocProvider.of<ThreadBloc>(context).add(ReportComment(
+                      comment.id,
+                      widget.threadId,
+                      widget.forumId,
+                      "User Report"));
+                  ScaffoldMessenger.of(context)
+                      .showSnackBar(SnackBar(content: Text("Reported")));
+                } else if (value == 'delete') {
+                  BlocProvider.of<ThreadBloc>(context).add(DeleteComment(
+                      comment.id, widget.threadId, widget.forumId));
+                } else if (value == 'edit') {
+                  setState(() {
+                    _editingComment = comment;
+                    _textController.text = comment.body;
+                    _replyToCommentId = null;
+                    _replyToAuthorName = null;
+                  });
+                  _focusNode.requestFocus();
+                }
+              },
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.all(
+                  Radius.circular(10.0),
                 ),
-                color: kCardOverlayGrey,
-                child: Icon(Icons.more_horiz,
-                    size: getIt<LayoutFactory>()
-                        .getDimension(baseDimension: 24.0)),
-                itemBuilder: (context) => [
-                      PopupMenuItem(
-                        value: 'report',
-                        child: Row(
-                          children: [
-                            Icon(
-                              Icons.error,
-                              size: getIt<LayoutFactory>()
-                                  .getDimension(baseDimension: 24.0),
-                            ),
-                            SizedBox(width: 4),
-                            Expanded(child: getIt<TextFactory>().lite('REPORT'))
-                          ],
+              ),
+              color: kCardOverlayGrey,
+              child: Icon(Icons.more_horiz,
+                  size:
+                      getIt<LayoutFactory>().getDimension(baseDimension: 24.0)),
+              itemBuilder: (context) {
+                final authState =
+                    BlocProvider.of<AuthenticationBloc>(context).state;
+                final isAuthor = authState is Authenticated &&
+                    authState.user.id == comment.authorId;
+                final isRecent = DateTime.now()
+                        .difference(comment.createdAt.toDate())
+                        .inMinutes <
+                    15;
+
+                return [
+                  PopupMenuItem(
+                    value: 'report',
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.error,
+                          size: getIt<LayoutFactory>()
+                              .getDimension(baseDimension: 24.0),
                         ),
-                      ),
-                      if (!comment.isDeleted)
-                        PopupMenuItem(
-                          value: 'delete',
-                          child: Row(
-                            children: [
-                              Icon(
-                                Icons.delete,
-                                size: getIt<LayoutFactory>()
-                                    .getDimension(baseDimension: 24.0),
-                              ),
-                              SizedBox(width: 4),
-                              Expanded(
-                                  child: getIt<TextFactory>().lite('DELETE'))
-                            ],
+                        SizedBox(width: 4),
+                        Expanded(child: getIt<TextFactory>().lite('REPORT'))
+                      ],
+                    ),
+                  ),
+                  if (!comment.isDeleted)
+                    PopupMenuItem(
+                      value: 'delete',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.delete,
+                            size: getIt<LayoutFactory>()
+                                .getDimension(baseDimension: 24.0),
                           ),
-                        ),
-                    ])
+                          SizedBox(width: 4),
+                          Expanded(child: getIt<TextFactory>().lite('DELETE'))
+                        ],
+                      ),
+                    ),
+                  if (!comment.isDeleted && isAuthor && isRecent)
+                    PopupMenuItem(
+                      value: 'edit',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.edit,
+                            size: getIt<LayoutFactory>()
+                                .getDimension(baseDimension: 24.0),
+                          ),
+                          SizedBox(width: 4),
+                          Expanded(child: getIt<TextFactory>().lite('EDIT'))
+                        ],
+                      ),
+                    ),
+                ];
+              },
+            ),
           ]),
           SizedBox(height: 4),
           Text(comment.isDeleted ? '[deleted]' : comment.body,
@@ -600,6 +690,35 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
                 ],
               ),
             ),
+          if (_editingComment != null)
+            Container(
+              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              margin: EdgeInsets.only(bottom: 8),
+              decoration: BoxDecoration(
+                  color: Colors.orange.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.orange.withOpacity(0.3))),
+              child: Row(
+                children: [
+                  Text("Editing Comment",
+                      style: TextStyle(
+                          color: Colors.orange[800],
+                          fontWeight: FontWeight.bold)),
+                  Spacer(),
+                  GestureDetector(
+                    child:
+                        Icon(Icons.close, size: 16, color: Colors.orange[800]),
+                    onTap: () {
+                      setState(() {
+                        _editingComment = null;
+                        _textController.clear();
+                      });
+                      FocusScope.of(context).unfocus();
+                    },
+                  )
+                ],
+              ),
+            ),
           Row(
             children: [
               Expanded(
@@ -608,7 +727,9 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
                   controller: _textController,
                   style: getIt<TextFactory>().liteTextStyle(),
                   decoration: InputDecoration(
-                      hintText: "Write a comment...",
+                      hintText: _editingComment != null
+                          ? "Edit your comment..."
+                          : "Write a comment...",
                       hintStyle: getIt<TextFactory>().liteTextStyle(),
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
@@ -627,41 +748,51 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
                 icon: Icon(Icons.send),
                 onPressed: () {
                   if (_textController.text.isNotEmpty) {
-                    final authState =
-                        BlocProvider.of<AuthenticationBloc>(context).state;
-                    String authorId = '';
-                    String authorName = 'Anonymous';
-                    String? authorImage;
+                    if (_editingComment != null) {
+                      BlocProvider.of<ThreadBloc>(context).add(
+                        UpdateComment(_editingComment!.id, widget.threadId,
+                            widget.forumId, _textController.text),
+                      );
+                      setState(() {
+                        _editingComment = null;
+                      });
+                    } else {
+                      final authState =
+                          BlocProvider.of<AuthenticationBloc>(context).state;
+                      String authorId = '';
+                      String authorName = 'Anonymous';
+                      String? authorImage;
 
-                    if (authState is Authenticated) {
-                      authorId = authState.user.id;
-                      authorName = authState.user.fullName;
-                      authorImage = authState.user.profilePhotoUrl;
+                      if (authState is Authenticated) {
+                        authorId = authState.user.id;
+                        authorName = authState.user.fullName;
+                        authorImage = authState.user.profilePhotoUrl;
+                      }
+
+                      BlocProvider.of<ThreadBloc>(context).add(
+                        AddComment(
+                            Comment(
+                                id: '',
+                                threadId: widget.threadId,
+                                body: _textController.text,
+                                authorId: authorId,
+                                authorName: authorName,
+                                authorImageUrl: authorImage,
+                                createdAt: Timestamp.now(),
+                                updatedAt: Timestamp.now(),
+                                isHidden: false,
+                                isDeleted: false,
+                                likedBy: [],
+                                reportCount: 0,
+                                parentId: _replyToCommentId),
+                            widget.forumId),
+                      );
+                      setState(() {
+                        _replyToCommentId = null;
+                        _replyToAuthorName = null;
+                      });
                     }
-
-                    BlocProvider.of<ThreadBloc>(context).add(
-                      AddComment(
-                          Comment(
-                              id: '',
-                              threadId: widget.threadId,
-                              body: _textController.text,
-                              authorId: authorId,
-                              authorName: authorName,
-                              authorImageUrl: authorImage,
-                              createdAt: Timestamp.now(),
-                              updatedAt: Timestamp.now(),
-                              isHidden: false,
-                              isDeleted: false,
-                              likedBy: [],
-                              reportCount: 0,
-                              parentId: _replyToCommentId),
-                          widget.forumId),
-                    );
                     _textController.clear();
-                    setState(() {
-                      _replyToCommentId = null;
-                      _replyToAuthorName = null;
-                    });
                     FocusScope.of(context).unfocus();
                   }
                 },
@@ -672,13 +803,37 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
       ),
     );
   }
+
+  void _showEditThreadDialog(BuildContext context, String currentTitle) {
+    OverlayEntry? entry;
+    final threadBloc = BlocProvider.of<ThreadBloc>(context);
+    Overlay.of(context).insert(
+      entry = OverlayEntry(
+        builder: (context) {
+          return ThreadForm(
+            initialTitle: currentTitle,
+            saveButtonText: 'SAVE',
+            onCancel: () => entry?.remove(),
+            onSave: (newTitle) {
+              threadBloc.add(
+                UpdateThread(widget.threadId, widget.forumId, newTitle),
+              );
+              entry?.remove();
+            },
+          );
+        },
+      ),
+    );
+  }
 }
 
 class ThreadTitleBar extends StatelessWidget {
   final String title;
   final Widget? trailing;
+  final VoidCallback? onEdit;
 
-  const ThreadTitleBar({Key? key, required this.title, this.trailing})
+  const ThreadTitleBar(
+      {Key? key, required this.title, this.trailing, this.onEdit})
       : super(key: key);
 
   @override
@@ -695,7 +850,7 @@ class ThreadTitleBar extends StatelessWidget {
             ),
           ),
           SizedBox(width: 8),
-          Expanded(child: getIt<TextFactory>().subPageHeading(title)),
+          Expanded(child: getIt<TextFactory>().subHeading2(title)),
           if (trailing != null) trailing!,
         ],
       ),

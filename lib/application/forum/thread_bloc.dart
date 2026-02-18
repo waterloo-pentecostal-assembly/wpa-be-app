@@ -25,6 +25,8 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
     on<FreezeThread>(_onFreezeThread);
     on<UnfreezeThread>(_onUnfreezeThread);
     on<HideThread>(_onHideThread);
+    on<UpdateThread>(_onUpdateThread);
+    on<UpdateComment>(_onUpdateComment);
   }
 
   Future<void> _onLoadThread(
@@ -146,6 +148,26 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
     try {
       await _forumRepository.hideThread(
           event.threadId, event.forumId, event.isHidden);
+    } catch (e) {
+      // emit error
+    }
+  }
+
+  Future<void> _onUpdateThread(
+      UpdateThread event, Emitter<ThreadState> emit) async {
+    try {
+      await _forumRepository.updateThread(
+          event.threadId, event.forumId, event.newTitle);
+    } catch (e) {
+      // emit error
+    }
+  }
+
+  Future<void> _onUpdateComment(
+      UpdateComment event, Emitter<ThreadState> emit) async {
+    try {
+      await _forumRepository.updateComment(
+          event.commentId, event.threadId, event.forumId, event.newBody);
     } catch (e) {
       // emit error
     }

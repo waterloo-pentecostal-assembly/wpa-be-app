@@ -1,37 +1,30 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/app/constants.dart';
 import 'package:wpa_app/app/injection.dart';
-import 'package:wpa_app/application/authentication/authentication_bloc.dart';
-import 'package:wpa_app/application/forum/forum_bloc.dart';
-import 'package:wpa_app/domain/forum/entities.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
 import 'package:wpa_app/presentation/common/text_factory.dart';
-import 'package:wpa_app/application/notification_settings/notification_settings_bloc.dart';
 
-class NewThreadForm extends StatefulWidget {
-  final OverlayEntry? entry;
-  final String forumId;
-  final ForumBloc forumBloc;
-  final NotificationSettingsBloc notificationSettingsBloc;
+class ThreadForm extends StatefulWidget {
+  final String? initialTitle;
+  final String saveButtonText;
+  final Function(String) onSave;
+  final VoidCallback onCancel;
 
-  const NewThreadForm({
+  const ThreadForm({
     Key? key,
-    this.entry,
-    required this.forumId,
-    required this.forumBloc,
-    required this.notificationSettingsBloc,
+    this.initialTitle,
+    this.saveButtonText = 'POST',
+    required this.onSave,
+    required this.onCancel,
   }) : super(key: key);
 
   @override
-  _NewThreadFormState createState() => _NewThreadFormState();
+  _ThreadFormState createState() => _ThreadFormState();
 }
 
-class _NewThreadFormState extends State<NewThreadForm>
-    with TickerProviderStateMixin {
+class _ThreadFormState extends State<ThreadForm> with TickerProviderStateMixin {
   final FocusNode _focusNode = FocusNode();
-  final TextEditingController _textEditingController = TextEditingController();
+  late TextEditingController _textEditingController;
   late AnimationController _controller;
   late Animation<double> _animation;
   bool _isValid = false;
@@ -39,6 +32,9 @@ class _NewThreadFormState extends State<NewThreadForm>
   @override
   void initState() {
     super.initState();
+    _textEditingController =
+        TextEditingController(text: widget.initialTitle ?? '');
+    _isValid = _textEditingController.text.trim().isNotEmpty;
 
     _controller = AnimationController(
       duration: const Duration(milliseconds: 700),
@@ -71,7 +67,7 @@ class _NewThreadFormState extends State<NewThreadForm>
         child: Stack(
           children: [
             GestureDetector(
-              onTap: () => widget.entry?.remove(),
+              onTap: widget.onCancel,
               child: Flex(
                 direction: Axis.horizontal,
                 children: [
@@ -134,16 +130,14 @@ class _NewThreadFormState extends State<NewThreadForm>
                       children: [
                         Wrap(
                           children: [
-                            CancelButton(entry: widget.entry),
+                            _CancelButton(onCancel: widget.onCancel),
                             SizedBox(width: 16),
-                            PostButton(
+                            _SaveButton(
                               isValid: _isValid,
-                              title: _textEditingController.text,
-                              forumId: widget.forumId,
-                              forumBloc: widget.forumBloc,
-                              notificationSettingsBloc:
-                                  widget.notificationSettingsBloc,
-                              entry: widget.entry,
+                              text: widget.saveButtonText,
+                              onPressed: () {
+                                widget.onSave(_textEditingController.text);
+                              },
                             ),
                           ],
                         ),
@@ -160,22 +154,16 @@ class _NewThreadFormState extends State<NewThreadForm>
   }
 }
 
-class PostButton extends StatelessWidget {
+class _SaveButton extends StatelessWidget {
   final bool isValid;
-  final String title;
-  final String forumId;
-  final ForumBloc forumBloc;
-  final NotificationSettingsBloc notificationSettingsBloc;
-  final OverlayEntry? entry;
+  final String text;
+  final VoidCallback onPressed;
 
-  const PostButton({
+  const _SaveButton({
     Key? key,
     required this.isValid,
-    required this.title,
-    required this.forumId,
-    required this.forumBloc,
-    required this.notificationSettingsBloc,
-    this.entry,
+    required this.text,
+    required this.onPressed,
   }) : super(key: key);
 
   @override
@@ -203,52 +191,17 @@ class PostButton extends StatelessWidget {
             padding: WidgetStateProperty.all(
                 EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8)),
             tapTargetSize: MaterialTapTargetSize.shrinkWrap),
-        onPressed: !isValid
-            ? null
-            : () {
-                final authState =
-                    BlocProvider.of<AuthenticationBloc>(context).state;
-                if (authState is Authenticated) {
-                  // Generate ID client-side
-                  final threadId = FirebaseFirestore.instance
-                      .collection('forums')
-                      .doc(forumId)
-                      .collection('threads')
-                      .doc()
-                      .id;
-
-                  forumBloc.add(
-                    CreateThread(
-                      ForumThread(
-                        id: threadId,
-                        forumId: forumId,
-                        title: title,
-                        authorId: authState.user.id,
-                        authorName: authState.user.fullName,
-                        authorImageUrl: authState.user.profilePhotoUrl,
-                        createdAt: Timestamp.now(),
-                        updatedAt: Timestamp.now(),
-                        commentCount: 0,
-                        isFrozen: false,
-                        isHidden: false,
-                      ),
-                    ),
-                  );
-                  // Auto-follow
-                  notificationSettingsBloc.add(ThreadFollowed(threadId));
-                }
-                entry?.remove();
-              },
-        child: getIt<TextFactory>().regularButton('POST'),
+        onPressed: !isValid ? null : onPressed,
+        child: getIt<TextFactory>().regularButton(text),
       ),
     );
   }
 }
 
-class CancelButton extends StatelessWidget {
-  final OverlayEntry? entry;
+class _CancelButton extends StatelessWidget {
+  final VoidCallback onCancel;
 
-  const CancelButton({Key? key, this.entry}) : super(key: key);
+  const _CancelButton({Key? key, required this.onCancel}) : super(key: key);
   @override
   Widget build(BuildContext context) {
     return ClipRRect(
@@ -264,7 +217,7 @@ class CancelButton extends StatelessWidget {
           padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
-        onPressed: () => entry?.remove(),
+        onPressed: onCancel,
         child: getIt<TextFactory>().regularButton('CANCEL'),
       ),
     );

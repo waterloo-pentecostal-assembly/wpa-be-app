@@ -302,4 +302,42 @@ class ForumRepository implements IForumRepository {
       throw _firebaseFirestoreService.handleException(e as Exception);
     }
   }
+
+  @override
+  Future<void> updateThread(
+      String threadId, String forumId, String newTitle) async {
+    try {
+      await _firestore
+          .collection('forums')
+          .doc(forumId)
+          .collection('threads')
+          .doc(threadId)
+          .update({
+        'title': newTitle,
+        'updated_at': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw _firebaseFirestoreService.handleException(e as Exception);
+    }
+  }
+
+  @override
+  Future<void> updateComment(
+      String commentId, String threadId, String forumId, String newBody) async {
+    try {
+      await _firestore
+          .collection('forums')
+          .doc(forumId)
+          .collection('threads')
+          .doc(threadId)
+          .collection('comments')
+          .doc(commentId)
+          .update({
+        'body': newBody,
+        'updated_at': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw _firebaseFirestoreService.handleException(e as Exception);
+    }
+  }
 }

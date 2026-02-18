@@ -17,4 +17,8 @@ abstract class IForumRepository {
       String commentId, String threadId, String forumId, String userId);
   Future<void> unlikeComment(
       String commentId, String threadId, String forumId, String userId);
+
+  Future<void> updateThread(String threadId, String forumId, String newTitle);
+  Future<void> updateComment(
+      String commentId, String threadId, String forumId, String newBody);
 }
