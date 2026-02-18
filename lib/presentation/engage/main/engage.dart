@@ -23,7 +23,8 @@ import '../../forum/forum_page.dart';
 import '../../forum/thread_detail_page.dart';
 import 'widgets/media_widget.dart';
 import 'widgets/current_bible_series_widget.dart';
-import 'widgets/prayer_request_widget.dart';
+import 'widgets/legacy_prayer_request.dart';
+import 'widgets/legacy_testimonies_widget.dart';
 
 class EngagePage extends IIndexedPage {
   final GlobalKey<NavigatorState>? navigatorKey;
@@ -133,8 +134,8 @@ class EngageIndex extends StatelessWidget {
               HeaderWidget(),
               CurrentBibleSeriesWidget(),
               SizedBox(height: 16.0),
-              RecentPrayerRequestsWidget(),
-              RecentTestimoniesWidget(),
+              LegacyRecentPrayerRequestsWidget(),
+              LegacyRecentTestimoniesWidget(),
               SizedBox(height: 16.0),
               MediaWidget(),
             ];
@@ -142,8 +143,8 @@ class EngageIndex extends StatelessWidget {
             children = <Widget>[
               SizedBox(height: 16.0),
               HeaderWidget(),
-              RecentPrayerRequestsWidget(),
-              RecentTestimoniesWidget(),
+              LegacyRecentPrayerRequestsWidget(),
+              LegacyRecentTestimoniesWidget(),
               SizedBox(height: 16.0),
               PastBibleSeriesWidget(),
               SizedBox(height: 16.0),
