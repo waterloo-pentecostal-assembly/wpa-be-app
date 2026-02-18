@@ -22,8 +22,16 @@ class CurrentBibleSeriesWidget extends StatelessWidget {
             child: ActiveBibleSeriesCard(bibleSeries: activeSeries),
           );
         } else {
-          // Fallback or placeholder if no series
-          return Container(); // Or a placeholder
+          return Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Container(
+              height: 300,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
+                color: Colors.grey.shade200,
+              ),
+            ),
+          );
         }
       },
     );

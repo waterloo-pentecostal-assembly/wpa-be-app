@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/application/testimonies/testimonies_bloc.dart';
 import 'package:wpa_app/presentation/common/loader.dart';
 import 'package:wpa_app/presentation/engage/main/widgets/past_bible_series_widget.dart';
-import 'package:wpa_app/presentation/engage/main/widgets/testimonies_widget.dart';
 import 'package:wpa_app/presentation/engage/testimonies/pages/testimonies.dart';
 
 import '../../../app/injection.dart';
@@ -143,10 +142,10 @@ class EngageIndex extends StatelessWidget {
             children = <Widget>[
               SizedBox(height: 16.0),
               HeaderWidget(),
+              PastBibleSeriesWidget(),
+              SizedBox(height: 16.0),
               LegacyRecentPrayerRequestsWidget(),
               LegacyRecentTestimoniesWidget(),
-              SizedBox(height: 16.0),
-              PastBibleSeriesWidget(),
               SizedBox(height: 16.0),
               MediaWidget(),
             ];
