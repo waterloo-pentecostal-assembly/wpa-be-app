@@ -28,9 +28,6 @@ class ProfilePage extends IIndexedPage {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<AuthenticationBloc>(
-          create: (BuildContext context) => getIt<AuthenticationBloc>(),
-        ),
         BlocProvider<UserProfileBloc>(
           create: (BuildContext context) => getIt<UserProfileBloc>(),
         ),
@@ -65,7 +62,10 @@ class ProfilePageRoot extends StatelessWidget {
     return BlocConsumer<AuthenticationBloc, AuthenticationState>(
       listener: (BuildContext context, AuthenticationState state) {
         if (state is Unauthenticated) {
-          Navigator.of(context, rootNavigator: true).pushNamed('/sign_in');
+          Navigator.of(context, rootNavigator: true).pushNamedAndRemoveUntil(
+            '/sign_in',
+            (Route<dynamic> route) => false,
+          );
         }
       },
       builder: (BuildContext context, AuthenticationState state) {
@@ -160,6 +160,8 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName>
     return BlocConsumer<UserProfileBloc, UserProfileState>(
       listener: (context, UserProfileState state) {},
       builder: (context, UserProfileState state) {
+        if (!getIt.isRegistered<LocalUser>()) return Container();
+
         if (state is NewProfilePhotoUploadStarted) {
           UploadTask uploadTask = state.uploadTask;
           LocalUser localUser = getIt<LocalUser>();

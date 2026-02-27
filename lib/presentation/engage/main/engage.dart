@@ -212,14 +212,16 @@ class EngageLayoutWidget extends StatelessWidget {
 }
 
 class HeaderWidget extends StatelessWidget {
-  final LocalUser localUser = getIt<LocalUser>();
-
   @override
   Widget build(BuildContext context) {
+    String firstName = '';
+    if (getIt.isRegistered<LocalUser>()) {
+      firstName = getIt<LocalUser>().firstName;
+    }
     return Container(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 8, 8, 16),
-        child: getIt<TextFactory>().heading('Hello, ${localUser.firstName}!'),
+        child: getIt<TextFactory>().heading('Hello, $firstName!'),
       ),
     );
   }

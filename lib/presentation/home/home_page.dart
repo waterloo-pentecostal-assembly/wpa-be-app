@@ -54,7 +54,9 @@ class HomeIndex extends StatelessWidget {
         body: Column(
           children: <Widget>[
             Container(
-              child: Text(getIt<LocalUser>().toString()),
+              child: Text(getIt.isRegistered<LocalUser>()
+                  ? getIt<LocalUser>().toString()
+                  : 'unregistered'),
             ),
             Container(
               child: Text('HOME'),

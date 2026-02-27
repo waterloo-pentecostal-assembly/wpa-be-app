@@ -215,7 +215,6 @@ class NavigationBar extends StatelessWidget {
   }
 
   List<BottomNavigationBarItem> getNavBarItems() {
-    final LocalUser user = getIt<LocalUser>();
     List<BottomNavigationBarItem> items = [
       BottomNavigationBarItem(
         // icon: Icon(Icons.class_),
@@ -243,7 +242,7 @@ class NavigationBar extends StatelessWidget {
       )
     ];
 
-    if (user.isAdmin) {
+    if (getIt.isRegistered<LocalUser>() && getIt<LocalUser>().isAdmin) {
       items.add(
         BottomNavigationBarItem(
           icon: Icon(Icons.admin_panel_settings,

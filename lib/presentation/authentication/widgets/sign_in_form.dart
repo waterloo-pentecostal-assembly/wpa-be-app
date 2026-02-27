@@ -4,6 +4,7 @@ import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/presentation/common/text_factory.dart';
 
 import '../../../app/constants.dart';
+import '../../../application/authentication/authentication_bloc.dart';
 import '../../../application/authentication/sign_in/sign_in_bloc.dart';
 import '../../../application/navigation_bar/navigation_bar_bloc.dart';
 import '../../common/loader.dart';
@@ -14,6 +15,10 @@ class SignInForm extends StatelessWidget {
     return BlocConsumer<SignInBloc, SignInState>(
       listener: (BuildContext context, SignInState state) {
         if (state.signInSuccess) {
+          // Tell AuthenticationBloc to re-fetch LocalUser since SignInBloc doesn't.
+          BlocProvider.of<AuthenticationBloc>(context)
+              .add(RequestAuthenticationState());
+
           // Navigate to HOME tab upon login
           BlocProvider.of<NavigationBarBloc>(context)
             ..add(
@@ -21,7 +26,11 @@ class SignInForm extends StatelessWidget {
                 tab: NavigationTabEnum.ENGAGE,
               ),
             );
-          Navigator.pushNamed(context, '/index');
+          Navigator.pushNamedAndRemoveUntil(
+            context,
+            '/index',
+            (Route<dynamic> route) => false,
+          );
         }
       },
       builder: (BuildContext context, SignInState state) {
