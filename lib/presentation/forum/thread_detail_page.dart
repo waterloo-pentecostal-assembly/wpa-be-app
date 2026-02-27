@@ -537,7 +537,7 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
                       ],
                     ),
                   ),
-                  if (!comment.isDeleted)
+                  if (!comment.isDeleted && isAuthor)
                     PopupMenuItem(
                       value: 'delete',
                       child: Row(
