@@ -499,7 +499,7 @@ class Other extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    getIt<TextFactory>().lite("Version 3.0.0"),
+                    getIt<TextFactory>().lite("Version 3.0.1"),
                   ],
                 ),
                 Divider(),

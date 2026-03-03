@@ -38,13 +38,17 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
 
       _threadSubscription = _forumRepository
           .watchThread(event.threadId, event.forumId)
-          .listen((thread) => add(ThreadUpdated(thread)), onError: (e) {
+          .listen((thread) {
+        if (!isClosed) add(ThreadUpdated(thread));
+      }, onError: (e) {
         // Handle error
       });
 
       _commentsSubscription = _forumRepository
           .watchComments(event.threadId, event.forumId)
-          .listen((comments) => add(CommentsUpdated(comments)), onError: (e) {
+          .listen((comments) {
+        if (!isClosed) add(CommentsUpdated(comments));
+      }, onError: (e) {
         // Handle error
       });
     } catch (e) {
@@ -122,6 +126,7 @@ class ThreadBloc extends Bloc<ThreadEvent, ThreadState> {
   @override
   Future<void> close() {
     _commentsSubscription?.cancel();
+    _threadSubscription?.cancel();
     return super.close();
   }
 

@@ -165,20 +165,6 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
                                               .inMinutes <
                                           15;
 
-                                  if (state is ThreadLoaded) {
-                                    print('DEBUG: isAuthor: $isAuthor');
-                                    print('DEBUG: isRecent: $isRecent');
-                                    print(
-                                        'DEBUG: authUserId: ${authState.user.id}');
-                                    print(
-                                        'DEBUG: threadAuthorId: ${state.thread.authorId}');
-                                    print(
-                                        'DEBUG: threadCreatedAt: ${state.thread.createdAt.toDate()}');
-                                    print('DEBUG: now: ${DateTime.now()}');
-                                    print(
-                                        'DEBUG: difference: ${DateTime.now().difference(state.thread.createdAt.toDate()).inMinutes}');
-                                  }
-
                                   if (isAuthor && isRecent) {
                                     items.add(PopupMenuItem(
                                       value: 'edit',
