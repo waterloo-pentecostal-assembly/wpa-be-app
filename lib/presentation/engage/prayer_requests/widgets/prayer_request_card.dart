@@ -250,14 +250,15 @@ class _PrayButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<PrayerRequestsBloc, PrayerRequestsState>(
+    return BlocConsumer<PrayerRequestsBloc, PrayerRequestsState>(
+      listener: (BuildContext context, PrayerRequestsState state) {
+        if (state is PrayForRequestComplete && state.id == prayerRequest.id) {
+          prayerRequest.hasPrayed = true;
+        }
+      },
       builder: (BuildContext context, PrayerRequestsState state) {
         if (prayerRequest.hasPrayed) {
           return _createPrayedButton();
-        } else if (state is PrayForRequestComplete) {
-          if (state.id == prayerRequest.id) {
-            return _createPrayedButton();
-          }
         } else if (state is PrayForRequestLoading) {
           if (state.id == prayerRequest.id) {
             return _createLoadingButton();

@@ -249,14 +249,15 @@ class _PraiseButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TestimoniesBloc, TestimoniesState>(
+    return BlocConsumer<TestimoniesBloc, TestimoniesState>(
+      listener: (BuildContext context, TestimoniesState state) {
+        if (state is PraiseTestimonyComplete && state.id == testimony.id) {
+          testimony.hasPraised = true;
+        }
+      },
       builder: (BuildContext context, TestimoniesState state) {
         if (testimony.hasPraised) {
           return _createPraisedButton();
-        } else if (state is PraiseTestimonyComplete) {
-          if (state.id == testimony.id) {
-            return _createPraisedButton();
-          }
         } else if (state is PraiseTestimonyLoading) {
           if (state.id == testimony.id) {
             return _createLoadingButton();

@@ -112,7 +112,7 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
             // No need to handle these two in MyPrayerRequests since this
             // BlocListener will be loaded in either case. If it is also
             // handled in MyPrayerRequests then two toasts will be shown
-            // if the error was thron from MyPrayerRequests.
+            // if the error was thrown from MyPrayerRequests.
           },
         ),
         BlocListener<AllPrayerRequestsBloc, PrayerRequestsState>(
