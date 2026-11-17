@@ -28,7 +28,7 @@ class AdminService implements IAdminService {
           .where("is_verified", isEqualTo: false)
           .get();
     } on Exception catch (e) {
-      _firebaseFirestoreService.handleException(e);
+      throw _firebaseFirestoreService.handleException(e);
     }
 
     for (QueryDocumentSnapshot<Map<String, dynamic>> doc
@@ -50,7 +50,7 @@ class AdminService implements IAdminService {
         transaction.update(documentReference, {'is_verified': true});
       });
     } on Exception catch (e) {
-      _firebaseFirestoreService.handleException(e);
+      throw _firebaseFirestoreService.handleException(e);
     }
   }
 
@@ -63,7 +63,7 @@ class AdminService implements IAdminService {
         transaction.update(documentReference, {"is_approved": true});
       });
     } on Exception catch (e) {
-      _firebaseFirestoreService.handleException(e);
+      throw _firebaseFirestoreService.handleException(e);
     }
   }
 
@@ -78,7 +78,7 @@ class AdminService implements IAdminService {
           .where("is_approved", isEqualTo: false)
           .get();
     } on Exception catch (e) {
-      _firebaseFirestoreService.handleException(e);
+      throw _firebaseFirestoreService.handleException(e);
     }
 
     for (QueryDocumentSnapshot<Map<String, dynamic>> doc
@@ -100,7 +100,7 @@ class AdminService implements IAdminService {
           .doc(prayerRequestId)
           .delete();
     } on Exception catch (e) {
-      _firebaseFirestoreService.handleException(e);
+      throw _firebaseFirestoreService.handleException(e);
     }
   }
 
@@ -113,7 +113,7 @@ class AdminService implements IAdminService {
         transaction.update(documentReference, {"is_approved": true});
       });
     } on Exception catch (e) {
-      _firebaseFirestoreService.handleException(e);
+      throw _firebaseFirestoreService.handleException(e);
     }
   }
 
@@ -128,7 +128,7 @@ class AdminService implements IAdminService {
           .where("is_approved", isEqualTo: false)
           .get();
     } on Exception catch (e) {
-      _firebaseFirestoreService.handleException(e);
+      throw _firebaseFirestoreService.handleException(e);
     }
 
     for (QueryDocumentSnapshot<Map<String, dynamic>> doc
@@ -146,7 +146,7 @@ class AdminService implements IAdminService {
     try {
       await _firestore.collection("testimonies").doc(testimonyId).delete();
     } on Exception catch (e) {
-      _firebaseFirestoreService.handleException(e);
+      throw _firebaseFirestoreService.handleException(e);
     }
   }
 
@@ -155,7 +155,7 @@ class AdminService implements IAdminService {
     try {
       await _firestore.collection('users').doc(userId).delete();
     } on Exception catch (e) {
-      _firebaseFirestoreService.handleException(e);
+      throw _firebaseFirestoreService.handleException(e);
     }
   }
 }

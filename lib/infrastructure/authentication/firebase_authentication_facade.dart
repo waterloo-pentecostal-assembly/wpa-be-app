@@ -42,7 +42,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
     try {
       userSnapshot = await _firestore.collection("users").doc(user.uid).get();
     } on Exception catch (e) {
-      _firebaseFirestoreService.handleException(e);
+      throw _firebaseFirestoreService.handleException(e);
     }
     if (userSnapshot.data() == null) {
       throw AuthenticationException(
@@ -130,7 +130,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
           .add(defaultNotificationSettings());
     } on Exception catch (e) {
       userCredential.user!.delete();
-      _firebaseFirestoreService.handleException(e);
+      throw _firebaseFirestoreService.handleException(e);
     }
   }
 
@@ -193,8 +193,9 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
           .collection('devices')
           .doc(token)
           .delete();
-    } on Exception catch (e) {
-      _firebaseFirestoreService.handleException(e);
+    } on Exception catch (_) {
+      // Removing the device token is best-effort; signing out must still
+      // happen even if it fails (e.g. offline).
     }
     return _firebaseAuth.signOut();
   }
@@ -250,7 +251,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
         await _firestore.collection('users').doc(uid).delete();
       }
     } on Exception catch (e) {
-      _firebaseFirestoreService.handleException(e);
+      throw _firebaseFirestoreService.handleException(e);
     }
   }
 
@@ -267,7 +268,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
     try {
       await _firebaseAuth.currentUser?.sendEmailVerification();
     } on Exception catch (e) {
-      _firebaseFirestoreService.handleException(e);
+      throw _firebaseFirestoreService.handleException(e);
     }
   }
 
@@ -288,7 +289,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
         "platform": platform,
       });
     } on Exception catch (e) {
-      _firebaseFirestoreService.handleException(e);
+      throw _firebaseFirestoreService.handleException(e);
     }
   }
 
@@ -305,7 +306,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
           .doc(deviceToken)
           .get();
     } on Exception catch (e) {
-      _firebaseFirestoreService.handleException(e);
+      throw _firebaseFirestoreService.handleException(e);
     }
 
     if (documentSnapshot.data() != null) {
@@ -325,7 +326,7 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
         "request_date": Timestamp.now(),
       });
     } on Exception catch (e) {
-      _firebaseFirestoreService.handleException(e);
+      throw _firebaseFirestoreService.handleException(e);
     }
   }
 }

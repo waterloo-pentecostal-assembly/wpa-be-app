@@ -28,7 +28,7 @@ class AchievementsRepository implements IAchievementsRepository {
               toFirestore: (model, _) => model.toJson())
           .get();
     } on Exception catch (e) {
-      _firebaseFirestoreService.handleException(e);
+      throw _firebaseFirestoreService.handleException(e);
     }
     return documentSnapshot.data() ?? Achievements(seriesProgress: 0);
   }
@@ -48,7 +48,7 @@ class AchievementsRepository implements IAchievementsRepository {
         return documentSnapshot.data() ?? Achievements(seriesProgress: 0);
       });
     } on Exception catch (e) {
-      _firebaseFirestoreService.handleException(e);
+      throw _firebaseFirestoreService.handleException(e);
     }
   }
 }
