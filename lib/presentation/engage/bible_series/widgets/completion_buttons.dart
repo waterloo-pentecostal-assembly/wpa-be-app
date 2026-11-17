@@ -16,7 +16,8 @@ class CompletionButton extends StatelessWidget {
   final SeriesContent seriesContent;
   final CompletionDetails? completionDetails;
   final String bibleId;
-  CompletionButton(this.seriesContent, this.completionDetails, this.bibleId, {super.key});
+  CompletionButton(this.seriesContent, this.completionDetails, this.bibleId,
+      {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -82,7 +83,8 @@ class ResponseCompletionButton extends StatelessWidget {
   final CompletionDetails? completionDetails;
   final String bibleId;
   ResponseCompletionButton(
-      this.seriesContent, this.completionDetails, this.bibleId, {super.key});
+      this.seriesContent, this.completionDetails, this.bibleId,
+      {super.key});
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<CompletionsBloc, CompletionsState>(
@@ -117,7 +119,8 @@ class ResponseCompletionButton extends StatelessWidget {
                                       minimumSize: const Size(90, 30),
                                       backgroundColor:
                                           kWpaBlue.withValues(alpha: 0.8),
-                                      padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                                      padding:
+                                          const EdgeInsets.fromLTRB(8, 4, 8, 4),
                                       tapTargetSize:
                                           MaterialTapTargetSize.shrinkWrap),
                                   onPressed: () {
@@ -163,7 +166,8 @@ class ResponseCompletionButton extends StatelessWidget {
                                       minimumSize: const Size(90, 30),
                                       backgroundColor:
                                           kWpaBlue.withValues(alpha: 0.8),
-                                      padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                                      padding:
+                                          const EdgeInsets.fromLTRB(8, 4, 8, 4),
                                       tapTargetSize:
                                           MaterialTapTargetSize.shrinkWrap),
                                   onPressed: () {

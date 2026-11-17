@@ -12,7 +12,8 @@ part 'achievements_state.dart';
 class AchievementsBloc extends Bloc<AchievementsEvent, AchievementsState> {
   final IAchievementsRepository _iAchievementsRepository;
 
-  AchievementsBloc(this._iAchievementsRepository) : super(AchievementsLoading()) {
+  AchievementsBloc(this._iAchievementsRepository)
+      : super(AchievementsLoading()) {
     on<WatchAchievementsStarted>(_onWatchAchievementsStarted);
     on<AchievementsReceived>(_onAchievementsReceived);
     on<AchievementsErrorReceived>(_onAchievementsErrorReceived);
@@ -60,7 +61,8 @@ class AchievementsBloc extends Bloc<AchievementsEvent, AchievementsState> {
   ) async {
     emit(AchievementsLoading());
     try {
-      Achievements achievements = await _iAchievementsRepository.getAchievements();
+      Achievements achievements =
+          await _iAchievementsRepository.getAchievements();
       emit(AchievementsLoaded(
         achievements: achievements,
       ));

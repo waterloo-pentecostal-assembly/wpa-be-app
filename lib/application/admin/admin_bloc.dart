@@ -50,7 +50,8 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
     Emitter<AdminState> emit,
   ) async {
     try {
-      List<PrayerRequest> prayerRequests = await _iAdminService.getUnapprovedPrayerRequest();
+      List<PrayerRequest> prayerRequests =
+          await _iAdminService.getUnapprovedPrayerRequest();
       emit(UnverifiedPrayerRequestsLoaded(prayerRequests: prayerRequests));
     } on BaseApplicationException catch (e) {
       emit(AdminError(
@@ -86,7 +87,8 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
     Emitter<AdminState> emit,
   ) async {
     try {
-      await _iAdminService.approvePrayerRequest(prayerRequestId: event.prayerRequestId);
+      await _iAdminService.approvePrayerRequest(
+          prayerRequestId: event.prayerRequestId);
       emit(PrayerRequestsApproved(prayerRequestId: event.prayerRequestId));
     } on BaseApplicationException catch (e) {
       emit(AdminError(
@@ -104,7 +106,8 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
     Emitter<AdminState> emit,
   ) async {
     try {
-      await _iAdminService.deletePrayerRequest(prayerRequestId: event.prayerRequestId);
+      await _iAdminService.deletePrayerRequest(
+          prayerRequestId: event.prayerRequestId);
       emit(PrayerRequestsDeleted(prayerRequestId: event.prayerRequestId));
     } on BaseApplicationException catch (e) {
       emit(AdminError(
@@ -138,7 +141,8 @@ class AdminBloc extends Bloc<AdminEvent, AdminState> {
     Emitter<AdminState> emit,
   ) async {
     try {
-      List<Testimony> testimonies = await _iAdminService.getUnapprovedTestimonies();
+      List<Testimony> testimonies =
+          await _iAdminService.getUnapprovedTestimonies();
       emit(UnverifiedTestimoniesLoaded(testimonies: testimonies));
     } on BaseApplicationException catch (e) {
       emit(AdminError(

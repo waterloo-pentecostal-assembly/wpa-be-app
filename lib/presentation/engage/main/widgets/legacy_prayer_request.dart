@@ -21,8 +21,8 @@ class LegacyRecentPrayerRequestsWidget extends StatelessWidget {
           child: Column(
             children: [
               Padding(
-                padding:
-                    const EdgeInsets.only(left: 24, top: 12, bottom: 12, right: 24),
+                padding: const EdgeInsets.only(
+                    left: 24, top: 12, bottom: 12, right: 24),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
@@ -116,15 +116,15 @@ class PrayerRequestOptionsSlider extends StatelessWidget {
           ),
           GestureDetector(
             onTap: () {
-            OverlayEntry? entry;
-            Overlay.of(context).insert(
-              entry = OverlayEntry(
-                builder: (context) {
-                  return NewPrayerRequestForm(entry: entry);
-                },
-              ),
-            );
-          },
+              OverlayEntry? entry;
+              Overlay.of(context).insert(
+                entry = OverlayEntry(
+                  builder: (context) {
+                    return NewPrayerRequestForm(entry: entry);
+                  },
+                ),
+              );
+            },
             child: Container(
               width: getIt<LayoutFactory>()
                   .getDimension(baseDimension: kPrayerRequestButtonHeight),
@@ -226,16 +226,16 @@ class PrayerRequestOptions extends StatelessWidget {
             Flexible(
               flex: 1,
               child: GestureDetector(
-                 onTap: () {
-            OverlayEntry? entry;
-            Overlay.of(context).insert(
-              entry = OverlayEntry(
-                builder: (context) {
-                  return NewPrayerRequestForm(entry: entry);
+                onTap: () {
+                  OverlayEntry? entry;
+                  Overlay.of(context).insert(
+                    entry = OverlayEntry(
+                      builder: (context) {
+                        return NewPrayerRequestForm(entry: entry);
+                      },
+                    ),
+                  );
                 },
-              ),
-            );
-          },
                 child: Container(
                   margin: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                   decoration: const BoxDecoration(

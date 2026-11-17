@@ -48,7 +48,8 @@ class TestimoniesBloc extends Bloc<TestimoniesEvent, TestimoniesState>
     Emitter<TestimoniesState> emit,
   ) async {
     try {
-      List<Testimony> testimony = await _iTestimoniesRepository.getMyTestimonies();
+      List<Testimony> testimony =
+          await _iTestimoniesRepository.getMyTestimonies();
       emit(MyTestimoniesLoaded(testimonies: testimony));
     } on BaseApplicationException catch (e) {
       emit(TestimoniesError(
@@ -66,7 +67,8 @@ class TestimoniesBloc extends Bloc<TestimoniesEvent, TestimoniesState>
     Emitter<TestimoniesState> emit,
   ) async {
     try {
-      List<Testimony> testimony = await _iTestimoniesRepository.getTestimonies(limit: event.amount);
+      List<Testimony> testimony =
+          await _iTestimoniesRepository.getTestimonies(limit: event.amount);
       emit(TestimoniesLoaded(
           testimonies: testimony, isEndOfList: testimony.length == 0));
     } on BaseApplicationException catch (e) {
@@ -141,7 +143,8 @@ class TestimoniesBloc extends Bloc<TestimoniesEvent, TestimoniesState>
     Emitter<TestimoniesState> emit,
   ) async {
     try {
-      List<Testimony> testimony = await _iTestimoniesRepository.getTestimonies(limit: event.amount);
+      List<Testimony> testimony =
+          await _iTestimoniesRepository.getTestimonies(limit: event.amount);
       emit(RecentTestimoniesLoaded(testimonies: testimony));
     } on BaseApplicationException catch (e) {
       emit(TestimoniesError(
@@ -222,7 +225,8 @@ class TestimoniesBloc extends Bloc<TestimoniesEvent, TestimoniesState>
     Emitter<TestimoniesState> emit,
   ) async {
     try {
-      List<Testimony> testimonies = await _iTestimoniesRepository.getMyArchivedTestimonies();
+      List<Testimony> testimonies =
+          await _iTestimoniesRepository.getMyArchivedTestimonies();
       emit(MyArchivedTestimoniesLoaded(testimonies: testimonies));
     } on BaseApplicationException catch (e) {
       emit(TestimoniesError(
@@ -240,7 +244,8 @@ class TestimoniesBloc extends Bloc<TestimoniesEvent, TestimoniesState>
     Emitter<TestimoniesState> emit,
   ) async {
     try {
-      Testimony testimony = await _iTestimoniesRepository.closeTestimony(id: event.id);
+      Testimony testimony =
+          await _iTestimoniesRepository.closeTestimony(id: event.id);
       getIt<FirebaseAnalytics>().logEvent(name: 'testimony_answered');
       emit(MyTestimonyAnsweredComplete(id: event.id, testimony: testimony));
     } on TestimoniesException catch (e) {

@@ -88,7 +88,8 @@ class _NewPrayerRequestFormState extends State<NewPrayerRequestForm>
                         margin: const EdgeInsets.all(16),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          borderRadius: const BorderRadius.all(Radius.circular(16)),
+                          borderRadius:
+                              const BorderRadius.all(Radius.circular(16)),
                           color: Colors.white,
                           boxShadow: [
                             BoxShadow(
@@ -102,8 +103,8 @@ class _NewPrayerRequestFormState extends State<NewPrayerRequestForm>
                           shrinkWrap: true,
                           children: [
                             Container(
-                              padding:
-                                  const EdgeInsets.only(top: 8, left: 8, right: 8),
+                              padding: const EdgeInsets.only(
+                                  top: 8, left: 8, right: 8),
                               child: TextFormField(
                                 controller: _textEditingController,
                                 keyboardType: TextInputType.multiline,

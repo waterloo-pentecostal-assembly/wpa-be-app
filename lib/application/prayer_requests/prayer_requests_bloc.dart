@@ -28,7 +28,8 @@ class PrayerRequestsBloc extends Bloc<PrayerRequestsEvent, PrayerRequestsState>
         MyAnsweredPrayerRequestsBloc {
   final IPrayerRequestsRepository _iPrayerRequestsRepository;
 
-  PrayerRequestsBloc(this._iPrayerRequestsRepository) : super(PrayerRequestsLoading()) {
+  PrayerRequestsBloc(this._iPrayerRequestsRepository)
+      : super(PrayerRequestsLoading()) {
     on<MyPrayerRequestsRequested>(_onMyPrayerRequestsRequested);
     on<PrayerRequestsRequested>(_onPrayerRequestsRequested);
     on<MyPrayerRequestDeleted>(_onMyPrayerRequestDeleted);
@@ -49,7 +50,8 @@ class PrayerRequestsBloc extends Bloc<PrayerRequestsEvent, PrayerRequestsState>
     Emitter<PrayerRequestsState> emit,
   ) async {
     try {
-      List<PrayerRequest> prayerRequest = await _iPrayerRequestsRepository.getMyPrayerRequests();
+      List<PrayerRequest> prayerRequest =
+          await _iPrayerRequestsRepository.getMyPrayerRequests();
       emit(MyPrayerRequestsLoaded(prayerRequests: prayerRequest));
     } on BaseApplicationException catch (e) {
       emit(PrayerRequestsError(
@@ -67,10 +69,11 @@ class PrayerRequestsBloc extends Bloc<PrayerRequestsEvent, PrayerRequestsState>
     Emitter<PrayerRequestsState> emit,
   ) async {
     try {
-      List<PrayerRequest> prayerRequest =
-          await _iPrayerRequestsRepository.getPrayerRequests(limit: event.amount);
+      List<PrayerRequest> prayerRequest = await _iPrayerRequestsRepository
+          .getPrayerRequests(limit: event.amount);
       emit(PrayerRequestsLoaded(
-          prayerRequests: prayerRequest, isEndOfList: prayerRequest.length == 0));
+          prayerRequests: prayerRequest,
+          isEndOfList: prayerRequest.length == 0));
     } on BaseApplicationException catch (e) {
       emit(PrayerRequestsError(
         message: e.message,
@@ -121,8 +124,8 @@ class PrayerRequestsBloc extends Bloc<PrayerRequestsEvent, PrayerRequestsState>
     Emitter<PrayerRequestsState> emit,
   ) async {
     try {
-      List<PrayerRequest> prayerRequests =
-          await _iPrayerRequestsRepository.getMorePrayerRequests(limit: event.amount);
+      List<PrayerRequest> prayerRequests = await _iPrayerRequestsRepository
+          .getMorePrayerRequests(limit: event.amount);
       emit(MorePrayerRequestsLoaded(
         prayerRequests: prayerRequests,
         isEndOfList: prayerRequests.length == 0,
@@ -143,8 +146,8 @@ class PrayerRequestsBloc extends Bloc<PrayerRequestsEvent, PrayerRequestsState>
     Emitter<PrayerRequestsState> emit,
   ) async {
     try {
-      List<PrayerRequest> prayerRequest =
-          await _iPrayerRequestsRepository.getPrayerRequests(limit: event.amount);
+      List<PrayerRequest> prayerRequest = await _iPrayerRequestsRepository
+          .getPrayerRequests(limit: event.amount);
       emit(RecentPrayerRequestsLoaded(prayerRequests: prayerRequest));
     } on BaseApplicationException catch (e) {
       emit(PrayerRequestsError(
@@ -176,8 +179,9 @@ class PrayerRequestsBloc extends Bloc<PrayerRequestsEvent, PrayerRequestsState>
     Emitter<PrayerRequestsState> emit,
   ) async {
     try {
-      PrayerRequest prayerRequest = await _iPrayerRequestsRepository.createPrayerRequest(
-          request: event.request, isAnonymous: event.isAnonymous);
+      PrayerRequest prayerRequest =
+          await _iPrayerRequestsRepository.createPrayerRequest(
+              request: event.request, isAnonymous: event.isAnonymous);
       getIt<FirebaseAnalytics>().logEvent(name: 'prayer_request_created');
       emit(NewPrayerRequestLoaded(prayerRequest: prayerRequest));
     } catch (e) {
@@ -197,9 +201,11 @@ class PrayerRequestsBloc extends Bloc<PrayerRequestsEvent, PrayerRequestsState>
     NewPrayerRequestRequestChanged event,
     Emitter<PrayerRequestsState> emit,
   ) async {
-    NewPrayerRequestState newPrayerRequestState = state as NewPrayerRequestState;
+    NewPrayerRequestState newPrayerRequestState =
+        state as NewPrayerRequestState;
     try {
-      PrayerRequestBody validatedPrayerRequest = PrayerRequestBody(event.prayerRequest);
+      PrayerRequestBody validatedPrayerRequest =
+          PrayerRequestBody(event.prayerRequest);
       emit(newPrayerRequestState.copyWith(
           prayerRequest: validatedPrayerRequest.value, prayerRequestError: ''));
     } on ValueObjectException catch (e) {
@@ -208,7 +214,8 @@ class PrayerRequestsBloc extends Bloc<PrayerRequestsEvent, PrayerRequestsState>
     } catch (e) {
       // Should never reach here in normal conditions, just covering all bases.
       emit(newPrayerRequestState.copyWith(
-          prayerRequest: event.prayerRequest, prayerRequestError: 'Unknown Error.'));
+          prayerRequest: event.prayerRequest,
+          prayerRequestError: 'Unknown Error.'));
     }
   }
 
@@ -216,7 +223,8 @@ class PrayerRequestsBloc extends Bloc<PrayerRequestsEvent, PrayerRequestsState>
     NewPrayerRequestAnonymousChanged event,
     Emitter<PrayerRequestsState> emit,
   ) async {
-    NewPrayerRequestState newPrayerRequestState = state as NewPrayerRequestState;
+    NewPrayerRequestState newPrayerRequestState =
+        state as NewPrayerRequestState;
     emit(newPrayerRequestState.copyWith(isAnonymous: event.isAnonymous));
   }
 
@@ -225,7 +233,8 @@ class PrayerRequestsBloc extends Bloc<PrayerRequestsEvent, PrayerRequestsState>
     Emitter<PrayerRequestsState> emit,
   ) async {
     try {
-      List<PrayerRequest> prayerRequests = await _iPrayerRequestsRepository.getMyAnsweredPrayerRequests();
+      List<PrayerRequest> prayerRequests =
+          await _iPrayerRequestsRepository.getMyAnsweredPrayerRequests();
       emit(MyAnsweredPrayerRequestsLoaded(prayerRequests: prayerRequests));
     } on BaseApplicationException catch (e) {
       emit(PrayerRequestsError(
@@ -243,7 +252,8 @@ class PrayerRequestsBloc extends Bloc<PrayerRequestsEvent, PrayerRequestsState>
     Emitter<PrayerRequestsState> emit,
   ) async {
     try {
-      PrayerRequest prayerRequest = await _iPrayerRequestsRepository.closePrayerRequest(id: event.id);
+      PrayerRequest prayerRequest =
+          await _iPrayerRequestsRepository.closePrayerRequest(id: event.id);
       getIt<FirebaseAnalytics>().logEvent(name: 'prayer_request_answered');
       emit(MyPrayerRequestAnsweredComplete(
           id: event.id, prayerRequest: prayerRequest));

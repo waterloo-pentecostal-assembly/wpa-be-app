@@ -200,7 +200,8 @@ class EngageLayoutWidget extends StatelessWidget {
             amount: hasActive ? 15 : 3,
             isActive: hasActive,
           ));
-        BlocProvider.of<MediaBloc>(context)..add(const AvailableMediaRequested());
+        BlocProvider.of<MediaBloc>(context)
+          ..add(const AvailableMediaRequested());
       },
       child: Container(
         child: ListView(

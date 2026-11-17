@@ -49,7 +49,8 @@ class TestimonyCard extends StatelessWidget {
         child: Stack(
           children: [
             Padding(
-              padding: const EdgeInsets.only(bottom: 48), // Reserve space for button
+              padding:
+                  const EdgeInsets.only(bottom: 48), // Reserve space for button
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [

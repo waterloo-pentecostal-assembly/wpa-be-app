@@ -683,7 +683,8 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
               decoration: BoxDecoration(
                   color: Colors.orange.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.orange.withValues(alpha: 0.3))),
+                  border:
+                      Border.all(color: Colors.orange.withValues(alpha: 0.3))),
               child: Row(
                 children: [
                   Text("Editing Comment",
@@ -726,8 +727,8 @@ class _ThreadDetailPageState extends State<ThreadDetailPage> {
                       focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(20),
                           borderSide: const BorderSide(color: Colors.black)),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 16, vertical: 8)),
+                      contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8)),
                 ),
               ),
               IconButton(

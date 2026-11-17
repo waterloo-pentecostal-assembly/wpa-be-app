@@ -24,8 +24,8 @@ class UserProfileBloc extends Bloc<UserProfileEvent, UserProfileState> {
   ) async {
     try {
       final LocalUser user = getIt<LocalUser>();
-      UploadTask uploadTask =
-          _iUserProfileRepository.uploadProfilePhoto(event.profilePhoto, user.id);
+      UploadTask uploadTask = _iUserProfileRepository.uploadProfilePhoto(
+          event.profilePhoto, user.id);
       emit(NewProfilePhotoUploadStarted(uploadTask: uploadTask));
 
       TaskSnapshot data = await uploadTask;

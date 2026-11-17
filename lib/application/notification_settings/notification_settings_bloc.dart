@@ -75,7 +75,8 @@ class NotificationSettingsBloc
             .subscribeToDailyEngagementReminder();
       } catch (e) {
         emit(currentState);
-        emit(const DailyEngagementReminderError(message: "Unable to subscribe"));
+        emit(
+            const DailyEngagementReminderError(message: "Unable to subscribe"));
       }
     } else {
       try {
@@ -83,7 +84,8 @@ class NotificationSettingsBloc
             .subscribeToDailyEngagementReminder();
         add(NotificationSettingsRequested());
       } catch (e) {
-        emit(const DailyEngagementReminderError(message: "Unable to subscribe"));
+        emit(
+            const DailyEngagementReminderError(message: "Unable to subscribe"));
       }
     }
   }
@@ -103,7 +105,8 @@ class NotificationSettingsBloc
             .unsubscribeFromDailyEngagementReminder();
       } catch (e) {
         emit(currentState);
-        emit(const DailyEngagementReminderError(message: "Unable to unsubscribe"));
+        emit(const DailyEngagementReminderError(
+            message: "Unable to unsubscribe"));
       }
     } else {
       try {
@@ -111,7 +114,8 @@ class NotificationSettingsBloc
             .unsubscribeFromDailyEngagementReminder();
         add(NotificationSettingsRequested());
       } catch (e) {
-        emit(const DailyEngagementReminderError(message: "Unable to unsubscribe"));
+        emit(const DailyEngagementReminderError(
+            message: "Unable to unsubscribe"));
       }
     }
   }
@@ -263,7 +267,8 @@ class NotificationSettingsBloc
             .unsubscribeFromTestimonyNotifications();
       } catch (e) {
         emit(currentState);
-        emit(const TestimonyNotificationError(message: "Unable to unsubscribe"));
+        emit(
+            const TestimonyNotificationError(message: "Unable to unsubscribe"));
       }
     } else {
       try {
@@ -271,7 +276,8 @@ class NotificationSettingsBloc
             .unsubscribeFromTestimonyNotifications();
         add(NotificationSettingsRequested());
       } catch (e) {
-        emit(const TestimonyNotificationError(message: "Unable to unsubscribe"));
+        emit(
+            const TestimonyNotificationError(message: "Unable to unsubscribe"));
       }
     }
   }
@@ -316,14 +322,16 @@ class NotificationSettingsBloc
         await _iNotificationSettingsService.unsubscribeFromNewTestimonies();
       } catch (e) {
         emit(currentState);
-        emit(const TestimonyNotificationError(message: "Unable to unsubscribe"));
+        emit(
+            const TestimonyNotificationError(message: "Unable to unsubscribe"));
       }
     } else {
       try {
         await _iNotificationSettingsService.unsubscribeFromNewTestimonies();
         add(NotificationSettingsRequested());
       } catch (e) {
-        emit(const TestimonyNotificationError(message: "Unable to unsubscribe"));
+        emit(
+            const TestimonyNotificationError(message: "Unable to unsubscribe"));
       }
     }
   }
@@ -559,14 +567,16 @@ class NotificationSettingsBloc
         await _iNotificationSettingsService.followThread(event.threadId);
       } catch (e) {
         emit(currentState);
-        emit(const NotificationSettingsError(message: "Unable to follow thread"));
+        emit(const NotificationSettingsError(
+            message: "Unable to follow thread"));
       }
     } else {
       try {
         await _iNotificationSettingsService.followThread(event.threadId);
         add(NotificationSettingsRequested());
       } catch (e) {
-        emit(const NotificationSettingsError(message: "Unable to follow thread"));
+        emit(const NotificationSettingsError(
+            message: "Unable to follow thread"));
       }
     }
   }
@@ -590,14 +600,16 @@ class NotificationSettingsBloc
         await _iNotificationSettingsService.unfollowThread(event.threadId);
       } catch (e) {
         emit(currentState);
-        emit(const NotificationSettingsError(message: "Unable to unfollow thread"));
+        emit(const NotificationSettingsError(
+            message: "Unable to unfollow thread"));
       }
     } else {
       try {
         await _iNotificationSettingsService.unfollowThread(event.threadId);
         add(NotificationSettingsRequested());
       } catch (e) {
-        emit(const NotificationSettingsError(message: "Unable to unfollow thread"));
+        emit(const NotificationSettingsError(
+            message: "Unable to unfollow thread"));
       }
     }
   }

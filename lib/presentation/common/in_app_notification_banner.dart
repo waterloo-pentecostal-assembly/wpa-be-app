@@ -75,8 +75,8 @@ class InAppNotificationBanner extends StatelessWidget {
                     style: TextButton.styleFrom(
                       foregroundColor: Colors.white,
                       backgroundColor: kWpaBlue.withValues(alpha: 0.8),
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 24, vertical: 8),
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                     onPressed: onView,

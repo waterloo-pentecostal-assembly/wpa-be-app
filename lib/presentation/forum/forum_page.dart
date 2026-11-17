@@ -133,7 +133,8 @@ class ForumTitleBar extends StatelessWidget {
     final authState = BlocProvider.of<AuthenticationBloc>(context).state;
     if (authState is! Authenticated) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("You must be signed in to create a thread.")),
+        const SnackBar(
+            content: Text("You must be signed in to create a thread.")),
       );
       return;
     }

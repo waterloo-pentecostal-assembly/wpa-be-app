@@ -29,7 +29,8 @@ class ColorLoader extends StatefulWidget {
   final DotType dotType;
   final Icon dotIcon;
 
-  ColorLoader({super.key, 
+  ColorLoader({
+    super.key,
     required this.dotOneColor,
     required this.dotTwoColor,
     required this.dotThreeColor,
@@ -163,7 +164,8 @@ class Dot extends StatelessWidget {
   final Icon icon;
 
   Dot(
-      {super.key, required this.radius,
+      {super.key,
+      required this.radius,
       required this.color,
       required this.type,
       required this.icon});

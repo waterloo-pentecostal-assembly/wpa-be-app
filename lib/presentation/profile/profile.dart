@@ -452,14 +452,16 @@ class Other extends StatelessWidget {
                         ),
                         actions: [
                           ClipRRect(
-                            borderRadius: const BorderRadius.all(Radius.circular(16)),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(16)),
                             child: TextButton(
                               style: TextButton.styleFrom(
                                   foregroundColor: Colors.white,
                                   minimumSize: const Size(90, 30),
                                   backgroundColor:
                                       kDarkGreyColor.withValues(alpha: 0.5),
-                                  padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                                  padding:
+                                      const EdgeInsets.fromLTRB(8, 4, 8, 4),
                                   tapTargetSize:
                                       MaterialTapTargetSize.shrinkWrap),
                               onPressed: () {
@@ -470,14 +472,16 @@ class Other extends StatelessWidget {
                             ),
                           ),
                           ClipRRect(
-                            borderRadius: const BorderRadius.all(Radius.circular(16)),
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(16)),
                             child: TextButton(
                               style: TextButton.styleFrom(
                                   foregroundColor: Colors.white,
                                   minimumSize: const Size(90, 30),
                                   backgroundColor:
                                       kWpaBlue.withValues(alpha: 0.8),
-                                  padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
+                                  padding:
+                                      const EdgeInsets.fromLTRB(8, 4, 8, 4),
                                   tapTargetSize:
                                       MaterialTapTargetSize.shrinkWrap),
                               onPressed: () {

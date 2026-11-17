@@ -179,8 +179,8 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
                             width: MediaQuery.of(context).size.width * 0.9,
                             height: MediaQuery.of(context).size.width * 1.6,
                             child: PhotoView(
-                              backgroundDecoration:
-                                  const BoxDecoration(color: Colors.transparent),
+                              backgroundDecoration: const BoxDecoration(
+                                  color: Colors.transparent),
                               imageProvider: NetworkImage(state.downloadURL![
                                   widget.contentNum.toString()]![0]),
                               minScale: PhotoViewComputedScale.contained * 0.8,

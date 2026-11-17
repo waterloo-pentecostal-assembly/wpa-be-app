@@ -24,8 +24,8 @@ class RecentTestimoniesWidget extends StatelessWidget {
           child: Column(
             children: [
               Padding(
-                padding:
-                    const EdgeInsets.only(left: 24, top: 12, bottom: 12, right: 24),
+                padding: const EdgeInsets.only(
+                    left: 24, top: 12, bottom: 12, right: 24),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
