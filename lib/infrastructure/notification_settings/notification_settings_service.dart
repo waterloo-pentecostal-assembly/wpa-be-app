@@ -1,147 +1,63 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import '../../app/injection.dart';
-import '../../domain/authentication/entities.dart';
+import '../../domain/authentication/session.dart';
 import '../../domain/notification_settings/entities.dart';
 import '../../domain/notification_settings/exceptions.dart';
 import '../../domain/notification_settings/interfaces.dart';
 import '../../services/firebase_firestore_service.dart';
-import 'notification_settings_dto.dart';
+import '../common/helpers.dart';
 
+/// Firestore field name for each [NotificationSetting].
+const Map<NotificationSetting, String> kNotificationSettingFields = {
+  NotificationSetting.dailyEngagementReminder: 'daily_engagement_reminder',
+  NotificationSetting.prayers: 'prayers',
+  NotificationSetting.newPrayerRequest: 'new_prayer_request',
+  NotificationSetting.testimonies: 'testimonies',
+  NotificationSetting.newTestimony: 'new_testimony',
+  NotificationSetting.newForumThread: 'new_forum_thread',
+  NotificationSetting.forumCommentReplies: 'forum_comment_replies',
+  NotificationSetting.forumThreadComments: 'forum_thread_comments',
+  NotificationSetting.forumCommentLikes: 'forum_comment_likes',
+};
+
+/// Stateless: the settings document id is looked up for each write.
 class NotificationSettingsService implements INotificationSettingsService {
-  late final FirebaseFirestoreService _firebaseFirestoreService;
-  late final FirebaseFirestore _firestore;
-  late String? notificationSettingsId;
+  NotificationSettingsService(
+    this._firestore,
+    this._firebaseFirestoreService,
+    this._session,
+  );
 
-  NotificationSettingsService(this._firestore, this._firebaseFirestoreService);
+  final FirebaseFirestore _firestore;
+  final FirebaseFirestoreService _firebaseFirestoreService;
+  final ISession _session;
 
-  @override
-  Future<void> subscribeToDailyEngagementReminder() async {
-    // FCM topic subscription handled by Firebase Functions
-    // This is done to handle multiple device tokens which is not
-    // possible with the dart SDK.
-    _setNotificationSetting({"daily_engagement_reminder": true});
-  }
+  CollectionReference<Map<String, dynamic>> _settings() => _firestore
+      .collection('users')
+      .doc(_session.requireUser().id)
+      .collection('notification_settings');
 
-  @override
-  Future<void> unsubscribeFromDailyEngagementReminder() async {
-    // FCM topic unsubscription handled by Firebase Functions
-    // This is done to handle multiple device tokens which is not
-    // possible with the dart SDK.
-    _setNotificationSetting({"daily_engagement_reminder": false});
-  }
-
-  @override
-  Future<void> subscribeToPrayerNotifications() async {
-    _setNotificationSetting({"prayers": true});
-  }
-
-  @override
-  Future<void> unsubscribeFromPrayerNotifications() async {
-    _setNotificationSetting({"prayers": false});
-  }
-
-  @override
-  Future<void> subscribeToNewPrayerRequests() async {
-    _setNotificationSetting({"new_prayer_request": true});
-  }
-
-  @override
-  Future<void> unsubscribeFromNewPrayerRequests() async {
-    _setNotificationSetting({"new_prayer_request": false});
-  }
-
-  @override
-  Future<void> subscribeToTestimonyNotifications() async {
-    _setNotificationSetting({"testimonies": true});
-  }
-
-  @override
-  Future<void> unsubscribeFromTestimonyNotifications() async {
-    _setNotificationSetting({"testimonies": false});
-  }
-
-  @override
-  Future<void> subscribeToNewTestimonies() async {
-    _setNotificationSetting({"new_testimony": true});
-  }
-
-  @override
-  Future<void> unsubscribeFromNewTestimonies() async {
-    _setNotificationSetting({"new_testimony": false});
-  }
-
-  @override
-  Future<void> subscribeToNewForumThreads() async {
-    _setNotificationSetting({"new_forum_thread": true});
-  }
-
-  @override
-  Future<void> unsubscribeFromNewForumThreads() async {
-    _setNotificationSetting({"new_forum_thread": false});
-  }
-
-  @override
-  Future<void> subscribeToForumCommentReplies() async {
-    _setNotificationSetting({"forum_comment_replies": true});
-  }
-
-  @override
-  Future<void> unsubscribeFromForumCommentReplies() async {
-    _setNotificationSetting({"forum_comment_replies": false});
-  }
-
-  @override
-  Future<void> subscribeToForumThreadComments() async {
-    _setNotificationSetting({"forum_thread_comments": true});
-  }
-
-  @override
-  Future<void> unsubscribeFromForumThreadComments() async {
-    _setNotificationSetting({"forum_thread_comments": false});
-  }
-
-  @override
-  Future<void> subscribeToForumCommentLikes() async {
-    _setNotificationSetting({"forum_comment_likes": true});
-  }
-
-  @override
-  Future<void> unsubscribeFromForumCommentLikes() async {
-    _setNotificationSetting({"forum_comment_likes": false});
-  }
-
-  @override
-  Future<void> followThread(String threadId) async {
-    _setNotificationSetting({
-      "threads_followed": FieldValue.arrayUnion([threadId])
-    });
-  }
-
-  @override
-  Future<void> unfollowThread(String threadId) async {
-    _setNotificationSetting({
-      "threads_followed": FieldValue.arrayRemove([threadId])
-    });
-  }
-
-  Future<void> _setNotificationSetting(
-      Map<String, dynamic> notificationSetting) async {
-    final LocalUser user = getIt<LocalUser>();
-
-    // Should always be available.  This is just a fail-safe
-    String _notificationSettingsId =
-        notificationSettingsId ?? await _getNotificationSettingsId();
-
+  Future<DocumentSnapshot<Map<String, dynamic>>> _settingsDoc() async {
+    final QuerySnapshot<Map<String, dynamic>> snapshot;
     try {
-      // Update flag in users/<user-doc>/notification_settings/<single-notification-settings-doc>
+      snapshot = await _settings().get();
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
+    }
+    if (snapshot.docs.isEmpty) {
+      throw const NotificationSettingsException(
+        code: NotificationSettingsExceptionCode.noNotificationSettings,
+        message: 'No notification settings exist',
+      );
+    }
+    return snapshot.docs.first;
+  }
+
+  Future<void> _update(Map<String, dynamic> data) async {
+    final doc = await _settingsDoc();
+    try {
       await _firestore.runTransaction((transaction) async {
-        DocumentReference documentReference = _firestore
-            .collection("users")
-            .doc(user.id)
-            .collection("notification_settings")
-            .doc(_notificationSettingsId);
-        transaction.update(documentReference, notificationSetting);
+        transaction.update(doc.reference, data);
       });
     } on Exception catch (e) {
       throw _firebaseFirestoreService.handleException(e);
@@ -150,57 +66,39 @@ class NotificationSettingsService implements INotificationSettingsService {
 
   @override
   Future<NotificationSettingsEntity> getNotificationSettings() async {
-    final LocalUser user = getIt<LocalUser>();
-    QuerySnapshot querySnapshot;
-    try {
-      querySnapshot = await _firestore
-          .collection("users")
-          .doc(user.id)
-          .collection("notification_settings")
-          .get();
-    } on Exception catch (e) {
-      throw _firebaseFirestoreService.handleException(e);
-    }
-
-    if (querySnapshot.docs.length > 0) {
-      DocumentSnapshot notificationSettingsDoc = querySnapshot.docs[0];
-
-      // Set notificationSettingsId
-      notificationSettingsId = notificationSettingsDoc.id;
-
-      return NotificationSettingsDto.fromFirestore(notificationSettingsDoc)
-          .toDomain();
-    }
-    throw NotificationSettingsException(
-      code: NotificationSettingsExceptionCode.NO_NOTIFICATION_SETTINGS,
-      message: "No notification settings exist",
+    final doc = await _settingsDoc();
+    final data = doc.data() ?? {};
+    bool flag(NotificationSetting s) =>
+        findOrDefaultTo(data, kNotificationSettingFields[s], false);
+    return NotificationSettingsEntity(
+      id: doc.id,
+      dailyEngagementReminder:
+          flag(NotificationSetting.dailyEngagementReminder),
+      prayers: flag(NotificationSetting.prayers),
+      newPrayerRequest: flag(NotificationSetting.newPrayerRequest),
+      testimonies: flag(NotificationSetting.testimonies),
+      newTestimony: flag(NotificationSetting.newTestimony),
+      newForumThread: flag(NotificationSetting.newForumThread),
+      forumCommentReplies: flag(NotificationSetting.forumCommentReplies),
+      forumThreadComments: flag(NotificationSetting.forumThreadComments),
+      forumCommentLikes: flag(NotificationSetting.forumCommentLikes),
+      threadsFollowed: toStringList(data['threads_followed']),
     );
   }
 
-  Future<String> _getNotificationSettingsId() async {
-    final LocalUser user = getIt<LocalUser>();
-    QuerySnapshot querySnapshot;
-    try {
-      querySnapshot = await _firestore
-          .collection("users")
-          .doc(user.id)
-          .collection("notification_settings")
-          .get();
-    } on Exception catch (e) {
-      throw _firebaseFirestoreService.handleException(e);
-    }
+  // FCM topic (un)subscription is done by Cloud Functions reacting to these
+  // flags (the Dart SDK cannot manage topics across a user's devices).
+  @override
+  Future<void> setSetting(NotificationSetting setting, bool enabled) =>
+      _update({kNotificationSettingFields[setting]!: enabled});
 
-    if (querySnapshot.docs.length > 0) {
-      DocumentSnapshot notificationSettingsDoc = querySnapshot.docs[0];
+  @override
+  Future<void> followThread(String threadId) => _update({
+        'threads_followed': FieldValue.arrayUnion([threadId]),
+      });
 
-      // Set notificationSettingsId
-      notificationSettingsId = notificationSettingsDoc.id;
-
-      return notificationSettingsDoc.id;
-    }
-    throw NotificationSettingsException(
-      code: NotificationSettingsExceptionCode.NO_NOTIFICATION_SETTINGS,
-      message: "No notification settings exist",
-    );
-  }
+  @override
+  Future<void> unfollowThread(String threadId) => _update({
+        'threads_followed': FieldValue.arrayRemove([threadId]),
+      });
 }

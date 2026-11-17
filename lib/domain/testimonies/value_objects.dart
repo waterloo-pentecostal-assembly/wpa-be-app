@@ -1,17 +1,12 @@
 import '../common/value_objects.dart';
 import 'validators.dart';
 
-class TestimonyBody extends ValueObject {
-  @override
-  final String value;
-
-  factory TestimonyBody(String testimonyBody) {
-    testimonyBody = testimonyBody.trim();
-    return TestimonyBody._(validateTestimonyBody(testimonyBody));
-  }
+class TestimonyBody extends ValueObject<String> {
+  factory TestimonyBody(String body) =>
+      TestimonyBody._(validateTestimonyBody(body.trim()));
 
   const TestimonyBody._(this.value);
 
   @override
-  List<Object> get props => [this.value];
+  final String value;
 }

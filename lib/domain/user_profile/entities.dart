@@ -1,18 +1,21 @@
-class UserSnippet {
-  final String firstName;
-  final String lastName;
-  final String? thumbnailUrl;
-  final String? thumbnail;
+import 'package:equatable/equatable.dart';
 
-  UserSnippet({
+/// Author details denormalised onto prayer requests and testimonies.
+class UserSnippet extends Equatable {
+  const UserSnippet({
     required this.firstName,
     required this.lastName,
     required this.thumbnailUrl,
     required this.thumbnail,
   });
 
+  final String firstName;
+  final String lastName;
+  final String? thumbnailUrl;
+  final String? thumbnail;
+
+  String get fullName => '$firstName $lastName';
+
   @override
-  String toString() {
-    return '''firstName: $firstName, lastName: $lastName, thumbnailUrl: $thumbnailUrl''';
-  }
+  List<Object?> get props => [firstName, lastName, thumbnailUrl, thumbnail];
 }

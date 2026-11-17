@@ -6,12 +6,12 @@ abstract class IAuthenticationFacade {
 
   Future<void> addDeviceToken(String userId);
 
-  /// Gets current signed in user. Returns a [LocalUser] object.
-  /// Throws [ApplicationException] or [AuthenticationException].
+  /// Loads the signed-in user from `users/{uid}` and publishes it to the
+  /// session. Throws [AuthenticationException] when not signed in, not
+  /// verified by an admin, or when the email address is not verified.
   Future<LocalUser> getSignedInUser();
 
-  /// Register user using first name, last name, email address and password.
-  /// Throws [ApplicationException] or [AuthenticationException].
+  /// Throws [AuthenticationException] or [ApplicationException].
   Future<void> registerWithEmailAndPassword({
     required Name firstName,
     required Name lastName,
@@ -19,33 +19,24 @@ abstract class IAuthenticationFacade {
     required Password password,
   });
 
-  /// Sign in user using email address and password. Returns a [LocalUser]
-  /// object with the user details.
-  /// Throws [ApplicationException] or [AuthenticationException].
+  /// Throws [AuthenticationException] or [ApplicationException].
   Future<LocalUser> signInWithEmailAndPassword({
     required EmailAddress emailAddress,
     required Password password,
   });
 
-  /// Send password reset email to provided email address.
-  /// Throws [ApplicationException] or [AuthenticationException].
-  Future<void> sendPasswordResetEmail({
-    required EmailAddress emailAddress,
-  });
+  Future<void> sendPasswordResetEmail({required EmailAddress emailAddress});
 
-  /// Send account verification email to a registered user.
-  /// Throws [ApplicationException] or [AuthenticationException].
   Future<void> sendAccountVerificationEmail({
     required EmailAddress emailAddress,
     required Password password,
   });
 
-  /// Sign out the singed in user
+  /// Signs out and clears the session.
   Future<void> signOut();
 
-  /// Initiate user account deletion
+  /// Files an account deletion request and clears the session.
   Future<void> initiateDelete(String userId);
 
-  /// Delete user
   Future<void> deleteUser();
 }

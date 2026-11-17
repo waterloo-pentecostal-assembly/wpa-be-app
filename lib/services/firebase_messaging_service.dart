@@ -1,43 +1,40 @@
 import 'dart:async';
-import 'dart:io';
-import 'package:firebase_analytics/firebase_analytics.dart';
+
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:wpa_app/app/injection.dart';
-import 'package:wpa_app/application/navigation_bar/navigation_bar_bloc.dart';
+import 'package:flutter/foundation.dart';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
-  // If you're going to use other Firebase services in the background, such as Firestore,
-  // make sure you call `await Firebase.initializeApp();` here.
-  print("Handling a background message: ${message.messageId}");
+  // Background messages are displayed by the OS; nothing to do here. If other
+  // Firebase services are needed, call `await Firebase.initializeApp()` first.
 }
 
+/// Push-notification plumbing. Routing of notification taps is done by the
+/// app router's deep-link mapper (`lib/app/router/deep_links.dart`).
 class FirebaseMessagingService {
-  late final FirebaseMessaging _firebaseMessaging;
-  final StreamController<RemoteMessage> _foregroundMessageController =
-      StreamController<RemoteMessage>.broadcast();
-
-  Stream<RemoteMessage> get foregroundMessageStream =>
-      _foregroundMessageController.stream;
-
   FirebaseMessagingService(this._firebaseMessaging);
 
-  Future<String?> getToken() async {
-    return _firebaseMessaging.getToken();
-  }
+  final FirebaseMessaging _firebaseMessaging;
+  final _foreground = StreamController<RemoteMessage>.broadcast();
+  final _opened = StreamController<RemoteMessage>.broadcast();
+  StreamSubscription<RemoteMessage>? _onMessageSub;
+  StreamSubscription<RemoteMessage>? _onOpenedSub;
 
-  String getPlatform() {
-    return Platform.operatingSystem;
-  }
+  /// Messages received while the app is in the foreground.
+  Stream<RemoteMessage> get foregroundMessageStream => _foreground.stream;
 
-  Future<void> subscribeToTopic(topic) {
-    return _firebaseMessaging.subscribeToTopic(topic);
-  }
+  /// Notifications tapped while the app was in the background.
+  Stream<RemoteMessage> get openedMessageStream => _opened.stream;
 
-  Future<void> unsubscribeFromTopic(topic) {
-    return _firebaseMessaging.unsubscribeFromTopic(topic);
-  }
+  Future<String?> getToken() => _firebaseMessaging.getToken();
+
+  /// Platform name as stored on device documents (`ios`, `android`, ...).
+  /// Matches the values previously produced by `Platform.operatingSystem`.
+  String getPlatform() => defaultTargetPlatform.name.toLowerCase();
+
+  /// The notification that launched the app from a terminated state, if any.
+  Future<RemoteMessage?> getInitialMessage() =>
+      _firebaseMessaging.getInitialMessage();
 
   Future<void> initialize() async {
     await _firebaseMessaging.requestPermission(
@@ -50,7 +47,7 @@ class FirebaseMessagingService {
       sound: true,
     );
 
-    // For iOS only
+    // iOS only: foreground notifications are shown by the in-app banner.
     await _firebaseMessaging.setForegroundNotificationPresentationOptions(
       alert: false,
       badge: false,
@@ -59,115 +56,9 @@ class FirebaseMessagingService {
 
     FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-    // If you want to test the push notification locally,
-    // you need to get the token and input to the Firebase console
-    String? token = await _firebaseMessaging.getToken();
-    print("FirebaseMessaging token: $token");
-
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      _foregroundMessageController.add(message);
-    });
-
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      navigationHandler(message.data);
-    });
-  }
-
-  static void navigationHandler(Map<String, dynamic> payload) async {
-    switch (payload['notificationType']) {
-      case 'dailyEngagementReminder':
-        getIt<FirebaseAnalytics>()
-            .logEvent(name: 'daily_engagement_notification_clicked');
-        getIt<NavigationBarBloc>().add(
-          NavigationBarEvent(
-            tab: NavigationTabEnum.ENGAGE,
-            route: '/bible_series',
-            arguments: {
-              'bibleSeriesId': payload['bibleSeriesId'],
-            },
-          ),
-        );
-        break;
-      case 'prayerRequestPrayed':
-        getIt<NavigationBarBloc>().add(
-          NavigationBarEvent(
-            tab: NavigationTabEnum.ENGAGE,
-            route: '/prayer_requests/mine',
-          ),
-        );
-        break;
-      case 'testimonyPraised':
-        getIt<NavigationBarBloc>().add(
-          NavigationBarEvent(
-            tab: NavigationTabEnum.ENGAGE,
-            route: '/testimonies/mine',
-          ),
-        );
-        break;
-      case 'userSignUp':
-        getIt<NavigationBarBloc>().add(
-          NavigationBarEvent(
-            tab: NavigationTabEnum.ADMIN,
-            route: '/user_verification',
-          ),
-        );
-        break;
-      case 'newPrayerRequestForApproval':
-        getIt<NavigationBarBloc>().add(
-          NavigationBarEvent(
-            tab: NavigationTabEnum.ADMIN,
-            route: '/prayer_request_approval',
-          ),
-        );
-        break;
-      case 'newTestimonyForApproval':
-        getIt<NavigationBarBloc>().add(
-          NavigationBarEvent(
-            tab: NavigationTabEnum.ADMIN,
-            route: '/testimony_approval',
-          ),
-        );
-        break;
-      case 'newPrayerRequest':
-        getIt<NavigationBarBloc>().add(
-          NavigationBarEvent(
-            tab: NavigationTabEnum.ENGAGE,
-            route: '/prayer_requests',
-          ),
-        );
-        break;
-      case 'newTestimony':
-        getIt<NavigationBarBloc>().add(
-          NavigationBarEvent(
-            tab: NavigationTabEnum.ENGAGE,
-            route: '/testimonies',
-          ),
-        );
-        break;
-      case 'newForumThread':
-      case 'newForumComment':
-      case 'forumCommentReply':
-      case 'forumCommentLike':
-        getIt<FirebaseAnalytics>().logEvent(
-            name: '${payload['notificationType']}_notification_clicked');
-        getIt<NavigationBarBloc>().add(
-          NavigationBarEvent(
-            tab: NavigationTabEnum.ENGAGE,
-            route: '/thread_detail',
-            arguments: {
-              'threadId': payload['threadId'],
-              'forumId': payload['forumId'],
-              'focusCommentId': payload['commentId'],
-            },
-          ),
-        );
-        break;
-      case 'link':
-        Uri uri = Uri.parse(payload['link']);
-        if (await canLaunchUrl(uri)) {
-          await launchUrl(uri);
-        }
-        break;
-    }
+    await _onMessageSub?.cancel();
+    await _onOpenedSub?.cancel();
+    _onMessageSub = FirebaseMessaging.onMessage.listen(_foreground.add);
+    _onOpenedSub = FirebaseMessaging.onMessageOpenedApp.listen(_opened.add);
   }
 }

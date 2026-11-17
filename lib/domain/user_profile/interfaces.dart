@@ -1,19 +1,17 @@
-import 'dart:io';
-
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:wpa_app/domain/authentication/entities.dart';
+import '../authentication/entities.dart';
+import '../common/media_upload.dart';
 
 abstract class IUserProfileRepository {
-  /// Updates the current [LocalUser] with information from Firestore.
-  /// Do this after updating the user collection. Like in the case of
-  /// a profile photo change
-  Future<LocalUser> updateLocalUser();
+  /// Reloads the signed-in user (e.g. after a photo change) and publishes it
+  /// to the session.
+  Future<LocalUser> refreshCurrentUser();
 
-  /// Start the upload of a new profile photo
-  UploadTask uploadProfilePhoto(File file, String userId);
+  /// Starts uploading a new profile photo for the current user.
+  UploadHandle uploadProfilePhoto(ImageData image);
 
-  /// Add/Update given data in user collection
-  Future<void> updateUserCollection(Map<String, dynamic> data, String userId);
-
-  void deleteOldProfilePhoto(String gsLocation, String userId);
+  /// Points the current user's profile at the uploaded photo/thumbnail.
+  Future<void> setProfilePhoto({
+    required String profilePhoto,
+    required String thumbnail,
+  });
 }

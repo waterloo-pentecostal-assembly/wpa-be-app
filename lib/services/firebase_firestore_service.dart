@@ -2,21 +2,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../domain/common/exceptions.dart';
 
+/// Maps Firestore errors to domain exceptions with user-safe messages.
 class FirebaseFirestoreService {
-  Exception handleException(Exception e) {
-    if (e is FirebaseException) {
-      if (e.code == 'permission-denied') {
-        return FirebaseFirestoreException(
-          code: FirebaseFirestoreExceptionCode.PERMISSION_DENIED,
-          message: 'You do not have permission to execute this operation',
-          details: e,
-        );
-      }
+  const FirebaseFirestoreService();
+
+  BaseApplicationException handleException(Object e) {
+    if (e is BaseApplicationException) return e;
+    if (e is FirebaseException && e.code == 'permission-denied') {
+      return DatabaseException(
+        code: DatabaseExceptionCode.permissionDenied,
+        message: 'You do not have permission to execute this operation',
+        details: e,
+      );
     }
-    return ApplicationException(
-      code: ApplicationExceptionCode.UNKNOWN,
-      message: 'An unknown error occurred',
-      details: e,
-    );
+    return ApplicationException.unknown(e);
   }
 }

@@ -9,65 +9,69 @@ import '../../domain/common/exceptions.dart';
 import '../../services/firebase_firestore_service.dart';
 import '../../services/firebase_messaging_service.dart';
 import '../../services/firebase_storage_service.dart';
+import '../session/app_session.dart';
 import 'firebase_user_dto.dart';
-import 'helpers.dart';
 
 class FirebaseAuthenticationFacade implements IAuthenticationFacade {
-  final FirebaseAuth _firebaseAuth;
-  final FirebaseFirestore _firestore;
-  final FirebaseStorageService _firebaseStorageService;
-  final FirebaseMessagingService _firebaseMessagingService;
-  final FirebaseFirestoreService _firebaseFirestoreService;
-
   FirebaseAuthenticationFacade(
     this._firebaseAuth,
     this._firestore,
     this._firebaseStorageService,
     this._firebaseMessagingService,
     this._firebaseFirestoreService,
+    this._session,
   );
+
+  final FirebaseAuth _firebaseAuth;
+  final FirebaseFirestore _firestore;
+  final FirebaseStorageService _firebaseStorageService;
+  final FirebaseMessagingService _firebaseMessagingService;
+  final FirebaseFirestoreService _firebaseFirestoreService;
+  final AppSession _session;
+
+  CollectionReference<Map<String, dynamic>> get _users =>
+      _firestore.collection('users');
 
   @override
   Future<LocalUser> getSignedInUser() async {
-    late User? user = _firebaseAuth.currentUser;
-
+    final user = _firebaseAuth.currentUser;
     if (user == null) {
-      throw AuthenticationException(
-        code: AuthenticationExceptionCode.NOT_AUTHENTICATED,
+      throw const AuthenticationException(
+        code: AuthenticationExceptionCode.notAuthenticated,
         message: 'User not authenticated',
       );
     }
 
-    late DocumentSnapshot<Map<String, dynamic>> userSnapshot;
+    final DocumentSnapshot<Map<String, dynamic>> userSnapshot;
     try {
-      userSnapshot = await _firestore.collection("users").doc(user.uid).get();
+      userSnapshot = await _users.doc(user.uid).get();
     } on Exception catch (e) {
       throw _firebaseFirestoreService.handleException(e);
     }
     if (userSnapshot.data() == null) {
-      throw AuthenticationException(
-        code: AuthenticationExceptionCode.USER_COLLECTION_NOT_FOUND,
+      throw const AuthenticationException(
+        code: AuthenticationExceptionCode.userCollectionNotFound,
         message: 'User details not found',
       );
     }
-    LocalUser domainUser = await FirebaseUserDto.fromFirestore(userSnapshot)
+    final domainUser = await FirebaseUserDto.fromFirestore(userSnapshot)
         .toDomain(_firebaseStorageService);
 
     if (!domainUser.isVerified) {
-      throw AuthenticationException(
-        code: AuthenticationExceptionCode.USER_NOT_VERIFIED,
+      throw const AuthenticationException(
+        code: AuthenticationExceptionCode.userNotVerified,
         message: 'User not verified',
       );
-    } else {
-      if (!user.emailVerified) {
-        await user.sendEmailVerification();
-        throw AuthenticationException(
-          code: AuthenticationExceptionCode.USER_NOT_VERIFIED,
-          message:
-              'Email not verified. See verification email sent to ${domainUser.email}',
-        );
-      }
     }
+    if (!user.emailVerified) {
+      await user.sendEmailVerification();
+      throw AuthenticationException(
+        code: AuthenticationExceptionCode.userNotVerified,
+        message:
+            'Email not verified. See verification email sent to ${domainUser.email}',
+      );
+    }
+    _session.update(domainUser);
     return domainUser;
   }
 
@@ -78,181 +82,148 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
     required EmailAddress emailAddress,
     required Password password,
   }) async {
-    // Create Firebase Authentication User
-    final String _emailAddress = emailAddress.value;
-    final String _password = password.value;
-    late UserCredential userCredential;
-
+    final UserCredential userCredential;
     try {
+      // No verification email here: an admin verifies new users manually.
       userCredential = await _firebaseAuth.createUserWithEmailAndPassword(
-        email: _emailAddress,
-        password: _password,
+        email: emailAddress.value,
+        password: password.value,
       );
-
-      // Don't send verification email since we want to
-      // be able to manually validate users to ensure that
-      // they are from WPA
-      // userCredential.user.sendEmailVerification();
     } on FirebaseAuthException catch (e) {
       if (e.code == 'email-already-in-use') {
-        throw AuthenticationException(
-          code: AuthenticationExceptionCode.EMAIL_IN_USE,
+        throw const AuthenticationException(
+          code: AuthenticationExceptionCode.emailInUse,
           message:
               'A user with this email already exists. Please try signing in',
         );
-      } else {
-        rethrow;
       }
+      throw ApplicationException.unknown(e);
     } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occurred',
-        details: e,
-      );
+      throw ApplicationException.unknown(e);
     }
 
+    final uid = userCredential.user!.uid;
     try {
-      // Create Document for that user in the User Collection
-      await _firestore.collection('users').doc(userCredential.user!.uid).set({
-        'first_name': firstName.value,
-        'last_name': lastName.value,
-        'email': emailAddress.value,
-        'reports': 0,
-        'is_verified': false,
-        'is_admin': false,
-      });
-
-      // Add default notification settings
-      await _firestore
-          .collection('users')
-          .doc(userCredential.user!.uid)
-          .collection("notification_settings")
+      await _users.doc(uid).set(
+            newUserDocument(
+              firstName: firstName.value,
+              lastName: lastName.value,
+              email: emailAddress.value,
+            ),
+          );
+      await _users
+          .doc(uid)
+          .collection('notification_settings')
           .add(defaultNotificationSettings());
     } on Exception catch (e) {
-      userCredential.user!.delete();
+      await userCredential.user?.delete();
       throw _firebaseFirestoreService.handleException(e);
     }
   }
 
-  /// Authenticates user with Firebase using [EmailAddress] and [Password].
-  /// Returns a [LocalUser] once authentication is successful
-  /// Throws [AuthenticationException] or [ApplicationException]
   @override
   Future<LocalUser> signInWithEmailAndPassword({
     required EmailAddress emailAddress,
     required Password password,
   }) async {
-    final String _emailAddress = emailAddress.value;
-    final String _password = password.value;
     try {
       await _firebaseAuth.signInWithEmailAndPassword(
-        email: _emailAddress,
-        password: _password,
+        email: emailAddress.value,
+        password: password.value,
       );
-      return getSignedInUser();
     } on FirebaseAuthException catch (e) {
-      if (e.code == 'invalid-email' || e.code == 'wrong-password') {
-        throw AuthenticationException(
-          code: AuthenticationExceptionCode.INVALID_EMAIL_OR_PASSWORD,
+      throw _mapSignInError(e);
+    } catch (e) {
+      throw ApplicationException.unknown(e);
+    }
+    return getSignedInUser();
+  }
+
+  BaseApplicationException _mapSignInError(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'invalid-email':
+      case 'wrong-password':
+      // Newer SDKs (email enumeration protection) report wrong credentials as
+      // `invalid-credential`.
+      case 'invalid-credential':
+        return const AuthenticationException(
+          code: AuthenticationExceptionCode.invalidEmailOrPassword,
           message: 'Invalid Email or Password',
         );
-      } else if (e.code == 'user-disabled') {
-        throw AuthenticationException(
-          code: AuthenticationExceptionCode.USER_DISABLED,
+      case 'user-disabled':
+        return const AuthenticationException(
+          code: AuthenticationExceptionCode.userDisabled,
           message: 'User disabled',
         );
-      } else if (e.code == 'user-not-found') {
-        throw AuthenticationException(
-          code: AuthenticationExceptionCode.USER_NOT_FOUND,
+      case 'user-not-found':
+        return const AuthenticationException(
+          code: AuthenticationExceptionCode.userNotFound,
           message: 'User not found',
         );
-      } else {
-        throw ApplicationException(
-          code: ApplicationExceptionCode.UNKNOWN,
-          message: 'An unknown error occurred',
-          details: e,
-        );
-      }
-    } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occurred',
-        details: e,
-      );
+      default:
+        return ApplicationException.unknown(e);
     }
   }
 
   @override
   Future<void> signOut() async {
     try {
-      String uid = _firebaseAuth.currentUser!.uid;
-      String? token = await _firebaseMessagingService.getToken();
-      await _firestore
-          .collection('users')
-          .doc(uid)
-          .collection('devices')
-          .doc(token)
-          .delete();
-    } on Exception catch (_) {
+      final uid = _firebaseAuth.currentUser?.uid;
+      final token = await _firebaseMessagingService.getToken();
+      if (uid != null && token != null) {
+        await _users.doc(uid).collection('devices').doc(token).delete();
+      }
+    } catch (_) {
       // Removing the device token is best-effort; signing out must still
       // happen even if it fails (e.g. offline).
     }
-    return _firebaseAuth.signOut();
+    _session.clear();
+    await _firebaseAuth.signOut();
   }
 
   @override
   Future<void> sendPasswordResetEmail({
     required EmailAddress emailAddress,
   }) async {
-    final String _emailAddress = emailAddress.value;
     try {
-      await _firebaseAuth.sendPasswordResetEmail(
-        email: _emailAddress,
-      );
+      await _firebaseAuth.sendPasswordResetEmail(email: emailAddress.value);
     } on FirebaseAuthException catch (e) {
       if (e.code == 'user-not-found') {
-        throw AuthenticationException(
-          code: AuthenticationExceptionCode.USER_NOT_FOUND,
+        throw const AuthenticationException(
+          code: AuthenticationExceptionCode.userNotFound,
           message: 'User not found, please verify email and try again',
         );
       }
+      // Other auth errors were silently treated as success before the
+      // refactor (e.g. email enumeration protection); keep that behaviour.
     } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occurred',
-        details: e,
-      );
+      throw ApplicationException.unknown(e);
     }
   }
 
   @override
   Future<void> deleteUser() async {
-    late String? uid;
+    String? uid;
     try {
       uid = _firebaseAuth.currentUser?.uid;
       await _firebaseAuth.currentUser?.delete();
     } on FirebaseAuthException catch (e) {
       if (e.code == 'requires-recent-login') {
-        throw AuthenticationException(
-          code: AuthenticationExceptionCode.REQUIRES_RECENT_LOGIN,
+        throw const AuthenticationException(
+          code: AuthenticationExceptionCode.requiresRecentLogin,
           message: 'Please sign out and sign in again before deleting account',
         );
       }
     } catch (e) {
-      throw ApplicationException(
-        code: ApplicationExceptionCode.UNKNOWN,
-        message: 'An unknown error occurred',
-        details: e,
-      );
+      throw ApplicationException.unknown(e);
     }
 
     try {
-      if (uid != null) {
-        await _firestore.collection('users').doc(uid).delete();
-      }
+      if (uid != null) await _users.doc(uid).delete();
     } on Exception catch (e) {
       throw _firebaseFirestoreService.handleException(e);
     }
+    _session.clear();
   }
 
   @override
@@ -260,11 +231,10 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
     required EmailAddress emailAddress,
     required Password password,
   }) async {
-    await this.signInWithEmailAndPassword(
+    await signInWithEmailAndPassword(
       emailAddress: emailAddress,
       password: password,
     );
-
     try {
       await _firebaseAuth.currentUser?.sendEmailVerification();
     } on Exception catch (e) {
@@ -274,19 +244,13 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
 
   @override
   Future<void> addDeviceToken(String userId) async {
-    String? deviceToken = await _firebaseMessagingService.getToken();
-    String platform = _firebaseMessagingService.getPlatform();
-
+    final deviceToken = await _firebaseMessagingService.getToken();
+    final platform = _firebaseMessagingService.getPlatform();
     try {
-      await _firestore
-          .collection("users")
-          .doc(userId)
-          .collection("devices")
-          .doc(deviceToken)
-          .set({
-        "token": deviceToken,
-        "created_at": Timestamp.now(),
-        "platform": platform,
+      await _users.doc(userId).collection('devices').doc(deviceToken).set({
+        'token': deviceToken,
+        'created_at': Timestamp.now(),
+        'platform': platform,
       });
     } on Exception catch (e) {
       throw _firebaseFirestoreService.handleException(e);
@@ -295,38 +259,28 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
 
   @override
   Future<bool> deviceTokenExists(String userId) async {
-    String? deviceToken = await _firebaseMessagingService.getToken();
-
-    late DocumentSnapshot documentSnapshot;
+    final deviceToken = await _firebaseMessagingService.getToken();
     try {
-      documentSnapshot = await _firestore
-          .collection("users")
-          .doc(userId)
-          .collection("devices")
-          .doc(deviceToken)
-          .get();
+      final doc =
+          await _users.doc(userId).collection('devices').doc(deviceToken).get();
+      return doc.data() != null;
     } on Exception catch (e) {
       throw _firebaseFirestoreService.handleException(e);
     }
-
-    if (documentSnapshot.data() != null) {
-      return true;
-    }
-
-    return false;
   }
 
   @override
-  Future<void> initiateDelete(userId) async {
+  Future<void> initiateDelete(String userId) async {
     try {
-      await _firestore.collection("account_deletion_requests").doc().set({
-        "account_disabled": false,
-        "user_data_deleted": false,
-        "user_id": userId,
-        "request_date": Timestamp.now(),
+      await _firestore.collection('account_deletion_requests').doc().set({
+        'account_disabled': false,
+        'user_data_deleted': false,
+        'user_id': userId,
+        'request_date': Timestamp.now(),
       });
     } on Exception catch (e) {
       throw _firebaseFirestoreService.handleException(e);
     }
+    _session.clear();
   }
 }

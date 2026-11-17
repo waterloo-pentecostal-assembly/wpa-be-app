@@ -1,18 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:wpa_app/services/firebase_storage_service.dart';
 
 import '../../domain/bible_series/entities.dart';
 import '../../domain/bible_series/exceptions.dart';
 import '../common/helpers.dart';
 
+/// `bible_series/{id}/series_content/{contentId}` document.
 class SeriesContentDto {
-  final String id;
-  final String title;
-  final String subTitle;
-  final String contentType;
-  final Timestamp date;
-  final List<SeriesContentBodyDto> body;
-
   const SeriesContentDto({
     required this.id,
     required this.title,
@@ -23,204 +16,137 @@ class SeriesContentDto {
   });
 
   factory SeriesContentDto.fromFirestore(DocumentSnapshot doc) {
-    Map<String, dynamic> data = (doc.data() ?? {}) as Map<String, dynamic>;
-    List<dynamic> _bodyFirebase = findOrThrowException(data, 'body');
-    List<SeriesContentBodyDto> _body = [];
-
-    _bodyFirebase.forEach((element) {
-      _body.add(SeriesContentBodyDto.fromFirestore(element));
-    });
-
+    final data = (doc.data() ?? {}) as Map<String, dynamic>;
+    final List<dynamic> body = findOrThrowException(data, 'body');
     return SeriesContentDto(
       id: doc.id,
       title: findOrThrowException(data, 'title'),
       subTitle: data['sub_title'] ?? '',
       contentType: findOrThrowException(data, 'content_type'),
       date: findOrThrowException(data, 'date'),
-      body: _body,
+      body: body
+          .map((e) => SeriesContentBodyDto.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
   }
 
-  Future<SeriesContent> toDomain(
-      FirebaseStorageService firebaseStorageService) async {
-    List<ISeriesContentBody> _body = [];
+  final String id;
+  final String title;
+  final String subTitle;
+  final String contentType;
+  final Timestamp date;
+  final List<SeriesContentBodyDto> body;
 
-    for (SeriesContentBodyDto element in this.body) {
-      ISeriesContentBody seriesContentBody =
-          await element.toDomain(body.indexOf(element), firebaseStorageService);
-      _body.add(seriesContentBody);
-    }
+  SeriesContent toDomain() {
     return SeriesContent(
-      id: this.id,
-      title: this.title,
-      subTitle: this.subTitle,
-      contentType: this.contentType.toUpperCase(),
-      date: this.date,
-      body: _body,
+      id: id,
+      title: title,
+      subTitle: subTitle,
+      contentType: contentType.toUpperCase(),
+      date: date.toDate(),
+      body: [for (var i = 0; i < body.length; i++) body[i].toDomain(i)],
     );
   }
 }
 
 class SeriesContentBodyDto {
+  SeriesContentBodyDto._({required this.bodyType, required this.properties});
+
+  factory SeriesContentBodyDto.fromJson(Map<String, dynamic> json) {
+    final String bodyType = json['body_type'];
+    final properties = <String, dynamic>{};
+    switch (bodyType) {
+      case 'audio':
+        properties['audioFileUrl'] =
+            findOrThrowException(json, 'audio_file_url');
+        properties['title'] = findOrDefaultTo(json, 'title', '');
+      case 'text':
+        properties['paragraphs'] = findOrThrowException(json, 'paragraphs');
+      case 'question':
+        properties['questions'] = findOrThrowException(json, 'questions');
+      case 'scripture':
+        properties['bibleVersion'] =
+            findOrThrowException(json, 'bible_version');
+        properties['attribution'] = findOrThrowException(json, 'attribution');
+        properties['scriptures'] = findOrThrowException(json, 'scriptures');
+      case 'image_input':
+      case 'divider':
+        break;
+      case 'link':
+        properties['title'] = findOrDefaultTo(json, 'title', '');
+        properties['text'] = findOrThrowException(json, 'text');
+        properties['link'] = findOrThrowException(json, 'link');
+      case 'video':
+        properties['link'] = findOrThrowException(json, 'link');
+        properties['title'] = findOrDefaultTo(json, 'title', '');
+      case 'title':
+        properties['text'] = findOrThrowException(json, 'text');
+      default:
+        throw BibleSeriesException(
+          message: 'Invalid body_type: $bodyType',
+          code: BibleSeriesExceptionCode.invalidContentBody,
+        );
+    }
+    return SeriesContentBodyDto._(bodyType: bodyType, properties: properties);
+  }
+
   final String bodyType;
   final Map<String, dynamic> properties;
 
-  factory SeriesContentBodyDto.fromJson(Map<String, dynamic> json) {
-    String _bodyType = json['body_type'];
-    Map<String, dynamic> _properties = {};
-
-    if (_bodyType == 'audio') {
-      _properties['audioFileUrl'] =
-          findOrThrowException(json, 'audio_file_url');
-      _properties['title'] = findOrDefaultTo(json, 'title', '');
-    } else if (_bodyType == 'text') {
-      _properties['paragraphs'] = findOrThrowException(json, 'paragraphs');
-    } else if (_bodyType == 'question') {
-      _properties['questions'] = findOrThrowException(json, 'questions');
-    } else if (_bodyType == 'scripture') {
-      _properties['bibleVersion'] = findOrThrowException(json, 'bible_version');
-      _properties['attribution'] = findOrThrowException(json, 'attribution');
-      _properties['scriptures'] = findOrThrowException(json, 'scriptures');
-    } else if (_bodyType == 'image_input') {
-    } else if (_bodyType == 'link') {
-      _properties['title'] = findOrDefaultTo(json, 'title', '');
-      _properties['text'] = findOrThrowException(json, 'text');
-      _properties['link'] = findOrThrowException(json, 'link');
-    } else if (_bodyType == 'video') {
-      _properties['link'] = findOrThrowException(json, 'link');
-      _properties['title'] = findOrDefaultTo(json, 'title', '');
-    } else if (_bodyType == 'title') {
-      _properties['text'] = findOrThrowException(json, 'text');
-    } else if (_bodyType == 'divider') {
-    } else {
-      throw BibleSeriesException(
-        message: 'Invalid body_type: $_bodyType',
-        code: BibleSeriesExceptionCode.INVALID_CONTENT_BODY,
-      );
-    }
-
-    return SeriesContentBodyDto._(
-      bodyType: _bodyType,
-      properties: _properties,
-    );
-  }
-
-  factory SeriesContentBodyDto.fromFirestore(dynamic contentBody) {
-    return SeriesContentBodyDto.fromJson(contentBody);
-  }
-
-  SeriesContentBodyDto._({
-    required this.bodyType,
-    required this.properties,
-  });
-}
-
-extension SeriesContentBodyDtoX on SeriesContentBodyDto {
-  // ignore: missing_return
-  Future<ISeriesContentBody> toDomain(
-      int index, FirebaseStorageService firebaseStorageService) async {
-    if (this.bodyType == 'audio') {
-      AudioBodyProperties bodyProperties = AudioBodyProperties();
-      bodyProperties.audioFileUrl = this.properties['audioFileUrl'];
-      bodyProperties.title = this.properties['title'];
-
-      return AudioBody(
-        type: SeriesContentBodyType.AUDIO,
-        properties: bodyProperties,
-      );
-    } else if (this.bodyType == 'text') {
-      TextBodyProperties bodyProperties = TextBodyProperties();
-      List<String> _paragraphs = [];
-
-      this.properties['paragraphs'].forEach((element) {
-        _paragraphs.add(element);
-      });
-      bodyProperties.paragraphs = _paragraphs;
-
-      return TextBody(
-        type: SeriesContentBodyType.TEXT,
-        properties: bodyProperties,
-      );
-    } else if (this.bodyType == 'scripture') {
-      ScriptureBodyProperties bodyProperties = ScriptureBodyProperties();
-      bodyProperties.bibleVersion = this.properties['bibleVersion'];
-      bodyProperties.attribution = this.properties['attribution'];
-      bodyProperties.scriptures = [];
-
-      List<dynamic> _scriptures = this.properties['scriptures'];
-      _scriptures.forEach((element) {
-        Map<String, String> _verses = {};
-        Map<String, dynamic> _versesFirebase =
-            findOrThrowException(element, 'verses');
-
-        _versesFirebase.forEach((key, value) {
-          _verses[key] = value;
-        });
-
-        bodyProperties.scriptures.add(
-          Scripture(
+  SeriesContentBody toDomain(int index) {
+    switch (bodyType) {
+      case 'audio':
+        return AudioBody(
+          audioFileUrl: properties['audioFileUrl'],
+          title: properties['title'],
+        );
+      case 'text':
+        return TextBody(
+          paragraphs: (properties['paragraphs'] as List<dynamic>)
+              .map((e) => e as String)
+              .toList(),
+        );
+      case 'scripture':
+        final scriptures =
+            (properties['scriptures'] as List<dynamic>).map((element) {
+          final Map<String, dynamic> verses =
+              findOrThrowException(element, 'verses');
+          return Scripture(
             title: element['title'] ?? '',
             book: findOrThrowException(element, 'book'),
             chapter: findOrThrowException(element, 'chapter'),
             fullChapter: findOrDefaultTo(element, 'full_chapter', false),
-            verses: _verses,
-          ),
+            verses: verses.map((k, v) => MapEntry(k, v as String)),
+          );
+        }).toList();
+        return ScriptureBody(
+          bibleVersion: properties['bibleVersion'],
+          attribution: properties['attribution'],
+          scriptures: scriptures,
         );
-      });
-
-      return ScriptureBody(
-        type: SeriesContentBodyType.SCRIPTURE,
-        properties: bodyProperties,
-      );
-    } else if (this.bodyType == 'question') {
-      QuestionBodyProperties bodyProperties = QuestionBodyProperties();
-      List<Question> _questions = [];
-      dynamic questions = this.properties['questions'];
-
-      questions.forEach((question) {
-        _questions.add(
-          Question(
-            location: [index, questions.indexOf(question)],
-            question: question,
-          ),
+      case 'question':
+        final questions = properties['questions'] as List<dynamic>;
+        return QuestionBody(
+          questions: [
+            for (var j = 0; j < questions.length; j++)
+              Question(location: [index, j], question: questions[j]),
+          ],
         );
-      });
-
-      bodyProperties.questions = _questions;
-
-      return QuestionBody(
-        type: SeriesContentBodyType.QUESTION,
-        properties: bodyProperties,
-      );
-    } else if (this.bodyType == 'image_input') {
-      return ImageInputBody(type: SeriesContentBodyType.IMAGE_INPUT);
-    } else if (this.bodyType == 'link') {
-      LinkBodyProperties properties = LinkBodyProperties();
-      properties.title = this.properties['title'];
-      properties.text = this.properties['text'];
-      properties.link = this.properties['link'];
-      return LinkBody(
-        type: SeriesContentBodyType.LINK,
-        properties: properties,
-      );
-    } else if (this.bodyType == 'video') {
-      VideoBodyProperties properties = VideoBodyProperties();
-      properties.title = this.properties['title'];
-      properties.link = this.properties['link'];
-      return VideoBody(
-        type: SeriesContentBodyType.VIDEO,
-        properties: properties,
-      );
-    } else if (this.bodyType == 'title') {
-      TitleBodyProperties properties = TitleBodyProperties();
-      properties.text = this.properties['text'];
-      return TitleBody(
-        type: SeriesContentBodyType.TITLE,
-        properties: properties,
-      );
-    } else if (this.bodyType == 'divider') {
-      return DividerBody();
+      case 'image_input':
+        return const ImageInputBody();
+      case 'link':
+        return LinkBody(
+          title: properties['title'],
+          text: properties['text'],
+          link: properties['link'],
+        );
+      case 'video':
+        return VideoBody(title: properties['title'], link: properties['link']);
+      case 'title':
+        return TitleBody(text: properties['text']);
+      case 'divider':
+        return const DividerBody();
     }
-    return DefaultEmptyBody();
+    return const EmptyBody();
   }
 }

@@ -1,121 +1,89 @@
-/// Parent exception of all exceptions thrown in the app.
-/// Any specific exception type must implement this class.
-abstract class BaseApplicationException implements Exception {
-  /// An application exception type. This should be of type [enum].
-  final dynamic code;
+/// Generic fallback shown to users when no more specific message exists.
+const String kUnknownErrorMessage = 'An unknown error occurred';
 
-  /// A human-readable error message. Should be able to safely display this to the user.
-  final String message;
-
-  /// Error details, possibly null.
-  final dynamic details;
-
-  /// Creates a [BaseApplicationException] with the specified error [type],
-  /// [message], and optional error [details].
-  BaseApplicationException({
+/// Parent of every exception thrown by the domain, infrastructure and service
+/// layers. [message] is always safe to display to the user.
+///
+/// Presentation code must never build its own error copy from an exception;
+/// use [userMessageFor] so that messages come from one place.
+abstract class BaseApplicationException<C extends Enum> implements Exception {
+  const BaseApplicationException({
     required this.code,
     required this.message,
     this.details,
   });
 
-  @override
-  String toString() => "[${this.runtimeType}: $code] $message $details";
-}
+  /// Machine-readable error code.
+  final C code;
 
-enum ValueObjectExceptionCode {
-  INVALID_FORMAT,
-  TOO_LONG,
-  TOO_SHORT,
-}
-
-/// Implements [BaseApplicationException] to provide an exception type specific to Value Objects.
-class ValueObjectException implements BaseApplicationException {
-  @override
-  final ValueObjectExceptionCode code;
-  @override
+  /// Human-readable message, safe to show to the user.
   final String message;
-  @override
-  final dynamic details;
 
-  /// Creates a [ValueObjectException] with the specified error [type],
-  /// [message], and optional error [details]. Default code is
-  /// [ValueObjectExceptionCode.INVALID_FORMAT]
-  ValueObjectException({
-    this.code = ValueObjectExceptionCode.INVALID_FORMAT,
-    required this.message,
-    this.details,
+  /// Optional diagnostic payload (never shown to users).
+  final Object? details;
+
+  @override
+  String toString() => '[$runtimeType: ${code.name}] $message ${details ?? ''}';
+}
+
+/// Returns a message that is safe to show to the user for [error].
+String userMessageFor(Object error, {String fallback = kUnknownErrorMessage}) {
+  if (error is BaseApplicationException) return error.message;
+  return fallback;
+}
+
+enum ValueObjectExceptionCode { invalidFormat, tooLong, tooShort }
+
+class ValueObjectException
+    extends BaseApplicationException<ValueObjectExceptionCode> {
+  const ValueObjectException({
+    super.code = ValueObjectExceptionCode.invalidFormat,
+    required super.message,
+    super.details,
   });
 }
 
-enum ApplicationExceptionCode {
-  PERMISSION_DENIED,
-  MISSING_KEY,
-  UNKNOWN,
+enum ApplicationExceptionCode { permissionDenied, missingKey, unknown }
+
+class ApplicationException
+    extends BaseApplicationException<ApplicationExceptionCode> {
+  const ApplicationException({
+    required super.code,
+    required super.message,
+    super.details,
+  });
+
+  const ApplicationException.unknown([Object? details])
+      : super(
+          code: ApplicationExceptionCode.unknown,
+          message: kUnknownErrorMessage,
+          details: details,
+        );
 }
 
-/// Implements [BaseApplicationException] to provide an exception type for Application level errors.
-class ApplicationException implements BaseApplicationException {
-  @override
-  final ApplicationExceptionCode code;
-  @override
-  final String message;
-  @override
-  final dynamic details;
+enum StorageExceptionCode {
+  objectNotFound,
+  unauthorized,
+  unableToStartUpload,
+  unableToDeleteFile,
+  unknown,
+}
 
-  /// Creates a [ApplicationException] with the specified error [type],
-  /// [message], and optional error [details].
-  ApplicationException({
-    required this.code,
-    required this.message,
-    this.details,
+class StorageException extends BaseApplicationException<StorageExceptionCode> {
+  const StorageException({
+    required super.code,
+    required super.message,
+    super.details,
   });
 }
 
-enum FirebaseStorageExceptionCode {
-  OBJECT_NOT_FOUND,
-  UNAUTHORIZED,
-  UNABLE_TO_START_UPLOAD,
-  UNABLE_TO_DELETE_FILE,
-  UNKNOWN,
-}
+enum DatabaseExceptionCode { permissionDenied, unknown }
 
-/// Implements [BaseApplicationException] to provide an exception type for firebase storage level errors.
-class FirebaseStorageException implements BaseApplicationException {
-  @override
-  final FirebaseStorageExceptionCode code;
-  @override
-  final String message;
-  @override
-  final dynamic details;
-
-  /// Creates a [ApplicationException] with the specified error [type],
-  /// [message], and optional error [details].
-  FirebaseStorageException({
-    required this.code,
-    required this.message,
-    this.details,
-  });
-}
-
-enum FirebaseFirestoreExceptionCode {
-  PERMISSION_DENIED,
-  UNKNOWN,
-}
-
-/// Implements [BaseApplicationException] to provide an exception type for firebase firestore level errors.
-class FirebaseFirestoreException implements BaseApplicationException {
-  @override
-  final FirebaseFirestoreExceptionCode code;
-  @override
-  final String message;
-  @override
-  final dynamic details;
-
-  /// Creates a [ApplicationException] with the specified error [type],
-  /// [message], and optional error [details].
-  FirebaseFirestoreException({
-    required this.code,
-    required this.message,
-    this.details,
+class DatabaseException
+    extends BaseApplicationException<DatabaseExceptionCode> {
+  const DatabaseException({
+    required super.code,
+    required super.message,
+    super.details,
   });
 }

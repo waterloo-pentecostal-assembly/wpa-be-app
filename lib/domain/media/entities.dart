@@ -1,12 +1,7 @@
-class Media {
-  final String id;
-  final String description;
-  final String platform;
-  final String link;
-  final String thumbnailUrl;
-  final String thumbnailGsLocation;
+import 'package:equatable/equatable.dart';
 
-  Media({
+class Media extends Equatable {
+  const Media({
     required this.id,
     required this.description,
     required this.platform,
@@ -15,8 +10,14 @@ class Media {
     required this.thumbnailGsLocation,
   });
 
+  final String id;
+  final String description;
+  final String platform;
+  final String link;
+  final String thumbnailUrl;
+  final String thumbnailGsLocation;
+
   @override
-  String toString() {
-    return '$id: id, $description: description, $platform: platform, $link: link, thumbnailUrl: $thumbnailUrl';
-  }
+  List<Object?> get props =>
+      [id, description, platform, link, thumbnailUrl, thumbnailGsLocation];
 }

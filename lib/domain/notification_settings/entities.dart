@@ -1,17 +1,20 @@
-class NotificationSettingsEntity {
-  final String id;
-  final bool dailyEngagementReminder;
-  final bool prayers;
-  final bool newPrayerRequest;
-  final bool testimonies;
-  final bool newTestimony;
-  final bool newForumThread;
-  final bool forumCommentReplies;
-  final bool forumThreadComments;
-  final bool forumCommentLikes;
-  final List<String> threadsFollowed;
+import 'package:equatable/equatable.dart';
 
-  NotificationSettingsEntity({
+/// Individually toggleable notification preferences.
+enum NotificationSetting {
+  dailyEngagementReminder,
+  prayers,
+  newPrayerRequest,
+  testimonies,
+  newTestimony,
+  newForumThread,
+  forumCommentReplies,
+  forumThreadComments,
+  forumCommentLikes,
+}
+
+class NotificationSettingsEntity extends Equatable {
+  const NotificationSettingsEntity({
     required this.id,
     required this.dailyEngagementReminder,
     required this.prayers,
@@ -25,8 +28,48 @@ class NotificationSettingsEntity {
     required this.threadsFollowed,
   });
 
+  final String id;
+  final bool dailyEngagementReminder;
+  final bool prayers;
+  final bool newPrayerRequest;
+  final bool testimonies;
+  final bool newTestimony;
+  final bool newForumThread;
+  final bool forumCommentReplies;
+  final bool forumThreadComments;
+  final bool forumCommentLikes;
+  final List<String> threadsFollowed;
+
+  bool valueOf(NotificationSetting setting) => switch (setting) {
+        NotificationSetting.dailyEngagementReminder => dailyEngagementReminder,
+        NotificationSetting.prayers => prayers,
+        NotificationSetting.newPrayerRequest => newPrayerRequest,
+        NotificationSetting.testimonies => testimonies,
+        NotificationSetting.newTestimony => newTestimony,
+        NotificationSetting.newForumThread => newForumThread,
+        NotificationSetting.forumCommentReplies => forumCommentReplies,
+        NotificationSetting.forumThreadComments => forumThreadComments,
+        NotificationSetting.forumCommentLikes => forumCommentLikes,
+      };
+
+  NotificationSettingsEntity withSetting(NotificationSetting s, bool v) =>
+      copyWith(
+        dailyEngagementReminder:
+            s == NotificationSetting.dailyEngagementReminder ? v : null,
+        prayers: s == NotificationSetting.prayers ? v : null,
+        newPrayerRequest: s == NotificationSetting.newPrayerRequest ? v : null,
+        testimonies: s == NotificationSetting.testimonies ? v : null,
+        newTestimony: s == NotificationSetting.newTestimony ? v : null,
+        newForumThread: s == NotificationSetting.newForumThread ? v : null,
+        forumCommentReplies:
+            s == NotificationSetting.forumCommentReplies ? v : null,
+        forumThreadComments:
+            s == NotificationSetting.forumThreadComments ? v : null,
+        forumCommentLikes:
+            s == NotificationSetting.forumCommentLikes ? v : null,
+      );
+
   NotificationSettingsEntity copyWith({
-    String? id,
     bool? dailyEngagementReminder,
     bool? prayers,
     bool? newPrayerRequest,
@@ -39,7 +82,7 @@ class NotificationSettingsEntity {
     List<String>? threadsFollowed,
   }) {
     return NotificationSettingsEntity(
-      id: id ?? this.id,
+      id: id,
       dailyEngagementReminder:
           dailyEngagementReminder ?? this.dailyEngagementReminder,
       prayers: prayers ?? this.prayers,
@@ -53,4 +96,19 @@ class NotificationSettingsEntity {
       threadsFollowed: threadsFollowed ?? this.threadsFollowed,
     );
   }
+
+  @override
+  List<Object?> get props => [
+        id,
+        dailyEngagementReminder,
+        prayers,
+        newPrayerRequest,
+        testimonies,
+        newTestimony,
+        newForumThread,
+        forumCommentReplies,
+        forumThreadComments,
+        forumCommentLikes,
+        threadsFollowed,
+      ];
 }

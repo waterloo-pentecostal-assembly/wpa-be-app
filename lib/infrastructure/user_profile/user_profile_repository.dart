@@ -1,69 +1,60 @@
-import 'dart:io';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:path/path.dart' as path;
-import 'package:wpa_app/services/firebase_firestore_service.dart';
 
 import '../../domain/authentication/entities.dart';
 import '../../domain/authentication/interfaces.dart';
+import '../../domain/authentication/session.dart';
+import '../../domain/common/media_upload.dart';
 import '../../domain/user_profile/exceptions.dart';
 import '../../domain/user_profile/interfaces.dart';
-import '../../app/injection.dart';
+import '../../services/firebase_firestore_service.dart';
 import '../../services/firebase_storage_service.dart';
 
 class UserProfileRepository implements IUserProfileRepository {
+  UserProfileRepository(
+    this._firestore,
+    this._firebaseFirestoreService,
+    this._firebaseStorageService,
+    this._authenticationFacade,
+    this._session,
+  );
+
   final FirebaseFirestore _firestore;
   final FirebaseFirestoreService _firebaseFirestoreService;
   final FirebaseStorageService _firebaseStorageService;
+  final IAuthenticationFacade _authenticationFacade;
+  final ISession _session;
 
-  UserProfileRepository(this._firestore, this._firebaseFirestoreService,
-      this._firebaseStorageService);
+  /// Delegates to the facade, which publishes the user to the session.
+  @override
+  Future<LocalUser> refreshCurrentUser() =>
+      _authenticationFacade.getSignedInUser();
 
   @override
-  Future<LocalUser> updateLocalUser() async {
-    LocalUser localUser =
-        await getIt<IAuthenticationFacade>().getSignedInUser();
-
-    // Register user infomation with getIt to have access to it throughout the application
-    if (getIt.isRegistered<LocalUser>()) {
-      getIt.unregister<LocalUser>();
-    }
-
-    getIt.registerLazySingleton(() => localUser);
-
-    return localUser;
-  }
-
-  @override
-  UploadTask uploadProfilePhoto(File file, String userId) {
-    String fileExt = path.extension(file.path);
-    String filePath = '/users/$userId/profile_photo/image$fileExt';
-
+  UploadHandle uploadProfilePhoto(ImageData image) {
+    final userId = _session.requireUser().id;
+    final filePath = '/users/$userId/profile_photo/image${image.extension}';
     try {
-      return _firebaseStorageService.startFileUpload(filePath, file);
+      return _firebaseStorageService.startUpload(filePath, image);
     } catch (e) {
       throw UserProfileException(
-        code: UserProfileExceptionCode.UNABLE_TO_UPLOAD_IMAGE,
-        message: "Unable to upload image",
+        code: UserProfileExceptionCode.unableToUploadImage,
+        message: 'Unable to upload image',
         details: e,
       );
     }
   }
 
   @override
-  void deleteOldProfilePhoto(String gsUrl, String userId) async {
+  Future<void> setProfilePhoto({
+    required String profilePhoto,
+    required String thumbnail,
+  }) async {
+    final userId = _session.requireUser().id;
     try {
-      await _firebaseStorageService.deleteFile(gsUrl);
-    } catch (e) {
-      //TODO: log somewhere for monitoring
-    }
-  }
-
-  @override
-  Future<void> updateUserCollection(Map<String, dynamic> data, String userId) {
-    try {
-      return _firestore.collection('users').doc(userId).update(data);
+      await _firestore.collection('users').doc(userId).update({
+        'thumbnail': thumbnail,
+        'profile_photo': profilePhoto,
+      });
     } on Exception catch (e) {
       throw _firebaseFirestoreService.handleException(e);
     }

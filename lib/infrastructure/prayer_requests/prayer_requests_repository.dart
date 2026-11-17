@@ -1,230 +1,151 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:wpa_app/infrastructure/common/helpers.dart';
 
-import '../../app/constants.dart';
-import '../../domain/authentication/entities.dart';
+import '../../domain/authentication/session.dart';
+import '../../domain/common/paging.dart';
 import '../../domain/prayer_requests/entities.dart';
 import '../../domain/prayer_requests/exceptions.dart';
 import '../../domain/prayer_requests/interfaces.dart';
-import '../../app/injection.dart';
+import '../../domain/prayer_requests/rules.dart';
 import '../../services/firebase_firestore_service.dart';
 import '../../services/firebase_storage_service.dart';
+import '../common/firestore_page_cursor.dart';
+import '../common/helpers.dart';
+import '../common/user_snippet_dto.dart';
 import 'prayer_requests_dto.dart';
 
-class PrayerRequestsRepository extends IPrayerRequestsRepository {
-  late final FirebaseFirestore _firestore;
-  late final FirebaseFirestoreService _firebaseFirestoreService;
-  late final FirebaseStorageService _firebaseStorageService;
-  late CollectionReference _prayerRequestsCollection;
-  DocumentSnapshot? _lastPrayerRequestDocument;
+class PrayerRequestsRepository implements IPrayerRequestsRepository {
+  PrayerRequestsRepository(
+    this._firestore,
+    this._firebaseStorageService,
+    this._firebaseFirestoreService,
+    this._session,
+  );
 
-  PrayerRequestsRepository(this._firestore, this._firebaseStorageService,
-      this._firebaseFirestoreService) {
-    _prayerRequestsCollection = _firestore.collection("prayer_requests");
-  }
+  final FirebaseFirestore _firestore;
+  final FirebaseStorageService _firebaseStorageService;
+  final FirebaseFirestoreService _firebaseFirestoreService;
+  final ISession _session;
 
-  @override
-  Future<PrayerRequest> createPrayerRequest(
-      {required String request, required bool isAnonymous}) async {
-    final LocalUser user = getIt<LocalUser>();
-    DocumentReference documentReference;
-    DocumentSnapshot documentSnapshot;
+  CollectionReference get _collection =>
+      _firestore.collection('prayer_requests');
 
+  Future<List<PrayerRequest>> _toDomain(
+          List<DocumentSnapshot> docs, String userId) =>
+      Future.wait(docs.map(
+        (doc) => PrayerRequestsDto.fromFirestore(
+            doc, userId, _firebaseStorageService),
+      ));
+
+  Future<QuerySnapshot> _get(Query query) async {
     try {
-      documentReference = await _prayerRequestsCollection.add(
-        PrayerRequestsDto.newRequestFromDomain(request, isAnonymous, user)
-            .newRequestToFirestore(),
-      );
-      documentSnapshot = await documentReference.get();
+      return await query.get();
     } on Exception catch (e) {
       throw _firebaseFirestoreService.handleException(e);
     }
+  }
 
-    return PrayerRequestsDto.fromFirestore(documentSnapshot, user.id)
-        .toDomain(_firebaseStorageService);
+  @override
+  Future<PrayerRequest> createPrayerRequest({
+    required String request,
+    required bool isAnonymous,
+  }) async {
+    final user = _session.requireUser();
+    final DocumentSnapshot snapshot;
+    try {
+      final ref = await _collection.add(PrayerRequestsDto.newDocument(
+        request: request,
+        isAnonymous: isAnonymous,
+        userId: user.id,
+        userSnippet: UserSnippetDto.fromDomain(user),
+        date: Timestamp.now(),
+      ));
+      snapshot = await ref.get();
+    } on Exception catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
+    }
+    return PrayerRequestsDto.fromFirestore(
+        snapshot, user.id, _firebaseStorageService);
   }
 
   @override
   Future<void> deletePrayerRequest({required String id}) async {
     try {
-      await _prayerRequestsCollection.doc(id).delete();
+      await _collection.doc(id).delete();
     } on Exception catch (e) {
       throw _firebaseFirestoreService.handleException(e);
     }
+  }
+
+  Future<List<PrayerRequest>> _mine({required bool closed}) async {
+    final user = _session.requireUser();
+    final snapshot = await _get(_collection
+        .where('user_id', isEqualTo: user.id)
+        .where('is_answered', isEqualTo: closed)
+        .orderBy('date', descending: true));
+    return _toDomain(snapshot.docs, user.id);
   }
 
   @override
-  Future<List<PrayerRequest>> getMyPrayerRequests() async {
-    final LocalUser user = getIt<LocalUser>();
-    QuerySnapshot querySnapshot;
-
-    try {
-      querySnapshot = await _prayerRequestsCollection
-          .where("user_id", isEqualTo: user.id)
-          .where("is_answered", isEqualTo: false)
-          .orderBy("date", descending: true)
-          .get();
-    } on Exception catch (e) {
-      throw _firebaseFirestoreService.handleException(e);
-    }
-
-    List<PrayerRequest> myPrayerRequests = [];
-
-    for (QueryDocumentSnapshot doc in querySnapshot.docs) {
-      PrayerRequest prayerRequest =
-          await PrayerRequestsDto.fromFirestore(doc, user.id)
-              .toDomain(_firebaseStorageService);
-      myPrayerRequests.add(prayerRequest);
-    }
-
-    return myPrayerRequests;
-  }
+  Future<List<PrayerRequest>> getMyPrayerRequests() => _mine(closed: false);
 
   @override
-  Future<List<PrayerRequest>> getMyAnsweredPrayerRequests() async {
-    final LocalUser user = getIt<LocalUser>();
-    QuerySnapshot querySnapshot;
-
-    try {
-      querySnapshot = await _prayerRequestsCollection
-          .where("user_id", isEqualTo: user.id)
-          .where("is_answered", isEqualTo: true)
-          .orderBy("date", descending: true)
-          .get();
-    } on Exception catch (e) {
-      throw _firebaseFirestoreService.handleException(e);
-    }
-
-    List<PrayerRequest> myPrayerRequests = [];
-
-    for (QueryDocumentSnapshot doc in querySnapshot.docs) {
-      PrayerRequest prayerRequest =
-          await PrayerRequestsDto.fromFirestore(doc, user.id)
-              .toDomain(_firebaseStorageService);
-      myPrayerRequests.add(prayerRequest);
-    }
-
-    return myPrayerRequests;
-  }
+  Future<List<PrayerRequest>> getMyAnsweredPrayerRequests() =>
+      _mine(closed: true);
 
   @override
   Future<PrayerRequest> closePrayerRequest({required String id}) async {
-    final LocalUser user = getIt<LocalUser>();
-    DocumentReference prayerRequestReference;
-    DocumentSnapshot prayerRequestSnapshot;
+    final user = _session.requireUser();
+    final DocumentSnapshot snapshot;
     try {
-      prayerRequestReference = _prayerRequestsCollection.doc(id);
-      await prayerRequestReference.update({"is_answered": true});
-      prayerRequestSnapshot = await prayerRequestReference.get();
+      final ref = _collection.doc(id);
+      await ref.update({'is_answered': true});
+      snapshot = await ref.get();
     } on Exception catch (e) {
       throw _firebaseFirestoreService.handleException(e);
     }
-    return PrayerRequestsDto.fromFirestore(prayerRequestSnapshot, user.id)
-        .toDomain(_firebaseStorageService);
+    return PrayerRequestsDto.fromFirestore(
+        snapshot, user.id, _firebaseStorageService);
   }
 
   @override
-  Future<List<PrayerRequest>> getMorePrayerRequests({
+  Future<PageResult<PrayerRequest>> getPrayerRequests({
     required int limit,
+    PageCursor? after,
   }) async {
-    final LocalUser user = getIt<LocalUser>();
-    List<PrayerRequest> prayerRequests = [];
-    QuerySnapshot querySnapshot;
-
-    if (_lastPrayerRequestDocument == null) {
-      throw PrayerRequestsException(
-          code: PrayerRequestsExceptionCode.NO_STARTING_DOCUMENT,
-          message: 'No starting document defined',
-          details:
-              'No starting document defined. Call [getPrayerRequests] first.');
-    }
-
-    try {
-      querySnapshot = await _prayerRequestsCollection
-          .where("is_approved", isEqualTo: true)
-          .where("is_answered", isEqualTo: false)
-          .orderBy("date", descending: true)
-          .startAfterDocument(_lastPrayerRequestDocument!)
-          .limit(limit)
-          .get();
-    } on Exception catch (e) {
-      throw _firebaseFirestoreService.handleException(e);
-    }
-
-    if (querySnapshot.docs.length > 0) {
-      for (QueryDocumentSnapshot doc in querySnapshot.docs) {
-        PrayerRequest prayerRequest =
-            await PrayerRequestsDto.fromFirestore(doc, user.id)
-                .toDomain(_firebaseStorageService);
-        prayerRequests.add(prayerRequest);
-      }
-      _lastPrayerRequestDocument = querySnapshot.docs.last;
-    } else {
-      // Reset tracker if no more documents exist
-      _lastPrayerRequestDocument = null;
-    }
-
-    return prayerRequests;
-  }
-
-  @override
-  Future<List<PrayerRequest>> getPrayerRequests({
-    required int limit,
-  }) async {
-    final LocalUser user = getIt<LocalUser>();
-    QuerySnapshot querySnapshot;
-
-    try {
-      querySnapshot = await _prayerRequestsCollection
-          .where("is_approved", isEqualTo: true)
-          .where("is_answered", isEqualTo: false)
-          .orderBy("date", descending: true)
-          .limit(limit)
-          .get();
-    } on Exception catch (e) {
-      throw _firebaseFirestoreService.handleException(e);
-    }
-
-    List<PrayerRequest> prayerRequests = [];
-
-    if (querySnapshot.docs.length > 0) {
-      for (QueryDocumentSnapshot doc in querySnapshot.docs) {
-        PrayerRequest prayerRequest =
-            await PrayerRequestsDto.fromFirestore(doc, user.id)
-                .toDomain(_firebaseStorageService);
-        prayerRequests.add(prayerRequest);
-      }
-
-      /// save last element to be used by [getMorePrayerRequests] function
-      _lastPrayerRequestDocument = querySnapshot.docs.last;
-    }
-
-    return prayerRequests;
+    final user = _session.requireUser();
+    final snapshot = await _get(_collection
+        .where('is_approved', isEqualTo: true)
+        .where('is_answered', isEqualTo: false)
+        .orderBy('date', descending: true)
+        .page(limit: limit, after: after));
+    return PageResult(
+      items: await _toDomain(snapshot.docs, user.id),
+      nextCursor: nextCursorFor(snapshot, limit),
+    );
   }
 
   @override
   Future<void> prayForPrayerRequest({required String id}) async {
-    final LocalUser user = getIt<LocalUser>();
+    final user = _session.requireUser();
     try {
-      // Using transaction to avoid stale data
+      // Transaction to avoid stale data.
       await _firestore.runTransaction((transaction) async {
-        DocumentReference documentReference = _prayerRequestsCollection.doc(id);
-        DocumentSnapshot documentSnapshot =
-            await transaction.get(documentReference);
-
-        // Check if prayer request exists
-        if (documentSnapshot.data() == null) {
-          throw PrayerRequestsException(
-            code: PrayerRequestsExceptionCode.PRAYER_REQUEST_NOT_FOUND,
+        final ref = _collection.doc(id);
+        final snapshot = await transaction.get(ref);
+        if (snapshot.data() == null) {
+          throw const PrayerRequestsException(
+            code: PrayerRequestsExceptionCode.prayerRequestNotFound,
             message: 'Prayer request not found',
           );
         }
-
-        List<dynamic> prayedBy = findOrDefaultTo(
-            documentSnapshot.data() as Map<String, dynamic>, 'prayed_by', []);
-        prayedBy..add(user.id);
-
-        transaction.update(documentReference, {"prayed_by": prayedBy});
+        final List<dynamic> reactedBy = findOrDefaultTo(
+          snapshot.data() as Map<String, dynamic>,
+          'prayed_by',
+          [],
+        );
+        transaction.update(ref, {
+          'prayed_by': [...reactedBy, user.id]
+        });
       });
     } on Exception catch (e) {
       throw _firebaseFirestoreService.handleException(e);
@@ -233,32 +154,25 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
 
   @override
   Future<void> reportPrayerRequest({required String id}) async {
-    final LocalUser user = getIt<LocalUser>();
-
+    final user = _session.requireUser();
     try {
-      // Using transaction to avoid stale data
       await _firestore.runTransaction((transaction) async {
-        DocumentReference documentReference = _prayerRequestsCollection.doc(id);
-        DocumentSnapshot documentSnapshot =
-            await transaction.get(documentReference);
-
-        List<dynamic> reportedBy = documentSnapshot["reported_by"] ?? [];
-
+        final ref = _collection.doc(id);
+        final snapshot = await transaction.get(ref);
+        final data = (snapshot.data() ?? {}) as Map<String, dynamic>;
+        final List<dynamic> reportedBy = data['reported_by'] ?? [];
         if (reportedBy.contains(user.id)) {
-          throw PrayerRequestsException(
-            code: PrayerRequestsExceptionCode.ALREADY_REPORTED,
+          throw const PrayerRequestsException(
+            code: PrayerRequestsExceptionCode.alreadyReported,
             message: 'You already reported this prayer request',
           );
         }
-
-        reportedBy.add(user.id);
-
-        transaction.update(documentReference, {
-          "reported_by": reportedBy,
-          "is_approved": false,
+        transaction.update(ref, {
+          'reported_by': [...reportedBy, user.id],
+          'is_approved': false,
         });
       });
-    } on PrayerRequestsException catch (_) {
+    } on PrayerRequestsException {
       rethrow;
     } on Exception catch (e) {
       throw _firebaseFirestoreService.handleException(e);
@@ -267,25 +181,11 @@ class PrayerRequestsRepository extends IPrayerRequestsRepository {
 
   @override
   Future<bool> canAddPrayerRequest() async {
-    final LocalUser user = getIt<LocalUser>();
-    QuerySnapshot querySnapshot;
-
-    try {
-      querySnapshot = await _prayerRequestsCollection
-          .where("user_id", isEqualTo: user.id)
-          .where("is_approved", isEqualTo: true)
-          .orderBy("date", descending: true)
-          .get();
-    } on Exception catch (e) {
-      throw _firebaseFirestoreService.handleException(e);
-    }
-
-    if (querySnapshot.docs.length < kPrayerRequestPerUserLimit) {
-      return true;
-    }
-
-    return false;
+    final user = _session.requireUser();
+    final snapshot = await _get(_collection
+        .where('user_id', isEqualTo: user.id)
+        .where('is_approved', isEqualTo: true)
+        .orderBy('date', descending: true));
+    return snapshot.docs.length < kPrayerRequestPerUserLimit;
   }
 }
-
-// TODO: handle SocketExcpetion for loss of internet connection

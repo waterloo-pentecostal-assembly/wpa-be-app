@@ -1,17 +1,12 @@
 import '../common/value_objects.dart';
 import 'validators.dart';
 
-class ResponseBody extends ValueObject {
-  @override
-  final String value;
-
-  factory ResponseBody(String responseBody) {
-    responseBody = responseBody.trim();
-    return ResponseBody._(validateResponseBody(responseBody));
-  }
+class ResponseBody extends ValueObject<String> {
+  factory ResponseBody(String responseBody) =>
+      ResponseBody._(validateResponseBody(responseBody.trim()));
 
   const ResponseBody._(this.value);
 
   @override
-  List<Object> get props => [this.value];
+  final String value;
 }

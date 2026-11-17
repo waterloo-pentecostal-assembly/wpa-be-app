@@ -3,92 +3,52 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/completions/entities.dart';
 import '../common/helpers.dart';
 
+/// `completions/{id}/responses/{responseId}` document.
 class ResponsesDto {
+  const ResponsesDto._(
+      {this.id, required this.responses, required this.userId});
+
+  factory ResponsesDto.fromDomain(Responses responses, String userId) =>
+      ResponsesDto._(responses: responses.responses, userId: userId);
+
+  factory ResponsesDto.fromFirestore(DocumentSnapshot doc) {
+    final json = doc.data() as Map<String, dynamic>;
+    final String userId = findOrThrowException(json, 'user_id');
+    final Map<String, dynamic> raw =
+        (json['responses'] as Map<String, dynamic>?) ?? {};
+    final parsed = <String, Map<String, ResponseDetails>>{};
+    raw.forEach((String bodyIndex, dynamic answers) {
+      (answers as Map<String, dynamic>)
+          .forEach((String questionIndex, dynamic value) {
+        final details = ResponseDetails(
+          response: findOrThrowException(value, 'response'),
+          type:
+              value['type'] == 'text' ? ResponseType.text : ResponseType.image,
+        );
+        (parsed[bodyIndex] ??= {})[questionIndex] = details;
+      });
+    });
+    return ResponsesDto._(id: doc.id, responses: parsed, userId: userId);
+  }
+
   final String? id;
   final Map<String, Map<String, ResponseDetails>> responses;
   final String userId;
 
-  factory ResponsesDto.fromDomain(
-      Map<String, Map<String, ResponseDetails>> responses, String userId) {
-    return ResponsesDto._(responses: responses, userId: userId);
-  }
-
-  factory ResponsesDto.fromFirestore(DocumentSnapshot doc) {
-    Map<String, dynamic> json = doc.data() as Map<String, dynamic>;
-    Map<String, Map<String, ResponseDetails>> _responses = {};
-    String userId = findOrThrowException(json, 'user_id');
-    String responseId = doc.id;
-    Map<String, dynamic> responses =
-        findOrDefaultToGetResponse(json, 'responses', {});
-    responses.forEach((String k1, dynamic v1) {
-      v1.forEach((String k2, dynamic v2) {
-        ResponseDetails responseDetails;
-        if (v2['type'] == 'text') {
-          responseDetails = ResponseDetails(
-            response: findOrThrowException(v2, 'response'),
-            type: ResponseType.TEXT,
-          );
-        } else {
-          responseDetails = ResponseDetails(
-            response: findOrThrowException(v2, 'response'),
-            type: ResponseType.IMAGE,
-          );
-        }
-        if (_responses[k1] != null) {
-          _responses[k1]![k2] = responseDetails;
-        } else {
-          _responses[k1] = {k2: responseDetails};
-        }
-      });
-    });
-    return ResponsesDto._(
-      id: responseId,
-      responses: _responses,
-      userId: userId,
-    );
-  }
-
-  const ResponsesDto._({
-    this.id,
-    required this.responses,
-    required this.userId,
-  });
-}
-
-extension ContentCompletionDtoX on ResponsesDto {
-  Responses toDomain() {
-    return Responses(
-      id: this.id,
-      responses: this.responses,
-    );
-  }
+  Responses toDomain() => Responses(id: id, responses: responses);
 
   Map<String, dynamic> toFirestore() {
-    Map<String, dynamic> _responses = {};
-    this.responses.forEach((String k1, Map<String, ResponseDetails> v1) {
-      v1.forEach((String k2, ResponseDetails v2) {
-        if (_responses[k1] != null) {
-          if (v2.type == ResponseType.TEXT) {
-            _responses[k1][k2] = {'response': v2.response, 'type': 'text'};
-          } else {
-            _responses[k1][k2] = {'response': v2.response, 'type': 'image'};
-          }
-        } else {
-          if (v2.type == ResponseType.TEXT) {
-            _responses[k1] = {
-              k2: {'response': v2.response, 'type': 'text'}
-            };
-          } else {
-            _responses[k1] = {
-              k2: {'response': v2.response, 'type': 'image'}
-            };
-          }
-        }
+    final out = <String, dynamic>{};
+    responses.forEach((bodyIndex, answers) {
+      final body = <String, dynamic>{};
+      answers.forEach((questionIndex, details) {
+        body[questionIndex] = {
+          'response': details.response,
+          'type': details.type == ResponseType.text ? 'text' : 'image',
+        };
       });
+      out[bodyIndex] = body;
     });
-    return {
-      "user_id": this.userId,
-      "responses": _responses,
-    };
+    return {'user_id': userId, 'responses': out};
   }
 }

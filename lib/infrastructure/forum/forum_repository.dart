@@ -1,343 +1,172 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-import 'package:wpa_app/domain/forum/entities.dart';
-import 'package:wpa_app/domain/forum/interfaces.dart';
-import 'package:wpa_app/services/firebase_firestore_service.dart';
+import '../../domain/forum/entities.dart';
+import '../../domain/forum/interfaces.dart';
+import '../../services/firebase_firestore_service.dart';
+import 'forum_dto.dart';
 
 class ForumRepository implements IForumRepository {
+  ForumRepository(this._firestore, this._firebaseFirestoreService);
+
   final FirebaseFirestore _firestore;
   final FirebaseFirestoreService _firebaseFirestoreService;
 
-  ForumRepository(this._firestore, this._firebaseFirestoreService);
+  DocumentReference<Map<String, dynamic>> _forum(String forumId) =>
+      _firestore.collection('forums').doc(forumId);
+
+  CollectionReference<Map<String, dynamic>> _threads(String forumId) =>
+      _forum(forumId).collection('threads');
+
+  DocumentReference<Map<String, dynamic>> _thread(
+    String threadId,
+    String forumId,
+  ) =>
+      _threads(forumId).doc(threadId);
+
+  DocumentReference<Map<String, dynamic>> _comment(
+    String commentId,
+    String threadId,
+    String forumId,
+  ) =>
+      _thread(threadId, forumId).collection('comments').doc(commentId);
+
+  Future<void> _guard(Future<void> Function() action) async {
+    try {
+      await action();
+    } catch (e) {
+      throw _firebaseFirestoreService.handleException(e);
+    }
+  }
+
+  Never _rethrowMapped(Object e) =>
+      throw _firebaseFirestoreService.handleException(e);
 
   @override
-  Stream<Forum> watchForum(String forumId) {
-    return _firestore
-        .collection('forums')
-        .doc(forumId)
-        .snapshots()
-        .map((snapshot) {
-      if (!snapshot.exists) {
-        return Forum.empty();
-      }
-      final data = snapshot.data();
-      if (data == null) return Forum.empty();
-
-      return Forum(
-        id: snapshot.id,
-        title: data['title'] ?? '',
-        isFrozen: data['is_frozen'] ?? false,
-        isReadOnly: data['is_read_only'] ?? false,
-      );
-    }).handleError((e) {
-      throw _firebaseFirestoreService.handleException(e);
-    });
-  }
+  Stream<Forum> watchForum(String forumId) => _forum(forumId)
+      .snapshots()
+      .map(forumFromFirestore)
+      .handleError(_rethrowMapped);
 
   @override
   Stream<List<ForumThread>> watchThreads(String forumId,
       {bool isAdmin = false}) {
-    Query query = _firestore
-        .collection('forums')
-        .doc(forumId)
-        .collection('threads')
-        .orderBy('created_at', descending: true);
-
-    // if (!isAdmin) {
-    //   query = query.where('is_hidden', isEqualTo: false);
-    // }
-
-    return query.snapshots().map((snapshot) {
-      return snapshot.docs.map((doc) {
-        final data = doc.data() as Map<String, dynamic>;
-        return ForumThread(
-          id: doc.id,
-          forumId: forumId,
-          title: data['title'] ?? '',
-          authorId: data['author_id'] ?? '',
-          authorName: data['author_name'] ?? '',
-          authorImageUrl: data['author_image_url'],
-          createdAt: data['created_at'] as Timestamp,
-          updatedAt: data['updated_at'] as Timestamp,
-          commentCount: data['comment_count'] ?? 0,
-          isFrozen: data['is_frozen'] ?? false,
-          isHidden: data['is_hidden'] ?? false,
-        );
-      }).toList();
-    }).handleError((e) {
-      throw _firebaseFirestoreService.handleException(e);
-    });
-  }
-
-  @override
-  Stream<ForumThread> watchThread(String threadId, String forumId) {
-    return _firestore
-        .collection('forums')
-        .doc(forumId)
-        .collection('threads')
-        .doc(threadId)
+    // Hidden threads are not filtered out for non-admins (unchanged behaviour;
+    // the filter was disabled before the refactor).
+    return _threads(forumId)
+        .orderBy('created_at', descending: true)
         .snapshots()
-        .map((doc) {
-      if (!doc.exists) {
-        return ForumThread.empty();
-      }
-      final data = doc.data() as Map<String, dynamic>;
-      return ForumThread(
-        id: doc.id,
-        forumId: forumId,
-        title: data['title'] ?? '',
-        authorId: data['author_id'] ?? '',
-        authorName: data['author_name'] ?? '',
-        authorImageUrl: data['author_image_url'],
-        createdAt: data['created_at'] as Timestamp,
-        updatedAt: data['updated_at'] as Timestamp,
-        commentCount: data['comment_count'] ?? 0,
-        isFrozen: data['is_frozen'] ?? false,
-        isHidden: data['is_hidden'] ?? false,
-      );
-    }).handleError((e) {
-      throw _firebaseFirestoreService.handleException(e);
-    });
+        .map((snapshot) => snapshot.docs
+            .map((doc) => threadFromFirestore(forumId, doc.id, doc.data()))
+            .toList())
+        .handleError(_rethrowMapped);
   }
 
   @override
-  Future<void> createThread(ForumThread thread) async {
-    try {
-      await _firestore
-          .collection('forums')
-          .doc(thread.forumId)
-          .collection('threads')
-          .doc(thread.id.isNotEmpty ? thread.id : null)
-          .set({
-        'title': thread.title,
-        'author_id': thread.authorId,
-        'author_name': thread.authorName,
-        'author_image_url': thread.authorImageUrl,
-        'created_at': FieldValue.serverTimestamp(),
-        'updated_at': FieldValue.serverTimestamp(),
-        'comment_count': 0,
-        'is_frozen': false,
-        'is_hidden': false,
-      });
-    } catch (e) {
-      throw _firebaseFirestoreService.handleException(e as Exception);
-    }
+  Stream<ForumThread?> watchThread(String threadId, String forumId) =>
+      _thread(threadId, forumId)
+          .snapshots()
+          .map((doc) => doc.exists && doc.data() != null
+              ? threadFromFirestore(forumId, doc.id, doc.data()!)
+              : null)
+          .handleError(_rethrowMapped);
+
+  @override
+  Future<String> createThread(NewThread thread) async {
+    final ref = _threads(thread.forumId).doc();
+    await _guard(() => ref.set(newThreadDocument(thread)));
+    return ref.id;
   }
 
   @override
-  Future<void> freezeThread(
-      String threadId, String forumId, bool isFrozen) async {
-    try {
-      await _firestore
-          .collection('forums')
-          .doc(forumId)
-          .collection('threads')
-          .doc(threadId)
-          .update({'is_frozen': isFrozen});
-    } catch (e) {
-      throw _firebaseFirestoreService.handleException(e as Exception);
-    }
-  }
+  Future<void> freezeThread(String threadId, String forumId, bool isFrozen) =>
+      _guard(() => _thread(threadId, forumId).update({'is_frozen': isFrozen}));
 
   @override
-  Future<void> hideThread(
-      String threadId, String forumId, bool isHidden) async {
-    try {
-      await _firestore
-          .collection('forums')
-          .doc(forumId)
-          .collection('threads')
-          .doc(threadId)
-          .update({'is_hidden': isHidden});
-    } catch (e) {
-      throw _firebaseFirestoreService.handleException(e as Exception);
-    }
-  }
+  Future<void> hideThread(String threadId, String forumId, bool isHidden) =>
+      _guard(() => _thread(threadId, forumId).update({'is_hidden': isHidden}));
 
   @override
-  Stream<List<Comment>> watchComments(String threadId, String forumId) {
-    return _firestore
-        .collection('forums')
-        .doc(forumId)
-        .collection('threads')
-        .doc(threadId)
-        .collection('comments')
-        .orderBy('created_at', descending: false)
-        .snapshots()
-        .map((snapshot) {
-      return snapshot.docs.map((doc) {
-        final data = doc.data();
-        return Comment(
-          id: doc.id,
-          threadId: threadId,
-          body: data['body'] ?? '',
-          authorId: data['author_id'] ?? '',
-          authorName: data['author_name'] ?? '',
-          authorImageUrl: data['author_image_url'],
-          createdAt: data['created_at'] as Timestamp,
-          updatedAt: data['updated_at'] as Timestamp,
-          parentId: data['parent_id'],
-          isHidden: data['is_hidden'] ?? false,
-          isDeleted: data['is_deleted'] ?? false,
-          likedBy: List<String>.from(data['liked_by'] ?? []),
-          reportCount: data['report_count'] ?? 0,
-        );
-      }).toList();
-    }).handleError((e) {
-      throw _firebaseFirestoreService.handleException(e);
-    });
-  }
+  Future<void> updateThread(String threadId, String forumId, String newTitle) =>
+      _guard(() => _thread(threadId, forumId).update({
+            'title': newTitle,
+            'updated_at': FieldValue.serverTimestamp(),
+          }));
 
   @override
-  Future<void> addComment(Comment comment, String forumId) async {
-    try {
-      final threadRef = _firestore
-          .collection('forums')
-          .doc(forumId)
-          .collection('threads')
-          .doc(comment.threadId);
+  Stream<List<Comment>> watchComments(String threadId, String forumId) =>
+      _thread(threadId, forumId)
+          .collection('comments')
+          .orderBy('created_at', descending: false)
+          .snapshots()
+          .map((snapshot) => snapshot.docs
+              .map((doc) => commentFromFirestore(threadId, doc.id, doc.data()))
+              .toList())
+          .handleError(_rethrowMapped);
 
+  @override
+  Future<void> addComment(NewComment comment, String forumId) {
+    return _guard(() async {
+      final threadRef = _thread(comment.threadId, forumId);
       await _firestore.runTransaction((transaction) async {
         final threadSnapshot = await transaction.get(threadRef);
-        if (!threadSnapshot.exists) {
-          throw Exception("Thread does not exist");
-        }
-
-        final commentsRef = threadRef.collection('comments').doc();
-        transaction.set(commentsRef, {
-          'thread_id': comment.threadId,
-          'body': comment.body,
-          'author_id': comment.authorId,
-          'author_name': comment.authorName,
-          'author_image_url': comment.authorImageUrl,
-          'created_at': FieldValue.serverTimestamp(),
-          'updated_at': FieldValue.serverTimestamp(),
-          'parent_id': comment.parentId,
-          'is_hidden': false,
-          'is_deleted': false,
-          'liked_by': [],
-          'report_count': 0,
-        });
-
+        if (!threadSnapshot.exists) throw Exception('Thread does not exist');
+        transaction.set(
+          threadRef.collection('comments').doc(),
+          newCommentDocument(comment),
+        );
         transaction
             .update(threadRef, {'comment_count': FieldValue.increment(1)});
       });
-    } catch (e) {
-      throw _firebaseFirestoreService.handleException(e as Exception);
-    }
+    });
   }
 
   @override
   Future<void> deleteComment(
-      String commentId, String threadId, String forumId) async {
-    try {
-      await _firestore
-          .collection('forums')
-          .doc(forumId)
-          .collection('threads')
-          .doc(threadId)
-          .collection('comments')
-          .doc(commentId)
-          .update({'is_deleted': true});
-    } catch (e) {
-      throw _firebaseFirestoreService.handleException(e as Exception);
-    }
-  }
+          String commentId, String threadId, String forumId) =>
+      _guard(() =>
+          _comment(commentId, threadId, forumId).update({'is_deleted': true}));
 
   @override
   Future<void> reportComment(
-      String commentId, String threadId, String forumId, String reason) async {
-    try {
-      // Also create a report document ideally, but for now just increment/update flag
-      await _firestore
-          .collection('forums')
-          .doc(forumId)
-          .collection('threads')
-          .doc(threadId)
-          .collection('comments')
-          .doc(commentId)
-          .update({
-        'report_count': FieldValue.increment(1),
-        // We might want to set is_hidden if reports > threshold, but for now just report
-      });
-    } catch (e) {
-      throw _firebaseFirestoreService.handleException(e as Exception);
-    }
-  }
+    String commentId,
+    String threadId,
+    String forumId,
+    String reason,
+  ) =>
+      _guard(() => _comment(commentId, threadId, forumId)
+          .update({'report_count': FieldValue.increment(1)}));
 
   @override
   Future<void> likeComment(
-      String commentId, String threadId, String forumId, String userId) async {
-    try {
-      await _firestore
-          .collection('forums')
-          .doc(forumId)
-          .collection('threads')
-          .doc(threadId)
-          .collection('comments')
-          .doc(commentId)
-          .update({
-        'liked_by': FieldValue.arrayUnion([userId])
-      });
-    } catch (e) {
-      throw _firebaseFirestoreService.handleException(e as Exception);
-    }
-  }
+    String commentId,
+    String threadId,
+    String forumId,
+    String userId,
+  ) =>
+      _guard(() => _comment(commentId, threadId, forumId).update({
+            'liked_by': FieldValue.arrayUnion([userId]),
+          }));
 
   @override
   Future<void> unlikeComment(
-      String commentId, String threadId, String forumId, String userId) async {
-    try {
-      await _firestore
-          .collection('forums')
-          .doc(forumId)
-          .collection('threads')
-          .doc(threadId)
-          .collection('comments')
-          .doc(commentId)
-          .update({
-        'liked_by': FieldValue.arrayRemove([userId])
-      });
-    } catch (e) {
-      throw _firebaseFirestoreService.handleException(e as Exception);
-    }
-  }
-
-  @override
-  Future<void> updateThread(
-      String threadId, String forumId, String newTitle) async {
-    try {
-      await _firestore
-          .collection('forums')
-          .doc(forumId)
-          .collection('threads')
-          .doc(threadId)
-          .update({
-        'title': newTitle,
-        'updated_at': FieldValue.serverTimestamp(),
-      });
-    } catch (e) {
-      throw _firebaseFirestoreService.handleException(e as Exception);
-    }
-  }
+    String commentId,
+    String threadId,
+    String forumId,
+    String userId,
+  ) =>
+      _guard(() => _comment(commentId, threadId, forumId).update({
+            'liked_by': FieldValue.arrayRemove([userId]),
+          }));
 
   @override
   Future<void> updateComment(
-      String commentId, String threadId, String forumId, String newBody) async {
-    try {
-      await _firestore
-          .collection('forums')
-          .doc(forumId)
-          .collection('threads')
-          .doc(threadId)
-          .collection('comments')
-          .doc(commentId)
-          .update({
-        'body': newBody,
-        'updated_at': FieldValue.serverTimestamp(),
-      });
-    } catch (e) {
-      throw _firebaseFirestoreService.handleException(e as Exception);
-    }
-  }
+    String commentId,
+    String threadId,
+    String forumId,
+    String newBody,
+  ) =>
+      _guard(() => _comment(commentId, threadId, forumId).update({
+            'body': newBody,
+            'updated_at': FieldValue.serverTimestamp(),
+          }));
 }

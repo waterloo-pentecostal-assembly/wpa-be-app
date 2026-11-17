@@ -1,23 +1,16 @@
-enum AppEnvironment { DEV, LOCAL_DEV, PROD }
+/// Build flavour. Selected by the flavour entry point in `flavors/`.
+enum AppEnvironment { dev, localDev, prod }
 
 class AppConfig {
-  final AppEnvironment appEnvironment;
+  const AppConfig({required this.environment, required this.title});
+
+  final AppEnvironment environment;
+
+  /// Application title (task switcher).
   final String title;
-  late bool _hasActiveBibleSeries;
 
-  AppConfig({
-    required this.appEnvironment,
-    required this.title,
-  });
+  bool get isProduction => environment == AppEnvironment.prod;
 
-  set hasActiveBibleSeries(bool hasActive) {
-    this._hasActiveBibleSeries = hasActive;
-  }
-
-  bool get hasActiveBibleSeries {
-    return this._hasActiveBibleSeries;
-  }
+  /// Local Firestore emulator (LOCAL_DEV only).
+  bool get useFirestoreEmulator => environment == AppEnvironment.localDev;
 }
-
-// Roughly followed multienv setup:
-// https://medium.com/@animeshjain/build-flavors-in-flutter-android-and-ios-with-different-firebase-projects-per-flavor-27c5c5dac10b

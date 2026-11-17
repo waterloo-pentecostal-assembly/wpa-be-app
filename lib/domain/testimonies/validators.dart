@@ -1,13 +1,10 @@
-import '../../app/constants.dart';
 import '../common/exceptions.dart';
+import 'rules.dart';
 
-validateTestimonyBody(String responseBody) {
-  if (responseBody.length < kMaxTestimonyBody) {
-    return responseBody;
-  } else {
-    throw ValueObjectException(
-      code: ValueObjectExceptionCode.TOO_LONG,
-      message: '$kMaxTestimonyBody character limit exceeded',
-    );
-  }
+String validateTestimonyBody(String body) {
+  if (body.length < kMaxTestimonyBody) return body;
+  throw const ValueObjectException(
+    code: ValueObjectExceptionCode.tooLong,
+    message: '$kMaxTestimonyBody character limit exceeded',
+  );
 }

@@ -1,26 +1,11 @@
-import 'package:wpa_app/infrastructure/common/helpers.dart';
+import 'package:equatable/equatable.dart';
 
-class Achievements {
+class Achievements extends Equatable {
+  const Achievements({required this.seriesProgress});
+
+  /// Percentage (0-100) of the current series completed by the user.
   final int seriesProgress;
 
-  Achievements({
-    required this.seriesProgress,
-  });
-
   @override
-  String toString() {
-    return "seriesProgress: $seriesProgress";
-  }
-
-  factory Achievements.fromJson(Map<String, dynamic> map) {
-    return Achievements(
-      seriesProgress: findOrDefaultTo(map, 'series_progress', 0),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'series_progress': this.seriesProgress,
-    };
-  }
+  List<Object?> get props => [seriesProgress];
 }

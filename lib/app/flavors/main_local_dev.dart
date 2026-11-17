@@ -1,17 +1,9 @@
-import 'package:material_ui/material_ui.dart';
-import 'package:wpa_app/app/app_config.dart';
+import '../app_config.dart';
+import '../bootstrap.dart';
 
-import '../injection.dart';
-import '../app.dart';
-
-void main() async {
-  initializeInjections(
-      useLocalFirestore: true,
-      useLocalAuth: true,
-      appConfig: AppConfig(
-        appEnvironment: AppEnvironment.LOCAL_DEV,
+void main() => bootstrap(
+      const AppConfig(
+        environment: AppEnvironment.localDev,
         title: 'WPA Bible Engagement LOCAL DEV',
-      ));
-
-  runApp(App());
-}
+      ),
+    );

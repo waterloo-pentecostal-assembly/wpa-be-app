@@ -1,8 +1,11 @@
 import 'package:equatable/equatable.dart';
-import 'package:material_ui/material_ui.dart';
 
-@immutable
-abstract class ValueObject<T> extends Equatable {
+/// Base class for validated, immutable value objects.
+abstract class ValueObject<T extends Object> extends Equatable {
   const ValueObject();
-  get value;
+
+  T get value;
+
+  @override
+  List<Object> get props => [value];
 }

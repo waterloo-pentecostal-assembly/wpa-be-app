@@ -58,7 +58,7 @@ packages:
     source: hosted
     version: "0.2.4"
   bloc:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: bloc
       sha256: e03b235924e4f509c27b5d6b2f949200e0a91149a9818b4f65eeb56662b75413
@@ -226,7 +226,7 @@ packages:
     source: hosted
     version: "1.0.2"
   cupertino_ui:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: cupertino_ui
       sha256: c3eaf7f5bdfee36deb0b14a4cbf7602f1b6b8d8b8576b81f38fc08c25881c94c
@@ -525,14 +525,6 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
-  fluttertoast:
-    dependency: "direct main"
-    description:
-      name: fluttertoast
-      sha256: "7903c9d5339173497bfecbc23bc4212f5a87e0edfac2e1693fb74465ea67da7e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "9.1.0"
   frontend_server_client:
     dependency: transitive
     description:
@@ -894,7 +886,7 @@ packages:
     source: hosted
     version: "3.0.0"
   path:
-    dependency: "direct main"
+    dependency: transitive
     description:
       name: path
       sha256: "75cca69d1490965be98c73ceaea117e8a04dd21217b37b292c9ddbec0d955bc5"
@@ -1005,14 +997,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.1.1"
-  rflutter_alert:
-    dependency: "direct main"
-    description:
-      name: rflutter_alert
-      sha256: "8ff35e3f9712ba24c746499cfa95bf320385edf38901a1a4eab0fe555867f66c"
-      url: "https://pub.dev"
-    source: hosted
-    version: "2.0.7"
   rx:
     dependency: transitive
     description:

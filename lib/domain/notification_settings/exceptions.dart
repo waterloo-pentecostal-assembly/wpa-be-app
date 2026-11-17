@@ -1,30 +1,16 @@
 import '../common/exceptions.dart';
 
 enum NotificationSettingsExceptionCode {
-  UNABLE_TO_SUBSCRIBE,
-  UNABLE_TO_UNSUBSCRIBE,
-  NO_NOTIFICATION_SETTINGS,
+  unableToSubscribe,
+  unableToUnsubscribe,
+  noNotificationSettings,
 }
 
-/// Implements [BaseException] to provide an exception type specific to Notiifcation Settings.
-class NotificationSettingsException implements BaseApplicationException {
-  /// Creates an [PrayerRequestsException] with the specified error [type],
-  /// [message], and optional error [details].
-  NotificationSettingsException({
-    required this.code,
-    required this.message,
-    this.details,
+class NotificationSettingsException
+    extends BaseApplicationException<NotificationSettingsExceptionCode> {
+  const NotificationSettingsException({
+    required super.code,
+    required super.message,
+    super.details,
   });
-
-  /// An authentication exception type.
-  @override
-  final NotificationSettingsExceptionCode code;
-
-  /// A human-readable error message. Should be able to safely display this to the user.
-  @override
-  final String message;
-
-  /// Error details, possibly null.
-  @override
-  final dynamic details;
 }

@@ -2,53 +2,40 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../domain/achievements/entities.dart';
 import '../../domain/achievements/interfaces.dart';
-import '../../domain/authentication/entities.dart';
-import '../../app/injection.dart';
+import '../../domain/authentication/session.dart';
 import '../../services/firebase_firestore_service.dart';
+import '../common/helpers.dart';
 
 class AchievementsRepository implements IAchievementsRepository {
+  AchievementsRepository(
+    this._firestore,
+    this._firebaseFirestoreService,
+    this._session,
+  );
+
   final FirebaseFirestore _firestore;
   final FirebaseFirestoreService _firebaseFirestoreService;
-  late CollectionReference _achievementsCollection;
+  final ISession _session;
 
-  AchievementsRepository(this._firestore, this._firebaseFirestoreService) {
-    _achievementsCollection = _firestore.collection("achievements");
-  }
+  static Achievements _fromData(Map<String, dynamic>? data) => Achievements(
+        seriesProgress: findOrDefaultTo(data ?? {}, 'series_progress', 0),
+      );
+
+  DocumentReference<Map<String, dynamic>> _doc() =>
+      _firestore.collection('achievements').doc(_session.requireUser().id);
 
   @override
   Future<Achievements> getAchievements() async {
-    late DocumentSnapshot<Achievements> documentSnapshot;
-    final LocalUser user = getIt<LocalUser>();
     try {
-      documentSnapshot = await _achievementsCollection
-          .doc(user.id)
-          .withConverter<Achievements>(
-              fromFirestore: (snapshots, _) =>
-                  Achievements.fromJson(snapshots.data()!),
-              toFirestore: (model, _) => model.toJson())
-          .get();
+      final snapshot = await _doc().get();
+      return _fromData(snapshot.data());
     } on Exception catch (e) {
       throw _firebaseFirestoreService.handleException(e);
     }
-    return documentSnapshot.data() ?? Achievements(seriesProgress: 0);
   }
 
   @override
-  Stream<Achievements> watchAchievements() async* {
-    final LocalUser user = getIt<LocalUser>();
-    try {
-      yield* _achievementsCollection
-          .doc(user.id)
-          .withConverter<Achievements>(
-              fromFirestore: (snapshots, _) =>
-                  Achievements.fromJson(snapshots.data()!),
-              toFirestore: (model, _) => model.toJson())
-          .snapshots()
-          .map((documentSnapshot) {
-        return documentSnapshot.data() ?? Achievements(seriesProgress: 0);
-      });
-    } on Exception catch (e) {
-      throw _firebaseFirestoreService.handleException(e);
-    }
-  }
+  Stream<Achievements> watchAchievements() =>
+      _doc().snapshots().map((s) => _fromData(s.data())).handleError(
+          (Object e) => throw _firebaseFirestoreService.handleException(e));
 }

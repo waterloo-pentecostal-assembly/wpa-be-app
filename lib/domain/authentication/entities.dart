@@ -1,19 +1,8 @@
-class LocalUser {
-  final String id;
-  final String firstName;
-  final String lastName;
-  final String email;
-  final int reports;
-  final String? thumbnailUrl;
-  final String? thumbnail;
-  final String? profilePhotoUrl;
-  final String? profilePhoto;
-  final bool isAdmin;
-  final bool isVerified;
+import 'package:equatable/equatable.dart';
 
-  String get fullName => '$firstName $lastName';
-
-  LocalUser({
+/// The signed-in user, as stored in `users/{uid}`.
+class LocalUser extends Equatable {
+  const LocalUser({
     required this.id,
     required this.firstName,
     required this.lastName,
@@ -27,12 +16,40 @@ class LocalUser {
     required this.isVerified,
   });
 
+  final String id;
+  final String firstName;
+  final String lastName;
+  final String email;
+  final int reports;
+
+  /// Download URL of the 200x200 thumbnail, if any.
+  final String? thumbnailUrl;
+
+  /// `gs://` location of the thumbnail, if any.
+  final String? thumbnail;
+
+  /// Download URL of the full profile photo, if any.
+  final String? profilePhotoUrl;
+
+  /// `gs://` location of the full profile photo, if any.
+  final String? profilePhoto;
+  final bool isAdmin;
+  final bool isVerified;
+
+  String get fullName => '$firstName $lastName';
+
   @override
-  String toString() {
-    return '''isAdmin: $isAdmin, isVerified: $isVerified, 
-    ID: $id, Name: $firstName $lastName, 
-    Email: $email, Reports: $reports, 
-    Thumbnail URL: $thumbnailUrl, Thumbnail Location: $thumbnail
-    Thumbnail URL: $profilePhotoUrl, Photo Location: $profilePhoto''';
-  }
+  List<Object?> get props => [
+        id,
+        firstName,
+        lastName,
+        email,
+        reports,
+        thumbnailUrl,
+        thumbnail,
+        profilePhotoUrl,
+        profilePhoto,
+        isAdmin,
+        isVerified,
+      ];
 }

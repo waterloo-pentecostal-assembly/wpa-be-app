@@ -1,13 +1,10 @@
-import '../../app/constants.dart';
 import '../common/exceptions.dart';
+import 'rules.dart';
 
-validateResponseBody(String responseBody) {
-  if (responseBody.length < kMaxResponseBody) {
-    return responseBody;
-  } else {
-    throw ValueObjectException(
-      code: ValueObjectExceptionCode.TOO_LONG,
-      message: 'Response should be less than $kMaxResponseBody characters',
-    );
-  }
+String validateResponseBody(String responseBody) {
+  if (responseBody.length < kMaxResponseBody) return responseBody;
+  throw const ValueObjectException(
+    code: ValueObjectExceptionCode.tooLong,
+    message: 'Response should be less than $kMaxResponseBody characters',
+  );
 }

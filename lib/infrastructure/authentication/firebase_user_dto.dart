@@ -4,20 +4,24 @@ import '../../domain/authentication/entities.dart';
 import '../../services/firebase_storage_service.dart';
 import '../common/helpers.dart';
 
+/// `users/{uid}` document.
 class FirebaseUserDto {
-  final String id;
-  final String firstName;
-  final String lastName;
-  final String email;
-  final int reports;
-  final String? thumbnail;
-  final String? profilePhoto;
-  final bool isVerified;
-  final bool isAdmin;
+  const FirebaseUserDto._({
+    required this.id,
+    required this.firstName,
+    required this.lastName,
+    required this.email,
+    required this.reports,
+    this.thumbnail,
+    this.profilePhoto,
+    required this.isVerified,
+    required this.isAdmin,
+  });
 
   factory FirebaseUserDto.fromFirestore(
-      DocumentSnapshot<Map<String, dynamic>> doc) {
-    Map<String, dynamic> data = doc.data()!;
+    DocumentSnapshot<Map<String, dynamic>> doc,
+  ) {
+    final data = doc.data()!;
     return FirebaseUserDto._(
       firstName: findOrThrowException(data, 'first_name'),
       lastName: findOrThrowException(data, 'last_name'),
@@ -31,40 +35,61 @@ class FirebaseUserDto {
     );
   }
 
-  const FirebaseUserDto._({
-    required this.id,
-    required this.firstName,
-    required this.lastName,
-    required this.email,
-    required this.reports,
-    this.thumbnail,
-    this.profilePhoto,
-    required this.isVerified,
-    required this.isAdmin,
-  });
-}
+  final String id;
+  final String firstName;
+  final String lastName;
+  final String email;
+  final int reports;
+  final String? thumbnail;
+  final String? profilePhoto;
+  final bool isVerified;
+  final bool isAdmin;
 
-extension FirebaseUserDtoX on FirebaseUserDto {
-  Future<LocalUser> toDomain(
-      FirebaseStorageService firebaseStorageService) async {
-    // Convert GS Location to Download URL
-    String? thumbnailUrl =
-        await firebaseStorageService.getNullableDownloadUrl(this.thumbnail);
-    String? profilePhotoUrl =
-        await firebaseStorageService.getNullableDownloadUrl(this.profilePhoto);
-
+  Future<LocalUser> toDomain(FirebaseStorageService storage) async {
+    final urls = await Future.wait([
+      storage.getNullableDownloadUrl(thumbnail),
+      storage.getNullableDownloadUrl(profilePhoto),
+    ]);
     return LocalUser(
-      id: this.id,
-      firstName: this.firstName,
-      lastName: this.lastName,
-      email: this.email,
-      reports: this.reports,
-      thumbnailUrl: thumbnailUrl,
-      thumbnail: this.thumbnail,
-      profilePhotoUrl: profilePhotoUrl,
-      profilePhoto: this.profilePhoto,
-      isVerified: this.isVerified,
-      isAdmin: this.isAdmin,
+      id: id,
+      firstName: firstName,
+      lastName: lastName,
+      email: email,
+      reports: reports,
+      thumbnailUrl: urls[0],
+      thumbnail: thumbnail,
+      profilePhotoUrl: urls[1],
+      profilePhoto: profilePhoto,
+      isVerified: isVerified,
+      isAdmin: isAdmin,
     );
   }
 }
+
+/// Document written for a new user at registration.
+Map<String, dynamic> newUserDocument({
+  required String firstName,
+  required String lastName,
+  required String email,
+}) =>
+    {
+      'first_name': firstName,
+      'last_name': lastName,
+      'email': email,
+      'reports': 0,
+      'is_verified': false,
+      'is_admin': false,
+    };
+
+/// Default notification settings written at registration.
+Map<String, dynamic> defaultNotificationSettings() => {
+      'daily_engagement_reminder': true,
+      'testimonies': true,
+      'prayers': true,
+      'new_prayer_request': true,
+      'new_testimony': true,
+      'new_forum_thread': true,
+      'forum_comment_likes': true,
+      'forum_comment_replies': true,
+      'forum_thread_comments': true,
+    };

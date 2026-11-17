@@ -1,10 +1,9 @@
 import 'entities.dart';
 
 abstract class IBibleSeriesRepository {
-  Future<BibleSeries> getBibleSeriesDetails({
-    required String bibleSeriesId,
-  });
+  Future<BibleSeries> getBibleSeriesDetails({required String bibleSeriesId});
 
+  /// Whether the most recent visible series is active.
   Future<bool> hasActiveBibleSeries();
 
   Future<SeriesContent> getContentDetails({
@@ -12,14 +11,10 @@ abstract class IBibleSeriesRepository {
     required String seriesContentId,
   });
 
-  /// Returns a [List] of the most recent [BibleSeries] limited by [limit].
-  /// Throws [ApplicationException] or [BibleSeriesException].
+  /// The [limit] most recent series (visible ones only for non-admins),
+  /// optionally restricted to active series. Malformed documents are skipped.
   Future<List<BibleSeries>> getBibleSeries({
     required int limit,
     bool isActive = false,
-  });
-
-  Future<List<BibleSeries>> getMoreBibleSeries({
-    required int limit,
   });
 }
