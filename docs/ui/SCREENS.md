@@ -1,645 +1,1038 @@
 # WPA Bible Engagement — Screens (UI Contract)
 
-> **Status:** Phase 0 draft, captured from the code at commit `dba1d54` **before** refactoring.
-> The **Route** fields record how each screen is reached *today* (top-level `MaterialApp.onGenerateRoute`, a per-tab nested `Navigator`, or an `Overlay` insert). They will be rewritten to `go_router` paths/typed helpers in Phase 5.
-> Copy strings are quoted **exactly** (including typos) — `TextFactory` methods are noted only where they affect meaning. See the style inventory at the end.
-> Defects are tagged **[DEFECT]**. Spec item numbers (B1…B15) refer to `docs/specs/refactor-and-ui-readiness.md` §5.
+> **Status:** this describes the refactored code at the head of branch `refactor/ui-readiness` (Phase 7 docs commit). Every route, state field, method and copy string here was checked against `lib/`.
+> **Purpose:** this is the blueprint for rebuilding `lib/presentation/features/**` without touching business logic. Route paths and params (`lib/app/router/routes.dart`), cubits and states (`lib/application/**`), the deep-link mapping and analytics names are fixed. A rebuild replaces the widget classes that `lib/app/router/screen_registry.dart` creates. It keeps the cubit creation in that file.
+> **Copy strings** are quoted **exactly**, typos included (e.g. `uplaod`). If a string comes from the application, domain or infrastructure layer, the doc says so. A rebuilt UI must show those strings as given and must not write its own.
+> **Defects:** B1…B15 are the items in `docs/specs/refactor-and-ui-readiness.md` §5. **[DEFECT]** marks a problem that is still open in the current code. "Fixed (Bn)" or "Fixed:" appears only where the fix changes what the UI must do.
 
 Business rules referenced here are described in [`FEATURES.md`](FEATURES.md).
 
 ## Contents
+- [How screens are wired](#how-screens-are-wired-read-first)
 - Root: [Splash](#splash) · [Sign in](#sign-in) · [Sign up](#sign-up) · [Password reset](#password-reset) · [Main shell](#main-shell-tabs)
-- Engage tab: [Engage home](#engage-home) · [All Bible series](#all-bible-series) · [Bible series detail](#bible-series-detail) · [Series content detail](#series-content-detail) · [Prayer requests](#prayer-requests) · [New prayer request](#new-prayer-request-overlay) · [Testimonies](#testimonies) · [New testimony](#new-testimony-overlay) · [Forum](#forum-thread-list) · [Thread form](#thread-form-overlay) · [Thread detail](#thread-detail)
-- Give tab: [Give](#give-no-screen)
-- Profile tab: [Profile](#profile) · [Notification settings](#notification-settings) · [Terms of use](#terms-of-use-unreachable)
-- Admin tab: [Admin home](#admin-home) · [User verification](#user-verification) · [Prayer request approval](#prayer-request-approval) · [Testimony approval](#testimony-approval)
+- Engage branch: [Engage home](#engage-home) · [All Bible series](#all-bible-series) · [Bible series detail](#bible-series-detail) · [Series content detail](#series-content-detail) · [Prayer requests](#prayer-requests) · [Testimonies](#testimonies) · [New prayer request / New testimony form](#new-prayer-request--new-testimony-form-overlay) · [Forum](#forum-thread-list) · [Thread form](#thread-form-overlay) · [Thread detail](#thread-detail)
+- Give: [Give](#give-no-screen)
+- Profile branch: [Profile](#profile) · [Notification settings](#notification-settings) · [Terms of use](#terms-of-use-external-link-only) · [Notifications tab](#notifications-tab-planned-not-implemented)
+- Admin branch: [Admin home](#admin-home) · [Admin queues (User verification, Prayer request approval, Testimony approval)](#admin-queues)
 - Global: [Foreground push banner](#foreground-push-banner) · [Toasts](#toasts) · [Snackbars](#snackbars) · [Loader](#loader) · [Dialogs](#dialogs-catalogue) · [Photo viewer](#photo-viewer)
-- [Content body catalogue](#content-body-catalogue) · [Route & overlay index](#route--overlay-index) · [Deep-link → screen map](#deep-link--screen-map) · [Analytics → screen map](#analytics--screen-map) · [Current-style inventory](#appendix--current-style-inventory)
+- [Content body catalogue](#content-body-catalogue) · [Route & overlay index](#route--overlay-index) · [Two-pane readiness](#two-pane-list--detail-readiness-spec-82) · [Deep-link → screen map](#deep-link--screen-map) · [Analytics → screen map](#analytics--screen-map) · [Open issues](#open-issues-summary) · [Styles](#appendix--styles-theme-roles-and-tokens)
+
+---
+
+## How screens are wired (read first)
+
+- **Router:** `buildAppRouter()` in `lib/app/router/app_router.dart` builds a `GoRouter`. It starts at `/splash`. Its `redirect` is `RedirectPolicy.redirect()` (`redirect_policy.dart`), and it refreshes on every `AuthenticationCubit` state change.
+  - **Root routes:** `/splash`, `/sign-in`, `/sign-up`, `/password-reset`.
+  - **Shell:** one `StatefulShellRoute.indexedStack` with three branches: **0 Engage** (`/engage/**`), **1 Profile** (`/profile/**`), **2 Admin** (`/admin/**`).
+  - `RouteScreens` lets tests replace each screen with a stub.
+  - An unknown location is sent to `/engage` by the router's `onException` handler (the redirect policy still applies).
+- **Screen registry:** `ScreenRegistry` (`screen_registry.dart`) is the only place that maps a route to a widget. Each builder wraps the widget in the `BlocProvider`(s) for its cubit(s), so cubits are **route-scoped**: created when the route is built and closed when it is popped. Most builders call `..load()` when they create the cubit.
+- **Navigation API:** screens call `context.navigator`, an `AppNavigator` from `lib/presentation/foundation/navigation/app_navigator.dart`, implemented by `GoRouterAppNavigator` in `app_navigator_impl.dart`.
+  - Forward navigation **pushes** (`router.push`), so back returns to the previous screen.
+  - `goToSignIn()` **replaces** the stack (`router.go`).
+  - Back is `Navigator.maybePop(context)`. `AppHeader` does this by default.
+  - Tapped notifications use `router.go` through `NotificationOpener` (see [deep links](#deep-link--screen-map)).
+- **App-scope state:** created in `_AppState` (`lib/app/app.dart`) and provided above the router.
+  - Blocs: `AuthenticationCubit`, which calls `checkAuthentication()` at start; `AudioPlayerCubit`; `LinksCubit`, which calls `load()` at start; `NotificationsCubit`.
+  - Repository providers: `AppNavigator` and `NewPostCubitFactory`.
+  - Fixed (B2/B3): Firebase, App Check, DI and FCM are initialised in `bootstrap()` before `runApp`. There is no in-app loader before the splash any more.
+- **State conventions:**
+  - `LoadStatus {initial, loading, success, failure}` (`application/common/load_status.dart`). `isLoading` is true for both `initial` and `loading`.
+  - Forms use `FormStatus {idle, submitting, success, failure}`.
+  - One-shot effects (toasts, snackbars, dialogs) are fields paired with a counter (`messageId`, `errorId` or `effectId`, made by `nextEffectId()`). The UI listens with `listenWhen: (a, b) => a.<id> != b.<id>`.
+- **Cross-screen refresh:** `AppEventBus` (`application/common/app_events.dart`, app singleton) carries `CompletionChanged`, `ThreadFollowChanged`, `PostCreated`, `PostDeleted`, `PostClosed`, `PostReported` and `PostReacted`. It replaces the old `.then(refresh)` after pops, so lists update even if they are not on top.
+- **Feedback API** (`lib/presentation/foundation/feedback/`): `AppToast.info` / `AppToast.error`, `showSnack`, `showOverlayForm`; dialogs (`showMessageDialog`, `showConfirmDialog`) are in `design_system/components/app_dialogs.dart`. fluttertoast and rflutter_alert are gone.
+- **Formatting** (`lib/presentation/foundation/formatting/`):
+  - `DateFormats.shortDate` → `17 Nov 2026`; `dateRange` → `1 Nov 2026 - 30 Nov 2026`.
+  - `readableDate` → `07 NOV, 2026`; `monthAbbrev` → `NOV`; `dayOfMonth` → `07`.
+  - `isoDate` → `2026-11-07`; `relative` → timeago, e.g. `5 minutes ago`.
+  - `countedPhrase(prefix, n, noun)` → `Prayed by 1 other` / `Prayed by 3 others`.
+  - `formatMinutesSeconds` → `mm:ss`.
+- **Layout primitives** (`lib/presentation/foundation/layout/`):
+  - `WindowSize` (compact < 600 ≤ medium < 840 ≤ expanded < 1200 ≤ large) is read on every build. Fixed (B15).
+  - `ContentConstraint`: centred, max width 720.
+  - `ResponsiveGrid`: max cross-axis extent grid.
+  - `AdaptiveShell`: navigation bar or rail.
+- **Platform helpers** (`foundation/platform/`): `openExternal(context, uri, {inAppWebView})`, `pickImageFromGallery()` (returns `ImageData` bytes, no `dart:io`), and `PickedImageView`.
+- Widgets import `package:material_ui/material_ui.dart`. `MaterialApp.router` wraps the tree in `MaterialUiCompatibilityBridge` for dependencies that still use `package:flutter/material.dart`.
 
 ---
 
 ## Root
 
 ### Splash
-- **Route:** top-level `/` (`app.dart routes`) — also the fallback for unknown names. Before it, `App` shows a bare `Loader()` while `initializeServices()` (Firebase init, App Check, FCM init, initial message) runs inside a `FutureBuilder` **in `build()`** (spec B2).
-- **Entry points:** app launch.
+- **Route:** `/splash` (`Paths.splash`, `Routes.splash`). Root route, outside the shell. `ScreenRegistry.splash()` → `SplashPage`. This is the router's `initialLocation`.
+- **Entry points:** app launch. While `AuthStatus.unknown`, `RedirectPolicy` sends every location here and remembers non-auth locations as *pending*.
 - **Inputs:** none.
-- **State holder(s):** `AuthenticationBloc` (app scope, `App` `MultiBlocProvider`, created with `RequestAuthenticationState`).
-- **States → what is shown:** always a `Scaffold` with a centred `Loader` (three pulsing blue dots).
+- **State holder(s):** `AuthenticationCubit` (app scope). `AuthenticationState` has:
+  - `status`: `AuthStatus {unknown, authenticated, unauthenticated}`
+  - `user`: `LocalUser?`
+  - `errorMessage`, `errorId`
+  - getter `isAdmin`
+- **States → what is shown:** always `Scaffold(body: LoadingState())`.
 - **User actions:** none.
-- **Navigation out:** `Authenticated` → `/index` (clear stack); `Unauthenticated` → `/sign_in` (clear stack).
-- **Side effects:** none directly. App-scope blocs are also created in `App`: `NavigationBarBloc`, `BibleSeriesBloc(HasActiveBibleSeriesRequested)` (spec B7 duplicate), `AudioPlayerBloc(InitializePlayer)`.
+- **Navigation out:** decided by the router redirect, not the widget:
+  - `authenticated` → the pending location if any, otherwise `/engage`. Admin paths go to `/engage` for non-admins.
+  - `unauthenticated` → `/sign-in`.
+- **Side effects:** none.
 - **Responsive notes:** n/a.
 
 ### Sign in
-- **Route:** top-level `/sign_in` (`SignInPage` → nested `Scaffold` → `SignInForm`, which builds another `Scaffold`).
-- **Entry points:** Splash when unauthenticated, Logout, account deletion, the OK button in the sign-up / password-reset success dialogs.
+- **Route:** `/sign-in` (`Routes.signIn`). Root route. `ScreenRegistry.signIn()` → `BlocProvider(SignInCubit)` + `SignInPage`.
+- **Entry points:**
+  - Redirect when unauthenticated: launch, `Logout`, account deletion.
+  - `goToSignIn()` from the sign-up and password-reset success dialogs.
 - **Inputs:** none.
-- **State holder(s):** `SignInBloc` (factory, created in `SignInPage`). Fields: `emailAddress, emailAddressError, password, passwordError, submitting, signInSuccess, signInError`; getter `isSignInFormValid`.
+- **State holder(s):** `SignInCubit` (route scope). `SignInState` has:
+  - `emailAddress`, `emailAddressError`, `password`, `passwordError`
+  - `status` (`FormStatus`)
+  - `errorMessage` (`''` = none)
+  - getters `isSubmitting`, `isValid` (no field errors and both fields non-empty)
 - **States → what is shown:**
-  - `submitting == true` → full-screen `Loader` (the whole form is replaced)
-  - otherwise a white scrollable page:
-    - logo (`kWpaLogoLoc`, height 200, padding 60 top/bottom)
-    - the `signInError` text in red (empty string = blank line)
-    - email field (hint `Email Address`) and obscured password field (hint `Password`), both validated live (`AutovalidateMode.always`)
-    - right-aligned `Forgot Password?` link
-    - full-width gradient button `LOGIN` (blue `rgba(0,146,214,1→0.7)`; grey.shade400 when disabled)
-    - row `Don't have an account?` + link `Sign Up`
-- **User actions → events:**
-  - typing → `EmailChanged(email)` / `PasswordChanged(password)`
-  - `LOGIN` (enabled when valid && !submitting) → `SignInWithEmailAndPassword()`
-  - `Forgot Password?` → push `/password_reset`
-  - `Sign Up` → push `/sign_up`
+  - `isSubmitting` → `Scaffold(LoadingState)`. The whole form is replaced.
+  - otherwise `AuthLayout`: a white scrollable page, content centred with max width 520:
+    - logo (`AppAssets.logo`, height 200, 60 px vertical padding)
+    - `errorMessage` in `AppColors.error` (an empty string leaves a blank line)
+    - a fields card with `Email Address` (email keyboard) and `Password` (obscured). Each field shows its cubit error as `errorText`.
+    - right-aligned `Forgot Password?` (muted style)
+    - full-width gradient button `LOGIN`: `wpaBlue` → `wpaBlue@70%`, `grey.shade400` when disabled
+    - footer `Don't have an account?` + link `Sign Up`
+- **User actions → methods:**
+  - typing → `emailChanged(v)` / `passwordChanged(v)`. Each change is validated, so errors appear as soon as the user types.
+  - `LOGIN` (enabled iff `isValid`) → `submit()`
+  - `Forgot Password?` → `openPasswordReset()`, which pushes `/password-reset`
+  - `Sign Up` → `openSignUp()`, which pushes `/sign-up`
 - **Permissions/visibility:** —
-- **Validation & messages:** email → `Invalid email address.`; password → `Password must be at least 8 characters.`. Server errors (shown as `signInError`): `Invalid Email or Password`, `User disabled`, `User not found`, `User not verified`, `Email not verified. See verification email sent to <email>`, `User details not found`, `An unknown error occurred`.
-- **Navigation out:** on `signInSuccess`: `AuthenticationBloc.add(RequestAuthenticationState())`, `NavigationBarBloc.add(NavigationBarEvent(tab: ENGAGE))`, `pushNamedAndRemoveUntil('/index')`.
-- **Side effects:** device token upsert (see FEATURES §1).
-- **Responsive notes:** single column with 30 px side padding and no max width. A candidate for `ContentConstraint` (≈ 480).
+- **Validation & messages:**
+  - Field errors come from the domain validators: `Invalid email address.` (`kEmailRegex`, on the trimmed value) and `Password must be at least 8 characters.` (`kMinPasswordLength`).
+  - Server errors (shown as `errorMessage`, from `userMessageFor`):
+    - `Invalid Email or Password`
+    - `User disabled`
+    - `User not found`
+    - `User not verified`
+    - `Email not verified. See verification email sent to <email>`
+    - `User details not found`
+    - `You do not have permission to execute this operation`
+    - `An unknown error occurred`
+  - After a failure the cubit also signs out.
+- **Navigation out:** on success the facade updates the `ISession`. `AuthenticationCubit` then emits `authenticated` and the router redirects to the pending location or `/engage`. The widget makes no navigation call. See the [Open issues](#open-issues-summary) note on pending locations after logout.
+- **Side effects:** saves this device's push token if it isn't stored yet (`deviceTokenExists` / `addDeviceToken`).
+- **Responsive notes:** single column with max width 520 (`ContentConstraintBox`) and 30 px side padding.
 
 ### Sign up
-- **Route:** top-level `/sign_up` (`SignUpPage` → `Scaffold` → `SignUpForm` → `Scaffold`).
+- **Route:** `/sign-up` (`Routes.signUp`). Root route, pushed over sign-in. `ScreenRegistry.signUp()` → `BlocProvider(SignUpCubit)` + `SignUpPage`.
 - **Entry points:** Sign in → `Sign Up`.
 - **Inputs:** none.
-- **State holder(s):** `SignUpBloc` (factory). Fields: `firstName, lastName, emailAddress, password` + `*Error`, `submitting, signUpSuccess, signUpError`; getter `isSignUpFormValid`.
-- **States → what is shown:** `submitting` → `Loader`. Otherwise: logo (height 100), red `signUpError`, fields `First Name`, `Last Name`, `Email Address`, `Password` (obscured), gradient button `SIGN UP`. There is no back button or "already have an account" link; the system back gesture works.
-- **User actions → events:** typing → `FirstNameChanged`, `LastNameChanged`, `EmailChanged`, `PasswordChanged`; `SIGN UP` → `SignUpWithEmailAndPassword()`.
-- **Validation & messages:** `Name must be at least one letter.`, `Invalid email address.`, `Password must be at least 8 characters.`; server: `A user with this email already exists. Please try signing in`, `An unknown error occurred`.
-- **Navigation out / side effects:** on success → dialog **Registration Successful!** / `Once your account is validated, a confirmation email will be sent to <email>` / button `OK` → `pushNamed('/sign_in')` (**[DEFECT]** pushes on top of the dialog and the stack instead of resetting).
+- **State holder(s):** `SignUpCubit` (route scope). `SignUpState` has:
+  - `firstName`, `lastName`, `emailAddress`, `password`, each with a `*Error`
+  - `status`, `errorMessage`
+  - getters `isSubmitting`, `isValid` (no errors and all four fields non-empty)
+- **States → what is shown:**
+  - `isSubmitting` → `LoadingState`.
+  - otherwise `AuthLayout`: logo height 100, red `errorMessage`, fields `First Name`, `Last Name`, `Email Address`, `Password` (obscured), and the gradient button `SIGN UP`.
+  - There is no back button or "already have an account" link; the system back gesture pops to sign-in.
+- **User actions → methods:**
+  - typing → `firstNameChanged`, `lastNameChanged`, `emailChanged`, `passwordChanged`
+  - `SIGN UP` (enabled iff `isValid`) → `submit()`
+- **Validation & messages:**
+  - `Name must be at least one letter.` (first and last name, not trimmed)
+  - `Invalid email address.`
+  - `Password must be at least 8 characters.`
+  - Server errors: `A user with this email already exists. Please try signing in`, `You do not have permission to execute this operation`, `An unknown error occurred`.
+- **Navigation out / side effects:** on `FormStatus.success` → dialog **Registration Successful!** / `Once your account is validated, a confirmation email will be sent to <email>` / `OK` → `goToSignIn()`, which replaces the stack. Fixed: it used to push `/sign_in` on top of the dialog and the stack. The new user is not signed in; an admin must verify them.
 - **Responsive notes:** as Sign in.
 
 ### Password reset
-- **Route:** top-level `/password_reset`.
+- **Route:** `/password-reset` (`Routes.passwordReset`). Root route, pushed over sign-in. `ScreenRegistry.passwordReset()` → `BlocProvider(PasswordResetCubit)` + `PasswordResetPage`.
 - **Entry points:** Sign in → `Forgot Password?`.
-- **State holder(s):** `PasswordResetBloc` (factory). Fields `emailAddress, emailAddressError, submitting, passwordResetSuccess, passwordResetError`.
-- **States → what is shown:** `submitting` → `Loader`. Otherwise logo (height 100), red error text, `Email Address` field, gradient button `RESET PASSWORD`.
-- **User actions → events:** typing → `EmailChanged`; button → `ResetPassword()`.
-- **Validation & messages:** `Invalid email address.`; server: `User not found, please verify email and try again`, `An unknown error occurred`.
-- **Navigation out / side effects:** on success → **rflutter_alert** `Alert` titled `Password Reset Successful!`, desc `Please follow instructions in email to reset password.`, button `OK` (white, 20 pt, width 120) → `pushNamed('/sign_in')`.
+- **Inputs:** none.
+- **State holder(s):** `PasswordResetCubit` (route scope). `PasswordResetState` has `emailAddress`, `emailAddressError`, `status`, `errorMessage`, and getters `isSubmitting`, `isValid`.
+- **States → what is shown:**
+  - `isSubmitting` → `LoadingState`.
+  - otherwise `AuthLayout`: logo height 100, red error text, the `Email Address` field, and the gradient button `RESET PASSWORD`.
+- **User actions → methods:** typing → `emailChanged`; the button (enabled iff `isValid`) → `submit()`.
+- **Validation & messages:**
+  - `Invalid email address.`
+  - Server errors: `User not found, please verify email and try again`, `An unknown error occurred`.
+  - Other Firebase auth errors are treated as success, as before the refactor.
+- **Navigation out / side effects:** on success → Material dialog **Password Reset Successful!** / `Please follow instructions in email to reset password.` / `OK` → `goToSignIn()`. This used to be an rflutter_alert `Alert` that pushed `/sign_in`.
+- **Responsive notes:** as Sign in.
 
 ### Main shell (tabs)
-- **Route:** top-level `/index` → `IndexPage`.
-- **Entry points:** Splash (authenticated), successful sign-in.
-- **Inputs:** none (reads `NavigationBarBloc` state for a pending deep link).
-- **State holder(s):** `NavigationBarBloc` (get_it **singleton** provided again here — see FEATURES §11), `LinksBloc(LinksRequested)` (created here and also read by Profile → Other).
-- **States → what is shown:** `Scaffold`:
-  - body `LazyLoadIndexedStack` (index = tab) of `[EngagePage, EmptyPage, ProfilePage, AdminPage]`, each with its own nested `Navigator` (Give = `EmptyPage`)
-  - `BottomNavigationBar` (fixed): `HOME` (`Icons.home`), `GIVE` (`Icons.favorite`), `PROFILE` (`Icons.person`), plus `ADMIN` (`Icons.admin_panel_settings`) only if `getIt<LocalUser>().isAdmin` at build time. Selected colour kWpaBlue@60%, unselected grey[500]; labels `regularTextStyle(11)` / `liteTextStyle(10)`.
-- **User actions → events:**
-  - tap another tab → `NavigationBarEvent(tab)`
-  - tap `GIVE` → launch `links.give_link` externally (no tab change), else toast `Error opening page`
-  - re-tap the current tab → pop that tab's navigator to its first route
-  - Android back → `PopScope(canPop:false)`: pops the current tab's navigator if possible, otherwise does nothing
-- **Permissions/visibility rules:** ADMIN tab ⇔ `LocalUser.isAdmin`.
-- **Navigation out:** deep links (see [map](#deep-link--screen-map)): pop the target tab to its root, then `pushNamed(route, arguments)`.
-- **Side effects:** subscribes to `FirebaseMessagingService.foregroundMessageStream` → shows the [Foreground push banner](#foreground-push-banner). On first frame, handles a pending `NavigationBarState.route` (cold-start deep link).
-- **Responsive notes:** bottom bar only. The target is `AdaptiveShell` (bar/rail/drawer).
-- **Note:** a local class named `NavigationBar` shadows Material's `NavigationBar` (spec §8.1).
+- **Route:** the `StatefulShellRoute.indexedStack` in `app_router.dart`, built by `RouteScreens._defaultShell` → `AppShell`. The shell is wrapped in a `BlocBuilder<AuthenticationCubit>` that rebuilds only when `isAdmin` changes. Every Engage, Profile and Admin route renders inside it, so the navigation stays visible on sub-pages.
+- **Entry points:** any authenticated location.
+- **Inputs:** set by the router, not by the user.
+  - `child`: the branch navigator
+  - `currentBranch`: 0 Engage, 1 Profile, 2 Admin
+  - `onSelectBranch(branch, reselected)` → `shell.goBranch(branch, initialLocation: reselected)`
+  - `isAdmin`
+  - `fallbackGiveUrl` = `kWpaGiveUrl` (`https://www.canadahelps.org/en/dne/15479`)
+- **State holder(s):** all app scope.
+  - `AuthenticationCubit`: `isAdmin`.
+  - `LinksCubit`: `LinksState{status, links: AppLinks{giveLink, privacyPolicyLink, termsOfUseLink, helpEmail, reportEmail}, errorMessage}`.
+  - `NotificationsCubit`: `NotificationsState{latest: PushNotification?, id}`.
+- **States → what is shown:** `AdaptiveShell` with these destinations:
+  - `HOME` (`Icons.home`)
+  - `GIVE` (`Icons.favorite`)
+  - `PROFILE` (`Icons.person`)
+  - `ADMIN` (`Icons.admin_panel_settings`), only when `isAdmin`
+
+  The layout depends on width:
+  - compact (< 600) → bottom `NavigationBar`
+  - medium (600–839) → `NavigationRail` with labels
+  - expanded+ (≥ 840) → extended rail
+
+  Styling comes from the theme:
+  - selected: `wpaBlue@60%`, 11/600
+  - unselected: `grey[500]`, 10/400
+  - no indicator
+
+  Selected destination: branch 0 → HOME, 1 → PROFILE, 2 → ADMIN. If the Admin branch is current but the user isn't an admin, HOME is selected.
+- **User actions → methods:**
+  - HOME / PROFILE / ADMIN → `onSelectBranch`. Each branch keeps its own stack.
+  - Re-tapping the current destination returns to that branch's root (`initialLocation: true`).
+  - `GIVE` → `openExternal(links.giveLink, or kWpaGiveUrl if missing or links not loaded)`. The branch doesn't change. If the link can't be opened → toast `Error opening page`.
+  - Android back: `PopScope(canPop: false)` wraps the shell. Routes inside the branch pop; at a branch root nothing happens, so the app never exits with back.
+- **Permissions/visibility rules:**
+  - The ADMIN destination appears iff `AuthenticationState.isAdmin`.
+  - Every `/admin` path is redirected to `/engage` for non-admins (`RedirectPolicy._authorised`).
+- **Navigation out:** branch switches; deep links (see [map](#deep-link--screen-map)).
+- **Side effects:** a `BlocListener<NotificationsCubit>` (`listenWhen: b.latest != null && a.id != b.id`) shows the [Foreground push banner](#foreground-push-banner). It only works while the shell is mounted.
+- **Responsive notes:** bar → rail → extended rail via `AdaptiveShell`. No drawer.
 
 ---
 
-## Engage tab
+## Engage branch
 
-Tab root: `EngagePage` (`presentation/engage/main/engage.dart`). It provides tab-scoped blocs to **every** route in its nested navigator and to overlays inserted into that navigator's `Overlay`:
-`BibleSeriesBloc(HasActiveBibleSeriesRequested)`, `PrayerRequestsBloc(RecentPrayerRequestsRequested(5))`, `TestimoniesBloc(RecentTestimoniesRequested(5))`, `AchievementsBloc(WatchAchievementsStarted)`, `MediaBloc(AvailableMediaRequested)`.
-The nested navigator's routes: `/` → `EngageIndex`, `/bible_series`, `/all_bible_series`, `/prayer_requests`, `/prayer_requests/mine`, `/testimonies`, `/testimonies/mine`, `/content_detail`, `/forum`, `/thread_detail`; unknown → `EngageIndex`. Arguments are untyped `Map`s.
+All routes below are children of `/engage` in branch 0. Each builds its own cubit(s) from its path and query params. No Engage-wide providers remain: the old `EngagePage` blocs are gone, and Fixed (B7) means there is now one Bible-series state holder per route scope.
 
 ### Engage home
-- **Route:** Engage nested `/` → `EngageIndex`.
-- **Entry points:** HOME tab; re-tap HOME.
+- **Route:** `/engage` (`Paths.engage`, `Routes.engage`). Root of branch 0. `ScreenRegistry.engageHome()` → `BlocProvider(EngageHomeCubit(...)..load())` + `EngageHomePage`.
+- **Entry points:**
+  - the HOME destination, re-tapping HOME, and the landing page after sign-in
+  - the fallback for admin deep links opened by non-admins
+  - the fallback for incomplete notification payloads
+  - back from screens that were opened by a deep link
 - **Inputs:** none.
-- **State holder(s):**
-  - `BibleSeriesBloc` (EngagePage scope) for `HasActiveBibleSeries`
-  - a **second** `BibleSeriesBloc` created inside `EngageIndex` with `RecentBibleSeriesRequested(amount: 3)` (spec B7: three instances incl. the app-scope one)
-  - `AchievementsBloc`, `MediaBloc`, `PrayerRequestsBloc`, `TestimoniesBloc` (EngagePage scope)
+- **State holder(s):** `EngageHomeCubit` (route scope). It is the **only** series state on the home screen (Fixed B7: replaces the app-scope, Engage-scope and home-scope `BibleSeriesBloc`s). `EngageHomeState` has:
+  - `status`: decides the layout. It stays loading until `hasActiveBibleSeries()` resolves; an error there counts as "no active series".
+  - `firstName`: from `ISession`
+  - `hasActiveSeries`
+  - `seriesStatus`, `series`, `seriesError`. When a series is active this is up to 15 active series (`activeSeriesLimit`); otherwise up to 3 past series (`pastSeriesLimit`).
+  - `seriesProgress`: int 0–100, from the achievements stream
+  - `mediaStatus`, `media`, `mediaError`
+  - getter `currentSeries` (the first series when one is active)
 - **States → what is shown:**
-  - until `HasActiveBibleSeries` arrives → `Loader`
-  - then a pull-to-refresh `ListView`:
-    1. header `Hello, <firstName>!` (`heading`, 30 pt w700)
-    2. **if hasActive:** [Current series card](#current-series-card); **else:** [Past Bible Series carousel](#past-bible-series-carousel)
-    3. **Prayer Requests** block (grey.shade100 background): title `Prayer Requests` + a row of three tiles: `VIEW ALL / REQUESTS` (flex 2), `VIEW MY / REQUESTS` (flex 2), a round `+` (flex 1, black38 background)
-    4. **Testimonies** block: title `Testimonies` + tiles `VIEW ALL / TESTIMONIES`, `VIEW MY / TESTIMONIES`, `+`
-    5. **Media** block: title `Media` + horizontal list of media cards (thumbnail 75 h × 150 w, `platform` bold, `description` lite with ellipsis). Loading → grey placeholders (count = ceil(screenWidth/150)); error → plain `Text(message)` (`Unable to load media`).
-  - there is no empty state for media (an empty list shows nothing)
-- **User actions → events/navigation:**
-  - pull to refresh → `HasActiveBibleSeriesRequested` (parent bloc), `WatchAchievementsStarted`, `RecentBibleSeriesRequested(amount: hasActive ? 15 : 3, isActive: hasActive)`, `AvailableMediaRequested`
-  - `VIEW ALL REQUESTS` → `/prayer_requests`; `VIEW MY REQUESTS` → `/prayer_requests/mine`; prayer `+` → [New prayer request overlay](#new-prayer-request-overlay)
-  - testimony tiles → `/testimonies`, `/testimonies/mine`, [New testimony overlay](#new-testimony-overlay)
-  - media card → `launchUrl(link, inAppWebView)`, else toast `Error opening page`
+  - `status.isLoading` → `LoadingState`
+  - otherwise a pull-to-refresh `ListView` with these sections in order:
+    1. `PageHeading` `Hello, <firstName>!` (`headlineLarge`)
+    2. if `hasActiveSeries`: the [Current series card](#current-series-card); otherwise the [Past Bible Series carousel](#past-bible-series-carousel)
+    3. **Prayer Requests** shortcuts (`CommunityShortcuts.prayerRequests`, `grey.shade100` background):
+       - section title `Prayer Requests`
+       - a row of tiles, height 50 scaled by text scale:
+         - `VIEW ALL` / `REQUESTS` (flex 2, `grey[300]`, radius 15)
+         - `VIEW MY` / `REQUESTS` (flex 2)
+         - a round `+` (flex 1, `black38`, add icon 40 in `grey.shade100`, semantics label `Prayer Request`)
+    4. **Testimonies** shortcuts: title `Testimonies`; tiles `VIEW ALL` / `TESTIMONIES`, `VIEW MY` / `TESTIMONIES`, `+` (semantics label `Testimony`)
+    5. **Media**: `SectionHeader` `Media`, then:
+       - `mediaStatus == failure` → left-aligned `ErrorState(mediaError)`, i.e. `Unable to load media`
+       - loading/initial → 3 grey placeholders (150×75)
+       - success → a horizontal list of tiles, 150 wide: thumbnail 75 high (radius 15), `platform` (`labelLarge`, 1 line), `description` (`bodyMedium`, 1 line, ellipsis)
+       - an empty list shows an empty strip with no copy
+  - **Not present** (checked against spec §4.2):
+    - The recent prayer-request and testimony lists don't exist. Fixed (B8): the unused fetch was removed, which matches the old visible behaviour.
+    - There is no forum entry on home. The forum is only reachable from Bible series detail → `Discussion`.
+- **User actions → methods / navigation:**
+  - pull to refresh → `refresh()` (same as `load()`): re-reads first name, active flag, series and media, and restarts the achievements watch
+  - `VIEW ALL` → `openPrayerRequests(tab: PostsTab.all)` → `/engage/prayer-requests`
+  - `VIEW MY` → `openPrayerRequests(tab: PostsTab.mine)` → `/engage/prayer-requests?tab=mine`
+  - prayer `+` → `showNewPostForm(context, PostCopy.prayerRequests)` ([form](#new-prayer-request--new-testimony-form-overlay))
+  - the testimony tiles do the same with `openTestimonies(...)` and `PostCopy.testimonies`
+  - media tile → `openExternal(link, inAppWebView: true)`. On failure → toast `Error opening page`.
 - **Permissions/visibility:** —
-- **Side effects:** fetches 5 recent prayer requests and 5 recent testimonies that are **never shown** (spec B8). The legacy widgets only render the option tiles; the spec's "recent prayer requests / recent testimonies" lists don't exist in the current UI. There is **no forum entry** on the home screen: the forum is reachable only from Bible series detail → `Discussion`.
-- **Responsive notes:** vertical feed of sections. Media and past series are horizontal carousels (grid candidates on wide screens).
+- **Side effects:** none besides loading.
+- **Responsive notes:** a vertical feed of sections. Past series and media are horizontal carousels, which could become grids on wide screens. Shortcut and carousel heights scale with the text scale factor.
 
 #### Current series card
-- Shown when `hasActive`. Reads the inner `BibleSeriesBloc` (`RecentBibleSeries`) and `AchievementsBloc`.
-- Not loaded / empty → grey.shade200 rounded placeholder (height 300).
-- Loaded → card with the series image darkened 50%, 16 radius, shadow:
-  - `Continue your journey with` (white70, 14)
-  - series title (white, 30, w700, max 2 lines)
-  - progress bar: track white@30%, "expected" white@50%, user kWpaBlue; labels `<n>% Complete` and `Target: <m>%`
-  - white pill button `Continue Reading` → `/bible_series {bibleSeriesId}`
-  - underlined `View Past Bible Series` (white70) → `/all_bible_series`
+- Shown when `hasActiveSeries`. Widgets: `CurrentSeriesSection` → `CurrentSeriesCard`.
+- `currentSeries == null` (series loading, failed or empty) → grey placeholder, height 300, radius 16. Series errors are **not** displayed.
+- Loaded → a card with the series image darkened by black@50%, radius 16, shadow, padding 24:
+  - `Continue your journey with` (`bodyMedium`, white70)
+  - series title (`headlineLarge`, white, max 2 lines, ellipsis)
+  - progress bar (height 8): track white@30%, expected white@50%, user `wpaBlue`
+  - labels `<n>% Complete` (`bodySmall`, white) and `Target: <m>%` (white70). *n* = `seriesProgress`. *m* = `EngageHomeState.expectedSeriesProgress`, computed by the cubit on load with `expectedProgress(series, now)` from `domain/bible_series/progress.dart`: the percentage of series days whose date is ≤ now.
+  - white pill button `Continue Reading` → `openBibleSeries(series.id)`
+  - underlined `View Past Bible Series` (white70) → `openAllBibleSeries()`
 
 #### Past Bible Series carousel
-- Shown when not active. Header `Past Bible Series` + `Show all` (→ `/all_bible_series`).
-- `RecentBibleSeries` → horizontal cards (250 w; image 130 h via `Image.network` with grey placeholder until the first frame; title; `d MMM yyyy - d MMM yyyy`). Tap → `/bible_series {bibleSeriesId}`.
-- Other states → grey placeholder tiles.
+- Shown when no series is active. Widgets: `PastSeriesSection` → `PastSeriesTile`.
+- Header: `Past Bible Series` + `Show all` (`labelLarge`) → `openAllBibleSeries()`.
+- `seriesStatus == success` → tiles 250 wide: image 130 high (`AppNetworkImage` with a grey placeholder, radius 15), title (`labelLarge`), date range `d MMM yyyy - d MMM yyyy` (`bodyMedium`). Tap → `openBibleSeries(id)`.
+- Any other status, including failure → 3 grey placeholders (250×130).
 
 ### All Bible series
-- **Route:** Engage nested `/all_bible_series`.
+- **Route:** `/engage/series` (`Paths.allSeries`, `Routes.allSeries`). Branch 0. `ScreenRegistry.allBibleSeries()` → `BlocProvider(AllBibleSeriesCubit(..)..load())` + `AllBibleSeriesPage`.
 - **Entry points:** Current series card `View Past Bible Series`; carousel `Show all`.
 - **Inputs:** none.
-- **State holder(s):** own `BibleSeriesBloc` with `RecentBibleSeriesRequested(amount: 20)`.
+- **State holder(s):** `AllBibleSeriesCubit` (route scope). `AllBibleSeriesState{status, series, errorMessage}`, limit 20, ordered by `start_date` descending (active and past series).
 - **States → what is shown:**
-  - title row: back arrow + `Bible Series` (`subPageHeading`, 24 w700)
-  - `FetchingBibleSeries` → `Loader`
-  - `BibleSeriesError` → centred `message`
-  - `RecentBibleSeries` → list of white rounded cards (height 100): image (flex 1, cover); title (`subHeading3`), optional subtitle, `d MMM yyyy - d MMM yyyy` (`liteSmall`)
-  - empty list → blank
-- **User actions:** back → pop; card → `/bible_series {bibleSeriesId}`.
-- **Permissions:** admins also see invisible series.
-- **Responsive notes:** list/detail pair with Bible series detail; grid candidate.
+  - `AppHeader`: back arrow + `Bible Series` (`headlineSmall`)
+  - failure → centred `errorMessage`, e.g. `An unknown error occurred`
+  - loading → `LoadingState`
+  - success → a grid (`ResponsiveGrid.delegate(maxItemExtent: 720, childAspectRatio: 720/116)`): one column on phones, more on wide windows. Each item is a `BibleSeriesListCard`: white, radius 16, shadow, with:
+    - the image in the left third
+    - title (`titleSmall`)
+    - optional subtitle (`bodyMedium`, max 2 lines)
+    - date range (`labelSmall`)
+  - an empty list shows a blank area with no copy
+- **User actions → methods:** back → `Navigator.maybePop`; card → `openBibleSeries(series.id)`.
+- **Permissions/visibility:** admins also see invisible series. `BibleSeriesRepository.getBibleSeries` skips the `is_visible == true` filter when `ISession.currentUser.isAdmin`.
+- **Navigation out:** Bible series detail.
+- **Responsive notes:** the list pane of the series list/detail pair ([two-pane](#two-pane-list--detail-readiness-spec-82)).
 
 ### Bible series detail
-- **Route:** Engage nested `/bible_series` with args `{bibleSeriesId}`. Analytics `bible_series_viewed` fires in the route builder.
-- **Entry points:** Continue Reading, past series card, All Bible series card, deep link `dailyEngagementReminder`.
-- **Inputs:** `bibleSeriesId: String` (required).
-- **State holder(s):** own `BibleSeriesBloc` (`BibleSeriesDetailRequested(bibleSeriesId)`), plus `AudioPlayerBloc` (app scope) for the playing indicator. `_BibleSeriesState` creates a `TabController` **inside the bloc listener** and never disposes it (spec B9).
+- **Route:** `/engage/series/:seriesId` (`Paths.seriesDetail`, helper `BibleSeriesRoute(seriesId:)`). Branch 0. `ScreenRegistry.bibleSeriesDetail(route)` → `BlocProvider(BibleSeriesDetailCubit(bibleSeriesId: route.seriesId, ...)..load())` + `BibleSeriesDetailPage`.
+- **Entry points:** `Continue Reading`, a past-series tile, an All Bible series card, deep link `dailyEngagementReminder`.
+- **Inputs:** `seriesId: String` (path, required).
+- **State holder(s):**
+  - `BibleSeriesDetailCubit` (route scope; one instance per route, B7). `BibleSeriesDetailState` has:
+    - `status`
+    - `series` (`BibleSeries` with completion flags applied by `applyCompletions`)
+    - `initialDayIndex`: today's day, or 0 if today isn't in the series
+    - `errorMessage`
+  - Cubit helpers: `dayStatus(day)` → `DayStatus {completed, late, neutral}`, and `isToday(day)`.
+  - The cubit listens for `CompletionChanged` events for this series and calls `refreshContent(contentId)`. This replaces `.then(UpdateCompletionDetail…)`.
+  - `AudioPlayerCubit` (app scope) drives the "playing" indicator.
 - **States → what is shown:**
-  - Loading → `SeriesDetailPlaceholder`: grey header (35% of screen height, bottom radius 30) with a back arrow, grey day-tab placeholders and a grey row.
-  - `BibleSeriesError` → `Error: <message>` (unstyled, top-left).
-  - `BibleSeriesDetail` / `UpdatedBibleSeries`:
-    - header image (35% height, bottom radius 30, top-down black→transparent gradient)
-    - white back `IconButton`
-    - white pill `Discussion` button
-    - scrollable **day tabs**: one per `seriesContentSnippet`, each a rounded box with status colour (see FEATURES §2) containing `•` if today, month `JAN…DEC`, day `dd` (heading) and the status icon (`done`/`edit`)
-    - a `TabBarView` per day: rows (grey.shade100, radius 8) with the content type name (e.g. `DEVOTIONAL`, `subHeading`), a play icon if this content's audio is playing, and the status icon
-- **User actions → events/navigation:**
-  - back → pop
-  - `Discussion` → `/forum {forumId: bibleSeries.id, title: bibleSeries.title}`
-  - day tab → switch day
-  - content row → `RestoreState(bibleSeries)`, then push `/content_detail {bibleSeriesId, seriesContentId, getCompletionDetails: isCompleted||isDraft, seriesContentType}`. `.then(...)` → `UpdateCompletionDetail(bibleSeries, actNum, scsNum)` refreshes that item's status on return (spec §8.1 asks to replace this).
-- **Permissions/visibility:** —
-- **Side effects:** `bible_series_viewed`.
-- **Responsive notes:** list/detail pair with content detail. The day-tab strip and content list could be split on wide screens. The header height is a fraction of screen height.
+  - failure → `Error: <message>` as unstyled text, top-left inside a `SafeArea`. There is no back button; system back works. This was the same before the refactor.
+  - loading → placeholder: a grey hero (35% of screen height, radius 30) with a white back `IconButton`, then 6 grey day-tab placeholders (70×108, radius 10).
+  - success → a `DefaultTabController` (length = number of days, `initialIndex = initialDayIndex`). Fixed (B9): the tab controller lifecycle is now owned by `DefaultTabController`. It contains:
+    - **Hero**:
+      - image at 35% of screen height, bottom radius 30, shadow, with a top-down gradient from black@80% to transparent (stops 0–0.4)
+      - white back `IconButton` (tooltip `Back`)
+      - right-aligned white pill `Discussion` (`labelLarge`)
+    - **Day tabs** (`DayTab`): a scrollable `TabBar` with no indicator and one tab per `seriesContentSnippet`.
+      - Each tab is a box, 70 wide × 108 high (height scaled by text scale), radius 10, coloured by `DayStatus`: completed → `AppColors.dayCompleted` (green@25%), late → `dayLate` (amber@25%), neutral → `dayNeutral` (`grey.shade100`).
+      - Inside the box, in order:
+        - `•` if today
+        - month `JAN…DEC` (`labelLarge`)
+        - day `dd` (`headlineLarge`)
+        - the status icon: `Icons.done` if completed, `Icons.edit` if draft, otherwise blank
+    - **Day contents**: a `TabBarView` with, for each day, a list of `ContentRow`s (each in a `ContentConstraint`):
+      - box: `grey.shade100`, radius 8, min height 60 (scaled)
+      - content type label (`titleLarge`, e.g. `READ`)
+      - `Icons.play_arrow_outlined` when `AudioPlayerCubit.state.isPlayingContent(contentId)`
+      - status icon (size 18)
+- **User actions → methods / navigation:**
+  - back → `Navigator.maybePop`
+  - `Discussion` → `openForum(series.id)`. The series id is the forum id.
+  - tap a day → switch tab
+  - content row → `openContent(seriesId, contentId, contentType: seriesContentType)` → `/engage/series/<id>/content/<cid>?type=READ`. When the user returns, the row's status has already been updated through `CompletionChanged`.
+- **Permissions/visibility:** day colour rules live in `dayStatusFor()` (`domain/bible_series/progress.dart`):
+  - completed if any content of the day is completed
+  - otherwise neutral if the day has a draft or is today
+  - otherwise late if the day is in the past
+  - otherwise neutral
+- **Validation & messages:** —
+- **Navigation out:** Forum, Series content detail.
+- **Side effects:** `bible_series_viewed` is logged at the start of `load()`, when the route's cubit is created. It is logged even if loading fails.
+- **Responsive notes:** the hero height is a fraction of the *screen* height. This page is the detail of All Bible series and the list for Content detail. On wide screens the day strip and the content list could be split.
 
 ### Series content detail
-- **Route:** Engage nested `/content_detail` with args `{bibleSeriesId, seriesContentId, getCompletionDetails: bool, seriesContentType: String}`. Analytics `engagement_viewed` fires in the route builder.
-- **Entry points:** Bible series detail content row.
-- **Inputs:** all four args (required).
-- **State holder(s):** own `BibleSeriesBloc` (`ContentDetailRequested`), own `CompletionsBloc` (factory). `CompletionDetailRequested(contentCompletionDetail)` is dispatched **from `build()`**, and `LoadResponses` is dispatched from the `build()` of each question/image body (spec B11).
+- **Route:** `/engage/series/:seriesId/content/:contentId`, with optional query `type` (`Paths.content`, helper `ContentRoute(seriesId:, contentId:, contentType:)`). Branch 0. `ScreenRegistry.contentDetail(route)` → `BlocProvider(ContentDetailCubit(bibleSeriesId:, contentId:, ...)..load())` + `ContentDetailPage(contentType: route.contentType ?? '')`.
+- **Entry points:** a content row on Bible series detail.
+- **Inputs:**
+  - `seriesId`, `contentId` (path, required)
+  - `type` (query, optional): the header text while loading
+- **State holder(s):**
+  - `ContentDetailCubit` (route scope). `ContentDetailState` has:
+    - `status`
+    - `content` (`SeriesContent{id, contentType (upper-cased), date, title, subTitle, body}`)
+    - `errorMessage`
+    - `completionId` (`''` = none)
+    - `isComplete`: `bool?`. `null` until loaded; `false` for drafts.
+    - `responses`: `Responses`, body index → question index → `ResponseDetails{type, response}`
+    - `imageUrls`, `thumbnailUrls`, `localImages`: maps keyed by body index
+    - `uploads`: body index → `UploadHandle` (has a `progress` stream)
+    - `actionError`
+    - `effect`: `ContentDetailEffect {noResponses, savedAsDraft, uploadInProgress, actionError}`
+    - `effectId`
+    - getter `isUploading`
+  - Fixed (B11): existing responses and image URLs are loaded inside `load()`, not from `build()`.
+  - Audio bodies use the app-scope `AudioPlayerCubit`.
 - **States → what is shown:**
-  - Loading → title row with back arrow and `seriesContentType` (`subPageHeading2`, 18 w700), nothing else
-  - `BibleSeriesError` → `Error: <message>`
-  - `SeriesContentDetail` → title row (back arrow + `seriesContentDetail.contentType` — the raw `content_type` value, not upper-cased), then a padded `ListView` of [body widgets](#content-body-catalogue) in order, followed by the completion button:
-    - `CompletionsState.isComplete == null` → `Error: <errorMessage>`
-    - `false` → grey check-circle icon (60, black87@50%, light-green splash)
-    - `true` → green check-circle (kSuccessColor@80%)
-- **User actions → events:**
-  - check (no questions) → `MarkAsComplete(CompletionDetails{id: state.id, seriesId, contentId, isDraft:false, isOnTime, completionDate: now})`
-  - green check → `MarkAsInComplete(id)`
-  - check (with questions) → see FEATURES §2 (dialogs **No responses found** / **Response(s) Saved as Draft**)
-  - back arrow → `backFunction` (upload-in-progress dialog / draft / incomplete), then pop
-  - system back → always `MarkAsDraft` for question content, then pop (**[DEFECT]** see FEATURES §2)
-- **Permissions/visibility:** —
-- **Validation & messages:** dialogs:
-  - **Uploading Image in Progress** / `Must wait for image to uplaod before exiting this page` (typo preserved) / `OK`
+  - Always: `AppHeader(small)` (`titleLarge`) with a back arrow and a title. The title is `content.contentType` once loaded (e.g. `REFLECT`), otherwise the `type` query.
+  - loading → the header only. There is no spinner.
+  - failure → `Error: <message>` below the header.
+  - success → a `ListView` (horizontal padding 25, each item in a `ContentConstraint`) with the [body widgets](#content-body-catalogue) in order, then the `CompletionButton`:
+    - `isComplete == null` → nothing
+    - `false` → grey `check_circle` (60, black87@50%, `lightGreenAccent` splash), semantics `Mark as complete`
+    - `true` → green `check_circle` (`AppColors.success@80%`), semantics `Mark as incomplete`
+- **User actions → methods:**
+  - grey check → `complete()`:
+    - for content with at least one question body (`SeriesContent.isResponsePossible`):
+      - no responses → effect `noResponses`
+      - not every question answered (`isResponsesFilled`) → effect `savedAsDraft`, then the draft is saved
+      - otherwise → marked complete and responses stored
+    - for content without questions → marked complete
+  - green check → `undoComplete()`
+  - typing an answer → `questionChanged(bodyIndex, questionIndex, value)`. A completed item becomes incomplete.
+  - image body: pick → `uploadImage(bodyIndex, ImageData)`; ✕ → `deleteImage(bodyIndex)`
+  - back arrow **and** system back both go through `PopScope(canPop: false)` → `requestExit()`:
+    - while uploading → effect `uploadInProgress`, and the page stays open
+    - otherwise, for question content: non-empty responses → save a draft; empty responses with an existing completion → mark incomplete
+    - then `Navigator.pop`
+    - Fixed: system back now follows the same rules as the back arrow. It used to always save a draft.
+- **Permissions/visibility:** `isOnTime(contentDate, now)` (`domain/completions/policies.dart`): a completion is on time if made on the content's UTC day or earlier.
+- **Validation & messages** (effects → `showMessageDialog`):
   - **No responses found** / `Please fill out responses before completing` / `OK`
   - **Response(s) Saved as Draft** / `You can now exit this page and work on it later` / `OK`
-- **Navigation out:** pop → Bible series detail (refreshes the item status).
-- **Side effects:** `engagement_viewed`, `engagement_completed`, Firestore completion/response writes, Storage uploads/deletes.
-- **Responsive notes:** reading column with 25 px side padding. The preferred max width is ≈ 720.
+  - **Uploading Image in Progress** / `Must wait for image to uplaod before exiting this page` / `OK` (typo preserved)
+  - `actionError` → error toast with the message from `userMessageFor`, e.g. `Unable to upload image`, `Unable to start upload`, `You do not have permission to execute this operation`, `An unknown error occurred`. Storage deletes in `deleteImage` swallow their own errors.
+  - Answers have no length limit (`kMaxResponseBody` is not enforced).
+- **Navigation out:** pop → Bible series detail.
+- **Side effects:**
+  - analytics: `engagement_viewed` at the start of `load()`; `engagement_completed` after the completion document is written (before responses are written)
+  - every completion, draft, incomplete, upload or delete change emits `CompletionChanged` so Bible series detail refreshes that row
+  - Firestore completion/response writes; Storage uploads and deletes
+- **Note:** content with an image body but no question body is not "response possible". Completing it doesn't check for an image, and leaving it doesn't save a draft. This was the same before the refactor.
+- **Responsive notes:** a reading column with max width 720. It is the detail of Bible series detail.
 
 ### Prayer requests
-- **Route:** Engage nested `/prayer_requests` (tab 0) and `/prayer_requests/mine` (tab 1). Tab 2 (answered) has no route.
-- **Entry points:** home tiles `VIEW ALL REQUESTS` / `VIEW MY REQUESTS`; deep links `newPrayerRequest` (tab 0) and `prayerRequestPrayed` (tab 1).
-- **Inputs:** `tabIndex: int` (constructor; copied into state and set on the controller **in `build()`**, spec B10).
-- **State holder(s):** three `PrayerRequestsBloc` instances registered as `AllPrayerRequestsBloc` (`PrayerRequestsRequested(amount)`), `MyPrayerRequestsBloc` (`MyPrayerRequestsRequested`) and `MyAnsweredPrayerRequestsBloc` (`MyAnsweredPrayerRequestsRequested`). Card actions and the overlay talk to EngagePage's `PrayerRequestsBloc` (**[DEFECT]**, see FEATURES §3). Page size = `calculateFetchAmount` (screen height / 75 + 1).
-- **States → what is shown:**
-  - title row: back arrow + `Prayer Requests` + round grey `+`
-  - `TabBar` (scrollable, no indicator): `All`, `My Open Requests`, `My Answered Prayers` (`subHeading2`; black87 selected / black54 unselected)
-  - each tab: `Loader` until loaded; error → `Unable to load prayer requests.` (ignores the message); loaded → `AnimatedList` of [prayer request cards](#prayer-request-card) with pull-to-refresh; **empty → blank** (no empty-state copy)
-  - All tab: infinite scroll (`MorePrayerRequestsRequested` within 200 px of the end until `isEndOfList`)
-  - My Open Requests: indicator `Prayed by N other(s)` if approved, else `Pending` (kWarningColor@80%)
-  - My Answered Prayers: same indicators
-- **User actions → events:**
-  - back → pop
-  - `+` → [New prayer request overlay](#new-prayer-request-overlay)
-  - pull to refresh → reload that tab
-  - card menu → `MyPrayerRequestDeleted`, `ClosePrayerRequest`, `PrayerRequestReported`
-  - `PRAY` → `PrayForRequest(id)`
-- **Permissions/visibility:** menu items by `isMine`/`isAnswered` (below); anonymous display rule.
-- **Side effects:**
-  - toasts: `Prayer Request Submitted` (info), `Unable to add prayer request.`, `Unable to delete prayer request` (error)
-  - unreachable today: `Prayer Request has been reported` (info), report/close errors, `Unable to complete request.`
-  - analytics: `prayer_request_*`
-- **Responsive notes:** cards are `0.9 × screen width` (target: `ContentConstraint`). A 2-column grid is a candidate on expanded screens.
+One generic screen, `PostsPage<T>`, serves both prayer requests and testimonies. All copy that differs between them comes from `PostCopy` (`features/community_posts/post_copy.dart`).
 
-#### Prayer request card
-- `FadeTransition` card (kCardOverlayGrey, radius 8, shadow):
-  - avatar 30 px (placeholder if anonymous or no thumbnail)
-  - name (`Anonymous` or `First Last`) and date `dd MON, yyyy` (e.g. `05 MAR, 2024`, `toReadableDate`)
-  - `…` popup menu
-  - request text (lite)
-  - bottom-right action
-- Action (All tab): `PRAY` (grey pill) → `...` while `PrayForRequestLoading` for this id → `PRAYED!` (black54, disabled) once `hasPrayed`. The PRAY button is shown on your own requests too.
-- Menu:
-  - mine → `DELETE` (Icons.delete), plus `PRAYER ANSWERED` (Icons.check) if not answered
-  - others → `REPORT AS INAPPROPRIATE` (Icons.error)
-  - there's **no confirmation dialog** for delete or report
+- **Route:** `/engage/prayer-requests` with an optional query `tab`: `mine` or `closed`. A missing or unknown value means `all`. Helper: `PrayerRequestsRoute(tab: PostsTab)`. Branch 0. `ScreenRegistry.prayerRequests(route)` builds a `MultiBlocProvider` with three cubits that share one `PrayerRequestActions`, each with `..load()` called at once:
+  - `AllPrayerRequestsCubit`, provided as `AllPostsCubit<PrayerRequest>`
+  - `MyPrayerRequestsCubit`, provided as `MyPostsCubit<PrayerRequest>`
+  - `MyAnsweredPrayerRequestsCubit`, provided as `MyClosedPostsCubit<PrayerRequest>`
 
-### New prayer request (overlay)
-- **Route:** none. `Overlay.of(context).insert(OverlayEntry(NewPrayerRequestForm(entry)))` from the home `+` tile or the Prayer requests title `+`. The overlay lives in the Engage tab navigator's `Overlay`, so the bottom bar stays visible.
-- **Inputs:** `entry` (used to remove itself).
-- **State holder(s):** its own `PrayerRequestsBloc` registered as `NewPrayerRequestsBloc` (`NewPrayerRequestStarted` → `NewPrayerRequestState{prayerRequest, isAnonymous, prayerRequestError}`, `isFormValid`, `errorExist`). POST dispatches `NewPrayerRequestCreated` to the EngagePage `PrayerRequestsBloc`.
+  The child is `PostsPage<PrayerRequest>(copy: PostCopy.prayerRequests, initialTab: route.tab)`.
+- **Entry points:**
+  - home `VIEW ALL` (tab `all`) and `VIEW MY` (tab `mine`)
+  - deep links `newPrayerRequest` (all) and `prayerRequestPrayed` (mine)
+  - `?tab=closed` exists but nothing links to it
+- **Inputs:** `tab: PostsTab {all, mine, closed}` (query, optional). Fixed (B10): the initial tab comes from the route through `DefaultTabController.initialIndex`. Nothing mutates the controller in `build()`.
+- **State holder(s):** the three cubits above (route scope). One `PostListState<T>` per tab:
+  - `status`
+  - `posts`
+  - `isEndOfList`, `isLoadingMore`
+  - `reactingIds` (posts with a pray request in flight)
+  - `errorMessage`
+  - `message`, `messageKind` (`PostListMessageKind {info, error}`), `messageId`
+
+  `AllPostsCubit` pages 15 posts at a time (`defaultPageSize`, a fixed size that replaces the old screen-height calculation) and has `loadMore()` and `react(id)`.
+
+  Cross-screen updates arrive over `AppEventBus`. Fixed: card actions and the form no longer go through a different bloc.
+  - every tab: `PostDeleted` → the post is removed
+  - All: `PostReported` and `PostClosed` → removed; `PostReacted` → marked as prayed
+  - My open: `PostCreated` → inserted at the top; `PostClosed` → removed
+  - My answered: `PostClosed` → inserted at the top
 - **States → what is shown:**
-  - fade-in (700 ms) white rounded card (margin 16, shadow) over a transparent tap-to-dismiss backdrop
-  - autofocused multiline field (hint `Prayer Request`, grey.shade300)
-  - red error line (12 pt) when invalid
-  - round blue `AnonymousCheckbox` + `Anonymous`
-  - buttons `CANCEL` (grey) and `POST` (kWpaBlue@75%; @25% when disabled)
-  - non-`NewPrayerRequestState` → `Loader`
-- **User actions → events:** typing → `NewPrayerRequestRequestChanged(prayerRequest)`; anonymous toggle → `NewPrayerRequestAnonymousChanged`; `POST` (valid) → `NewPrayerRequestCreated(request, isAnonymous)` + remove overlay; `CANCEL`/backdrop → remove.
-- **Validation & messages:** `500 character limit exceeded`. POST is disabled when empty or invalid.
-- **Side effects:** `prayer_request_created`. The `Prayer Request Submitted` toast appears only when the Prayer requests page is mounted. The new item is inserted at the top of **My Open Requests** (if that page is mounted).
-- **Defects:** `FocusScope.requestFocus` called in `build()`; `initState` lacks `@override` (spec B12); the `AnonymousCheckbox` state is copied in its constructor.
-- **Responsive notes:** spec §7 — keep the overlay look but drive it from a cubit so it can become a route, sheet or dialog. A dialog with max width ≈ 560 is a candidate on wide screens.
+  - `AppHeader`: back + `Prayer Requests` + `AddCircleButton` (round grey `+`, semantics `Prayer Request`)
+  - `TabBar` (scrollable, start-aligned, no indicator or divider): `All`, `My Open Requests`, `My Answered Prayers` (`titleMedium`; black87 selected, black54 unselected)
+  - each tab is kept alive (`AutomaticKeepAliveClientMixin`):
+    - `status.isLoading` → `LoadingState`. The status only becomes loading when the list is empty, so a refresh doesn't show it.
+    - failure → `Unable to load prayer requests.` (left-aligned; `errorMessage` is ignored)
+    - success → a pull-to-refresh `ListView` of [post cards](#post-card), each in a `ContentConstraint`
+    - **empty → blank** (no empty-state copy)
+  - All tab: infinite scroll. Within 200 px of the end → `loadMore()`. No "loading more" indicator is shown.
+- **User actions → methods:**
+  - back → `maybePop`
+  - `+` → `showNewPostForm(context, PostCopy.prayerRequests)`
+  - pull to refresh → `refresh()` on that tab's cubit
+  - card menu → `deletePost(id)` / `closePost(id)` / `reportPost(id)` on that tab's cubit
+  - `PRAY` → `AllPostsCubit.react(id)`
+- **Permissions/visibility:** `isMine`, `isClosed` (= `isAnswered`), `isApproved` and `isAnonymous` come from the entity (computed by the repository/DTO). Menu items are listed below. Anonymous posts show `Anonymous` and no photo.
+- **Validation & messages:** toasts, via the `messageId` listener:
+  - info: `Prayer Request has been reported` (report from the All tab)
+  - error:
+    - `Unable to delete prayer request`
+    - `Unable to close prayer request`
+    - `Unable to report prayer request`
+    - `You already reported this prayer request`
+    - `Unable to complete request.` (pray)
+    - the load-more error message (`userMessageFor`)
+- **Navigation out:** back.
+- **Side effects:** analytics are logged after each successful action (see the [analytics map](#analytics--screen-map)). Reporting also un-approves the post on the server.
+- **Responsive notes:** cards are max 720 wide (`ContentConstraint`). A two-column grid is a candidate on expanded screens. There is no detail screen.
+
+#### Post card
+- `PostCard`: `AppCard` (`grey.shade100`, radius 8, soft shadow) containing:
+  - avatar 30 px (`AppAvatar`; a placeholder if anonymous or there's no thumbnail)
+  - name: `Anonymous` or `<First> <Last>` (`labelLarge`)
+  - date `07 NOV, 2026` (`labelSmall`, `DateFormats.readableDate`)
+  - `…` menu (`Icons.more_horiz`)
+  - body (`bodyMedium`)
+  - a trailing widget at the bottom right
+- Trailing widget:
+  - **All tab:** `ReactButton`: `PRAY` (`cardGrey` pill) → `...` (black87) while the id is in `reactingIds` → `PRAYED!` (black54, not tappable) once `hasReacted`. The PRAY button also appears on your own posts.
+  - **My open / My answered tabs:** `ReactionIndicator`: `Pending` (`AppColors.warning@80%`) if not approved, otherwise `Prayed by N other(s)` (`Prayed by 1 other` / `Prayed by 3 others`).
+- Menu (`PopupMenuButton`):
+  - mine → `DELETE` (`Icons.delete`), plus `PRAYER ANSWERED` (`Icons.check`) if not closed
+  - others → `REPORT AS INAPPROPRIATE` (`Icons.error`)
+  - There is **no confirmation dialog** for delete, close or report.
 
 ### Testimonies
-- **Route:** Engage nested `/testimonies` (tab 0), `/testimonies/mine` (tab 1).
-- **Entry points:** home testimony tiles; deep links `newTestimony` (tab 0), `testimonyPraised` (tab 1).
+- **Route:** `/engage/testimonies` with an optional `tab` query (`TestimoniesRoute(tab:)`). `ScreenRegistry.testimonies(route)` → `AllTestimoniesCubit`, `MyTestimoniesCubit` and `MyArchivedTestimoniesCubit` (provided as `AllPostsCubit` / `MyPostsCubit` / `MyClosedPostsCubit<Testimony>`, sharing one `TestimonyActions`) + `PostsPage<Testimony>(copy: PostCopy.testimonies, initialTab: route.tab)`.
+- **Entry points:** home testimony tiles; deep links `newTestimony` (all) and `testimonyPraised` (mine).
 - Identical to [Prayer requests](#prayer-requests) except:
   - title `Testimonies`; tabs `All`, `My Shared Testimonies`, `My Archived Testimonies`
-  - blocs `AllTestimoniesBloc` / `MyTestimoniesBloc` / `MyArchivedTestimoniesBloc`
-  - error text `Unable to load Testimonies.`
+  - `+` semantics `Testimony`
+  - load error `Unable to load Testimonies.`
   - action `AMEN` → `...` → `PRAISED!`; indicator `Praised by N other(s)` / `Pending`
   - menu `DELETE`, `ARCHIVE` (mine, not archived), `REPORT AS INAPPROPRIATE` (others)
-  - toasts `Testimony Submitted`, `Unable to add testimony.`, `Unable to delete testimony` (and the unreachable `Testimony has been reported`)
-  - analytics `testimony_created`, `amen_testimony`, `testimony_reported`, `testimony_deleted`, `testimony_answered`
+  - toasts:
+    - info `Testimony has been reported`
+    - errors `Unable to delete testimony`, `Unable to close testimony`, `Unable to report testimony`, `You already reported this testimony`, `Unable to complete request.`
+  - analytics `amen_testimony`, `testimony_reported`, `testimony_deleted`, `testimony_answered` (archive)
 
-### New testimony (overlay)
-- Same as [New prayer request](#new-prayer-request-overlay) with hint `Testimony`, bloc `NewTestimoniesBloc`, event `NewTestimonyCreated`, validation `500 character limit exceeded`.
+### New prayer request / New testimony form (overlay)
+- **Presentation:** still an **overlay**, not a route.
+  - `showNewPostForm(context, copy)` (`features/community_posts/new_post_form.dart`) calls `showOverlayForm` (`foundation/feedback/overlay_form.dart`). That inserts an `OverlayEntry` into the nearest `Overlay`, which is the current branch navigator's, so the navigation bar stays visible.
+  - The form's cubit owns all validation and submission. A rebuild may therefore present it as a route, bottom sheet or dialog (spec §7).
+  - This is one of the two remaining `overlay.insert` sites (see the [index](#route--overlay-index)).
+- **Entry points:** home `+` tiles (both kinds); the `+` in the Prayer requests / Testimonies header.
+- **Inputs:** `PostCopy` (decides the kind).
+- **State holder(s):**
+  - `NewPostCubit<T>`: `NewPrayerRequestCubit` or `NewTestimonyCubit`. A new one is created each time the form opens by the app-scope `NewPostCubitFactory` (a `RepositoryProvider` in `App`). It is provided by a `BlocProvider` inside the overlay entry, so it is closed when the entry is removed.
+  - `NewPostState` has `body` (trimmed by the validator), `bodyError` (`''` = valid), `isAnonymous`, `status` (`FormStatus`), `errorMessage`, and getter `isValid` (no error and `body` non-empty).
+- **States → what is shown:** an `OverlayFormCard`:
+  - fades in over 700 ms (`fastOutSlowIn`) above a transparent backdrop that dismisses on tap
+  - white card: margin 16, padding 16, radius 16, shadow `grey.shade400` blur 18, top-aligned, max width 720
+  - contents:
+    - an autofocused multiline `TextField`: hint `Prayer Request` / `Testimony`, input style, hint colour `grey.shade300`
+    - `bodyError` in 12 pt `AppColors.error@80%`
+    - `RoundCheckbox` (18 px; `wpaBlue@65%` with a white check when on) + `Anonymous`
+    - `CANCEL` (secondary grey pill) and `POST` (primary pill, `wpaBlue@75%`; @25% when disabled)
+- **User actions → methods:**
+  - typing → `bodyChanged(v)`
+  - checkbox → `anonymousChanged(bool)`
+  - `POST` (enabled iff `isValid`) → closes the overlay **first**, then awaits `submit()`. The result toast is shown on the context that opened the form, if it is still mounted:
+    - success → info `Prayer Request Submitted` / `Testimony Submitted`
+    - failure → error `Unable to add prayer request.` / `Unable to add testimony.`
+  - `CANCEL` or tapping the backdrop → close. The text is discarded with no confirmation.
+- **Validation & messages:**
+  - `500 character limit exceeded` when the trimmed body is 500 characters or more (`kMaxPrayerRequestBody` / `kMaxTestimonyBody`; must be `< 500`)
+  - `Unknown Error.` for an unexpected validator error
+  - an empty body shows no message; `POST` is just disabled
+  - `kPrayerRequestPerUserLimit` / `kTestimoniesPerUserLimit` are not enforced
+- **Navigation out:** none.
+- **Side effects:**
+  - analytics `prayer_request_created` / `testimony_created`
+  - `PostCreated` inserts the new post at the top of **My Open Requests** / **My Shared Testimonies** if that screen is mounted
+  - new posts are unapproved: they show `Pending` and don't appear in All
+- Fixed (B12): there are no lifecycle hooks with broken signatures any more, and focus comes from `autofocus`, not `requestFocus` in `build()`.
+- **Responsive notes:** card max width 720. A centred dialog (~560) is a candidate on wide screens.
 
 ### Forum (thread list)
-- **Route:** Engage nested `/forum` with args `{forumId, title}`.
-- **Entry points:** Bible series detail → `Discussion` (`forumId` = the Bible series id).
-- **Inputs:** `forumId: String` (required), `title: String` (required but **not displayed**; the header always reads `Forum`).
-- **State holder(s):** `ForumBloc` (`LoadForum(forumId, includeHidden: isAdmin)`, live streams), `NotificationSettingsBloc` (page scope, for followed bells and auto-follow).
+- **Route:** `/engage/forums/:forumId` (`Paths.forum`, helper `ForumRoute(forumId:)`). Branch 0. `ScreenRegistry.forum(route)` → `BlocProvider(ForumCubit(forumId:, ...)..load())` + `ForumPage`.
+- **Entry points:** Bible series detail → `Discussion` (`forumId` = series id).
+- **Inputs:** `forumId: String` (path, required). The old untyped `title` argument no longer exists.
+- **State holder(s):** `ForumCubit` (route scope). `ForumState` has:
+  - `status`
+  - `forum` (`Forum{id, title, isFrozen, isReadOnly}`, loaded but **not displayed**)
+  - `threads`: live stream, newest first
+  - `followedThreadIds`: from notification settings; optional
+  - `isAdmin`
+  - `errorMessage`
+  - `message`, `messageId` (snackbar)
+
+  The cubit listens for `ThreadFollowChanged`, which replaces the old `.then(NotificationSettingsRequested)` bell refresh.
 - **States → what is shown:**
-  - title row: back arrow + `Forum` + round grey `+`
-  - `ForumLoading` → `CircularProgressIndicator`
-  - `ForumError` → `Error: <message>`
-  - `ForumLoaded` empty → `No discussions yet. Start one!`
-  - `ForumLoaded` → cards (kCardOverlayGrey, 0.9 width): avatar 30 (placeholder on error), `authorName`, date `yyyy-mm-dd` (local), eye-off icon if `isHidden`, kWpaBlue bell if followed, title (`subHeading3`), `💬 <n> Comments`
-- **User actions → events/navigation:**
-  - back → pop
-  - `+` → if not authenticated, snackbar `You must be signed in to create a thread.`; else the [Thread form overlay](#thread-form-overlay). Save → `CreateThread(ForumThread{id: client-generated, ...})` + `ThreadFollowed(threadId)`.
-  - card → `/thread_detail {threadId, forumId}`; `.then` → `NotificationSettingsRequested` to refresh bells
-- **Permissions/visibility:** hidden threads are visible to everyone (filter commented out).
-- **Side effects:** Firestore writes (see FEATURES §5); errors swallowed.
-- **Responsive notes:** list/detail pair with Thread detail.
+  - `AppHeader`: back + `Forum` (always this text) + `AddCircleButton` (semantics `New thread`)
+  - failure → centred `Error: <message>`
+  - not yet success → `CircularProgressIndicator`
+  - success, empty → `EmptyState` `No discussions yet. Start one!`
+  - success → `ThreadCard`s (`AppCard`, radius 8, each in a `ContentConstraint`), each showing:
+    - avatar 30, `authorName` (`titleSmall`) and date `yyyy-MM-dd` (local, `labelSmall`)
+    - `Icons.visibility_off` (`grey.shade600`, semantics `Hidden`) if `thread.isHidden`
+    - `Icons.notifications_active` (`wpaBlue`, semantics `Following`) if followed
+    - title (`titleMedium`)
+    - right-aligned `Icons.comment` + `<n> Comments` (`bodySmall`; plural even for 1)
+- **User actions → methods:**
+  - back → `maybePop`
+  - `+` → [thread form](#thread-form-overlay) with `onSave: cubit.createThread`. `createThread(title)`:
+    - no user → snackbar `You must be signed in to create a thread.`
+    - otherwise the thread is created and **auto-followed** (bell shown, `ThreadFollowChanged` emitted)
+    - errors → snackbar with `userMessageFor` text
+  - card → `openThread(forumId:, threadId:)`
+- **Permissions/visibility:** hidden threads are listed for everyone. The repository doesn't filter them (unchanged behaviour), and the hidden marker is also shown to everyone. **[DEFECT]** inconsistency: `ForumState.isAdmin` is documented as "Admins see the hidden-thread marker" but nothing uses it for that. See [Open issues](#open-issues-summary).
+- **Navigation out:** Thread detail.
+- **Side effects:** Firestore writes (see FEATURES.md → Forum). The written data is unchanged.
+- **Responsive notes:** the list pane of the forum list/detail pair.
 
 ### Thread form (overlay)
-- **Route:** none. `Overlay.of(context).insert` from Forum `+` (create) or the Thread detail `EDIT THREAD` menu item.
-- **Inputs:** `initialTitle?`, `saveButtonText` (`POST` default, `SAVE` when editing), `onSave(String)`, `onCancel`.
-- **State holder(s):** local `State` only (`_isValid = text.trim().isNotEmpty`).
-- **States → what is shown:** the same visual as the new prayer request card: autofocused multiline field (hint `Thread Title`) and buttons `CANCEL` / `POST`|`SAVE` (disabled when blank).
-- **User actions:** save → `onSave(text)` (the raw text, not trimmed); cancel/backdrop → `onCancel`.
-- **Defects:** `FocusScope.requestFocus` in `build()`; `dispose` lacks `@override`/return type (spec B12).
+- **Presentation:** `showThreadForm(context, {initialTitle, saveLabel = 'POST', onSave})` (`features/forum/thread_form.dart`) → `showOverlayForm`. It is the same `OverlayFormCard` visual as the new-post form.
+- **Entry points:** Forum `+` (create, `POST`); Thread detail menu `EDIT THREAD` (`SAVE`, prefilled with the current title).
+- **Inputs:** `initialTitle?`, `saveLabel` (`POST` | `SAVE`), `onSave(String)`.
+- **State holder(s):** none. `ThreadForm` is a `StatefulWidget` that keeps only a `TextEditingController`, which is purely visual state. Submission goes to `ForumCubit.createThread` or `ThreadCubit.updateTitle`.
+- **States → what is shown:** an autofocused multiline field (hint `Thread Title`) and the buttons `CANCEL` / `POST`|`SAVE`. The save button is disabled while the trimmed text is empty.
+- **User actions:** save → closes the overlay, then `onSave(text)` with the **raw** (untrimmed) text. Cancel or backdrop → close.
+- **Validation & messages:** non-blank required; no other rule.
+- Fixed (B12): the `dispose` signature is correct; no focus calls happen in `build()`.
 
 ### Thread detail
-- **Route:** Engage nested `/thread_detail` with args `{threadId, forumId, focusCommentId?}`.
-- **Entry points:** Forum card; deep links `newForumThread`, `newForumComment`, `forumCommentReply`, `forumCommentLike`.
-- **Inputs:** `threadId: String` (required), `forumId: String` (required), `focusCommentId: String?`.
-- **State holder(s):** `ThreadBloc` (`LoadThread`, live thread + comments streams), page-scope `NotificationSettingsBloc`, app `AuthenticationBloc` (for the current user). Local UI state: reply target, editing comment, collapsed parents, scroll-to-focus flag.
+- **Route:** `/engage/forums/:forumId/threads/:threadId`, with an optional query `comment` (`Paths.thread`, helper `ThreadDetailRoute(forumId:, threadId:, focusCommentId:)`). Branch 0. `ScreenRegistry.threadDetail(route)` → `BlocProvider(ThreadCubit(forumId:, threadId:, ...)..load())` + `ThreadDetailPage(focusCommentId: route.focusCommentId)`.
+- **Entry points:** a Forum thread card; deep links `newForumThread`, `newForumComment`, `forumCommentReply` and `forumCommentLike` (focus = the payload's `commentId`).
+- **Inputs:** `forumId`, `threadId` (path, required); `comment` (query, optional) → `focusCommentId`.
+- **State holder(s):**
+  - `ThreadCubit` (route scope). `ThreadState` has:
+    - `status`
+    - `thread` (`ForumThread?`, live)
+    - `comments` (live, server order, oldest first)
+    - `collapsedIds`
+    - `isFollowing`: `bool?`; `null` until notification settings load, and stays `null` if they can't be loaded
+    - `replyTo`, `editing` (`Comment?`)
+    - `user` (`LocalUser?` from `ISession` when the cubit is created)
+    - `errorMessage`
+    - `message`, `messageId` (snackbar)
+    - `closeRequested`
+  - `ThreadState` getters:
+    - `visibleComments`: `threadedComments()`, i.e. each parent followed by its replies, replies of collapsed parents hidden, de-duplicated
+    - `hasReplies(id)`
+    - `title` (`Thread` until loaded)
+    - `isFrozen`, `isHidden`
+    - `canComment` (`!isFrozen`)
+    - `canModerate` (`canModerateThreads(user)`)
+  - Cubit getters: `canEditThread` and `permissionsFor(comment)` → `CommentPermissions{canEdit, canDelete, canReply, isLiked}`.
+  - Widget-local visual state: the input `TextEditingController`, a `FocusNode`, an `ItemScrollController`, and a "focus done" flag.
 - **States → what is shown:**
-  - title row: back arrow + thread title (`Thread` until loaded) + eye-off icon if hidden + `…` menu (signed in)
-  - `ThreadLoading` → spinner
-  - `ThreadError` → `Error: <message>`
-  - loaded with no comments → `No comments yet. Be the first!`
-  - comments: a `ScrollablePositionedList` of tiles. Replies are indented 32 px under their parent; children of collapsed parents are hidden. Each tile:
-    - avatar 24, author name, `timeago` time
+  - Header: `AppHeader(small)` with the thread title, plus `Icons.visibility_off` (grey, semantics `Hidden`) if hidden, plus the `ThreadMenu` (`…`). The menu appears only when `status` is success, `user != null`, and at least one menu item applies.
+  - Comments area:
+    - failure → `Error: <message>`
+    - not success → spinner
+    - no visible comments → `No comments yet. Be the first!`
+    - otherwise a `ScrollablePositionedList` of `CommentTile`s (each in a `ContentConstraint`); replies are indented 32 px
+  - Each `CommentTile` (`AppCard`; background `wpaBlue` alpha 25 while it is the reply target, otherwise `grey.shade100`) shows:
+    - avatar 24
+    - author name (`titleSmall`, ellipsis)
+    - relative time (`labelSmall`, e.g. `5 minutes ago`)
     - `…` menu
-    - body or `[deleted]`
-    - like button (filled blue if liked) + count
-    - `Reply` (top-level, not deleted)
-    - `Hide Replies` / `Show Replies` (when the comment has children)
-    - background kWpaBlue@10% while it's the reply target
-  - input area (if not frozen):
-    - `Replying to <name>` chip with ✕
-    - orange `Editing Comment` chip with ✕
-    - rounded text field (hint `Write a comment...` / `Edit your comment...`) + send icon
-  - frozen → `This thread is read-only.` (grey)
-- **User actions → events:**
-  - thread menu:
-    - `EDIT THREAD` → overlay → `UpdateThread`
-    - `FREEZE THREAD`/`UNFREEZE THREAD` → `FreezeThread`/`UnfreezeThread`
-    - `HIDE THREAD`/`UNHIDE THREAD` → `HideThread(true/false)` and **pop**
-    - `FOLLOW THREAD`/`UNFOLLOW THREAD` → `ThreadFollowed`/`ThreadUnfollowed` + snackbar `Thread followed` / `Thread unfollowed` (1 s)
-  - comment menu: `REPORT` → `ReportComment(..., "User Report")` + snackbar `Reported`; `DELETE` → `DeleteComment`; `EDIT` → enter edit mode
-  - like/unlike → `LikeComment`/`UnlikeComment` (not signed in → snackbar `You need to sign in to like comments`)
-  - `Reply` → set reply target, expand, focus and scroll into view
-  - send (non-empty) → `UpdateComment` (edit) or `AddComment(Comment{..., parentId: replyTarget})`; clears and unfocuses
-- **Permissions/visibility rules** (decided in the widget today; to move to `domain/forum/policies.dart`):
-  - edit thread: author && < 15 min
-  - freeze/hide: `isAdmin`
-  - follow: settings loaded
-  - comment delete: author && !deleted
-  - comment edit: author && !deleted && < 15 min
-  - reply: `parentId == null && !isDeleted`
+    - the body, or `[deleted]`
+    - a like `IconButton` (`thumb_up` blue if liked, `thumb_up_alt_outlined` otherwise; tooltip `Like`/`Unlike`) + like count (`bodySmall`)
+    - `Reply` if `canReply && canComment`
+    - `Hide Replies` / `Show Replies` if the comment has replies
+  - Bottom area (success only):
+    - if `canComment` → `CommentInputArea`, pinned and max 720 wide:
+      - `Replying to <name>` banner (`grey.shade100`, ✕ → `cancelReply()`)
+      - `Editing Comment` banner (orange@10%, border orange@30%, bold `orange[800]` text; ✕ → `cancelEdit()` + clears the field + unfocuses)
+      - a rounded `TextField` (radius 20; `grey.shade300` border, black when focused) with hint `Edit your comment...` while editing, otherwise `Write a comment...`, plus a send `IconButton`
+    - if frozen → `This thread is read-only.` (grey)
+- **User actions → methods:**
+  - **Thread menu:**
+    - `EDIT THREAD` (`Icons.edit`; if `canEditThread`) → thread form prefilled, `SAVE` → `updateTitle(title)`
+    - `FREEZE THREAD` / `UNFREEZE THREAD` (`Icons.ac_unit`; if `canModerate`) → `setFrozen(!isFrozen)`
+    - `HIDE THREAD` / `UNHIDE THREAD` (`visibility_off` / `visibility`; if `canModerate`) → `setHidden(!isHidden)`. This sets `closeRequested`, and the page then calls `maybePop()`.
+    - `FOLLOW THREAD` / `UNFOLLOW THREAD` (`notifications_active` / `notifications_off`; if `isFollowing != null`) → `setFollowing(!isFollowing)`. It is optimistic and shows snackbar `Thread followed` / `Thread unfollowed`. On failure the change is reverted and the snackbar shows `Unable to follow thread` / `Unable to unfollow thread`. On success `ThreadFollowChanged` updates the forum list bell.
+  - **Comment menu:**
+    - `REPORT` (`Icons.error`, always) → `report(comment)`: snackbar `Reported` immediately, then `reportComment(…, 'User Report')`
+    - `DELETE` (if `canDelete`) → `delete(comment)`
+    - `EDIT` (if `canEdit`) → `startEdit(comment)`. A listener fills the input with the comment body and focuses it.
+  - like / unlike → `toggleLike(comment)`. With no user → snackbar `You need to sign in to like comments`.
+  - `Reply` → `startReply(comment)`: sets the reply target, cancels editing, and expands that parent. A listener focuses the input. The list does not scroll.
+  - `Hide Replies` / `Show Replies` → `toggleReplies(commentId)`
+  - send → ignored if the text is empty. Otherwise the input is cleared and unfocused, then `submit(text)`: `updateComment` when editing, else `addComment` with `parentId = replyTo?.id`.
+  - errors from any write → snackbar with `userMessageFor` text. Fixed: these used to be swallowed.
+  - back → `maybePop`
+- **Permissions/visibility rules** (`domain/forum/policies.dart`, exposed through the cubit with `now` from the cubit's clock). Fixed (§7): these used to be decided in the widget.
+  - edit thread: `canEditThread`, i.e. the author and less than 15 whole minutes since creation (`kForumEditWindow`)
+  - freeze/hide: `canModerateThreads(user)`, i.e. `isAdmin`
+  - follow/unfollow: notification settings have loaded (`isFollowing != null`)
+  - delete comment: `canDeleteComment`, i.e. the author and not deleted
+  - edit comment: `canEditComment`, i.e. `canDeleteComment` and less than 15 minutes
+  - reply: `canReplyTo`, i.e. a top-level comment that isn't deleted
   - report: always
-- **Validation & messages:** empty send ignored; no length limit.
-- **Navigation out:** back; hide/unhide pops.
-- **Side effects:** Firestore writes; no error feedback. Focus jump: once comments load, `jumpTo(index of focusCommentId)`.
-- **Responsive notes:** detail pane of Forum list/detail; the input bar is pinned at the bottom.
+  - comment at all: `canComment`, i.e. the thread isn't frozen
+- **Validation & messages:** an empty send is ignored. The text is not trimmed, so whitespace-only comments are sent. There is no length limit.
+- **Navigation out:** back; hiding or unhiding closes the screen.
+- **Side effects:**
+  - Firestore writes
+  - focus jump: once `focusCommentId` appears in `visibleComments`, `jumpTo(index)` runs once (post-frame)
+- **Responsive notes:** the detail pane of the forum list/detail pair. The composer is pinned at the bottom.
 
 ---
 
-## Give tab
+## Give
 
 ### Give (no screen)
-- **Route:** bottom-nav item index 1 (`EmptyPage`, never shown).
-- **Behaviour:** see [Main shell](#main-shell-tabs) (launches `links.give_link`; toast `Error opening page`).
-- **Note:** `kWpaGiveUrl` is unused (the spec assumes it; trust the code).
+- **Route:** none. `GIVE` is a shell destination that is an action, not a branch (`AppShell._branchFor[1] == null`).
+- **Behaviour:** see [Main shell](#main-shell-tabs). It opens `links.giveLink`, or `kWpaGiveUrl` as the fallback, externally. If that fails → toast `Error opening page`.
 
 ---
 
-## Profile tab
-
-Tab root: `ProfilePage` provides `UserProfileBloc` and `NotificationSettingsBloc(NotificationSettingsRequested)` to its nested navigator: `/notification_settings` → `NotificationSettingsPage`, anything else → `ProfilePageRoot`.
+## Profile branch
 
 ### Profile
-- **Route:** Profile nested `/` (`ProfilePageRoot`).
-- **Entry points:** PROFILE tab.
-- **State holder(s):** `UserProfileBloc` (tab scope), `AuthenticationBloc` (app), `LinksBloc` (shell scope), `getIt<LocalUser>()` for name/photo.
-- **States → what is shown:**
-  - header `Profile` (`heading`)
-  - round photo (diameter min(150, 50% of width)) with a black@50% bottom band `EDIT`; while uploading the band shows `<n>%` over the placeholder; after upload, the local file
-  - full name
-  - divider, red `Logout` (14), divider
-  - `SETTINGS` / divider / `Notification Settings ›` / divider
-  - **Other** (only when `LinksLoaded`; `LinksError` → `Text(message)`; else blank): `OTHER` / divider / `Privacy Policy ›`, `Terms of Use ›`, `Help ›`, `Report a Problem ›`, `Delete my Account` (delete icon), `Version 3.0.1`, divider
-- **User actions → events:**
-  - `EDIT` → gallery picker → `UploadProfilePhoto(File)`
-  - `Logout` → `SignOut()`
-  - `Notification Settings` → push `/notification_settings`
-  - Privacy/Terms → `launchUrl(link)`; Help/Report → `mailto:` with subjects; on failure toast `Error opening page`
-  - `Delete my Account` → dialog **Delete my Account** / `This account will be permanently disabled and all data associated with this account will be deleted. Would you like to proceed?` / `No` (grey) / `Yes` (blue) → `InitiateDelete()`
-- **Navigation out:** `Unauthenticated` → root `/sign_in` (clear stack).
-- **Side effects:** Storage upload, `users/{uid}` update. `Error uploading photo` / `Unable to initiate account deletion` aren't rendered.
-- **Responsive notes:** settings list; candidate for a master/detail split with Notification settings.
+- **Route:** `/profile` (`Paths.profile`, `Routes.profile`). Root of branch 1. `ScreenRegistry.profile()` → `BlocProvider(ProfileCubit(repository, session))` + `ProfilePage(appVersion: AppInfo.version)`.
+- **Entry points:** the PROFILE destination.
+- **Inputs:** `appVersion` (constructor; from `AppInfo.version`).
+- **State holder(s):**
+  - `ProfileCubit` (route scope). `ProfileState` has:
+    - `user` (from `ISession`; updates on session changes)
+    - `uploadPercent` (`int?`, only while uploading)
+    - `uploadedImage` (`ImageData` picked in this session)
+    - `errorMessage`, `errorId`
+    - getter `isUploading`
+  - App scope: `AuthenticationCubit` (`signOut`, `initiateDelete`) and `LinksCubit` (`links`).
+- **States → what is shown:** a `ListView` with `PageHeading` `Profile`, then a `ContentConstraint` column with 16 px side padding:
+  - Photo (only when `user != null`):
+    - a circle with diameter `min(150, shortestSide / 2)`
+    - content: the placeholder asset while uploading; else the picked image after an upload this session; else `AppAvatar(user.thumbnailUrl)`
+    - a bottom band (black@50%, height 30) showing `EDIT`, or `<n>%` while uploading (`labelMedium`, white)
+  - full name (`titleSmall`)
+  - `Logout` (red `bodyMedium` text button)
+  - `SETTINGS` + divider, then the `Notification Settings` row (chevron)
+  - `OTHER` + divider, then rows: `Privacy Policy`, `Terms of Use`, `Help`, `Report a Problem`, `Delete my Account` (`Icons.delete` instead of a chevron)
+  - `Version <AppInfo.version>` (`bodyMedium`)
+  - Change: the Other section is now **always** shown. It used to wait for links to load. A links load error (`LinksState.errorMessage`, fallback copy `An unknown error occured`) is not displayed.
+- **User actions → methods:**
+  - `EDIT` (disabled while uploading) → gallery picker → `uploadPhoto(ImageData)`
+  - `Logout` → `AuthenticationCubit.signOut()`; the router redirects to `/sign-in`
+  - `Notification Settings` → `openNotificationSettings()`, which pushes `/profile/notification-settings`
+  - `Privacy Policy` / `Terms of Use` → `openExternal(links.privacyPolicyLink / links.termsOfUseLink)`
+  - `Help` / `Report a Problem` → a `mailto:` link to `links.helpEmail` / `links.reportEmail` with subject `WPA_BE_APP_Help_Request` / `WPA_BE_APP_Problem_Report`
+  - any link that can't be opened (including a missing URL) → toast `Error opening page`
+  - `Delete my Account` → `showConfirmDialog` **Delete my Account** / `This account will be permanently disabled and all data associated with this account will be deleted. Would you like to proceed?` / `No` (muted) / `Yes` (primary). Confirming calls `AuthenticationCubit.initiateDelete()`, which emits `unauthenticated` and the router redirects to `/sign-in`.
+- **Permissions/visibility:** —
+- **Validation & messages:**
+  - toast `Error uploading photo` when an upload fails
+  - error toast `Unable to initiate account deletion` when the deletion request fails (`AuthenticationState.errorMessage`/`errorId`; the user stays signed in). Newly shown — the old UI ignored this error.
+- **Navigation out:** Notification settings; sign-in after logout or deletion.
+- **Side effects:** Storage upload, then a `users/{uid}` update and a session refresh; external URLs and mail.
+- Fixed (B13): the version comes from `AppInfo.version` (`--dart-define=APP_VERSION=x.y.z`, default `3.0.1`).
+- **Responsive notes:** a settings list with max width 720. It is the list pane of the Profile → Notification settings pair.
 
 ### Notification settings
-- **Route:** Profile nested `/notification_settings`.
-- **Entry points:** Profile → Notification Settings.
-- **State holder(s):** `NotificationSettingsBloc` (Profile tab scope).
-- **States → what is shown:**
-  - title row: back arrow + `Notification Settings`
-  - section `GENERAL`: `Daily Engagement Reminder`; `Prayers` / `Notify me when someone prays for my request`; `New Prayer Requests` / `Notify me when someone adds a new prayer request`; `Testimonies` / `Notify me when someone reacts to my testimony`; `New Testimonies` / `Notify me when someone adds a new testimony`
-  - section `DISCUSSION FORUM`: `New Threads` / `Notify me when a new thread is created`; `Replies` / `Notify me of replies to my comments`; `Thread Comments` / `Notify me of new comments in threads that I am following`; `Comment Likes` / `Notify me when someone likes my comment`
-  - switches: `PlatformSwitch` (`CupertinoSwitch` on iOS, Material `Switch` elsewhere; tinted kWpaBlue). Disabled/off until `NotificationSettingsPositions`.
-- **User actions → events:** each switch → `SubscribedTo…` / `UnsubscribedFrom…` (DailyEngagementReminder, PrayerNotifications, NewPrayerRequests, TestimonyNotifications, NewTestimonies, NewForumThreads, ForumCommentReplies, ForumThreadComments, ForumCommentLikes).
-- **Side effects:** optimistic update; error toasts `Error loading notification settings`, `Unable to subscribe`, `Unable to unsubscribe` (and follow/unfollow errors).
-- **Responsive notes:** detail pane for Profile.
+- **Route:** `/profile/notification-settings` (`Paths.notificationSettings`, `Routes.notificationSettings`). Branch 1. `ScreenRegistry.notificationSettings()` → `BlocProvider(NotificationSettingsCubit(..)..load())` + `NotificationSettingsPage`. The cubit is route-scoped; it used to be scoped to the whole Profile tab.
+- **Entry points:** Profile → `Notification Settings`.
+- **Inputs:** none.
+- **State holder(s):** `NotificationSettingsCubit`. `NotificationSettingsState` has `status`, `settings` (`NotificationSettingsEntity?`), `errorMessage`, `errorId`, and getters `isEnabled` (`settings != null`) and `valueOf(NotificationSetting)`.
+- **States → what is shown:** `AppHeader` `Notification Settings`, then a `ListView` (max 720) with these sections and rows (title / subtitle):
+  - `GENERAL`:
+    - `Daily Engagement Reminder` (no subtitle)
+    - `Prayers` / `Notify me when someone prays for my request`
+    - `New Prayer Requests` / `Notify me when someone adds a new prayer request`
+    - `Testimonies` / `Notify me when someone reacts to my testimony`
+    - `New Testimonies` / `Notify me when someone adds a new testimony`
+  - `DISCUSSION FORUM`:
+    - `New Threads` / `Notify me when a new thread is created`
+    - `Replies` / `Notify me of replies to my comments`
+    - `Thread Comments` / `Notify me of new comments in threads that I am following`
+    - `Comment Likes` / `Notify me when someone likes my comment`
 
-### Terms of use (unreachable)
-- `TermsOfUsePage` (header `Terms of Use` + lorem ipsum) isn't routed anywhere. Profile's `Terms of Use` opens `links.terms_of_use_link` externally. Keep the class but flag the placeholder content (spec §9.6).
+  Each row is a `SwitchRow`: title `bodyMedium`, subtitle `labelSmall` grey, and `Switch.adaptive` (Cupertino on iOS; selected track `wpaBlue@60%`). Switches are off and disabled until settings load. There is no spinner.
+- **User actions → methods:** each switch → `toggle(NotificationSetting, value)`. The setting enum values in row order: `dailyEngagementReminder`, `prayers`, `newPrayerRequest`, `testimonies`, `newTestimony`, `newForumThread`, `forumCommentReplies`, `forumThreadComments`, `forumCommentLikes`.
+- **Validation & messages:** error toasts:
+  - `Error loading notification settings` (load failure; switches stay disabled)
+  - `Unable to subscribe` / `Unable to unsubscribe` (toggle failure; the optimistic value is reverted)
+- **Navigation out:** back.
+- **Side effects:** topic subscriptions and the settings document (see FEATURES.md → Notification settings).
+- **Responsive notes:** the detail pane for Profile.
+
+### Terms of use (external link only)
+- The in-app `TermsOfUsePage` (lorem-ipsum placeholder) was **deleted** during the refactor (`lib/presentation/profile/terms_of_use.dart`), even though spec §9.6 said to keep it. There is no route or widget for it now.
+- Terms of use **is reachable**, but only as the Profile row `Terms of Use`, which opens `links.terms_of_use_link` externally. The real terms content must come from the church; it is not in the app.
+
+### Notifications tab (planned, not implemented)
+- There is no route, branch, destination or widget. The unwired placeholder `presentation/notifications/notifications_page.dart` was deleted. Foreground pushes appear only as the [banner](#foreground-push-banner).
 
 ---
 
-## Admin tab
-
-Tab root: `AdminPage` provides **one** `AdminBloc` to its nested navigator: `/` → `OptionsList`, `/prayer_request_approval`, `/testimony_approval`, `/user_verification`; unknown → `OptionsList`.
+## Admin branch
 
 ### Admin home
-- **Route:** Admin nested `/` (`OptionsList`).
-- **Entry points:** ADMIN tab (admins only).
-- **States → what is shown:** header `Admin Panel` and a wrap of three white tiles (shadow, radius 15):
-  - `User Verification` (amber `supervised_user_circle`)
-  - `Prayer Request Approval` (green `verified_user`)
-  - `Testimony Approval` (blue `book`)
-- **User actions:** tile → dispatch `LoadUnverifiedUsers` / `LoadUnverifiedPrayerRequests` / `LoadUnverifiedTestimonies`, **then** push the page.
-- **Responsive notes:** list/detail with the queues; tile grid.
+- **Route:** `/admin` (`Paths.admin`, `Routes.admin`). Root of branch 2. `ScreenRegistry.adminHome()` → `AdminHomePage` (no cubit).
+- **Entry points:** the ADMIN destination (admins only).
+- **Inputs:** none.
+- **State holder(s):** none.
+- **States → what is shown:** `PageHeading` `Admin Panel`, then a `Wrap` of three `AdminTile`s (white, radius 15, shadow, width 150, min height 125, icon 50, label `titleSmall`):
+  - `User Verification` (`Icons.supervised_user_circle`, `amber[300]`)
+  - `Prayer Request Approval` (`Icons.verified_user`, `greenAccent[400]`)
+  - `Testimony Approval` (`Icons.book`, `blueAccent[400]`)
+- **User actions → navigation:** tiles → `openUserVerification()` / `openPrayerRequestApproval()` / `openTestimonyApproval()` (push). Fixed: tiles no longer trigger a load before pushing; each queue loads its own data.
+- **Permissions/visibility:** `RedirectPolicy` sends non-admins from `/admin` and below to `/engage`. The destination is hidden for non-admins.
+- **Responsive notes:** a tile grid; the list pane of Admin → queues.
 
-### User verification
-- **Route:** Admin nested `/user_verification`.
-- **Entry points:** Admin home tile; deep link `userSignUp` (no load event is dispatched → empty until pull-to-refresh).
-- **State holder(s):** shared `AdminBloc`; a local list copied from `UnverifiedUsersLoaded`.
+### Admin queues
+One generic screen, `AdminQueuePage<T, C extends AdminQueueCubit<T>>` (`features/admin/admin_queue_page.dart`), serves three routes:
+
+| Route (helper) | Cubit (`ScreenRegistry`) | Title | Item widget |
+|---|---|---|---|
+| `/admin/user-verification` (`Routes.userVerification`) | `UserVerificationCubit` (`userVerification()`) | `User Verification` | `UnverifiedUserTile`: `<First> <Last>` (`titleSmall`) + email (`bodyMedium`) |
+| `/admin/prayer-request-approval` (`Routes.prayerRequestApproval`) | `PrayerRequestApprovalCubit` (`prayerRequestApproval()`) | `Prayer Request Approval` | `PendingPostTile`: body only, no author or date |
+| `/admin/testimony-approval` (`Routes.testimonyApproval`) | `TestimonyApprovalCubit` (`testimonyApproval()`) | `Testimony Request Approval` (the tile says `Testimony Approval`) | `PendingPostTile` |
+
+- **Entry points:** Admin home tiles; deep links `userSignUp`, `newPrayerRequestForApproval` and `newTestimonyForApproval`. Fixed: the queue now loads when opened from a deep link. It used to stay empty until a pull-to-refresh.
+- **Inputs:** none.
+- **State holder(s):** one cubit per route, with `..load()` called at creation. `AdminQueueState<T>{status, items, errorMessage, errorId}`.
 - **States → what is shown:**
-  - header: back + `User Verification`
-  - list empty → header only (no empty copy)
-  - list non-empty → `AnimatedList` of cards (kCardOverlayGrey, 0.9 width): `First Last`, email, red ✕ (`Icons.cancel`, 40) and green ✓ (`check_circle_rounded`, 40)
-  - the `Loader` branch is unreachable; `AdminError` isn't rendered
-- **User actions → events:** pull to refresh → `LoadUnverifiedUsers`; ✕ → `DeleteUnverifiedUser(id)` + remove row; ✓ → `VerifyUser(id)` + remove row (optimistic, no confirmation).
-
-### Prayer request approval
-- **Route:** Admin nested `/prayer_request_approval`.
-- **Entry points:** Admin home tile; deep link `newPrayerRequestForApproval` (no load dispatched).
-- **States → what is shown:** header `Prayer Request Approval`; cards show **only the request text** (no author/date) with ✕ and ✓; empty → header only.
-- **User actions → events:** ✕ → `DeletePrayerRequest(id)`; ✓ → `ApprovePrayerRequest(id)`. Pull to refresh → `LoadUnverifiedPrayerRequests` when non-empty, but `LoadUnverifiedUsers` when empty (**spec B6**).
-
-### Testimony approval
-- **Route:** Admin nested `/testimony_approval`.
-- **Entry points:** Admin home tile; deep link `newTestimonyForApproval`.
-- Same as Prayer request approval with header `Testimony Request Approval` (note: the tile says `Testimony Approval`), events `DeleteTestimony` / `ApproveTestimony` / `LoadUnverifiedTestimonies` (B6 applies to the empty branch).
+  - `status.isLoading` (only when there are no items yet) → `Scaffold(LoadingState)`, with no header
+  - otherwise a pull-to-refresh column: `AppHeader` (back + title), then a list of `AdminQueueCard`s (`AppCard`, each in a `ContentConstraint`). Each card has the item widget plus a red `Icons.cancel` (40, `error@80%`, tooltip `Reject`) and a green `Icons.check_circle_rounded` (40, `success@80%`, tooltip `Approve`).
+  - empty → the header only (no copy)
+  - failure → error toast with `userMessageFor` text; the list stays as it was
+- **User actions → methods:**
+  - pull → `load()`. Fixed (B6): each page reloads its own queue.
+  - ✕ → `reject(item)`: users → `deleteUnverifiedUsers`; posts → delete
+  - ✓ → `approve(item)`: `verifyUser` / `approvePrayerRequest` / `approveTestimony`
+  - Removal is optimistic and there is no confirmation. On failure → error toast, and the item is **not** put back.
+- **Permissions/visibility:** admin-only (router redirect).
+- **Navigation out:** back.
+- **Responsive notes:** the detail pane of Admin home; cards max 720.
 
 ---
 
 ## Global surfaces
 
 ### Foreground push banner
-- **Trigger:** `FirebaseMessaging.onMessage` while the shell is mounted.
-- **Presentation:** `showGeneralDialog` (transparent barrier, dismissible, label `Dismiss`, 400 ms slide-down, easeOutCubic) with an `InAppNotificationBanner` aligned top in a `SafeArea`: a white card (radius 16, shadow) with the title (`subHeading2`), ✕ (grey[400]), body (lite) and a blue pill `VIEW`.
-- **Copy fallbacks:** title `Notification` (or `data['title']` when `notification == null`); body `New notification received`.
-- **Actions:** ✕, a tap outside, or a swipe up (velocity < −100) → dismiss; `VIEW` → dismiss + deep-link handler (see [map](#deep-link--screen-map)).
+- **Trigger:** `FirebaseMessaging.onMessage` → `FirebaseMessagingService.foregroundMessageStream` → `NotificationsCubit` (app scope) → the `AppShell` listener. Only shown while the shell is mounted.
+- **Presentation:** `showNotificationBanner()` (`features/shell/in_app_notification_banner.dart`):
+  - a `showGeneralDialog` with a transparent, dismissible barrier (label `Dismiss`), 400 ms slide-down, `easeOutCubic`
+  - inside: `InAppNotificationBanner`, top-aligned in a `SafeArea`, max width 600
+  - the banner is a white card (radius 16, black@10% shadow) with the title (`titleMedium`), ✕ (`grey[400]`), the body (`bodyMedium`) and a blue pill `VIEW` (`wpaBlue@80%`)
+- **Copy:** title = `notification.title`, body = `notification.body`. Mapped by `bannerNotification()` (`lib/app/router/deep_links.dart`) with the pre-refactor fallbacks: title `Notification`, body `New notification received`; data-only messages use `data['title']`.
+- **Actions:**
+  - ✕, a tap outside, or a swipe up (velocity < −100) → dismiss
+  - `VIEW` → dismiss, then `context.navigator.openNotification(data)` (see the [deep-link map](#deep-link--screen-map))
 
 ### Toasts
-- `ToastMessage.showInfoToast` (green kSuccessColor@90%) and `showErrorToast` (red @90%): `FToast` (fluttertoast), bottom, 3 s, pill with white bold text.
-- Messages in use:
-  - `Error opening page`
-  - `Prayer Request Submitted`, `Testimony Submitted`
-  - `Unable to add prayer request.`, `Unable to add testimony.`
-  - `Unable to delete prayer request`, `Unable to delete testimony`
-  - `Prayer Request has been reported`, `Testimony has been reported` (unreachable)
-  - report/close/pray errors (unreachable)
-  - notification-settings errors
+- **API:** `AppToast.info(context, msg)` (`AppColors.success@90%`) and `AppToast.error(context, msg)` (red@90%).
+- **Visual:** a pill (radius 25, padding 12) with white `labelLarge` text, inserted into the **root** overlay. It sits 50 px + bottom safe area from the bottom, lasts 3 s, and ignores pointer events.
+- **Messages in use:**
+  - `Error opening page` (any external link or `mailto`, media tile, GIVE)
+  - post forms: `Prayer Request Submitted`, `Testimony Submitted` (info); `Unable to add prayer request.`, `Unable to add testimony.`
+  - post lists:
+    - info: `Prayer Request has been reported`, `Testimony has been reported`
+    - errors: `Unable to delete prayer request`, `Unable to delete testimony`, `Unable to close prayer request`, `Unable to close testimony`, `Unable to report prayer request`, `Unable to report testimony`, `You already reported this prayer request`, `You already reported this testimony`, `Unable to complete request.`, and load-more errors
+  - content detail action errors (`userMessageFor`)
+  - profile: `Error uploading photo`
+  - notification settings: `Error loading notification settings`, `Unable to subscribe`, `Unable to unsubscribe`
+  - admin queue errors (`userMessageFor`)
 
 ### Snackbars
-Material `SnackBar`, forum only: `You must be signed in to create a thread.`, `Thread followed`, `Thread unfollowed` (1 s), `Reported`, `You need to sign in to like comments`.
+- **API:** `showSnack(context, msg)`, a Material `SnackBar` with fixed behaviour, **4 s** for every message. The old follow/unfollow messages lasted 1 s.
+- **Used by the forum screens only:**
+  - Forum: `You must be signed in to create a thread.`, plus create errors
+  - Thread detail: `Thread followed`, `Thread unfollowed`, `Unable to follow thread`, `Unable to unfollow thread`, `Reported`, `You need to sign in to like comments`, plus write errors (`userMessageFor`)
 
 ### Loader
-`Loader` = centred `ColorLoader`: three dots kWpaBlue @100/80/60%, 1 s cycle. Used for app boot, splash, auth submitting, list loading and the image placeholder.
+- `LoadingState` (`design_system/components/states.dart`): three 10 px dots in `wpaBlue` at 100/80/60% alpha, bouncing on a 1 s cycle, with semantics `Loading`.
+- Used by: splash, auth while submitting, Engage home, All Bible series, post lists, admin queues.
+- Forum and Thread detail use a `CircularProgressIndicator` instead. Bible series detail uses grey placeholders. Content detail shows nothing while loading.
 
 ### Dialogs (catalogue)
+All dialogs are Material `AlertDialog`s from `design_system/components/app_dialogs.dart` (`showMessageDialog`, `showConfirmDialog`): white, radius 16, title `titleMedium`, content `bodyMedium`, `PillButton` actions (min 90×30, radius 16).
+
 | Title | Body | Buttons | Where |
 |---|---|---|---|
-| `Registration Successful!` | `Once your account is validated, a confirmation email will be sent to <email>` | `OK` → push `/sign_in` | Sign up |
-| `Password Reset Successful!` (rflutter_alert) | `Please follow instructions in email to reset password.` | `OK` → push `/sign_in` | Password reset |
-| `Uploading Image in Progress` | `Must wait for image to uplaod before exiting this page` | `OK` | Content detail back arrow |
-| `No responses found` | `Please fill out responses before completing` | `OK` | Response completion |
-| `Response(s) Saved as Draft` | `You can now exit this page and work on it later` | `OK` | Response completion |
-| `Delete my Account` | `This account will be permanently disabled and all data associated with this account will be deleted. Would you like to proceed?` | `No` / `Yes` | Profile |
-
-All except rflutter_alert are `AlertDialog` (radius 16, `subHeading2` title, lite content, blue kWpaBlue@80% pill buttons, 90×30).
+| `Registration Successful!` | `Once your account is validated, a confirmation email will be sent to <email>` | `OK` → `goToSignIn()` | Sign up (`showMessageDialog`) |
+| `Password Reset Successful!` | `Please follow instructions in email to reset password.` | `OK` → `goToSignIn()` | Password reset (`showMessageDialog`) |
+| `Uploading Image in Progress` | `Must wait for image to uplaod before exiting this page` | `OK` | Content detail exit during upload |
+| `No responses found` | `Please fill out responses before completing` | `OK` | Content detail complete |
+| `Response(s) Saved as Draft` | `You can now exit this page and work on it later` | `OK` | Content detail complete (partial answers) |
+| `Delete my Account` | `This account will be permanently disabled and all data associated with this account will be deleted. Would you like to proceed?` | `No` (muted) / `Yes` (primary) | Profile (`showConfirmDialog`, resolves `bool`) |
 
 ### Photo viewer
-From an uploaded image response: `showDialog` → a transparent `PhotoView` (width 0.9 × screen, height 1.6 × screen width; min scale contained × 0.8, max covered × 2; spinner while loading) with a white ✕ at top-left (30,30). Back closes it.
+- Opened by tapping an uploaded image response. A `showDialog` shows a transparent `PhotoView` (`FractionallySizedBox` 0.9 width × 0.8 height; `minScale` contained × 0.8, `maxScale` covered × 2; spinner while loading) with a white ✕ (`IconButton`, tooltip `Close`) at top-left (30, 30). Back or ✕ closes it.
 
 ---
 
 ## Content body catalogue
 
-Source: `domain/bible_series/entities.dart` (`SeriesContentBodyType`), `infrastructure/bible_series/series_content_dto.dart` (Firestore `body[].body_type` + properties). The body index (`contentNum`) is the key under which responses are stored.
+Sources: `lib/domain/bible_series/entities.dart` (sealed `SeriesContentBody`, `SeriesContentBodyType`), `lib/infrastructure/bible_series/series_content_dto.dart` (Firestore `body[].body_type` + properties), and `lib/presentation/features/bible_series/bodies/` (widgets). The body index in the list is the key under which responses are stored. `ContentDetailPage._ContentBodies` switches on the body type.
 
 | Firestore `body_type` | Domain type | Data fields (Firestore → domain) | Widget | Display / interaction |
 |---|---|---|---|---|
-| `title` | `TitleBody` | `text`* → `properties.text` | `TitleBodyWidget` | centred `heading` 24 pt |
-| `text` | `TextBody` | `paragraphs`* (list) → `properties.paragraphs` | `TextContentBodyWidget` | each paragraph as `SelectableText` lite 16 with 8 px vertical padding |
-| `scripture` | `ScriptureBody` | `bible_version`*, `attribution`*, `scriptures`* [{`book`*, `chapter`*, `title`?, `full_chapter`(false), `verses`*{num→text}}] | `ScriptureContentBodyWidget` | per scripture: reference `Book Chapter` (full chapter) / `Book Chapter: a` / `Book Chapter: a - b` (`subHeading` 18); optional title (`subHeading3`); verses sorted numerically as selectable rich text (verse number bold 12, text lite 16); footer `<version>\n<attribution>` (`liteSmall` 12) |
-| `question` | `QuestionBody` | `questions`* (list of strings) → `Question{question, location:[bodyIndex, qIndex]}` | `QuestionContentBodyWidget` | per question: `<n>.` + question text (`textFormFieldInput` 16); a multiline borderless-underline field, hint `Share your thoughts ...`, initial value from the loaded responses. Typing → `QuestionResponseChanged(value, contentNum, questionNum)` (marks complete items incomplete first). No length limit (`kMaxResponseBody` unenforced). Makes the content "response possible". Dispatches `LoadResponses` in `build()` (B11). |
-| `image_input` | `ImageInputBody` | (none) | `ImageInputBodyWidget` | no image → `add_a_photo` icon (36) + `Upload Photo!`; uploading → `<n>%`; uploaded → ✕ (delete) above the image (thumbnail via `Image.network`, or a local `Image.file` right after upload; width 0.8 × screen). Tap → photo viewer. Pick from **gallery** → `UploadImage(File)`; ✕ → `DeleteImage`. Response key `contentNum` → `'0'`. Dispatches `LoadResponses` in `build()` (B11). Uses `dart:io File` (spec §6.7/§7). |
-| `audio` | `AudioBody` | `audio_file_url`*, `title`('') | `AudioBodyWidget` → `AudioPlayerWidget` | `mm:ss` position, a blue slider (track 10, thumb 14) and `mm:ss` duration; big play/pause icon (70). Play → `Play(sourceUrl, contentId)`; pause → `Pause()`; slide → `Seek`. Uses the app-wide `AudioPlayerBloc` via `getIt` (spec §7). The title isn't displayed. |
-| `video` | `VideoBody` | `link`*, `title`('') | `VideoBodyWidget` | optional title (`subHeading`). YouTube URLs (`YoutubePlayerController.convertUrlToId`) → `youtube_player_flutter` v10 player with a red progress theme; other URLs → `video_player` with tap-to-play overlay (big white ▶ on black26) and a scrubbable red progress bar. Grey box + spinner (200 h) while initialising. `print`s the URL (B14). |
-| `link` | `LinkBody` | `title`(''), `text`*, `link`* | `LinkBodyWidget` | optional title (`subHeading` 22); grey rounded button (100 w) with `text`. Tap → `launchUrl(link)` (external), else toast `Error opening page`. |
-| `divider` | `DividerBody` | — | `DividerBodyWidget` | Material `Divider()` |
-| *(other)* | — | — | — | DTO throws `Invalid body_type: <x>`; `DefaultEmptyBody` (`EMPTY`) exists but isn't rendered |
+| `title` | `TitleBody` | `text`* | `TitleBodyView` | centred `headlineSmall` (24/700), 8 px vertical padding |
+| `text` | `TextBody` | `paragraphs`* (list) | `TextBodyView` | each paragraph as `SelectableText` `bodyLarge` (16/400), 8 px vertical padding |
+| `scripture` | `ScriptureBody` | `bible_version`*, `attribution`*, `scriptures`* [{`book`*, `chapter`*, `title`(''), `full_chapter`(false), `verses`*{num→text}}] | `ScriptureBodyView` | per scripture: `Scripture.reference` (`Book Chapter` for full chapters or no verses, `Book Chapter: a`, `Book Chapter: a - b`) in `titleLarge`; optional title (`titleSmall`); verses sorted numerically as selectable rich text (number in `verseNumber` 12/bold, text `bodyLarge`). Footer `<version>\n<attribution>` (`bodySmall`). |
+| `question` | `QuestionBody` | `questions`* (list of strings) → `Question{question, location: [bodyIndex, qIndex]}` | `QuestionBodyView` | per question: `<n>.` + question text (input style 14/500). Below it a multiline collapsed field with an underline, hint `Share your thoughts ...`, initial value from `responses.at(bodyIndex, qIndex)`. Typing → `questionChanged(bodyIndex, qIndex, value)`. No length limit. Makes the content "response possible". |
+| `image_input` | `ImageInputBody` | (none) | `ImageInputBodyView` | no image → `Icons.add_a_photo` (50, tooltip `Upload Photo`) + `Upload Photo!`; uploading → `<n>%` from the upload progress stream; uploaded → ✕ (tooltip `Remove photo`) above the preview at 0.8 width (server thumbnail, or the in-memory picked image right after upload, or the full URL). Tap the preview → [photo viewer](#photo-viewer). Pick from the **gallery** (`pickImageFromGallery`, bytes) → `uploadImage`; ✕ → `deleteImage`. Response stored at `responses[bodyIndex]['0']`, type `image`. |
+| `audio` | `AudioBody` | `audio_file_url`*, `title`('') | `AudioBodyView` | `mm:ss` position, a slider (track 10, thumb 14, `wpaBlue`; inactive and disabled unless this body's URL is loaded) and `mm:ss` duration. Play/pause icon button (70). Play → `AudioPlayerCubit.play(sourceUrl:, contentId:)`; pause → `pause()`; slide → `seek(Duration)`. Uses the **app-scope** `AudioPlayerCubit` from the widget tree, so playback continues after leaving the page and the series detail shows a playing icon. The title isn't displayed. |
+| `video` | `VideoBody` | `link`*, `title`('') | `VideoBodyView` | optional title (`titleLarge`). YouTube URLs (`YoutubePlayerController.convertUrlToId`) → `youtube_player_flutter` `YoutubePlayer` (not autoplay; red progress via `YoutubePlayerTheme`). Other URLs → `video_player`, with a tap-to-play overlay (big white ▶ on `black26`) and a scrubbable red/grey/white progress bar. While initialising → 200 px `black12` box with a spinner. If initialisation fails or the URL doesn't parse, the spinner stays (errors are swallowed). |
+| `link` | `LinkBody` | `title`(''), `text`*, `link`* | `LinkBodyView` | optional title (`headlineSmall`); a grey rounded button (`cardGrey`, radius 15, min width 100) with `text` (`titleSmall`). Tap → `openExternal(link)`; on failure → toast `Error opening page`. |
+| `divider` | `DividerBody` | — | `Divider()` | Material divider |
+| *(other)* | — | — | — | the DTO throws `Invalid body_type: <x>`, so the whole content fails to load (`Error: Invalid body_type: <x>`). `EmptyBody` exists in the domain and renders `SizedBox.shrink()`, but the DTO never produces it. |
 
 `*` = required (`findOrThrowException`); `(x)` = default.
 
-Response storage (`completions/{id}/responses/{id}`): `{user_id, responses: {"<bodyIndex>": {"<qIndex>": {response, type: 'text'|'image'}}}}`.
+Response storage (`completions/{id}/responses/{id}`): `{user_id, responses: {"<bodyIndex>": {"<qIndex>": {response, type: 'text'|'image'}}}}`. Unchanged.
 
 ---
 
 ## Route & overlay index
 
-| Navigator | Route | Widget | Args |
-|---|---|---|---|
-| root | `/` | `SplashPage` | — |
-| root | `/index` | `IndexPage` | — |
-| root | `/sign_in` | `SignInPage` | — |
-| root | `/sign_up` | `SignUpPage` | — |
-| root | `/password_reset` | `PasswordResetPage` | — |
-| Engage | `/` | `EngageIndex` | — |
-| Engage | `/bible_series` | `BibleSeriesDetailPage` | `bibleSeriesId` |
-| Engage | `/all_bible_series` | `AllBibleSeriesPage` | — |
-| Engage | `/prayer_requests` | `PrayerRequestsPage(tabIndex:0)` | — |
-| Engage | `/prayer_requests/mine` | `PrayerRequestsPage(tabIndex:1)` | — |
-| Engage | `/testimonies` | `TestimoniesPage(tabIndex:0)` | — |
-| Engage | `/testimonies/mine` | `TestimoniesPage(tabIndex:1)` | — |
-| Engage | `/content_detail` | `ContentDetailPage` | `bibleSeriesId, seriesContentId, getCompletionDetails, seriesContentType` |
-| Engage | `/forum` | `ForumPage` | `forumId, title` |
-| Engage | `/thread_detail` | `ThreadDetailPage` | `threadId, forumId, focusCommentId?` |
-| Profile | `/` | `ProfilePageRoot` | — |
-| Profile | `/notification_settings` | `NotificationSettingsPage` | — |
-| Admin | `/` | `OptionsList` | — |
-| Admin | `/user_verification` | `UserVerificationPage` | — |
-| Admin | `/prayer_request_approval` | `PrayerApprovalPage` | — |
-| Admin | `/testimony_approval` | `TestimonyApprovalPage` | — |
+Every path is in `Paths`/`Routes` and the typed helpers in `lib/app/router/routes.dart`. Path segments are URI-encoded by the helpers.
 
-`Overlay.of(context).insert` sites (9):
-1. `legacy_prayer_request.dart` — `PrayerRequestOptionsSlider` (dead class)
-2. `legacy_prayer_request.dart` — `PrayerRequestOptions` (home `+`)
-3. `legacy_testimonies_widget.dart` — home `+`
-4. `prayer_requests.dart` — title `+`
-5. `testimonies.dart` — title `+`
-6. `forum_page.dart` — create thread
-7. `thread_detail_page.dart` — edit thread
-8. `main/widgets/prayer_request_widget.dart` — dead file
-9. `main/widgets/testimonies_widget.dart` — dead file
+| Path | Helper | Branch | `ScreenRegistry` → widget | Cubit(s) (route scope) | Params |
+|---|---|---|---|---|---|
+| `/splash` | `Routes.splash` | root | `splash()` → `SplashPage` | — (app `AuthenticationCubit`) | — |
+| `/sign-in` | `Routes.signIn` | root | `signIn()` → `SignInPage` | `SignInCubit` | — |
+| `/sign-up` | `Routes.signUp` | root | `signUp()` → `SignUpPage` | `SignUpCubit` | — |
+| `/password-reset` | `Routes.passwordReset` | root | `passwordReset()` → `PasswordResetPage` | `PasswordResetCubit` | — |
+| `/engage` | `Routes.engage` | 0 Engage | `engageHome()` → `EngageHomePage` | `EngageHomeCubit` | — |
+| `/engage/series` | `Routes.allSeries` | 0 | `allBibleSeries()` → `AllBibleSeriesPage` | `AllBibleSeriesCubit` | — |
+| `/engage/series/:seriesId` | `BibleSeriesRoute(seriesId:)` | 0 | `bibleSeriesDetail(r)` → `BibleSeriesDetailPage` | `BibleSeriesDetailCubit` | path `seriesId` |
+| `/engage/series/:seriesId/content/:contentId` | `ContentRoute(seriesId:, contentId:, contentType:)` | 0 | `contentDetail(r)` → `ContentDetailPage(contentType:)` | `ContentDetailCubit` | path `seriesId`, `contentId`; query `type?` |
+| `/engage/forums/:forumId` | `ForumRoute(forumId:)` | 0 | `forum(r)` → `ForumPage` | `ForumCubit` | path `forumId` |
+| `/engage/forums/:forumId/threads/:threadId` | `ThreadDetailRoute(forumId:, threadId:, focusCommentId:)` | 0 | `threadDetail(r)` → `ThreadDetailPage(focusCommentId:)` | `ThreadCubit` | path `forumId`, `threadId`; query `comment?` |
+| `/engage/prayer-requests` | `PrayerRequestsRoute(tab:)` | 0 | `prayerRequests(r)` → `PostsPage<PrayerRequest>` | `AllPrayerRequestsCubit`, `MyPrayerRequestsCubit`, `MyAnsweredPrayerRequestsCubit` | query `tab?` = `mine`\|`closed` (absent = all) |
+| `/engage/testimonies` | `TestimoniesRoute(tab:)` | 0 | `testimonies(r)` → `PostsPage<Testimony>` | `AllTestimoniesCubit`, `MyTestimoniesCubit`, `MyArchivedTestimoniesCubit` | query `tab?` |
+| `/profile` | `Routes.profile` | 1 Profile | `profile()` → `ProfilePage(appVersion:)` | `ProfileCubit` | — |
+| `/profile/notification-settings` | `Routes.notificationSettings` | 1 | `notificationSettings()` → `NotificationSettingsPage` | `NotificationSettingsCubit` | — |
+| `/admin` | `Routes.admin` | 2 Admin | `adminHome()` → `AdminHomePage` | — | — |
+| `/admin/user-verification` | `Routes.userVerification` | 2 | `userVerification()` → `AdminQueuePage<LocalUser, UserVerificationCubit>` | `UserVerificationCubit` | — |
+| `/admin/prayer-request-approval` | `Routes.prayerRequestApproval` | 2 | `prayerRequestApproval()` → `AdminQueuePage<PrayerRequest, PrayerRequestApprovalCubit>` | `PrayerRequestApprovalCubit` | — |
+| `/admin/testimony-approval` | `Routes.testimonyApproval` | 2 | `testimonyApproval()` → `AdminQueuePage<Testimony, TestimonyApprovalCubit>` | `TestimonyApprovalCubit` | — |
 
-Other modal surfaces: `showGeneralDialog` (push banner), `showDialog` × 6 (dialogs + photo viewer), `PopupMenuButton` × 4 (prayer card, testimony card, thread menu, comment menu), rflutter_alert × 1.
+All Engage, Profile and Admin child routes are **direct children** of their branch root, not nested in each other. For example, content is a sibling of series detail, and thread is a sibling of forum. When a screen is pushed, back returns to the screen that pushed it. When a location is opened with `go` (deep links), the stack is the branch root plus the target.
 
-Unreachable/dead (spec §9.6, confirmed by search):
+**Overlay / modal surfaces**
+- `grep "Overlay.of(context).insert" lib/presentation` finds **no** matches. The remaining overlay inserts are:
+  1. `foundation/feedback/overlay_form.dart` → `showOverlayForm()`. It has exactly two callers: `showNewPostForm()` (new prayer request / testimony; home `+` tiles and the posts-page `+`) and `showThreadForm()` (Forum `+`, Thread detail `EDIT THREAD`).
+  2. `foundation/feedback/toast.dart` → `AppToast` (root overlay).
+- `showGeneralDialog` × 1: the push banner.
+- `showDialog` × 3 call sites: `showMessageDialog`, `showConfirmDialog`, and the photo viewer.
+- `PopupMenuButton` × 3: post card, thread menu, comment menu.
+- `SnackBar` via `showSnack`: Forum and Thread detail.
+- No bottom sheets.
+
+**Deleted during the refactor** (unreachable or replaced; confirmed absent from `lib/`):
 - `presentation/home/home_page.dart`
 - `presentation/notifications/notifications_page.dart`
-- `engage/main/widgets/bible_series_widget.dart`
-- `engage/main/widgets/prayer_request_widget.dart`
-- `engage/main/widgets/testimonies_widget.dart`
-- `engage/main/widgets/add_card.dart` (only used by the dead widgets)
-- `PrayerRequestOptionsSlider` (in `legacy_prayer_request.dart`)
-- `TermsOfUsePage`
-- `AppVersion` (in `profile.dart`)
+- `presentation/profile/terms_of_use.dart` (`TermsOfUsePage`)
+- the dead `engage/main/widgets/*` duplicates and `PrayerRequestOptionsSlider`
+- `LayoutFactory`, `TextFactory`, `NavigationBarBloc`, `LazyLoadIndexedStack`
+- the per-tab nested `Navigator`s and the local `NavigationBar` class
+
+---
+
+## Two-pane (list / detail) readiness (spec §8.2)
+
+Each detail below is identified **only by path params**, and its `ScreenRegistry` builder creates its own cubit from those params. Cross-pane consistency comes through `AppEventBus` (`CompletionChanged` refreshes series detail; `ThreadFollowChanged` refreshes forum bells). So any of these pairs can be shown side by side without shared state:
+
+| List | Detail | Detail identified by | Ready? |
+|---|---|---|---|
+| All Bible series `/engage/series` | Bible series detail `/engage/series/:seriesId` | `seriesId` | yes |
+| Bible series detail `/engage/series/:seriesId` | Content detail `/engage/series/:seriesId/content/:contentId` | `seriesId`, `contentId` (the `type` query is only a loading label) | yes |
+| Forum `/engage/forums/:forumId` | Thread detail `/engage/forums/:forumId/threads/:threadId` | `forumId`, `threadId` (+ `comment?`) | yes |
+| Admin home `/admin` | Admin queues `/admin/{user-verification,prayer-request-approval,testimony-approval}` | fixed path | yes (Admin home has no state) |
+| Profile `/profile` | Notification settings `/profile/notification-settings` | fixed path | yes |
+| Prayer requests / Testimonies | — | no detail screen | n/a |
+
+Caveats for an implementer:
+- Details are sibling routes of their lists (see the note under the index), and Content detail's `PopScope` controls the exit. A two-pane layout must still call `ContentDetailCubit.requestExit()` before it replaces the content pane, so drafts get saved.
+- Bible series detail sizes its hero from the *screen* height, not its own constraints.
 
 ---
 
 ## Deep-link → screen map
 
-| `notificationType` | Screen | Params | Analytics | Notes |
-|---|---|---|---|---|
-| `dailyEngagementReminder` | [Bible series detail](#bible-series-detail) | `bibleSeriesId` | `daily_engagement_notification_clicked`, then `bible_series_viewed` | |
-| `prayerRequestPrayed` | [Prayer requests](#prayer-requests), My Open Requests | — | — | |
-| `testimonyPraised` | [Testimonies](#testimonies), My Shared Testimonies | — | — | |
-| `userSignUp` | [User verification](#user-verification) | — | — | list not auto-loaded; non-admin → out-of-range tab **[DEFECT]** |
-| `newPrayerRequestForApproval` | [Prayer request approval](#prayer-request-approval) | — | — | same |
-| `newTestimonyForApproval` | [Testimony approval](#testimony-approval) | — | — | same |
-| `newPrayerRequest` | [Prayer requests](#prayer-requests), All | — | — | |
-| `newTestimony` | [Testimonies](#testimonies), All | — | — | |
-| `newForumThread` / `newForumComment` / `forumCommentReply` / `forumCommentLike` | [Thread detail](#thread-detail) | `threadId`, `forumId`, `focusCommentId` ← `commentId` | `<type>_notification_clicked` | |
-| `link` | external browser | `link` | — | |
+The source of truth is `lib/app/router/deep_links.dart`: `locationForNotification(data)` (pure), `analyticsEventForNotification(data)`, and `NotificationOpener.open(data)`.
+- `open` first logs the analytics event, if any, then:
+  - an in-app location (no scheme) → `router.go(location)`
+  - a URL with a scheme → opened externally (`canLaunchUrl` → `launchUrl`; no toast on failure)
+  - `null` → nothing happens
+- String values are only used when non-empty.
 
-Entry paths: cold start (`getInitialMessage` in `App.initializeServices` → pending `NavigationBarState.route`, handled post-frame in `IndexPage`), background tap (`onMessageOpenedApp`), foreground banner `VIEW`.
+| `notificationType` | Location (helper) | Screen | Params from payload | Fallback | Analytics |
+|---|---|---|---|---|---|
+| `dailyEngagementReminder` | `/engage/series/<bibleSeriesId>` (`BibleSeriesRoute`) | [Bible series detail](#bible-series-detail) | `bibleSeriesId` | missing `bibleSeriesId` → `/engage` | `daily_engagement_notification_clicked` (then `bible_series_viewed` from the screen) |
+| `prayerRequestPrayed` | `/engage/prayer-requests?tab=mine` | [Prayer requests](#prayer-requests), My Open Requests | — | — | — |
+| `testimonyPraised` | `/engage/testimonies?tab=mine` | [Testimonies](#testimonies), My Shared Testimonies | — | — | — |
+| `userSignUp` | `/admin/user-verification` | [User verification](#admin-queues) | — | non-admin → `/engage` (router) | — |
+| `newPrayerRequestForApproval` | `/admin/prayer-request-approval` | [Prayer request approval](#admin-queues) | — | non-admin → `/engage` | — |
+| `newTestimonyForApproval` | `/admin/testimony-approval` | [Testimony approval](#admin-queues) | — | non-admin → `/engage` | — |
+| `newPrayerRequest` | `/engage/prayer-requests` | [Prayer requests](#prayer-requests), All | — | — | — |
+| `newTestimony` | `/engage/testimonies` | [Testimonies](#testimonies), All | — | — | — |
+| `newForumThread`, `newForumComment`, `forumCommentReply`, `forumCommentLike` | `/engage/forums/<forumId>/threads/<threadId>[?comment=<commentId>]` (`ThreadDetailRoute`) | [Thread detail](#thread-detail) | `forumId`, `threadId`, `commentId` → focus | missing `forumId` or `threadId` → `/engage` | `<notificationType>_notification_clicked` |
+| `link` | the `link` value as an external URL | external browser | `link` | missing `link` → nothing | — |
+| anything else / missing | `null` | nothing | — | — | — |
 
-## Analytics → screen map
+**Entry paths** (all go through `NotificationOpener.open`, wired in `lib/app/app.dart`):
+- **Cold start:** `FirebaseMessagingService.getInitialMessage()` in `_AppState.initState`. The `go` happens while auth is `unknown`, so `RedirectPolicy` saves the location as pending, shows splash, and restores it once authenticated.
+- **Background tap:** `openedMessageStream` (`onMessageOpenedApp`).
+- **Foreground:** the banner `VIEW` → `AppNavigator.openNotification(data)`.
 
-| Event | Screen / surface |
-|---|---|
-| `bible_series_viewed` | Bible series detail (route build) |
-| `engagement_viewed` | Series content detail (route build) |
-| `engagement_completed` | Series content detail completion button |
-| `daily_engagement_notification_clicked` | Push (any entry path) → Bible series detail |
-| `<forumType>_notification_clicked` ×4 | Push → Thread detail |
-| `prayer_request_created` | New prayer request overlay POST |
-| `prayer_request_prayed` | Prayer request card PRAY |
-| `prayer_request_reported` | Prayer request card menu REPORT |
-| `prayer_request_deleted` | Prayer request card menu DELETE |
-| `prayer_request_answered` | Prayer request card menu PRAYER ANSWERED |
-| `testimony_created` | New testimony overlay POST |
-| `amen_testimony` | Testimony card AMEN |
-| `testimony_reported` / `testimony_deleted` / `testimony_answered` | Testimony card menu REPORT / DELETE / ARCHIVE |
+`go` replaces the current branch stack, so back from a deep-linked screen returns to that branch's root.
 
 ---
 
-## Appendix — Current-style inventory
+## Analytics → screen map
 
-`TextFactory` (all Montserrat, sizes multiplied by 1.2 on "tablet" via `LayoutFactory`):
+The names are the contract in `AnalyticsEvents` (`lib/domain/common/analytics.dart`). They go through `IAnalytics.log`, implemented by `FirebaseAnalyticsAdapter` (`lib/infrastructure/analytics/`), which calls `FirebaseAnalytics.logEvent`. That is the only `logEvent` call site. Every name in spec Appendix B is present.
 
-| Method | Size / weight / colour |
-|---|---|
-| `heading` | 30 / w700 |
-| `subPageHeading` | 24 / w700 |
-| `subPageHeading2` | 18 / w700 |
-| `subHeading` | 18 / w700 |
-| `subHeading2` | 16 / w600 |
-| `subHeading3` | 14 / w600 |
-| `regular` / `regularTextStyle` | 14 / w600 / black |
-| `regularButton` | 13 / w600 |
-| `textFormFieldInput` | 14 / w500 / black |
-| `lite` / `liteTextStyle` / `selectLite` | 14 / w400 / black |
-| `lite2` | 14 / w400 / grey[600] |
-| `linkLite` | 14 / w400 |
-| `liteSmall` | 10 / w400 |
-| `smallBoldTextStyle` | 12 / bold |
-| `authenticationButton` | 16 / w600 |
-| `hintStyle` | 16 / w400 / grey[400] |
-
-`LayoutFactory`: `DeviceType` from the shortest side < 600, cached once (B15). `getDimension(baseDimension)` ×1.2 on tablet; named dims `CONTENT_TAB_HEIGHT/WIDTH`, `ADMIN_TILE_HEIGHT/WIDTH/FONT_SIZE`, `ADMIN_ICON_SIZE`; `conversionVal = 1.2`.
-
-App `ThemeData`: `useMaterial3: false`, `fontFamily: 'Montserrat'`, transparent splash/highlight. Everything else is hard-coded per widget.
-
-| Screen | Text styles | Hard-coded colours / sizes |
+| Event | Call site | Screen / user action |
 |---|---|---|
-| Sign in / up / reset | `lite2`, `linkLite`, `authenticationButton`, `liteTextStyle(16)` fields | white bg; gradient `Color.fromRGBO(0,146,214,1→0.7)`; disabled grey.shade400; field bg white + grey shadow, grey.shade200 underline; error `kErrorTextColor` (red); logo 200 h (sign in) / 100 h |
-| Shell | `regularTextStyle(11)`, `liteTextStyle(10)` | selected kWpaBlue@60%, unselected grey[500]; icon 24 |
-| Engage home | `heading`, `subHeading`, `regular`, `lite` | section bg grey.shade100; tiles grey[300] radius 15; `+` black38 radius 40; current card black@50% overlay, white/white70 text, progress kWpaBlue / white@30/50%; placeholders grey.shade200; tile sizes `kPrayerRequestButtonHeight 50`, `kPastBibleSeriesTile* 250×130 (+60)`, `kMediaTile* 150×75 (+60)` |
-| All Bible series | `subPageHeading`, `subHeading3`, `lite`, `liteSmall` | white cards radius 16, grey@25% shadow, height 100 |
-| Bible series detail | `regular`, `heading`, `subHeading` | header 35% height, radius 30, black@80% gradient; day tabs radius 10 with green@25% / amber@25% / grey.shade100; rows grey.shade100 radius 8, height `kContentChildrenHeight 60`; label colours black87/black45 |
-| Content detail + bodies | `subPageHeading2`, `heading(24)`, `selectLite(16)`, `subHeading(18/22)`, `subHeading3`, `liteSmall(12)`, `smallBoldTextStyle(12)`, `textFormFieldInput(16)`, `liteTextStyle(16)` | completion icon 60: black87@50% / kSuccessColor@80%, splash lightGreenAccent; audio slider kWpaBlue (@50/@10%); video progress red/grey/white; link button grey[300] radius 15 width `kLinkButtonWidth 100`; `kTopPaddingQuestionBody 8` |
-| Prayer requests / Testimonies | `subPageHeading`, `subHeading2`, `regular`, `lite(10)` | cards `kCardOverlayGrey` (grey.shade100) radius 8; pray button `kCardGrey` (grey.shade300); PRAYED black54; Pending `kWarningColor`@80%; `+` grey.shade300 |
-| New PR / testimony / thread form | `textFormFieldInputStyle`, `lite`, `regularButton` | white card radius 16, shadow grey.shade400 blur 18; hint grey.shade300; POST kWpaBlue@75% (disabled @25%); CANCEL `kCardGrey`; anonymous check kWpaBlue@65% |
-| Forum / Thread detail | `subPageHeading`, `subHeading2/3`, `regular(14)`, `lite(10/12)`, raw `TextStyle(fontSize:12)` | cards `kCardOverlayGrey`; followed bell kWpaBlue; hidden icon grey.shade600; reply highlight kWpaBlue alpha 25; edit chip orange@10/30%, orange[800]; like Colors.blue; input border grey.shade300 → black, radius 20 |
-| Profile | `heading`, `regular`, `lite`, `subHeading2`, `regularButton` | `kDarkGreyColor` chevrons; Logout red 14; photo band black@50%; dialog No `kDarkGreyColor`@50%, Yes kWpaBlue@80% |
-| Notification settings | `subPageHeading`, `regular`, `lite`, `lite(10, grey)` | switch kWpaBlue@60% (iOS track) / @25% track + @60% thumb (Android) |
-| Admin | `heading`, `subPageHeading`, `subHeading3`, `regular`, `lite` | tiles white radius 15 (`kAdminTile*` 150×125); icons amber[300] / greenAccent[400] / blueAccent[400]; ✕ `kErrorColor`@80%, ✓ `kSuccessColor`@80% (40) |
-| Push banner | `subHeading2`, `liteTextStyle`, `regularButton` | white card radius 16, black@10% shadow; ✕ grey[400]; VIEW kWpaBlue@80% |
-| Toast | `regular(white)` | info kSuccessColor@90%, error red@90%, radius 25 |
-| Dialogs | `subHeading2`, `lite`, `regularButton` | radius 16; buttons kWpaBlue@80% 90×30 |
-| Loader | — | kWpaBlue @100/80/60% |
+| `bible_series_viewed` | `BibleSeriesDetailCubit.load()` | Bible series detail opened (any entry, incl. deep link) |
+| `engagement_viewed` | `ContentDetailCubit.load()` | Series content detail opened |
+| `engagement_completed` | `ContentDetailCubit._markComplete()` (after the completion write) | Content detail grey check, when complete is allowed |
+| `daily_engagement_notification_clicked` | `NotificationOpener.open` via `analyticsEventForNotification` | push opened (cold start, background tap, banner `VIEW`) → Bible series detail |
+| `newForumThread_notification_clicked`, `newForumComment_notification_clicked`, `forumCommentReply_notification_clicked`, `forumCommentLike_notification_clicked` | same (`AnalyticsEvents.notificationClicked(type)`) | push opened → Thread detail |
+| `prayer_request_created` | `PostActions.create` (via `NewPrayerRequestCubit.submit`) | New prayer request form `POST` (on success) |
+| `prayer_request_prayed` | `PostActions.react` (via `AllPostsCubit.react`) | Prayer request card `PRAY` |
+| `prayer_request_reported` | `PostActions.report` (via `PostListCubit.reportPost`) | card menu `REPORT AS INAPPROPRIATE` |
+| `prayer_request_deleted` | `PostActions.delete` (via `deletePost`) | card menu `DELETE` |
+| `prayer_request_answered` | `PostActions.close` (via `closePost`) | card menu `PRAYER ANSWERED` |
+| `testimony_created` | `PostActions.create` (via `NewTestimonyCubit.submit`) | New testimony form `POST` |
+| `amen_testimony` | `PostActions.react` | Testimony card `AMEN` |
+| `testimony_reported` / `testimony_deleted` / `testimony_answered` | `PostActions.report` / `delete` / `close` | Testimony card menu `REPORT AS INAPPROPRIATE` / `DELETE` / `ARCHIVE` |
+
+All `PostActions` events are logged only after the repository call succeeds, as before the refactor. The two view events are logged at the start of `load()`, even if loading then fails.
+
+---
+
+## Open issues (summary)
+
+Fixed in the Phase 7 commit: push-banner copy fallbacks restored; account-deletion failure now shows a toast; unknown locations fall back to `/engage` (go_router `onException`); sign-out no longer makes the next sign-in land on the page that was open.
+
+Still present and relevant to a UI rebuild:
+1. The hidden-thread marker is shown to everyone. `ForumState.isAdmin` says it is for admins but is unused for that, and hidden threads are not filtered (unchanged behaviour).
+2. The Forum header always reads `Forum`. The loaded `ForumState.forum.title` is not displayed.
+3. Admin queue actions are optimistic and never put a failed item back.
+4. Bible series detail in the failure state has no back button.
+5. Copy that is still inconsistent or has typos (kept on purpose):
+   - the tile says `Testimony Approval` but the screen says `Testimony Request Approval`
+   - `uplaod`
+   - the unused `LinksCubit` fallback `An unknown error occured`
+   - `<n> Comments` even for 1
+
+---
+
+## Appendix — Styles (theme roles and tokens)
+
+`TextFactory` and `LayoutFactory` are gone. Styles now come from:
+- **`Theme.of(context).textTheme`**, also available as `context.text`. Defined in `lib/presentation/design_system/theme.dart` (Material 3, seeded from `wpaBlue`, Montserrat, sizes respect the user's text scale).
+- **`AppTextStyles`**, a `ThemeExtension` available as `context.textStyles`, for styles with no M3 role: `input`, `muted`, `link`, `hint`, `verseNumber`, `authButton`.
+- **Tokens** in `lib/presentation/design_system/tokens.dart`: `AppColors`, `AppSpacing`, `AppRadii`, `AppDurations`, `AppSizes`, `AppAssets`.
+- **Components** in `lib/presentation/design_system/components/`: `AppHeader`, `PageHeading`, `SectionHeader`, `AppCard`, `PlaceholderBox`, `AppAvatar`, `AppNetworkImage`, `PillButton`, `AddCircleButton`, `OverlayFormCard`, `SettingsRow`, `SwitchRow`, `LabeledDivider`, `LoadingState`, `EmptyState`, `ErrorState`.
+
+The mapping from old `TextFactory` methods to theme roles belongs in `docs/ui/UI_REBUILD_GUIDE.md`. Role sizes in the current theme:
+
+| Role | Size / weight |
+|---|---|
+| `headlineLarge` | 30/700 |
+| `headlineSmall` | 24/700 |
+| `titleLarge` | 18/700 |
+| `titleMedium` | 16/600 |
+| `titleSmall` | 14/600 |
+| `labelLarge` | 14/600 black87 |
+| `labelMedium` | 13/600 |
+| `labelSmall` | 10/400 |
+| `bodyLarge` | 16/400 |
+| `bodyMedium` | 14/400 |
+| `bodySmall` | 12/400 |
+
+Where the roles are used today, so a redesign knows what each role means:
+
+| Screen | Roles / tokens |
+|---|---|
+| Auth | `AppTextStyles.authButton`, `muted`, `link`, `hint`; `bodyLarge` fields; `AppColors.error`; gradient `wpaBlue` → @70%; max width 520 |
+| Shell | `navigationBarTheme` / `navigationRailTheme` (selected `wpaBlue@60%` 11/600, unselected `grey[500]` 10/400) |
+| Engage home | `headlineLarge` (greeting, current series title), `titleLarge` (section headers), `labelLarge` (tiles, carousel titles), `bodyMedium`, `bodySmall` (progress labels); `AppSizes.pastSeriesTile*`, `mediaTile*`, `homeButtonHeight` |
+| All Bible series / Series detail | `headlineSmall` (`AppHeader`), `titleSmall`, `labelSmall`; `headlineLarge` (day number), `labelLarge` (month), `titleLarge` (content rows); `AppColors.dayCompleted/dayLate/dayNeutral`; `AppSizes.dayTab*`, `contentRowHeight` |
+| Content detail + bodies | see the [body catalogue](#content-body-catalogue); `AppTextStyles.input`, `verseNumber`; `AppColors.success`, `cardGrey` |
+| Posts / forms | `titleMedium` (tabs), `labelLarge` (author, buttons), `labelSmall` (date), `bodyMedium` (body); `PillButton` (`labelMedium`); `AppColors.warning`, `cardGrey`, `cardOverlayGrey` |
+| Forum / Thread | `titleSmall` (author), `titleMedium` (thread title), `labelSmall` (date, relative time), `bodyMedium`/`bodySmall`. Still raw `TextStyle(fontSize: 12)` for `Reply` / `Hide Replies` and an orange `Editing Comment` banner. |
+| Profile / Notification settings | `headlineLarge` (`PageHeading`), `labelLarge` (`LabeledDivider`), `bodyMedium` (rows), `labelSmall` grey (switch subtitles), `labelMedium` (photo band) |
+| Admin | `headlineLarge`, `titleSmall`; `AppSizes.adminTile*`, `adminIcon`; tile icons `amber[300]` / `greenAccent[400]` / `blueAccent[400]` |
+| Toast / banner / dialogs | `labelLarge` white (toast); `titleMedium` + `bodyMedium` + `labelMedium` (banner, dialogs); `AppDurations.toast/banner/fade` |

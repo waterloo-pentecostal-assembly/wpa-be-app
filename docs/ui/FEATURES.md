@@ -1,51 +1,50 @@
 # WPA Bible Engagement — Feature Inventory
 
-> **Status:** Phase 0 draft, captured from the code at commit `dba1d54` (branch `refactor/ui-readiness`) **before** refactoring.
-> It describes current behaviour — including known defects, which are marked **[DEFECT]** — so nothing is lost during the rewrite.
-> Class names, routes and state shapes will be updated at the end of the refactor (spec §10).
+> **Status:** reflects the head of branch `refactor/ui-readiness` (Phase 7 docs commit), after the refactor described in `docs/specs/refactor-and-ui-readiness.md`. The Phase-0 draft captured the pre-refactor code at `dba1d54`.
+> It describes **current** behaviour. Spec defects B1–B15 are fixed (see the appendix) and are no longer described as behaviour. Limitations that were deliberately kept unchanged are marked **[KEPT]**. Issues noticed while writing this are marked **[NOTE]**.
+> The Firestore schema did not change: the DTOs write the same documents as before.
 
-Companion documents: [`SCREENS.md`](SCREENS.md) (per-screen UI contract), `docs/firestore/*.md` (schema).
+Companion documents: [`SCREENS.md`](SCREENS.md) (per-screen UI contract), [`../ARCHITECTURE.md`](../ARCHITECTURE.md) (layers, routing, state conventions), `docs/firestore/*.md` (schema).
 
 ---
 
-## 0. Rule constants (`lib/app/constants.dart`)
+## 0. Rule constants
 
-Constants that encode a **business rule** (sizes and colours are covered in the style inventory at the end of `SCREENS.md`).
+Business-rule constants now live in their domain feature, in `lib/domain/<feature>/rules.dart`. `lib/app/constants.dart` re-exports them and adds `kWpaGiveUrl`. Look-and-feel constants (sizes, colours, asset paths) are in `lib/presentation/design_system/tokens.dart` (`AppColors`, `AppSizes`, `AppAssets`, …).
 
-| Constant | Value | Where it is enforced today | Notes |
-|---|---|---|---|
-| `kMaxPrayerRequestBody` | `500` | `domain/prayer_requests/validators.dart` → `PrayerRequestBody` value object, used by `PrayerRequestsBloc._onNewPrayerRequestRequestChanged` | Rule is `length < 500` after `trim()`, so **499** characters is the real maximum. Message: `500 character limit exceeded`. |
-| `kMaxTestimonyBody` | `500` | `domain/testimonies/validators.dart` → `TestimonyBody`, used by `TestimoniesBloc` | Same `< 500` rule. Message: `500 character limit exceeded`. |
-| `kMaxResponseBody` | `4000` | `domain/completions/validators.dart` → `ResponseBody` | **[DEFECT] not enforced:** nothing constructs `ResponseBody`. Question answers have no length limit. Message (unused): `Response should be less than 4000 characters`. |
-| `kPrayerRequestPerUserLimit` | `10` | `PrayerRequestsRepository.canAddPrayerRequest()` (counts the user's **approved** requests) | **[DEFECT] not enforced:** `canAddPrayerRequest()` is never called. |
-| `kTestimoniesPerUserLimit` | `10` | `TestimoniesRepository.canAddTestimony()` | **[DEFECT] not enforced:** never called. |
-| `kMaxActivePrayerRequests` | `10` | — | Unused. |
-| `kPrayerRequestsReportsLimit` | `2` | — | Unused. One report already sets `is_approved=false`. |
-| `kTestimoniesReportsLimit` | `2` | — | Unused. |
-| `kEmailRegex` | `^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_\`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+` | `domain/authentication/validators.dart` → `EmailAddress` (input is trimmed) | Message: `Invalid email address.` |
-| `kPasswordRegex` | `^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$` | — | Unused (commented out). The real rule: trimmed length ≥ 8. Message: `Password must be at least 8 characters.` |
-| `kWpaGiveUrl` | `https://www.canadahelps.org/en/dne/15479` | — | **Unused.** The Give tab opens `links/<doc>.give_link` from Firestore (see §9). The spec assumed `kWpaGiveUrl`; the code disagrees. |
-| `kDailyEngagementReminderTopic` | `daily_engagement_reminder` | — | Unused. Topic subscription happens server-side (Cloud Functions watch `notification_settings`). |
-| `kHelpEmailSubject` | `WPA_BE_APP_Help_Request` | Profile → Help (mailto subject) | |
-| `kReportEmailSubject` | `WPA_BE_APP_Problem_Report` | Profile → Report a Problem (mailto subject) | |
-| `kWpaLogoLoc` | `assets/images/wpa-logo.png` | Sign-in and sign-up logo | |
-| `kProfilePhotoPlaceholder` | `assets/images/person-placeholder-image.png` | Avatars wherever a photo is missing, or the post is anonymous | |
+| Constant | Value | Defined in | Enforced by | Notes |
+|---|---|---|---|---|
+| `kMaxPrayerRequestBody` | `500` | `domain/prayer_requests/rules.dart` | `validatePrayerBody` → `PrayerRequestBody` value object (input trimmed), used by `NewPrayerRequestCubit` | The rule is `length < 500`, so **499** characters is the real maximum. Message: `500 character limit exceeded`. |
+| `kMaxTestimonyBody` | `500` | `domain/testimonies/rules.dart` | `validateTestimonyBody` → `TestimonyBody`, used by `NewTestimonyCubit` | Same `< 500` rule and message. |
+| `kMaxResponseBody` | `4000` | `domain/completions/rules.dart` | `validateResponseBody` → `ResponseBody` | **[KEPT] Not enforced.** Nothing constructs `ResponseBody`, so question answers have no length limit. The message `Response should be less than 4000 characters` is unused. |
+| `kPrayerRequestPerUserLimit` | `10` | `domain/prayer_requests/rules.dart` | `PrayerRequestsRepository.canAddPrayerRequest()` (counts the user's **approved** requests) | **[KEPT] Not enforced.** No cubit calls `canAddPrayerRequest()`. |
+| `kTestimoniesPerUserLimit` | `10` | `domain/testimonies/rules.dart` | `TestimoniesRepository.canAddTestimony()` | **[KEPT] Not enforced.** Never called. |
+| `kPrayerRequestsReportsLimit` / `kTestimoniesReportsLimit` | `2` | `domain/*/rules.dart` | — | Unused. A single report already sets `is_approved=false`. |
+| `kEmailRegex` | `^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_\`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+` | `domain/authentication/rules.dart` | `validateEmailAddress` → `EmailAddress` (input trimmed) | Message: `Invalid email address.` |
+| `kMinPasswordLength` | `8` | `domain/authentication/rules.dart` | `validatePassword` → `Password` (input trimmed) | Message: `Password must be at least 8 characters.` |
+| `kPasswordRegex` | `^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d]{8,}$` | `domain/authentication/rules.dart` | — | Unused (documented as "not enforced"). |
+| `kForumEditWindow` | `Duration(minutes: 15)` | `domain/forum/policies.dart` | `canEditThread`, `canEditComment` | Strict: `now - created_at` must be under 15 whole minutes. |
+| `kWpaGiveUrl` | `https://www.canadahelps.org/en/dne/15479` | `app/constants.dart` | `AppShell` (via `RouteScreens._defaultShell`) | Fallback GIVE destination, used only when the `links` doc has no usable `give_link`. |
+| `kHelpEmailSubject` | `WPA_BE_APP_Help_Request` | `presentation/features/profile/profile_page.dart` | Profile → Help (mailto subject) | Moved out of `constants.dart`. |
+| `kReportEmailSubject` | `WPA_BE_APP_Problem_Report` | same | Profile → Report a Problem | |
 
-Other hard-coded rules (not in `constants.dart`):
+Removed from `constants.dart`:
+- `kMaxActivePrayerRequests` and `kDailyEngagementReminderTopic`: unused. Topic subscription is done by Cloud Functions.
+- `kWpaLogoLoc` and `kProfilePhotoPlaceholder`: now `AppAssets.logo` and `AppAssets.profilePlaceholder` in `tokens.dart`.
+
+Other rules and limits:
 
 | Rule | Value | Location |
 |---|---|---|
-| Forum thread edit window (author only) | `< 15` minutes since `created_at` | `forum/thread_detail_page.dart` thread menu |
-| Forum comment edit window (author only) | `< 15` minutes since `created_at` | `forum/thread_detail_page.dart` comment menu |
-| Forum reply depth | One level: only top-level, non-deleted comments show **Reply** | `thread_detail_page.dart` |
-| Engage home: recent series count | `RecentBibleSeriesRequested(amount: 3)` on first load; on refresh `amount: hasActive ? 15 : 3, isActive: hasActive` | `engage.dart` |
-| All Bible series list size | `20` (no pagination) | `all_bible_series.dart` |
-| Prayer request/testimony page size | `ceil(screenHeight / 75) + 1` | `calculateFetchAmount` in `prayer_requests.dart` / `testimonies.dart` |
-| Infinite-scroll trigger | within `200` px of the end | `all_prayer_requests.dart`, `all_testimonies.dart` |
-| Recent prayer requests/testimonies on home | `amount: 5` fetched, **never displayed** (spec B8) | `engage.dart` |
-| Version label | `Version 3.0.1` (hard-coded) | `profile.dart` (spec B13) |
-| Profile photo thumbnail path | `.../profile_photo/thumbs/image_200x200.<ext>` | `UserProfileBloc` |
-| Response image thumbnail path | `<prefix><uid>/thumbs/<name>_200x200<ext>` | `application/completions/helper.dart` `toThumbnail` |
+| Forum reply depth | One level: only top-level, non-deleted comments can be replied to | `canReplyTo` in `domain/forum/policies.dart` |
+| Engage home series fetch | Active series exists → `getBibleSeries(limit: 15, isActive: true)`. Otherwise → `limit: 3` (past series carousel) | `EngageHomeCubit.activeSeriesLimit` / `pastSeriesLimit` |
+| All Bible series list size | `20` (no pagination) | `AllBibleSeriesCubit.limit` |
+| Prayer request / testimony "All" page size | `15` (fixed; replaces the old screen-height calculation) | `AllPostsCubit.defaultPageSize` |
+| Infinite-scroll trigger | within `200` px of the end | `PostsPage` (`_scrollThreshold`) |
+| Thread title | must be non-empty after trim | `ThreadForm._isValid` (`presentation/features/forum/thread_form.dart`). This is a UI rule. |
+| Profile photo thumbnail path | `…/profile_photo/thumbs/image_200x200.<ext>` | `profileThumbnailLocation` in `domain/user_profile/policies.dart` |
+| Response image thumbnail path | `<prefix><uid>/thumbs/<name>_200x200<ext>` | `responseThumbnailLocation` in `domain/completions/policies.dart` |
+| Version label | `Version <AppInfo.version>`, from `--dart-define=APP_VERSION`, default `3.0.1` | `app/app_info.dart` → `ProfilePage(appVersion:)` |
 
 ---
 
@@ -55,75 +54,140 @@ Other hard-coded rules (not in `constants.dart`):
 - As a new member I can sign up with first name, last name, email and password. My account then waits for **manual admin verification** before I can sign in.
 - As a member I can sign in with email and password. If I'm not verified yet, I'm told so.
 - As a member I can request a password-reset email.
-- As a signed-in member the app remembers my session: on launch, Splash sends me straight to the main shell.
+- As a signed-in member the app remembers my session. On launch, Splash resolves it and the router takes me to the main shell (or to a pending deep link).
 - I can sign out (Profile → Logout) and request account deletion (Profile → Delete my Account).
 
 **Business rules**
-- Validation is applied on every keystroke (`EmailChanged`, `PasswordChanged`, `FirstNameChanged`, `LastNameChanged`):
+- Validation runs on every keystroke (`emailChanged`, `passwordChanged`, `firstNameChanged`, `lastNameChanged`). The domain value objects are the source of truth:
   - Email: trimmed, must match `kEmailRegex` → `Invalid email address.`
-  - Password: trimmed, length ≥ 8 → `Password must be at least 8 characters.`
-  - First/last name: length > 0 (not trimmed) → `Name must be at least one letter.`
-- Submit buttons stay disabled until every field is filled and has no error (`isSignInFormValid`, `isSignUpFormValid`, password-reset `isFormValid`), and while submitting.
-- **Sign-up** (`FirebaseAuthenticationFacade.registerWithEmailAndPassword`) creates a Firebase Auth user and writes `users/{uid}` = `{first_name, last_name, email, reports: 0, is_verified: false, is_admin: false}`. It then adds a `users/{uid}/notification_settings` doc with every flag `true` (`defaultNotificationSettings()`). No verification email is sent at sign-up. If the Firestore write fails, the Auth user is deleted.
-  - `email-already-in-use` → `A user with this email already exists. Please try signing in`
-- **Sign-in gate** (`getSignedInUser`, also used on app launch):
-  1. no Firebase user → `User not authenticated` (Splash routes to Sign in)
-  2. `users/{uid}` missing → `User details not found` (**[DEFECT] B4:** the Firestore exception is discarded, see spec)
-  3. `is_verified == false` → `User not verified`
-  4. Firebase `emailVerified == false` → a verification email is sent, then `Email not verified. See verification email sent to <email>`
-  - Auth errors: `invalid-email` / `wrong-password` → `Invalid Email or Password`; `user-disabled` → `User disabled`; `user-not-found` → `User not found`; anything else → `An unknown error occurred`. Note: current Firebase Auth SDKs with email-enumeration protection return `invalid-credential` for a bad password, which falls through to `An unknown error occurred`.
-  - On any sign-in error the bloc calls `signOut()`.
-- On successful sign-in: the device token is upserted to `users/{uid}/devices/{fcmToken}` = `{token, created_at: Timestamp.now(), platform: Platform.operatingSystem}` if it doesn't exist yet. `LocalUser` is registered in `get_it`. The nav tab resets to ENGAGE and the app goes to `/index`.
-- **Password reset:** `user-not-found` → `User not found, please verify email and try again`, otherwise `An unknown error occurred`.
-- **Sign-out:** deletes `users/{uid}/devices/{token}`, then Firebase sign-out. `LocalUser` is unregistered and the app navigates to Sign in.
-- **Account deletion** (`InitiateDelete`): writes `account_deletion_requests/{auto}` = `{account_disabled: false, user_data_deleted: false, user_id, request_date: Timestamp.now()}`. The bloc then emits `Unauthenticated` → Sign in. **[DEFECT]** Firebase Auth is *not* signed out, so the next cold start signs the user back in until the backend disables the account. On failure the bloc emits `Error("Unable to initiate account deletion")`, which no widget renders.
+  - Password: trimmed, length ≥ `kMinPasswordLength` → `Password must be at least 8 characters.`
+  - First/last name: length > 0, not trimmed → `Name must be at least one letter.`
+- Submit buttons are disabled until every field is filled and error-free (`isValid` on `SignInState`, `SignUpState`, `PasswordResetState`), and while `status == FormStatus.submitting`. `submit()` also guards against both cases.
+- **Sign-up** (`FirebaseAuthenticationFacade.registerWithEmailAndPassword`):
+  - Creates a Firebase Auth user, then writes `users/{uid}` = `{first_name, last_name, email, reports: 0, is_verified: false, is_admin: false}` (`newUserDocument`).
+  - Adds a `users/{uid}/notification_settings/{auto}` doc with all nine flags set to `true` (`defaultNotificationSettings()`).
+  - No verification email is sent at sign-up. If a Firestore write fails, the Auth user is deleted.
+  - `email-already-in-use` → `A user with this email already exists. Please try signing in`.
+  - On success the page shows **Registration Successful!** and then goes to Sign in.
+- **Sign-in gate** (`getSignedInUser`, also used on app launch by `AuthenticationCubit.checkAuthentication`):
+  1. no Firebase user → `User not authenticated`
+  2. reading `users/{uid}` fails → the mapped Firestore exception is thrown (fix B4)
+  3. `users/{uid}` missing → `User details not found`
+  4. `is_verified == false` → `User not verified`
+  5. Firebase `emailVerified == false` → a verification email is sent, then `Email not verified. See verification email sent to <email>`
+  6. otherwise the user is published to the `ISession` (`AppSession.update`)
+- Auth errors (`_mapSignInError`):
+
+  | Firebase code | Message |
+  |---|---|
+  | `invalid-email`, `wrong-password`, `invalid-credential` | `Invalid Email or Password` |
+  | `user-disabled` | `User disabled` |
+  | `user-not-found` | `User not found` |
+  | anything else | `An unknown error occurred` |
+
+  `invalid-credential` is newly mapped; current SDKs return it for a wrong password.
+- On any sign-in error, `SignInCubit` calls `signOut()` and shows the error above the form.
+- **On successful sign-in:**
+  - The device token is saved to `users/{uid}/devices/{fcmToken}` = `{token, created_at: Timestamp.now(), platform}` if it doesn't exist yet. `platform` is `defaultTargetPlatform.name.toLowerCase()`, e.g. `ios` / `android`.
+  - The session change moves `AuthenticationCubit` to `authenticated`, and `RedirectPolicy` sends the user to the remembered location or `/engage`.
+- **Password reset:**
+  - `user-not-found` → `User not found, please verify email and try again`.
+  - Other `FirebaseAuthException`s are treated as success, unchanged from before.
+  - Non-auth errors → `An unknown error occurred`.
+  - Success shows **Password Reset Successful!** and then goes to Sign in.
+- **Sign-out** (`AuthenticationCubit.signOut`): best-effort delete of `users/{uid}/devices/{token}`, then the session is cleared, Firebase signs out, and the router redirects to Sign in.
+  - `RedirectPolicy` forgets the current location on sign-out, so the next sign-in starts on Engage (as before the refactor).
+- **Account deletion** (`AuthenticationCubit.initiateDelete`): writes `account_deletion_requests/{auto}` = `{account_disabled: false, user_data_deleted: false, user_id, request_date: Timestamp.now()}` and clears the session, so the app shows Sign in.
+  - **[KEPT]** Firebase Auth is *not* signed out, so the next cold start signs the user back in until the backend disables the account.
+  - On failure the state carries `errorMessage: 'Unable to initiate account deletion'`, shown as an error toast on Profile.
 
 **Implemented by**
-- Domain: `domain/authentication/{entities.dart (LocalUser), value_objects.dart (EmailAddress, Password, Name), validators.dart, exceptions.dart (AuthenticationException, codes), interfaces.dart (IAuthenticationFacade)}`
-- Application: `AuthenticationBloc` (`RequestAuthenticationState`, `SignOut`, `InitiateDelete`; states `AuthenticationInitial`, `Authenticated(user)`, `Unauthenticated`, `Error(message)`), `SignInBloc`, `SignUpBloc`, `PasswordResetBloc`
-- Infrastructure: `FirebaseAuthenticationFacade`, `FirebaseUserDto`, `authentication/helpers.dart`
+- Domain: `domain/authentication/`
+  - `entities.dart`: `LocalUser`
+  - `value_objects.dart`: `EmailAddress`, `Password`, `Name`
+  - `validators.dart`, `rules.dart`
+  - `exceptions.dart`: `AuthenticationException`, `AuthenticationExceptionCode`
+  - `interfaces.dart`: `IAuthenticationFacade`
+  - `session.dart`: `ISession`, `requireUser()`
+- Application: `AuthenticationCubit` (app-scope; `AuthStatus {unknown, authenticated, unauthenticated}`, `user`, `isAdmin`), `SignInCubit`, `SignUpCubit`, `PasswordResetCubit`, `FormStatus`
+- Infrastructure: `FirebaseAuthenticationFacade`, `FirebaseUserDto` (`newUserDocument`, `defaultNotificationSettings`), `AppSession`
+- Routing: `RedirectPolicy` (`app/router/redirect_policy.dart`)
 
 ---
 
 ## 2. Bible series (engagement)
 
 **User stories**
-- I see the current Bible series on the home screen with my progress, and can continue reading.
-- When no series is active, I see a carousel of past series.
+- I see the current Bible series on the home screen with my progress and the target, and can continue reading.
+- When no series is active, I see a carousel of recent past series.
 - I can browse all series (most recent 20).
-- In a series I see one tab per day (month, day number, today dot, completion colour), and for each day the list of content items (e.g. `DEVOTIONAL`, `PRAYER`).
-- I open a content item and read/watch/listen to its typed body blocks (title, text, scripture, question, image upload, audio, video/YouTube, link, divider).
-- I mark an item complete. If it has questions, I answer them first. Partly answered work is saved as a draft.
-- I can open the series' discussion forum.
+- In a series I see one tab per day (month, day number, a dot for today, completion colour), and for each day the list of content items (e.g. `DEVOTIONAL`, `PRAYER`).
+- I open a content item and read/watch/listen to its typed body blocks: title, text, scripture, question, image upload, audio, video/YouTube, link, divider.
+- I mark an item complete. If it has questions I answer them first. Partly answered work is saved as a draft.
+- I can open the series' discussion forum (**Discussion**).
 
 **Business rules**
-- **Visibility:** non-admins only see series with `is_visible == true`; admins see all (`BibleSeriesRepository.getBibleSeries`). Ordered by `start_date` desc.
-- **Has-active:** `hasActiveBibleSeries()` looks at the single most recent *visible* series and returns its `is_active` (catches errors → `false`).
-- **Current series card:** the first item of `RecentBibleSeriesRequested(amount:3)`. It isn't filtered by `isActive` on first load, so for admins it can be an invisible newer series.
-- **Expected progress ("Target")** = % of `series_content_snippet` dates that are not after now (`ActiveBibleSeriesCard.getExpectedProgress`). **User progress** = `achievements/{uid}.series_progress` (a server-computed int, streamed via `AchievementsBloc.WatchAchievementsStarted`).
-- **Initial day tab:** the snippet whose local date equals today, otherwise index 0.
-- **Day status colour** (`_getStatusColor`): completed → green @25%; draft **or** today → grey.shade100; past and not completed → amber @25% ("late"); future → grey.shade100. Status icon: completed → `Icons.done`; draft → `Icons.edit`.
-- **Day completion aggregation** (`application/bible_series/helpers.dart`): a day counts as *completed* if ≥1 item is completed (non-draft), *on time* if ≥1 completed item was on time, and *draft* if none are completed but ≥1 is a draft.
-- **On time** (`presentation/engage/bible_series/helper.dart isOnTime`): the content date is today (UTC date compare) or in the future.
-- **Response possible** = the content has at least one `question` body (`SeriesContent.isResponsePossible`).
-- **Completing without questions:** tap the check icon → `MarkAsComplete` → creates `completions/{auto}` (or updates the existing one) with `{is_draft:false, is_on_time, completion_date: Timestamp(now), series_id, content_id, user_id...}` and logs `engagement_completed`. Tapping again → `MarkAsInComplete` deletes the completion (and its responses).
-- **Completing with questions** (`ResponseCompletionButton`):
-  - no responses at all → dialog **No responses found**
-  - some questions unanswered → saved as draft (`MarkAsDraft`), then dialog **Response(s) Saved as Draft**
-  - all answered → `MarkAsComplete`, then `putResponses`
-- Editing any answer of a completed item marks it incomplete first (`MarkAsInComplete`).
-- **Leaving content detail:**
-  - On-screen back arrow: if an image upload is in progress → dialog **Uploading Image in Progress**. Otherwise, for question content: non-empty responses → `MarkAsDraft`; empty responses with an existing completion id → `MarkAsInComplete`.
-  - System back (`PopScope`): for question content it **always** dispatches `MarkAsDraft` and ignores uploads. **[DEFECT]** This can create an empty draft and differs from the arrow.
-- **Image input:** pick from the gallery → upload to Storage `/responses/{uid}/{DateTime.now()}{ext}` and show % progress. The response is stored as `{type:'image', response:'gs://...'}` and displayed via the server-generated `_200x200` thumbnail (or the local file right after upload). Tap opens a zoomable viewer; ✕ deletes the image and its thumbnail. Upload/delete marks a completed item incomplete.
-- **Audio:** one app-wide `AudioPlayerBloc` (lazy singleton). The playing item shows a play icon in the series detail list.
-- Analytics: `bible_series_viewed` and `engagement_viewed` fire from the nested-route builder (`engage.dart`); `engagement_completed` fires from `CompletionsBloc._onMarkAsComplete`.
+- **Visibility:** non-admins only see series with `is_visible == true`; admins see all (`BibleSeriesRepository.getBibleSeries`). Series are ordered by `start_date` desc. Malformed series documents are skipped.
+- **Has-active:** `hasActiveBibleSeries()` looks at the single most recent *visible* series and returns its `is_active`. `EngageHomeCubit` treats errors as `false`.
+- **Current series card:** `EngageHomeState.currentSeries`. It is the first of the `isActive: true` series and is shown only when `hasActiveSeries` (fix B7: one cubit, one fetch).
+- **Expected progress ("Target")** = % of `series_content_snippet` days whose date is not after now (`expectedProgress` in `domain/bible_series/progress.dart`). `EngageHomeCubit` computes it when the series loads and exposes it as `EngageHomeState.expectedSeriesProgress`.
+- **User progress** = `achievements/{uid}.series_progress`, a server-computed int streamed by `AchievementsRepository.watchAchievements()` into `EngageHomeState.seriesProgress`.
+- **Initial day tab:** the day whose local date equals today, otherwise index 0 (`initialDayIndex`) → `BibleSeriesDetailState.initialDayIndex`.
+- **Day status** (`dayStatusFor` → `DayStatus`, exposed by `BibleSeriesDetailCubit.dayStatus`):
+
+  | Day | `DayStatus` | UI colour (`tokens.dart`) |
+  |---|---|---|
+  | completed | `completed` | `AppColors.dayCompleted`, green @25% |
+  | draft, today, or future | `neutral` | `dayNeutral`, grey.shade100 |
+  | past and not completed | `late` | `dayLate`, amber @25% |
+
+  Per-content status icon: completed → `Icons.done`, draft → `Icons.edit`.
+- **Day completion aggregation** (`applyCompletions` / `applyContentCompletion` in `domain/bible_series/progress.dart`):
+  - *completed*: at least one item is completed (non-draft)
+  - *on time*: at least one completed item was on time
+  - *draft*: no item is completed and at least one is a draft
+- **On time** (`isOnTime` in `domain/completions/policies.dart`): the content date is today (UTC date compare) or in the future.
+- **Response possible** = the content has at least one `question` body (`SeriesContent.isResponsePossible`). Image-input bodies don't count.
+- **Completing** (`ContentDetailCubit.complete`):
+  - With questions and no responses at all → dialog **No responses found** (`ContentDetailEffect.noResponses`).
+  - With questions and some unanswered (`isResponsesFilled` is false) → dialog **Response(s) Saved as Draft**, and a draft is saved: `completions/{auto}` with `is_draft: true`, plus the responses doc.
+  - Otherwise:
+    1. create `completions/{auto}` (or update the existing doc) with `{is_draft:false, is_on_time, completion_date: Timestamp(now), series_id, content_id, user_id}`
+    2. log `engagement_completed`
+    3. write the responses doc `completions/{id}/responses/{id}` = `{user_id, responses}`. As before the refactor, this is written on every completion.
+  - Tapping the green check (`undoComplete`) deletes the completion, and the user's responses if any.
+- Editing any answer of a completed item marks it incomplete first (`questionChanged` → `_markIncomplete`).
+- **Leaving content detail** (`requestExit`): the on-screen back arrow and system back (`PopScope`) behave the same.
+  - An image upload is in progress → dialog **Uploading Image in Progress**, and the user stays on the page.
+  - Otherwise, for question content: non-empty responses → save draft. Empty responses with an existing completion → mark incomplete.
+- **Image input:**
+  - Pick from the gallery (`ImageData` bytes) → upload with `putData` to Storage `/responses/{uid}/{DateTime.now()}{ext}` with `contentType` `image/*`. Upload progress is shown as a %.
+  - The response is stored as `{type:'image', response:'gs://...'}`. One image per image-input body.
+  - Images loaded from the server show via the `_200x200` thumbnail; tapping opens a zoomable viewer.
+  - Delete (✕) removes the image and its thumbnail (best-effort).
+  - Upload or delete marks a completed item incomplete.
+- **Audio:** one app-scope `AudioPlayerCubit`, provided in `lib/app/app.dart` over the `IAudioPlayer` port implemented by `JustAudioPlayer`. The playing item shows a play icon in the series detail list.
+- Every change to a completion emits `CompletionChanged`, and `BibleSeriesDetailCubit` re-reads that content's completion. This replaces the old refresh-after-pop.
+- Analytics:
+  - `bible_series_viewed`: `BibleSeriesDetailCubit.load`, including deep links
+  - `engagement_viewed`: `ContentDetailCubit.load`
+  - `engagement_completed`: `ContentDetailCubit._markComplete`
 
 **Implemented by**
-- Domain: `domain/bible_series/{entities.dart (BibleSeries, SeriesContentSnippet, AvailableContentType, SeriesContent, *Body classes, SeriesContentBodyType), interfaces.dart, exceptions.dart}`, `domain/completions/{entities.dart (CompletionDetails, Responses, ResponseDetails, ResponseType), interfaces.dart, value_objects.dart, validators.dart}`, `domain/achievements/*`
-- Application: `BibleSeriesBloc` (+ `helpers.dart`), `CompletionsBloc` (+ `helper.dart`), `AchievementsBloc`, `AudioPlayerBloc`
-- Infrastructure: `BibleSeriesRepository`, `BibleSeriesDto`, `SeriesContentDto`, `CompletionsRepository`, `CompletionsDto`, `ResponsesDto`, `AchievementsRepository`
-- Presentation-embedded rules (to be moved, spec §7): `presentation/engage/bible_series/helper.dart` (`isOnTime`, `isResponsesFilled`, `isResponseEmpty`), day-status logic in `bible_series_detail.dart`, progress math in `current_bible_series_widget.dart`.
+- Domain:
+  - `domain/bible_series/`:
+    - `entities.dart`: `BibleSeries`, `SeriesContentSnippet`, `AvailableContentType`, `SeriesContent`, sealed `SeriesContentBody` + `*Body`, `SeriesContentBodyType`
+    - `progress.dart`: `DayStatus`, `dayStatusFor`, `initialDayIndex`, `expectedProgress`, `applyCompletions`
+    - `interfaces.dart`: `IBibleSeriesRepository`
+    - `exceptions.dart`
+  - `domain/completions/`:
+    - `entities.dart`: `CompletionDetails`, `Responses`, `ResponseDetails`, `ResponseType`
+    - `policies.dart`: `isOnTime`, `isResponsesFilled`, `isResponseEmpty`, `responseThumbnailLocation`
+    - `interfaces.dart`: `ICompletionsRepository`
+    - `rules.dart`, `validators.dart`, `value_objects.dart`
+  - `domain/achievements/`
+- Application: `EngageHomeCubit`, `AllBibleSeriesCubit`, `BibleSeriesDetailCubit`, `ContentDetailCubit` (`ContentDetailEffect`), `AudioPlayerCubit`
+- Infrastructure: `BibleSeriesRepository`, `BibleSeriesDto`, `SeriesContentDto`, `CompletionsRepository`, `CompletionsDto`, `ResponsesDto`, `AchievementsRepository`, `MediaRepository`. Services: `FirebaseStorageService` (download-URL cache, `startUpload`), `JustAudioPlayer`.
 
 ---
 
@@ -134,29 +198,35 @@ Other hard-coded rules (not in `constants.dart`):
 - I can see **My Open Requests** with a "Prayed by N others" count, or **Pending** while awaiting approval.
 - I can see **My Answered Prayers**.
 - I can post a new request, optionally anonymously. It needs admin approval before others see it.
-- On my own requests I can **DELETE** or mark **PRAYER ANSWERED**. On others' I can **REPORT AS INAPPROPRIATE**.
+- On my own requests I can **DELETE**, or mark **PRAYER ANSWERED** if the request is still open. On others' requests I can **REPORT AS INAPPROPRIATE**.
 
 **Business rules**
-- All list: `prayer_requests where is_approved==true && is_answered==false orderBy date desc`, paged (`limit = calculateFetchAmount`).
-- Mine: `user_id==me && is_answered==false orderBy date desc` (includes unapproved). Answered: `user_id==me && is_answered==true`.
-- New request writes `{request, user_id, date: Timestamp.now(), is_anonymous, is_approved:false, user_snippet:{first_name,last_name,thumbnail}, ...}` (`PrayerRequestsDto.newRequestToFirestore`). Body is validated against `kMaxPrayerRequestBody`. POST is enabled only when non-empty and valid.
-- Pray: a transaction appends my uid to `prayed_by`. `hasPrayed` = my uid ∈ `prayed_by` → button shows **PRAYED!**
-- Report: a transaction appends to `reported_by` and sets `is_approved=false`. Reporting twice → `You already reported this prayer request`.
-- Close as answered: `update({is_answered: true})`. Delete: hard delete.
-- `isMine` = `user_id == me`. Anonymous posts display **Anonymous** with the placeholder avatar.
-- Analytics: `prayer_request_created`, `prayer_request_prayed`, `prayer_request_reported`, `prayer_request_deleted`, `prayer_request_answered` (all in `PrayerRequestsBloc`).
-- **[DEFECT] bloc wiring:** card actions (pray/report/delete/close) and POST dispatch to `BlocProvider.of<PrayerRequestsBloc>`. That resolves to the `PrayerRequestsBloc` created by `EngagePage` (the "recent" instance), not the per-tab instances (`AllPrayerRequestsBloc` etc. are registered under mixin types). As a result:
-  - the All tab's handlers for `PrayerRequestReportedAndRemoved`, `PrayerRequestReportError`, `PrayForRequestComplete` and `PrayForRequestError` never fire, so no "reported" toast, no removal and no error toasts
-  - "Prayer Request Submitted" only shows if the Prayer Requests page is mounted
-  - spec B5: all instances share the singleton repository's paging cursor
+- **All:** `prayer_requests where is_approved==true && is_answered==false orderBy date desc`. It is paged with an opaque cursor that `AllPrayerRequestsCubit` holds; the repository is stateless (fix B5). Page size is 15.
+- **Mine:** `user_id==me && is_answered==false orderBy date desc` (includes unapproved). **Answered:** `user_id==me && is_answered==true orderBy date desc`.
+- **New request** (`PrayerRequestsDto.newDocument`) writes `{request, user_id, date: Timestamp.now(), is_anonymous, is_approved:false, is_answered:false, user_snippet:{first_name,last_name,thumbnail}}`.
+  - The body is validated by `PrayerRequestBody` (trimmed, `< kMaxPrayerRequestBody`). POST is enabled only when the body is non-empty and valid.
+  - On success the toast **Prayer Request Submitted** shows, and the post appears at the top of *My Open Requests* via `PostCreated`.
+  - On failure: `Unable to add prayer request.`
+- **Pray:** a transaction appends my uid to `prayed_by`. While in flight the button shows `...`. Then `hasReacted` → **PRAYED!**. Failure → `Unable to complete request.`
+- **Report:** a transaction appends to `reported_by` and sets `is_approved=false`. The post leaves the All list and the toast `Prayer Request has been reported` shows.
+  - Reporting twice → `You already reported this prayer request`.
+  - Other failures → `Unable to report prayer request`.
+- **Close as answered:** `update({is_answered: true})`. The post moves from *Open* to *Answered*. Failure → `Unable to close prayer request`.
+- **Delete:** hard delete; the post is removed from every list. Failure → `Unable to delete prayer request`.
+- `isMine` = `user_id == me`, `hasReacted` = my uid ∈ `prayed_by`; both are computed in the DTO. Anonymous posts display **Anonymous** with the placeholder avatar.
+- Each tab has its own cubit. The cubits share a `PrayerRequestActions`, and their state stays consistent through `AppEventBus` events (see `ARCHITECTURE.md` §5). The old shared-bloc wiring defect is gone.
+- Analytics: `prayer_request_created`, `prayer_request_prayed`, `prayer_request_reported`, `prayer_request_deleted`, `prayer_request_answered`. They are logged by `PostActions` after a successful repository call.
 
-**Implemented by**: `domain/prayer_requests/*`; `PrayerRequestsBloc` (mixins `AllPrayerRequestsBloc`, `MyPrayerRequestsBloc`, `MyAnsweredPrayerRequestsBloc`, `NewPrayerRequestsBloc`); `PrayerRequestsRepository`, `PrayerRequestsDto`, `UserSnippetDto`.
+**Implemented by**
+- Domain: `domain/prayer_requests/` (`PrayerRequest` implements `CommunityPost`, `IPrayerRequestsRepository`, `PrayerRequestBody`, `PrayerRequestsException`)
+- Application: `PrayerRequestActions` (a `PostActions<PrayerRequest>`), `AllPrayerRequestsCubit` / `MyPrayerRequestsCubit` / `MyAnsweredPrayerRequestsCubit` (the `AllPostsCubit` / `MyPostsCubit` / `MyClosedPostsCubit` bases in `application/community_posts/post_list_cubit.dart`), `NewPrayerRequestCubit` (a `NewPostCubit`)
+- Infrastructure: `PrayerRequestsRepository`, `PrayerRequestsDto`, `UserSnippetDto`, `FirestorePageCursor`
 
 ---
 
 ## 4. Testimonies
 
-A mirror of prayer requests. The differences:
+Testimonies mirror prayer requests and share the same generic cubits, `PostActions` and widgets. The differences:
 
 | Prayer requests | Testimonies |
 |---|---|
@@ -164,12 +234,14 @@ A mirror of prayer requests. The differences:
 | `prayed_by`, button **PRAY** / **PRAYED!**, "Prayed by N other(s)" | `praised_by`, button **AMEN** / **PRAISED!**, "Praised by N other(s)" |
 | menu **PRAYER ANSWERED** | menu **ARCHIVE** |
 | tabs All / My Open Requests / My Answered Prayers | tabs All / My Shared Testimonies / My Archived Testimonies |
-| hint `Prayer Request` | hint `Testimony` |
+| hint `Prayer Request`, toast `Prayer Request Submitted` | hint `Testimony`, toast `Testimony Submitted` |
+| report toast `Prayer Request has been reported` | `Testimony has been reported` |
 | events `prayer_request_*` | `testimony_created`, `amen_testimony`, `testimony_reported`, `testimony_deleted`, `testimony_answered` |
 
-Validation uses `kMaxTestimonyBody` (`500 character limit exceeded`). Errors: `Unable to add testimony.`, `Unable to delete testimony`, `Unable to report testimony`, `You already reported this testimony`, `Unable to close testimony`, `Unable to complete request.` The same bloc-wiring defect applies.
+- Validation uses `TestimonyBody` (`kMaxTestimonyBody`, `500 character limit exceeded`).
+- Errors: `Unable to add testimony.`, `Unable to delete testimony`, `Unable to report testimony`, `You already reported this testimony`, `Unable to close testimony`, `Unable to complete request.`
 
-**Implemented by**: `domain/testimonies/*`; `TestimoniesBloc` (mixins `AllTestimoniesBloc`, `MyTestimoniesBloc`, `MyArchivedTestimoniesBloc`, `NewTestimoniesBloc`); `TestimoniesRepository`, `TestimoniesDto`.
+**Implemented by**: `domain/testimonies/*`; `TestimonyActions`, `AllTestimoniesCubit`, `MyTestimoniesCubit`, `MyArchivedTestimoniesCubit`, `NewTestimonyCubit` (`application/testimonies/testimonies_cubits.dart`); `TestimoniesRepository`, `TestimoniesDto`.
 
 ---
 
@@ -177,116 +249,190 @@ Validation uses `kMaxTestimonyBody` (`500 character limit exceeded`). Errors: `U
 
 **User stories**
 - From a Bible series I open **Discussion**: a forum whose id equals the Bible series id.
-- I see threads (newest first) with author, date, comment count, a followed bell, and a hidden icon.
-- I start a thread (title only). I automatically follow it.
-- In a thread I read comments in two levels (replies woven under parents), collapse/expand replies, like/unlike, reply to top-level comments, edit my comment within 15 minutes, delete my comment (soft delete → `[deleted]`), and report any comment.
-- I follow/unfollow a thread.
+- I see threads, newest first, with author, date, comment count, a bell if I follow the thread, and an eye-off icon if it is hidden.
+- I start a thread (title only), and I automatically follow it.
+- In a thread I can:
+  - read comments in two levels, with replies woven under their parents
+  - collapse and expand replies
+  - like and unlike
+  - reply to top-level comments
+  - edit my comment within 15 minutes
+  - delete my comment (soft delete → `[deleted]`)
+  - report any comment
+- I follow and unfollow a thread.
 - Admins can freeze/unfreeze a thread (read-only) and hide/unhide it.
 
-**Business rules**
-- Threads: `forums/{forumId}/threads orderBy created_at desc`, live stream. **[DEFECT/behaviour]** The `is_hidden` filter is commented out, so non-admins also see hidden threads (with the eye-off icon). `includeHidden` is ignored.
-- Create thread: the id is generated client-side (`FirebaseFirestore.instance...doc().id` in the widget). It writes `{title, author_id, author_name, author_image_url, created_at: serverTimestamp, updated_at: serverTimestamp, comment_count:0, is_frozen:false, is_hidden:false}`. Then `ThreadFollowed` appends to `users/{uid}/notification_settings/*.threads_followed`.
-- Thread menu (signed-in only):
-  - **EDIT THREAD** when author && < 15 min → update `{title, updated_at: serverTimestamp}`
-  - admin: **FREEZE THREAD/UNFREEZE THREAD** (`is_frozen`), **HIDE THREAD/UNHIDE THREAD** (`is_hidden`, then pops back)
-  - **FOLLOW THREAD/UNFOLLOW THREAD** when notification settings have loaded
-- Comments: `.../threads/{id}/comments orderBy created_at asc`, live. Add comment = a transaction that sets `{thread_id, body, author_id, author_name, author_image_url, created_at/updated_at: serverTimestamp, parent_id, is_hidden:false, is_deleted:false, liked_by:[], report_count:0}` and increments the thread's `comment_count`.
-- Comment menu:
-  - **REPORT** (everyone, incl. own and deleted comments) → `report_count += 1`, snackbar `Reported`
-  - **DELETE** (author, not deleted) → `is_deleted: true`
-  - **EDIT** (author, not deleted, < 15 min) → update `{body, updated_at}`
-  - No admin comment moderation exists (the spec assumed "admin moderation rights" on comments; only thread-level admin actions exist).
-- Like: `arrayUnion/arrayRemove(liked_by, uid)`. Not signed in → `You need to sign in to like comments` (unreachable in practice).
-- Frozen thread: the input is replaced by `This thread is read-only.`
-- Empty send is ignored. There's no length limit.
-- Deep link with `focusCommentId` jumps to that comment once.
-- All write errors are swallowed (no user feedback).
+**Business rules** (permission decisions live in `domain/forum/policies.dart` and are exposed by `ThreadCubit`)
+- **Threads:** `forums/{forumId}/threads orderBy created_at desc`, as a live stream (`watchThreads`).
+  - **[KEPT]** Hidden threads are not filtered out for non-admins; everyone sees the eye-off icon. The `isAdmin` argument to `watchThreads` is ignored.
+- **Create thread** (`ForumCubit.createThread` → `ForumRepository.createThread`):
+  1. The id is generated by the repository (`threads.doc()`).
+  2. It writes `{title, author_id, author_name, author_image_url, created_at: serverTimestamp, updated_at: serverTimestamp, comment_count:0, is_frozen:false, is_hidden:false}` (`newThreadDocument`).
+  3. It then follows the thread: `arrayUnion` on `users/{uid}/notification_settings/*.threads_followed`, and emits `ThreadFollowChanged`.
+- **Thread menu** (each item appears only if allowed; the menu is hidden when empty):
+  - **EDIT THREAD**: `canEditThread`, meaning the author within `kForumEditWindow` → update `{title, updated_at: serverTimestamp}`
+  - **FREEZE THREAD / UNFREEZE THREAD**: `canModerateThreads(user)`, admins only → `is_frozen`
+  - **HIDE THREAD / UNHIDE THREAD**: admins only → `is_hidden`, then the screen closes (`closeRequested`)
+  - **FOLLOW THREAD / UNFOLLOW THREAD**: once notification settings have loaded (`isFollowing != null`). The update is optimistic, with snackbar `Thread followed` / `Thread unfollowed`. On failure it reverts with `Unable to follow thread` / `Unable to unfollow thread`.
+- **Comments:** `.../threads/{id}/comments orderBy created_at asc`, live. `threadedComments` orders parents followed by their non-collapsed replies.
+  - Adding a comment is a transaction that sets `{thread_id, body, author_id, author_name, author_image_url, created_at/updated_at: serverTimestamp, parent_id, is_hidden:false, is_deleted:false, liked_by:[], report_count:0}` and increments the thread's `comment_count`.
+- **Comment menu** (`ThreadCubit.permissionsFor` → `CommentPermissions`):
+  - **REPORT**: everyone, including on own and deleted comments → `report_count += 1`. The snackbar `Reported` is shown before the write.
+  - **DELETE**: `canDeleteComment`, meaning the author on a non-deleted comment → `is_deleted: true`
+  - **EDIT**: `canEditComment`, meaning delete rights plus within `kForumEditWindow` → update `{body, updated_at: serverTimestamp}`
+  - **Reply**: `canReplyTo`, meaning a top-level, non-deleted comment, and the thread is not frozen
+  - There is no admin moderation of comments, only thread-level admin actions.
+- **Like:** `arrayUnion/arrayRemove(liked_by, uid)`. Not signed in → `You need to sign in to like comments`.
+- **Frozen thread** (`canComment` is false): the input is replaced by `This thread is read-only.`
+- Empty sends are ignored. There is no length limit.
+- A deep link with `focusCommentId` (`?comment=`) scrolls to that comment once.
+- Write errors are shown as a snackbar with the mapped message (`ThreadCubit._guard`). Before the refactor they were swallowed.
 
-**Implemented by**: `domain/forum/{entities.dart (Forum, ForumThread, Comment), interfaces.dart}`; `ForumBloc`, `ThreadBloc`; `ForumRepository`. Follow state: `NotificationSettingsBloc` (`ThreadFollowed`/`ThreadUnfollowed`).
+**Implemented by**: `domain/forum/` (`Forum`, `ForumThread`, `Comment`, `NewThread`, `NewComment`, `IForumRepository`, `policies.dart`); `ForumCubit`, `ThreadCubit` (`ThreadState`, `CommentPermissions`); `ForumRepository`, `forum_dto.dart`. Follow state: `INotificationSettingsService.followThread` / `unfollowThread`.
 
 ---
 
 ## 6. Media links
 
-- The home screen shows a horizontal carousel of `media` docs (`thumbnail_gs_location` resolved to a URL, `platform`, `description`, `link`). Unordered `get()`; malformed docs are skipped.
-- Tap → `launchUrl(link, mode: inAppWebView)`; failure toast `Error opening page`.
-- Error state shows `Unable to load media`.
-- **Implemented by**: `domain/media/*`, `MediaBloc`, `MediaRepository`, `MediaDto`.
+- The home screen shows a horizontal carousel of `media` docs: `thumbnail_gs_location` resolved to a URL, plus `platform`, `description` and `link`. The docs come from an unordered `get()` (resolved in parallel), and malformed docs are skipped.
+- Tap → `openExternal(link, inAppWebView: true)`. If the link can't be opened, the toast `Error opening page` shows.
+- On load failure: `Unable to load media` (`EngageHomeState.mediaError`).
+- **Implemented by**: `domain/media/*`, `EngageHomeCubit` (media section), `MediaRepository`.
 
 ## 7. Give
 
-- The **GIVE** bottom-nav item doesn't change tab. It launches the `give_link` value from the single doc in the `links` collection (`LinksBloc`, created in `IndexPage`), via `launchUrlString` (external).
-- If the links haven't loaded, or the URL can't be launched → toast `Error opening page`.
+- **GIVE** is a shell destination that doesn't change branch (`AppShell._onDestination`).
+- It opens `give_link` from the single doc in the `links` collection (app-scope `LinksCubit`). If that is missing or unparsable, it opens `kWpaGiveUrl`.
+- If the URL can't be launched → toast `Error opening page`.
 
 ## 8. Profile
 
-- Shows the profile photo (thumbnail URL or placeholder), **EDIT** overlay to pick a new photo from the gallery, and full name.
-  - Upload goes to `/users/{uid}/profile_photo/image{ext}` with % progress, then updates `users/{uid}` `{thumbnail, profile_photo}` (gs:// paths) and refreshes `LocalUser`.
-  - Error state `Error uploading photo` is never rendered.
-- **Logout**, Settings → **Notification Settings**.
-- Other (from the `links` doc): **Privacy Policy** (`privacy_policy_link`), **Terms of Use** (`terms_of_use_link`, external), **Help** (mailto `help_email`, subject `kHelpEmailSubject`), **Report a Problem** (mailto `report_email`, subject `kReportEmailSubject`), **Delete my Account** (confirmation dialog), and `Version 3.0.1`.
-- `TermsOfUsePage` (lorem-ipsum placeholder) exists but is **unreachable**; Terms of Use opens the external link.
-- **Implemented by**: `UserProfileBloc`, `UserProfileRepository`, `AuthenticationBloc`, `LinksBloc`.
+- Shows the profile photo (thumbnail URL or placeholder) with an **EDIT** overlay to pick a new photo from the gallery, and the full name.
+  - The upload goes to `/users/{uid}/profile_photo/image{ext}` with % progress (`ProfileState.uploadPercent`).
+  - Then `users/{uid}` is updated with `{thumbnail, profile_photo}` as `gs://` paths, and the user is reloaded into the session (`refreshCurrentUser`).
+  - On failure the toast `Error uploading photo` shows.
+- **Logout**, and Settings → **Notification Settings**.
+- **Other** section, driven by the `links` doc:
+  - **Privacy Policy** (`privacy_policy_link`, external)
+  - **Terms of Use** (`terms_of_use_link`, external)
+  - **Help** (mailto `help_email`, subject `kHelpEmailSubject`)
+  - **Report a Problem** (mailto `report_email`, subject `kReportEmailSubject`)
+  - **Delete my Account** (confirmation dialog, see §1)
+  - `Version <AppInfo.version>`
+- The unreachable lorem-ipsum `TermsOfUsePage` was deleted in `ce5befa`. Terms of Use opens only the external link. The in-app terms text is still a content gap.
+- **Implemented by**: `ProfileCubit`, `IUserProfileRepository` / `UserProfileRepository`, `AuthenticationCubit`, `LinksCubit` / `LinksRepository`.
 
 ## 9. Notification settings
 
-- Switches (optimistic update; on failure revert + toast):
+- Switches with optimistic updates; on failure they revert and show a toast (`NotificationSettingsCubit.toggle`):
   - General: Daily Engagement Reminder, Prayers, New Prayer Requests, Testimonies, New Testimonies
   - Discussion Forum: New Threads, Replies, Thread Comments, Comment Likes
-- Stored in `users/{uid}/notification_settings/{doc}` fields `daily_engagement_reminder, prayers, new_prayer_request, testimonies, new_testimony, new_forum_thread, forum_comment_replies, forum_thread_comments, forum_comment_likes, threads_followed[]`. FCM topic subscription is done by Cloud Functions, not the app.
-- Errors: `Error loading notification settings`, `Unable to subscribe`, `Unable to unsubscribe`, `Unable to follow thread`, `Unable to unfollow thread`.
-- While loading, every switch is shown disabled/off.
-- **Implemented by**: `domain/notification_settings/*`, `NotificationSettingsBloc`, `NotificationSettingsService`, `NotificationSettingsDto`.
+- Stored in the first doc of `users/{uid}/notification_settings`.
+  - Fields: `daily_engagement_reminder, prayers, new_prayer_request, testimonies, new_testimony, new_forum_thread, forum_comment_replies, forum_thread_comments, forum_comment_likes, threads_followed[]` (`kNotificationSettingFields`).
+  - Writes are single-field transaction updates.
+  - FCM topic subscription is done by Cloud Functions, not the app.
+- Errors: `Error loading notification settings`, `Unable to subscribe`, `Unable to unsubscribe`. The follow errors are in §5.
+- Until settings load, every switch is disabled and off (`isEnabled == false`).
+- **Implemented by**: `domain/notification_settings/*` (`NotificationSetting`, `NotificationSettingsEntity`), `NotificationSettingsCubit`, `NotificationSettingsService`.
 
-## 10. Admin (admins only — `LocalUser.isAdmin`)
+## 10. Admin (admins only, `LocalUser.isAdmin`)
 
-- The **ADMIN** tab appears only if the user is admin when the shell builds.
-- **User Verification:** `users where is_verified==false`. ✓ → `is_verified: true`; ✕ → hard delete of the `users/{uid}` doc (the Auth account remains).
-- **Prayer Request Approval:** `prayer_requests where is_approved==false`. ✓ → `is_approved: true`; ✕ → hard delete. This includes reported requests (reporting sets `is_approved=false`).
-- **Testimony Approval:** same for `testimonies`.
-- Lists load only when the tile on Admin home is tapped. Deep links into these pages show an empty list until pull-to-refresh. **[DEFECT B6]** Pull-to-refresh on an *empty* Prayer/Testimony approval list dispatches `LoadUnverifiedUsers` (the non-empty branch dispatches the correct event).
-- No error UI (`AdminError` isn't rendered). One `AdminBloc` instance is shared by all admin pages.
-- **Implemented by**: `domain/admin/interfaces.dart (IAdminService)`, `AdminBloc`, `AdminService`.
+- The **ADMIN** destination appears only for admins. The shell rebuilds when `AuthenticationState.isAdmin` changes. `RedirectPolicy` sends non-admins away from every `/admin/**` route to `/engage`.
+- **User Verification:** `users where is_verified==false`.
+  - ✓ → transaction update `is_verified: true`.
+  - ✕ → hard delete of the `users/{uid}` doc. The Auth account remains.
+- **Prayer Request Approval:** `prayer_requests where is_approved==false`.
+  - ✓ → `is_approved: true`. ✕ → hard delete.
+  - The queue includes reported requests, because reporting sets `is_approved=false`.
+- **Testimony Approval:** the same, for `testimonies`.
+- Each queue has its own cubit, which loads when the route opens, so deep links show data immediately. Pull-to-refresh reloads the queue's own list (fix B6).
+- Items are removed from the list immediately on ✓/✕. On failure an error toast shows (`AdminQueueState.errorMessage`) and the item stays removed.
+- **Implemented by**: `domain/admin/interfaces.dart` (`IAdminService`), `AdminQueueCubit<T>` with `UserVerificationCubit`, `PrayerRequestApprovalCubit` and `TestimonyApprovalCubit` (`application/admin/admin_queue_cubit.dart`), `AdminService`.
 
 ## 11. Push notifications
 
-- Permission is requested at startup (alert, badge, sound). iOS foreground presentation is disabled, so the app shows its own banner.
-- **Foreground:** a top in-app banner (`InAppNotificationBanner`) with title (fallback `Notification`, or `data.title` when there is no notification block), body (fallback `New notification received`), ✕ and **VIEW**. It can be swiped up to dismiss. **VIEW** runs the deep-link handler.
-- **Background tap** (`onMessageOpenedApp`) and **cold start** (`getInitialMessage`) run the same handler.
-- Deep-link contract (`FirebaseMessagingService.navigationHandler`):
+- Permission (alert, badge, sound) is requested at startup in `bootstrap` (`FirebaseMessagingService.initialize`). iOS foreground presentation is disabled, so the app shows its own banner. The FCM token is no longer logged (fix B14).
+- **Foreground:** `onMessage` → `NotificationsCubit` → `AppShell` shows a top in-app banner (`InAppNotificationBanner`).
+  - The banner has the title, the body, ✕ and **VIEW**, and can be swiped up to dismiss.
+  - **VIEW** calls `AppNavigator.openNotification(data)`.
+  - **[NOTE]** Title and body come from `message.notification` with `''` fallbacks (`lib/app/app.dart:27-31`). The pre-refactor fallbacks (`Notification` / `data.title` / `New notification received`) were lost.
+- **Background tap** (`onMessageOpenedApp`) and **cold start** (`getInitialMessage`) both go through `NotificationOpener.open` (`lib/app/router/deep_links.dart`). On cold start, the destination is remembered by `RedirectPolicy` until authentication resolves.
+- Deep-link contract (`locationForNotification`):
 
-| `notificationType` | Tab → route (nested navigator) | Args | Analytics |
+| `notificationType` | Destination (branch → location) | Required data | Analytics (`analyticsEventForNotification`) |
 |---|---|---|---|
-| `dailyEngagementReminder` | ENGAGE → `/bible_series` | `bibleSeriesId` | `daily_engagement_notification_clicked` (+ `bible_series_viewed` from the route) |
-| `prayerRequestPrayed` | ENGAGE → `/prayer_requests/mine` (tab 1) | — | — |
-| `testimonyPraised` | ENGAGE → `/testimonies/mine` (tab 1) | — | — |
-| `userSignUp` | ADMIN → `/user_verification` | — | — |
-| `newPrayerRequestForApproval` | ADMIN → `/prayer_request_approval` | — | — |
-| `newTestimonyForApproval` | ADMIN → `/testimony_approval` | — | — |
-| `newPrayerRequest` | ENGAGE → `/prayer_requests` (tab 0) | — | — |
-| `newTestimony` | ENGAGE → `/testimonies` (tab 0) | — | — |
-| `newForumThread`, `newForumComment`, `forumCommentReply`, `forumCommentLike` | ENGAGE → `/thread_detail` | `threadId`, `forumId`, `focusCommentId` ← `commentId` | `<notificationType>_notification_clicked` |
-| `link` | external `launchUrl(link)` | — | — |
+| `dailyEngagementReminder` | Engage → `/engage/series/{bibleSeriesId}` (no id → `/engage`) | `bibleSeriesId` | `daily_engagement_notification_clicked` (+ `bible_series_viewed` from the cubit) |
+| `prayerRequestPrayed` | Engage → `/engage/prayer-requests?tab=mine` | — | — |
+| `testimonyPraised` | Engage → `/engage/testimonies?tab=mine` | — | — |
+| `userSignUp` | Admin → `/admin/user-verification` | — | — |
+| `newPrayerRequestForApproval` | Admin → `/admin/prayer-request-approval` | — | — |
+| `newTestimonyForApproval` | Admin → `/admin/testimony-approval` | — | — |
+| `newPrayerRequest` | Engage → `/engage/prayer-requests` (All tab) | — | — |
+| `newTestimony` | Engage → `/engage/testimonies` (All tab) | — | — |
+| `newForumThread`, `newForumComment`, `forumCommentReply`, `forumCommentLike` | Engage → `/engage/forums/{forumId}/threads/{threadId}?comment={commentId}` (missing ids → `/engage`) | `forumId`, `threadId`, optional `commentId` | `<notificationType>_notification_clicked` |
+| `link` | external `launchUrl(link)` | `link` | — |
+| anything else | ignored | — | — |
 
-- Navigation mechanics: the handler adds a `NavigationBarEvent` to the `get_it` singleton `NavigationBarBloc`. `IndexPage` pops the tab's nested navigator to its root and `pushNamed`s the route, then resets the route to `null`.
-- **[DEFECT]** Admin destinations for non-admins select tab index 3 while the bottom bar has only 3 items (`currentIndex` out of range).
-- **[DEFECT]** `NavigationBarBloc` is a `get_it` lazy singleton, yet it's handed to `BlocProvider(create:)` in both `App` and `IndexPage`. Disposing `IndexPage` (sign-out) closes it, so later events after re-sign-in in the same process would throw.
-- The FCM token is printed to the log (spec B14).
+- Navigation uses `router.go(location)`. Admin destinations for non-admins are redirected to `/engage` by `RedirectPolicy`.
 
 ## 12. Notifications tab (planned, not implemented)
 
-`presentation/notifications/notifications_page.dart` is an unwired placeholder (the nav item is commented out). Record as **planned, not implemented**.
+There is no notifications tab or inbox. The unwired placeholder `presentation/notifications/notifications_page.dart` was deleted in `ce5befa` (spec §9.6). Record as **planned, not implemented**: it has no route, no cubit and no data source.
 
 ---
 
-## Appendix — Analytics events (verified with `grep -rn "logEvent(" lib`)
+## Appendix A — Analytics events
+
+All names are constants in `AnalyticsEvents` (`domain/common/analytics.dart`), logged through `IAnalytics`.
 
 | Event | Fired from | Trigger |
 |---|---|---|
-| `bible_series_viewed` | `engage.dart` route builder `/bible_series` | Bible series detail route built (incl. deep link) |
-| `engagement_viewed` | `engage.dart` route builder `/content_detail` | Content detail route built |
-| `engagement_completed` | `CompletionsBloc._onMarkAsComplete` | A content item is marked complete |
-| `daily_engagement_notification_clicked` | `FirebaseMessagingService.navigationHandler` | `dailyEngagementReminder` notification opened |
+| `bible_series_viewed` | `BibleSeriesDetailCubit.load` | Bible series detail opened (including from a deep link) |
+| `engagement_viewed` | `ContentDetailCubit.load` | Content detail opened |
+| `engagement_completed` | `ContentDetailCubit._markComplete` | A content item is marked complete |
+| `daily_engagement_notification_clicked` | `NotificationOpener.open` | `dailyEngagementReminder` notification opened |
 | `newForumThread_notification_clicked`, `newForumComment_notification_clicked`, `forumCommentReply_notification_clicked`, `forumCommentLike_notification_clicked` | same | forum notification opened |
-| `prayer_request_created` / `_prayed` / `_reported` / `_deleted` / `_answered` | `PrayerRequestsBloc` | after a successful repository call |
-| `testimony_created` / `amen_testimony` / `testimony_reported` / `testimony_deleted` / `testimony_answered` | `TestimoniesBloc` | after a successful repository call |
+| `prayer_request_created` / `_prayed` / `_reported` / `_deleted` / `_answered` | `PostActions` (`PrayerRequestActions`) | after a successful repository call |
+| `testimony_created` / `amen_testimony` / `testimony_reported` / `testimony_deleted` / `testimony_answered` | `PostActions` (`TestimonyActions`) | after a successful repository call |
+
+## Appendix B — Firestore and Storage touched by the app
+
+| Path | Read by | Written by |
+|---|---|---|
+| `users/{uid}` | `FirebaseAuthenticationFacade.getSignedInUser`, `AdminService.getUnverifiedUsers` | sign-up (create), `UserProfileRepository.setProfilePhoto` (`thumbnail`, `profile_photo`), `AdminService` (`is_verified`, delete) |
+| `users/{uid}/devices/{token}` | `deviceTokenExists` | `addDeviceToken` (sign-in), delete on sign-out |
+| `users/{uid}/notification_settings/{auto}` | `NotificationSettingsService` | sign-up (create), toggles, `threads_followed` |
+| `account_deletion_requests/{auto}` | — | `initiateDelete` |
+| `bible_series/{id}` (+ `series_content/{id}`) | `BibleSeriesRepository` | — |
+| `completions/{id}` (+ `responses/{id}`) | `CompletionsRepository` | `CompletionsRepository` (see `docs/firestore/completions.md`) |
+| `achievements/{uid}` | `AchievementsRepository` (stream) | — (server) |
+| `prayer_requests/{id}` / `testimonies/{id}` | repositories, `AdminService` | create, react, report, close, delete, approve |
+| `forums/{forumId}` (+ `threads/{id}` + `comments/{id}`) | `ForumRepository` (streams) | `ForumRepository` |
+| `media/*` | `MediaRepository` | — |
+| `links/*` (single doc) | `LinksRepository` | — |
+| Storage `/responses/{uid}/…`, `/users/{uid}/profile_photo/image{ext}` (+ server `thumbs/*_200x200`) | `FirebaseStorageService.getDownloadUrl` | `startUpload` (`putData`), `deleteFile` |
+
+## Appendix C — Spec defects resolved (no longer current behaviour)
+
+| # | Resolution |
+|---|---|
+| B1 | App Check uses Play Integrity / App Attest (DeviceCheck fallback) in prod and debug providers otherwise (`lib/app/bootstrap.dart`). The prod providers must be registered in the Firebase console before enforcement. |
+| B2, B3 | Every flavour calls `bootstrap(AppConfig)`, which initializes once before `runApp`. |
+| B4 | Mapped Firestore exceptions are thrown everywhere (`throw _firebaseFirestoreService.handleException(e)`). |
+| B5 | Repositories are stateless. Paging uses `PageResult` / `PageCursor`, and the cursor is held by `AllPostsCubit`. |
+| B6 | Admin pull-to-refresh calls the queue's own `load()`. |
+| B7 | One `EngageHomeCubit` per Engage home. |
+| B8 | The unused "recent prayer requests/testimonies" fetch was removed. |
+| B9–B12 | Controllers are created and disposed in lifecycle methods. No events are dispatched from `build()`. `@override` signatures were fixed. |
+| B13 | The version comes from `APP_VERSION` (`AppInfo.version`). |
+| B14 | The FCM token is no longer printed, and there is no `print` in `lib/`. |
+| B15 | `LayoutFactory` / `TextFactory` were removed. Layout uses `WindowSize` from `MediaQuery.sizeOf` on every build. |
+
+Other pre-refactor defects that are gone:
+- Prayer request/testimony card actions dispatched to the wrong bloc instance.
+- `NavigationBarBloc` lifecycle problems, and an out-of-range tab index for non-admin admin links.
+- Forum write errors were swallowed.
+- System back and the back arrow behaved differently on content detail.
+- Profile upload errors and admin errors were never rendered.
+
+Removed packages: `fluttertoast` and `rflutter_alert` (in `ce5befa`; feedback now goes through `presentation/foundation/feedback`), and `mockito` (in `02991fe`, replaced by `mocktail`).
