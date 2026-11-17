@@ -92,6 +92,9 @@ GoRouter buildAppRouter({
     navigatorKey: navigatorKey,
     initialLocation: initialLocation,
     refreshListenable: StreamListenable(auth.stream),
+    // Unknown locations fall back to the Engage root (the redirect policy
+    // still applies), as unknown route names did before go_router.
+    onException: (_, __, router) => router.go(Paths.engage),
     redirect: (_, state) => redirectPolicy.redirect(
       status: auth.state.status,
       isAdmin: auth.state.isAdmin,

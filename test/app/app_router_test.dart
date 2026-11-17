@@ -143,6 +143,15 @@ void main() {
     expect(find.text('GIVE'), findsOneWidget);
   });
 
+  testWidgets('an unknown location falls back to the Engage root',
+      (tester) async {
+    await pumpApp(tester);
+    await signIn(tester);
+    router.go('/no-such-page');
+    await tester.pumpAndSettle();
+    expect(find.text('engage home'), findsOneWidget);
+  });
+
   testWidgets('tab switching keeps each branch stack; re-tap returns to root',
       (tester) async {
     await pumpApp(tester);

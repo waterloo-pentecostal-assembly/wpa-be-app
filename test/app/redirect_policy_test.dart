@@ -93,5 +93,22 @@ void main() {
       expect(
           redirect(AuthStatus.authenticated, '/sign-in'), '/engage/series/s2');
     });
+
+    test('signing out does not remember the current page', () {
+      expect(redirect(AuthStatus.authenticated, '/profile'), isNull);
+      expect(redirect(AuthStatus.unauthenticated, '/profile'), '/sign-in');
+      expect(policy.pending, isNull);
+      expect(redirect(AuthStatus.unauthenticated, '/sign-in'), isNull);
+      expect(redirect(AuthStatus.authenticated, '/sign-in'), '/engage');
+    });
+
+    test('a link opened after signing out is still restored', () {
+      redirect(AuthStatus.authenticated, '/profile');
+      redirect(AuthStatus.unauthenticated, '/profile');
+      redirect(AuthStatus.unauthenticated, '/sign-in');
+      redirect(AuthStatus.unauthenticated, '/engage/series/s3');
+      expect(
+          redirect(AuthStatus.authenticated, '/sign-in'), '/engage/series/s3');
+    });
   });
 }

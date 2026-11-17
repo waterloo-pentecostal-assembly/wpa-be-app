@@ -93,3 +93,17 @@ class NewPostCubit<T extends CommunityPost> extends Cubit<NewPostState> {
     }
   }
 }
+
+/// Creates the form cubits; provided at app scope by the composition root.
+class NewPostCubitFactory {
+  const NewPostCubitFactory({
+    required this.prayerRequest,
+    required this.testimony,
+  });
+
+  final NewPostCubit Function() prayerRequest;
+  final NewPostCubit Function() testimony;
+
+  NewPostCubit create({required bool prayerRequest}) =>
+      prayerRequest ? this.prayerRequest() : testimony();
+}

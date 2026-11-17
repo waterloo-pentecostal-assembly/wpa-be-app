@@ -11,6 +11,25 @@ class _RecordingAnalytics implements IAnalytics {
 }
 
 void main() {
+  group('bannerNotification', () {
+    test('uses the notification title and body', () {
+      final n = bannerNotification(
+          hasNotification: true, title: 'T', body: 'B', data: {'title': 'D'});
+      expect((n.title, n.body), ('T', 'B'));
+    });
+
+    test('falls back to default copy when fields are missing', () {
+      final n = bannerNotification(hasNotification: true, data: {});
+      expect((n.title, n.body), ('Notification', 'New notification received'));
+    });
+
+    test('data-only messages use the payload title', () {
+      final n = bannerNotification(
+          hasNotification: false, data: {'title': 'From data'});
+      expect((n.title, n.body), ('From data', 'New notification received'));
+    });
+  });
+
   String? location(Map<String, dynamic> data) =>
       locationForNotification(data)?.toString();
 

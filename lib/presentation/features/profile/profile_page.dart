@@ -5,7 +5,6 @@ import '../../../application/authentication/authentication_cubit.dart';
 import '../../../application/links/links_cubit.dart';
 import '../../../application/profile/profile_cubit.dart';
 import '../../design_system/components.dart';
-import '../../foundation/feedback/dialogs.dart';
 import '../../foundation/feedback/toast.dart';
 import '../../foundation/layout/content_constraint.dart';
 import '../../foundation/navigation/app_navigator.dart';
@@ -158,7 +157,15 @@ class _OtherSection extends StatelessWidget {
           'associated with this account will be deleted. Would you like to '
           'proceed?',
     );
-    if (confirmed) await auth.initiateDelete();
+    if (!confirmed) return;
+    final errorIdBefore = auth.state.errorId;
+    await auth.initiateDelete();
+    final error = auth.state.errorMessage;
+    if (context.mounted &&
+        auth.state.errorId != errorIdBefore &&
+        error != null) {
+      AppToast.error(context, error);
+    }
   }
 
   @override

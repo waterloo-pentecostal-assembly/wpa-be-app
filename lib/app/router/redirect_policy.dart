@@ -4,9 +4,12 @@ import 'routes.dart';
 /// Authentication / authorisation redirects, kept pure for testing.
 ///
 /// A location requested before authentication is known (e.g. a notification
-/// opened at cold start) is remembered and restored once signed in.
+/// opened at cold start) is remembered and restored once signed in. Signing
+/// out does not remember the page the user was on, so the next sign-in starts
+/// on Engage (as before the refactor).
 class RedirectPolicy {
   String? _pending;
+  AuthStatus? _lastStatus;
 
   /// Location restored after sign-in, if any.
   String? get pending => _pending;
@@ -16,6 +19,9 @@ class RedirectPolicy {
     required bool isAdmin,
     required String location,
   }) {
+    final signedOut = _lastStatus == AuthStatus.authenticated &&
+        status == AuthStatus.unauthenticated;
+    _lastStatus = status;
     final path = Uri.parse(location).path;
     final isAuthRoute = Paths.auth.contains(path);
     final isSplash = path == Paths.splash;
@@ -26,8 +32,12 @@ class RedirectPolicy {
         if (!isAuthRoute) _pending = location;
         return Paths.splash;
       case AuthStatus.unauthenticated:
+        if (signedOut) {
+          _pending = null;
+        } else if (!isAuthRoute && !isSplash) {
+          _pending = location;
+        }
         if (isAuthRoute) return null;
-        if (!isSplash) _pending = location;
         return Paths.signIn;
       case AuthStatus.authenticated:
         if (isSplash || isAuthRoute) {

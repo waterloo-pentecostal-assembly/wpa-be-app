@@ -1,6 +1,27 @@
 import '../../domain/common/analytics.dart';
+import '../../domain/notifications/entities.dart';
 import '../../presentation/foundation/navigation/app_navigator.dart';
 import 'routes.dart';
+
+/// Builds the foreground banner content for a push message, with the same
+/// fallbacks as before the refactor: "Notification" / "New notification
+/// received", and the payload's `title` for data-only messages.
+/// [hasNotification] is whether the message carried a notification block.
+PushNotification bannerNotification({
+  required bool hasNotification,
+  String? title,
+  String? body,
+  required Map<String, dynamic> data,
+}) {
+  final dataTitle = data['title'];
+  return PushNotification(
+    title: !hasNotification && dataTitle is String
+        ? dataTitle
+        : title ?? 'Notification',
+    body: body ?? 'New notification received',
+    data: data,
+  );
+}
 
 /// Forum notification types (routed to the thread, analytics logged).
 const forumNotificationTypes = {

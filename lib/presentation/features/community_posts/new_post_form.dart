@@ -7,27 +7,13 @@ import '../../foundation/feedback/overlay_form.dart';
 import '../../foundation/feedback/toast.dart';
 import 'post_copy.dart';
 
-/// Creates the form cubits; provided at app scope by the composition root.
-class NewPostCubitFactory {
-  const NewPostCubitFactory({
-    required this.prayerRequest,
-    required this.testimony,
-  });
-
-  final NewPostCubit Function() prayerRequest;
-  final NewPostCubit Function() testimony;
-
-  NewPostCubit create(PostCopy copy) =>
-      copy.isPrayerRequest ? prayerRequest() : testimony();
-}
-
 /// Shows the new prayer request / testimony form over the current screen.
 void showNewPostForm(BuildContext context, PostCopy copy) {
   final factory = context.read<NewPostCubitFactory>();
   showOverlayForm(
     context,
     (_, close) => BlocProvider<NewPostCubit>(
-      create: (_) => factory.create(copy),
+      create: (_) => factory.create(prayerRequest: copy.isPrayerRequest),
       child: NewPostForm(copy: copy, onClose: close, toastContext: context),
     ),
   );

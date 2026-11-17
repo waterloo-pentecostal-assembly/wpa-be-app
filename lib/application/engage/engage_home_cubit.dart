@@ -8,6 +8,7 @@ import '../../domain/achievements/interfaces.dart';
 import '../../domain/authentication/session.dart';
 import '../../domain/bible_series/entities.dart';
 import '../../domain/bible_series/interfaces.dart';
+import '../../domain/bible_series/progress.dart';
 import '../../domain/common/exceptions.dart';
 import '../../domain/media/entities.dart';
 import '../../domain/media/interfaces.dart';
@@ -22,6 +23,7 @@ class EngageHomeState extends Equatable {
     this.series = const [],
     this.seriesError,
     this.seriesProgress = 0,
+    this.expectedSeriesProgress = 0,
     this.mediaStatus = LoadStatus.initial,
     this.media = const [],
     this.mediaError,
@@ -41,6 +43,9 @@ class EngageHomeState extends Equatable {
   /// User progress (0-100) in the current series.
   final int seriesProgress;
 
+  /// Progress (0-100) expected by today in the current series.
+  final double expectedSeriesProgress;
+
   final LoadStatus mediaStatus;
   final List<Media> media;
   final String? mediaError;
@@ -56,6 +61,7 @@ class EngageHomeState extends Equatable {
     List<BibleSeries>? series,
     String? seriesError,
     int? seriesProgress,
+    double? expectedSeriesProgress,
     LoadStatus? mediaStatus,
     List<Media>? media,
     String? mediaError,
@@ -68,6 +74,8 @@ class EngageHomeState extends Equatable {
       series: series ?? this.series,
       seriesError: seriesError ?? this.seriesError,
       seriesProgress: seriesProgress ?? this.seriesProgress,
+      expectedSeriesProgress:
+          expectedSeriesProgress ?? this.expectedSeriesProgress,
       mediaStatus: mediaStatus ?? this.mediaStatus,
       media: media ?? this.media,
       mediaError: mediaError ?? this.mediaError,
@@ -83,6 +91,7 @@ class EngageHomeState extends Equatable {
         series,
         seriesError,
         seriesProgress,
+        expectedSeriesProgress,
         mediaStatus,
         media,
         mediaError,
@@ -96,7 +105,9 @@ class EngageHomeCubit extends Cubit<EngageHomeState> {
     required IAchievementsRepository achievementsRepository,
     required IMediaRepository mediaRepository,
     required ISession session,
-  })  : _bibleSeries = bibleSeriesRepository,
+    DateTime Function()? clock,
+  })  : _clock = clock ?? DateTime.now,
+        _bibleSeries = bibleSeriesRepository,
         _achievements = achievementsRepository,
         _media = mediaRepository,
         _session = session,
@@ -106,6 +117,7 @@ class EngageHomeCubit extends Cubit<EngageHomeState> {
   final IAchievementsRepository _achievements;
   final IMediaRepository _media;
   final ISession _session;
+  final DateTime Function() _clock;
   StreamSubscription<Achievements>? _achievementsSub;
 
   /// Past series shown in the carousel when no series is active.
@@ -139,7 +151,13 @@ class EngageHomeCubit extends Cubit<EngageHomeState> {
         isActive: hasActive,
       );
       if (!isClosed) {
-        emit(state.copyWith(seriesStatus: LoadStatus.success, series: series));
+        emit(state.copyWith(
+          seriesStatus: LoadStatus.success,
+          series: series,
+          expectedSeriesProgress: hasActive && series.isNotEmpty
+              ? expectedProgress(series.first, _clock())
+              : 0,
+        ));
       }
     } catch (e) {
       if (!isClosed) {

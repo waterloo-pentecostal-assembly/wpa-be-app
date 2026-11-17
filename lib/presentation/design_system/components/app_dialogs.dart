@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 
-import '../../design_system/components/app_button.dart';
+import 'app_button.dart';
 
 /// Information dialog with a single OK button.
 Future<void> showMessageDialog(

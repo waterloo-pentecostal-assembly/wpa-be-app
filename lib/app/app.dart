@@ -8,13 +8,13 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../application/audio_player/audio_player_cubit.dart';
 import '../application/authentication/authentication_cubit.dart';
+import '../application/community_posts/new_post_cubit.dart';
 import '../application/links/links_cubit.dart';
 import '../application/notifications/notifications_cubit.dart';
 import '../application/prayer_requests/prayer_requests_cubits.dart';
 import '../application/testimonies/testimonies_cubits.dart';
 import '../domain/notifications/entities.dart';
 import '../presentation/design_system/theme.dart';
-import '../presentation/features/community_posts/new_post_form.dart';
 import '../presentation/foundation/navigation/app_navigator.dart';
 import '../services/firebase_messaging_service.dart';
 import 'app_config.dart';
@@ -24,9 +24,11 @@ import 'router/app_router.dart';
 import 'router/deep_links.dart';
 import 'router/screen_registry.dart';
 
-PushNotification _toPushNotification(RemoteMessage message) => PushNotification(
-      title: message.notification?.title ?? '',
-      body: message.notification?.body ?? '',
+PushNotification _toPushNotification(RemoteMessage message) =>
+    bannerNotification(
+      hasNotification: message.notification != null,
+      title: message.notification?.title,
+      body: message.notification?.body,
       data: message.data,
     );
 

@@ -31,11 +31,12 @@ void main() {
     session = FakeSession(buildUser(firstName: 'Grace'));
   });
 
-  EngageHomeCubit build() => EngageHomeCubit(
+  EngageHomeCubit build({DateTime Function()? clock}) => EngageHomeCubit(
         bibleSeriesRepository: bibleSeries,
         achievementsRepository: achievements,
         mediaRepository: media,
         session: session,
+        clock: clock,
       );
 
   test('with an active series: loads active series, media and progress',
@@ -60,6 +61,25 @@ void main() {
     await pumpEventQueue();
     expect(cubit.state.seriesProgress, 42);
     await cubit.close();
+  });
+
+  test('computes expected progress of the current series from the clock',
+      () async {
+    bibleSeries
+      ..hasActive = true
+      ..seriesList = [
+        buildSeries(
+            id: 'a', days: [DateTime(2026, 3, 1), DateTime(2026, 3, 2)]),
+      ];
+    final beforeStart = build(clock: () => DateTime(2026, 2, 28));
+    await beforeStart.load();
+    expect(beforeStart.state.expectedSeriesProgress, 0);
+
+    final firstDay = build(clock: () => DateTime(2026, 3, 1, 12));
+    await firstDay.load();
+    expect(firstDay.state.expectedSeriesProgress, 50);
+    await beforeStart.close();
+    await firstDay.close();
   });
 
   test('without an active series: loads recent past series, no current one',

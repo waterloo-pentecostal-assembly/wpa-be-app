@@ -4,7 +4,6 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../../../application/engage/engage_home_cubit.dart';
 import '../../../../domain/bible_series/entities.dart';
-import '../../../../domain/bible_series/progress.dart';
 import '../../../design_system/components.dart';
 import '../../../foundation/navigation/app_navigator.dart';
 
@@ -30,7 +29,7 @@ class CurrentSeriesSection extends StatelessWidget {
               : CurrentSeriesCard(
                   series: series,
                   userProgress: state.seriesProgress.toDouble(),
-                  expectedProgress: expectedProgress(series, DateTime.now()),
+                  expectedProgress: state.expectedSeriesProgress,
                 ),
         );
       },
