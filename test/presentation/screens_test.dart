@@ -11,6 +11,7 @@ import 'package:wpa_app/application/audio_player/audio_player_cubit.dart';
 import 'package:wpa_app/application/audio_player/audio_player_port.dart';
 import 'package:wpa_app/application/authentication/authentication_cubit.dart';
 import 'package:wpa_app/application/authentication/sign_in_cubit.dart';
+import 'package:wpa_app/application/bible_series/all_bible_series_cubit.dart';
 import 'package:wpa_app/application/bible_series/bible_series_detail_cubit.dart';
 import 'package:wpa_app/application/common/app_events.dart';
 import 'package:wpa_app/application/community_posts/post_list_cubit.dart';
@@ -49,6 +50,7 @@ import 'package:wpa_app/presentation/design_system/theme.dart';
 import 'package:wpa_app/presentation/features/admin/admin_home_page.dart';
 import 'package:wpa_app/presentation/features/admin/admin_queue_page.dart';
 import 'package:wpa_app/presentation/features/auth/sign_in_page.dart';
+import 'package:wpa_app/presentation/features/bible_series/all_bible_series_page.dart';
 import 'package:wpa_app/presentation/features/bible_series/bible_series_detail_page.dart';
 import 'package:wpa_app/presentation/features/bible_series/content_detail_page.dart';
 import 'package:wpa_app/presentation/features/community_posts/post_copy.dart';
@@ -128,10 +130,15 @@ const _user = LocalUser(
   isVerified: true,
 );
 
-BibleSeries _series() => BibleSeries(
-      id: 's1',
-      title: 'Gospel of John',
-      subTitle: 'A month in John',
+BibleSeries _series({
+  String id = 's1',
+  String title = 'Gospel of John',
+  String subTitle = 'A month in John',
+}) =>
+    BibleSeries(
+      id: id,
+      title: title,
+      subTitle: subTitle,
       imageUrl: '',
       imageGsLocation: '',
       startDate: _now.subtract(const Duration(days: 2)),
@@ -263,10 +270,13 @@ void main() {
     WidgetTester tester,
     Widget screen, {
     required double width,
+    double textScale = 1,
   }) async {
     tester.view.physicalSize = Size(width, 900);
     tester.view.devicePixelRatio = 1;
+    tester.platformDispatcher.textScaleFactorTestValue = textScale;
     addTearDown(tester.view.reset);
+    addTearDown(tester.platformDispatcher.clearTextScaleFactorTestValue);
 
     final session = AppSession()..update(_user);
     final links = _MockLinks();
@@ -347,6 +357,40 @@ void main() {
       );
       expect(find.textContaining('Hello'), findsOneWidget);
     });
+
+    for (final scale in [1.0, 2.0]) {
+      testWidgets('all bible series ($w, text x$scale)', (tester) async {
+        final repo = _MockSeries();
+        when(() => repo.getBibleSeries(
+              limit: any(named: 'limit'),
+              isActive: any(named: 'isActive'),
+            )).thenAnswer((_) async => [
+              _series(),
+              _series(
+                id: 's2',
+                title: 'Sample Series With A Fairly Long Title',
+                subTitle: 'A subtitle long enough to wrap onto a second line '
+                    'on a phone',
+              ),
+              _series(id: 's3', subTitle: ''),
+            ]);
+        await pumpScreen(
+          tester,
+          BlocProvider(
+            create: (_) => AllBibleSeriesCubit(repo)..load(),
+            child: const AllBibleSeriesPage(),
+          ),
+          width: width,
+          textScale: scale,
+        );
+        expect(find.byType(BibleSeriesListCard), findsWidgets);
+        // Scroll to the last card; any overflow on the way fails the test.
+        await tester.drag(find.byType(ListView), const Offset(0, -2000));
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+        expect(find.byType(BibleSeriesListCard), findsWidgets);
+      });
+    }
 
     testWidgets('bible series detail ($w)', (tester) async {
       final series = _MockSeries();

@@ -279,8 +279,8 @@ All routes below are children of `/engage` in branch 0. Each builds its own cubi
   - `AppHeader`: back arrow + `Bible Series` (`headlineSmall`)
   - failure → centred `errorMessage`, e.g. `An unknown error occurred`
   - loading → `LoadingState`
-  - success → a grid (`ResponsiveGrid.delegate(maxItemExtent: 720, childAspectRatio: 720/116)`): one column on phones, more on wide windows. Each item is a `BibleSeriesListCard`: white, radius 16, shadow, with:
-    - the image in the left third
+  - success → a single-column list, each card centred with `ContentConstraint` (max 720). Each item is a `BibleSeriesListCard`: white, radius 16, shadow, at least `AppSizes.seriesListCardHeight` (100, scaled by the text scale) tall and growing with its text — do **not** give these cards a fixed height or aspect ratio (that overflowed on phones). Contents:
+    - the image filling the left third at the card's height
     - title (`titleSmall`)
     - optional subtitle (`bodyMedium`, max 2 lines)
     - date range (`labelSmall`)

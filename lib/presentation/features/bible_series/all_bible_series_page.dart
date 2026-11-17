@@ -6,7 +6,7 @@ import '../../../application/common/load_status.dart';
 import '../../../domain/bible_series/entities.dart';
 import '../../design_system/components.dart';
 import '../../foundation/formatting/dates.dart';
-import '../../foundation/layout/responsive_grid.dart';
+import '../../foundation/layout/content_constraint.dart';
 import '../../foundation/navigation/app_navigator.dart';
 
 /// All Bible series. Expects an [AllBibleSeriesCubit] above it.
@@ -27,16 +27,14 @@ class AllBibleSeriesPage extends StatelessWidget {
                     return ErrorState(state.errorMessage ?? '');
                   }
                   if (state.status.isLoading) return const LoadingState();
-                  return GridView.builder(
+                  // A list, not a fixed-extent grid: cards grow with their
+                  // text (subtitle lines, text scale).
+                  return ListView.builder(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
-                    gridDelegate: ResponsiveGrid.delegate(
-                      maxItemExtent: 720,
-                      childAspectRatio: 720 / 116,
-                      spacing: 0,
-                    ),
                     itemCount: state.series.length,
-                    itemBuilder: (context, i) =>
-                        BibleSeriesListCard(series: state.series[i]),
+                    itemBuilder: (context, i) => ContentConstraint(
+                      child: BibleSeriesListCard(series: state.series[i]),
+                    ),
                   );
                 },
               ),
@@ -58,7 +56,12 @@ class BibleSeriesListCard extends StatelessWidget {
     return GestureDetector(
       onTap: () => context.navigator.openBibleSeries(series.id),
       child: Container(
+        width: double.infinity,
         margin: const EdgeInsets.fromLTRB(4, 4, 4, 8),
+        constraints: BoxConstraints(
+          minHeight: MediaQuery.textScalerOf(context)
+              .scale(AppSizes.seriesListCardHeight),
+        ),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(AppRadii.xl),
           color: Colors.white,
@@ -72,44 +75,66 @@ class BibleSeriesListCard extends StatelessWidget {
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(AppRadii.xl),
-          child: Row(
-            children: [
-              Expanded(
-                child: AppNetworkImage(
-                  url: series.imageUrl,
-                  height: double.infinity,
-                ),
-              ),
-              Expanded(
-                flex: 2,
-                child: Padding(
-                  padding: const EdgeInsets.all(12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(series.title, style: context.text.titleSmall),
-                      if (series.subTitle.isNotEmpty) ...[
-                        const SizedBox(height: 4),
-                        Text(
-                          series.subTitle,
-                          style: context.text.bodyMedium,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                      const SizedBox(height: 4),
-                      Text(
-                        DateFormats.dateRange(series.startDate, series.endDate),
-                        style: context.text.labelSmall,
-                      ),
-                    ],
+          // The text decides the card height (at least the minimum above);
+          // the image fills the left third at whatever height that is.
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final imageWidth = constraints.maxWidth / 3;
+              return Stack(
+                // Card width and minimum height reach the text column.
+                fit: StackFit.passthrough,
+                children: [
+                  PositionedDirectional(
+                    start: 0,
+                    top: 0,
+                    bottom: 0,
+                    width: imageWidth,
+                    child: AppNetworkImage(url: series.imageUrl),
                   ),
-                ),
-              ),
-            ],
+                  Padding(
+                    padding: EdgeInsetsDirectional.only(start: imageWidth),
+                    child: _SeriesText(series: series),
+                  ),
+                ],
+              );
+            },
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _SeriesText extends StatelessWidget {
+  const _SeriesText({required this.series});
+
+  final BibleSeries series;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(series.title, style: context.text.titleSmall),
+          if (series.subTitle.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              series.subTitle,
+              style: context.text.bodyMedium,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+          const SizedBox(height: 4),
+          Text(
+            DateFormats.dateRange(series.startDate, series.endDate),
+            style: context.text.labelSmall,
+          ),
+        ],
       ),
     );
   }

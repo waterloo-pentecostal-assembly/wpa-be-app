@@ -58,6 +58,9 @@ abstract final class AppSizes {
   static const homeButtonHeight = 50.0;
   static const linkButtonWidth = 100.0;
   static const contentRowHeight = 60.0;
+
+  /// Minimum height of a card on the all Bible series page.
+  static const seriesListCardHeight = 100.0;
   static const dayTabHeight = 108.0;
   static const dayTabWidth = 70.0;
   static const adminTileHeight = 125.0;
