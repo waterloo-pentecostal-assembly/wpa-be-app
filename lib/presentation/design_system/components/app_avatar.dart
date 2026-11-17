@@ -53,6 +53,7 @@ class AppNetworkImage extends StatelessWidget {
           width: width,
           color: AppColors.placeholderGrey,
         );
+    if (url.isEmpty) return grey(context, url);
     return CachedNetworkImage(
       imageUrl: url,
       height: height,

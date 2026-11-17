@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:photo_view/photo_view.dart';
@@ -96,10 +97,10 @@ class _UploadedImage extends StatelessWidget {
     final thumbnail = state.thumbnailUrls[key]?.firstOrNull;
     final local = state.localImages[key]?.firstOrNull;
     final Widget preview = thumbnail != null
-        ? Image.network(thumbnail, fit: BoxFit.fill)
+        ? CachedNetworkImage(imageUrl: thumbnail, fit: BoxFit.fill)
         : local != null
             ? PickedImageView(image: local)
-            : Image.network(url);
+            : CachedNetworkImage(imageUrl: url);
 
     return Column(
       children: [
@@ -133,7 +134,7 @@ class _UploadedImage extends StatelessWidget {
               child: PhotoView(
                 backgroundDecoration:
                     const BoxDecoration(color: Colors.transparent),
-                imageProvider: NetworkImage(url),
+                imageProvider: CachedNetworkImageProvider(url),
                 minScale: PhotoViewComputedScale.contained * 0.8,
                 maxScale: PhotoViewComputedScale.covered * 2,
                 loadingBuilder: (_, __) =>

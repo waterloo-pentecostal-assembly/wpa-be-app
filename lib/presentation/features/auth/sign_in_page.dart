@@ -52,8 +52,8 @@ class SignInPage extends StatelessWidget {
           ),
           buttonLabel: 'LOGIN',
           onSubmit: state.isValid ? cubit.submit : null,
-          footer: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          footer: Wrap(
+            alignment: WrapAlignment.center,
             children: [
               Text("Don't have an account?", style: context.textStyles.muted),
               const SizedBox(width: 3),

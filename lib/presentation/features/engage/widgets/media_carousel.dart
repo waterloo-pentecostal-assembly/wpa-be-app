@@ -13,7 +13,9 @@ class MediaSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final height = AppSizes.mediaTileHeight +
+    // Tile padding (2 x 8) + thumbnail + text block.
+    final height = 16 +
+        AppSizes.mediaTileHeight +
         MediaQuery.textScalerOf(context)
             .scale(AppSizes.mediaTileDescriptionHeight);
     return Column(
@@ -76,13 +78,19 @@ class MediaTile extends StatelessWidget {
             ),
             Padding(
               padding: const EdgeInsets.only(left: 8, top: 8),
-              child: Text(media.platform, style: context.text.labelLarge),
+              child: Text(
+                media.platform,
+                style: context.text.labelLarge,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
             ),
             Padding(
               padding: const EdgeInsets.only(left: 8),
               child: Text(
                 media.description,
                 style: context.text.bodyMedium,
+                maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
             ),

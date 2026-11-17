@@ -27,7 +27,8 @@ class CommunityShortcuts extends StatelessWidget {
         children: [
           SectionHeader(title: copy.title),
           SizedBox(
-            height: AppSizes.homeButtonHeight,
+            height: MediaQuery.textScalerOf(context)
+                .scale(AppSizes.homeButtonHeight),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 8),
               child: Row(
@@ -91,13 +92,18 @@ class _Tile extends StatelessWidget {
           color: Colors.grey[300],
           borderRadius: const BorderRadius.all(Radius.circular(AppRadii.lg)),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            for (final line in lines)
-              Text(line,
-                  textAlign: TextAlign.center, style: context.text.labelLarge),
-          ],
+        padding: const EdgeInsets.all(AppSpacing.xs),
+        alignment: Alignment.center,
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Column(
+            children: [
+              for (final line in lines)
+                Text(line,
+                    textAlign: TextAlign.center,
+                    style: context.text.labelLarge),
+            ],
+          ),
         ),
       ),
     );
