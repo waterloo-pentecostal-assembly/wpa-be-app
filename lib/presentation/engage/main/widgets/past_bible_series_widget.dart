@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
 
@@ -10,6 +10,8 @@ import '../../../common/date_formatter.dart';
 import '../../../common/text_factory.dart';
 
 class PastBibleSeriesWidget extends StatelessWidget {
+  const PastBibleSeriesWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<BibleSeriesBloc, BibleSeriesState>(
@@ -19,7 +21,7 @@ class PastBibleSeriesWidget extends StatelessWidget {
           children: [
             Padding(
               padding:
-                  EdgeInsets.only(left: 24, top: 12, bottom: 12, right: 24),
+                  const EdgeInsets.only(left: 24, top: 12, bottom: 12, right: 24),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
@@ -62,7 +64,7 @@ class PastBibleSeriesList extends StatelessWidget {
               .getDimension(
                   baseDimension: kPastBibleSeriesTileDescriptionHeight)),
       child: ListView.builder(
-        padding: EdgeInsets.only(left: 16),
+        padding: const EdgeInsets.only(left: 16),
         scrollDirection: Axis.horizontal,
         itemCount: bibleSeriesList.length,
         itemBuilder: (context, index) => BibleSeriesCard(
@@ -89,7 +91,7 @@ class BibleSeriesCard extends StatelessWidget {
       child: Container(
         width: getIt<LayoutFactory>()
             .getDimension(baseDimension: kPastBibleSeriesTileWidth),
-        padding: EdgeInsets.only(
+        padding: const EdgeInsets.only(
           right: 8,
           left: 8,
           top: 8,
@@ -133,6 +135,8 @@ class BibleSeriesCard extends StatelessWidget {
 }
 
 class BibleSeriesCardPlaceholder extends StatelessWidget {
+  const BibleSeriesCardPlaceholder({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -144,6 +148,8 @@ class BibleSeriesCardPlaceholder extends StatelessWidget {
 }
 
 class PastBibleSeriesListPlaceholder extends StatelessWidget {
+  const PastBibleSeriesListPlaceholder({super.key});
+
   @override
   @override
   Widget build(BuildContext context) {
@@ -154,7 +160,7 @@ class PastBibleSeriesListPlaceholder extends StatelessWidget {
               .getDimension(
                   baseDimension: kPastBibleSeriesTileDescriptionHeight)),
       child: ListView.builder(
-        padding: EdgeInsets.only(left: 16),
+        padding: const EdgeInsets.only(left: 16),
         scrollDirection: Axis.horizontal,
         itemCount: (MediaQuery.of(context).size.width /
                 (getIt<LayoutFactory>()

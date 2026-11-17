@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
 
 import '../../app/constants.dart';
@@ -7,7 +7,7 @@ import '../common/text_factory.dart';
 
 class HeaderWidget extends StatelessWidget {
   final String title;
-  const HeaderWidget({required this.title});
+  const HeaderWidget({super.key, required this.title});
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -21,7 +21,7 @@ class HeaderWidget extends StatelessWidget {
               size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
             ),
           ),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
           getIt<TextFactory>().subPageHeading(title),
         ],
       ),

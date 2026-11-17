@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -20,6 +20,7 @@ import '../common/text_factory.dart';
 import '../common/toast_message.dart';
 
 class ProfilePage extends IIndexedPage {
+  @override
   final GlobalKey<NavigatorState> navigatorKey;
 
   const ProfilePage({Key? key, required this.navigatorKey}) : super(key: key);
@@ -57,6 +58,8 @@ class ProfilePage extends IIndexedPage {
 }
 
 class ProfilePageRoot extends StatelessWidget {
+  const ProfilePageRoot({super.key});
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AuthenticationBloc, AuthenticationState>(
@@ -72,23 +75,23 @@ class ProfilePageRoot extends StatelessWidget {
         return SafeArea(
           child: Container(
             child: ListView(
-              physics: ClampingScrollPhysics(),
+              physics: const ClampingScrollPhysics(),
               children: <Widget>[
                 HeaderWidget(),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 ProfileImageAndName(),
-                SizedBox(height: 12),
-                Divider(indent: 12, endIndent: 12),
+                const SizedBox(height: 12),
+                const Divider(indent: 12, endIndent: 12),
                 LogoutButton(),
-                Divider(indent: 12, endIndent: 12),
-                SizedBox(height: 18),
+                const Divider(indent: 12, endIndent: 12),
+                const SizedBox(height: 18),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 12.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       getIt<TextFactory>().regular('SETTINGS'),
-                      Divider(),
+                      const Divider(),
                       GestureDetector(
                         onTap: () {
                           Navigator.of(context)
@@ -107,11 +110,11 @@ class ProfilePageRoot extends StatelessWidget {
                           ],
                         ),
                       ),
-                      Divider(),
+                      const Divider(),
                     ],
                   ),
                 ),
-                SizedBox(height: 18),
+                const SizedBox(height: 18),
                 Other(),
               ],
             ),
@@ -123,6 +126,8 @@ class ProfilePageRoot extends StatelessWidget {
 }
 
 class HeaderWidget extends StatelessWidget {
+  const HeaderWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -135,6 +140,8 @@ class HeaderWidget extends StatelessWidget {
 }
 
 class ProfileImageAndName extends StatefulWidget {
+  const ProfileImageAndName({super.key});
+
   @override
   _ProfileImageAndNameState createState() => _ProfileImageAndNameState();
 }
@@ -205,7 +212,7 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName>
                       ],
                     ),
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   getIt<TextFactory>().regular(localUser.fullName)
                 ],
               );
@@ -260,7 +267,7 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName>
                   ],
                 ),
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               getIt<TextFactory>().regular(localUser.fullName)
             ],
           );
@@ -282,6 +289,8 @@ class _ProfileImageAndNameState extends State<ProfileImageAndName>
 }
 
 class LogoutButton extends StatelessWidget {
+  const LogoutButton({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Row(
@@ -302,6 +311,8 @@ class LogoutButton extends StatelessWidget {
 }
 
 class Other extends StatelessWidget {
+  const Other({super.key});
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<LinksBloc, LinksState>(
@@ -318,7 +329,7 @@ class Other extends StatelessWidget {
                 Container(
                   child: getIt<TextFactory>().regular('OTHER'),
                 ),
-                Divider(),
+                const Divider(),
                 GestureDetector(
                   onTap: () async {
                     Uri uri = Uri.parse(state.linkMap['privacy_policy_link']);
@@ -342,7 +353,7 @@ class Other extends StatelessWidget {
                     ],
                   ),
                 ),
-                SizedBox(height: 6),
+                const SizedBox(height: 6),
                 GestureDetector(
                   onTap: () async {
                     Uri uri = Uri.parse(state.linkMap['terms_of_use_link']);
@@ -366,7 +377,7 @@ class Other extends StatelessWidget {
                     ],
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 GestureDetector(
                   onTap: () async {
                     final Uri _emailLaunchUri = Uri(
@@ -394,7 +405,7 @@ class Other extends StatelessWidget {
                     ],
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 GestureDetector(
                   onTap: () async {
                     final Uri _emailLaunchUri = Uri(
@@ -423,7 +434,7 @@ class Other extends StatelessWidget {
                     ],
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 GestureDetector(
                   onTap: () {
                     showDialog(
@@ -431,7 +442,7 @@ class Other extends StatelessWidget {
                       builder: (_) => AlertDialog(
                         buttonPadding:
                             const EdgeInsets.fromLTRB(10, 20, 20, 20),
-                        shape: RoundedRectangleBorder(
+                        shape: const RoundedRectangleBorder(
                             borderRadius:
                                 BorderRadius.all(Radius.circular(16))),
                         title: getIt<TextFactory>()
@@ -441,14 +452,14 @@ class Other extends StatelessWidget {
                         ),
                         actions: [
                           ClipRRect(
-                            borderRadius: BorderRadius.all(Radius.circular(16)),
+                            borderRadius: const BorderRadius.all(Radius.circular(16)),
                             child: TextButton(
                               style: TextButton.styleFrom(
                                   foregroundColor: Colors.white,
-                                  minimumSize: Size(90, 30),
+                                  minimumSize: const Size(90, 30),
                                   backgroundColor:
                                       kDarkGreyColor.withValues(alpha: 0.5),
-                                  padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
+                                  padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
                                   tapTargetSize:
                                       MaterialTapTargetSize.shrinkWrap),
                               onPressed: () {
@@ -459,14 +470,14 @@ class Other extends StatelessWidget {
                             ),
                           ),
                           ClipRRect(
-                            borderRadius: BorderRadius.all(Radius.circular(16)),
+                            borderRadius: const BorderRadius.all(Radius.circular(16)),
                             child: TextButton(
                               style: TextButton.styleFrom(
                                   foregroundColor: Colors.white,
-                                  minimumSize: Size(90, 30),
+                                  minimumSize: const Size(90, 30),
                                   backgroundColor:
                                       kWpaBlue.withValues(alpha: 0.8),
-                                  padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
+                                  padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
                                   tapTargetSize:
                                       MaterialTapTargetSize.shrinkWrap),
                               onPressed: () {
@@ -495,14 +506,14 @@ class Other extends StatelessWidget {
                     ],
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     getIt<TextFactory>().lite("Version 3.0.1"),
                   ],
                 ),
-                Divider(),
+                const Divider(),
               ],
             ),
           );
@@ -519,6 +530,8 @@ class Other extends StatelessWidget {
 }
 
 class AppVersion extends StatelessWidget {
+  const AppVersion({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container();

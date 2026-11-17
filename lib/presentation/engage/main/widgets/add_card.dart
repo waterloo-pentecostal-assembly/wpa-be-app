@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'package:wpa_app/presentation/common/text_factory.dart';
 
@@ -16,7 +16,7 @@ class AddCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        margin: EdgeInsets.all(8.0),
+        margin: const EdgeInsets.all(8.0),
         width: 150, // Fixed width for the add card
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
@@ -26,18 +26,18 @@ class AddCard extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              decoration: BoxDecoration(
+              decoration: const BoxDecoration(
                 shape: BoxShape.circle,
                 color: Colors.black12,
               ),
-              padding: EdgeInsets.all(12),
-              child: Icon(
+              padding: const EdgeInsets.all(12),
+              child: const Icon(
                 Icons.add,
                 size: 32,
                 color: Colors.black54,
               ),
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             getIt<TextFactory>().regular(text, textAlign: TextAlign.center),
           ],
         ),

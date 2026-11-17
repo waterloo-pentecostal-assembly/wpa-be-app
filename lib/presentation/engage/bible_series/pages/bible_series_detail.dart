@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/application/audio_player/audio_player_bloc.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
@@ -35,8 +35,10 @@ class BibleSeriesDetailPage extends StatelessWidget {
 }
 
 class BibleSeriesWidget extends StatefulWidget {
+  const BibleSeriesWidget({super.key});
+
   @override
-  State<StatefulWidget> createState() => new _BibleSeriesState();
+  State<StatefulWidget> createState() => _BibleSeriesState();
 }
 
 class _BibleSeriesState extends State<BibleSeriesWidget>
@@ -58,7 +60,7 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
           bibleSeries = state.bibleSeriesDetail;
           tabLength = bibleSeries.seriesContentSnippet.length;
           if (_tabController == null) {
-            _tabController = new TabController(
+            _tabController = TabController(
               length: tabLength,
               vsync: this,
               initialIndex: _getInitialIndex(bibleSeries.seriesContentSnippet),
@@ -79,7 +81,7 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                       Container(
                         height: 0.35 * MediaQuery.of(context).size.height,
                         width: MediaQuery.of(context).size.width,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black26,
@@ -89,7 +91,7 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                           ],
                         ),
                         child: ClipRRect(
-                          borderRadius: BorderRadius.only(
+                          borderRadius: const BorderRadius.only(
                             bottomLeft: Radius.circular(30.0),
                             bottomRight: Radius.circular(30.0),
                           ),
@@ -131,7 +133,7 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                                 onPressed: () => Navigator.pop(context),
                                 color: Colors.white,
                               ),
-                              Spacer(),
+                              const Spacer(),
                               ElevatedButton(
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: Colors.white,
@@ -139,7 +141,7 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(24),
                                   ),
-                                  padding: EdgeInsets.symmetric(
+                                  padding: const EdgeInsets.symmetric(
                                       horizontal: 16, vertical: 8),
                                   elevation: 0,
                                 ),
@@ -166,10 +168,10 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                 Container(
                   color: Colors.transparent,
                   child: TabBar(
-                    labelPadding: EdgeInsets.all(8),
+                    labelPadding: const EdgeInsets.all(8),
                     controller: _tabController,
                     isScrollable: true,
-                    indicator: BoxDecoration(color: Colors.transparent),
+                    indicator: const BoxDecoration(color: Colors.transparent),
                     indicatorSize: TabBarIndicatorSize.label,
                     unselectedLabelColor: Colors.black45,
                     labelColor: Colors.black87,
@@ -182,7 +184,7 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
                   child: BlocBuilder<AudioPlayerBloc, AudioPlayerState>(
                     builder: (context, state) {
                       return Container(
-                        padding: EdgeInsets.all(0),
+                        padding: const EdgeInsets.all(0),
                         child: TabBarView(
                           controller: _tabController,
                           children: _buildContentChildren(
@@ -209,6 +211,8 @@ class _BibleSeriesState extends State<BibleSeriesWidget>
 }
 
 class SeriesDetailPlaceholder extends StatelessWidget {
+  const SeriesDetailPlaceholder({super.key});
+
   @override
   Widget build(BuildContext context) {
     int amtOfCards = (MediaQuery.of(context).size.width / 70).ceil();
@@ -218,7 +222,7 @@ class SeriesDetailPlaceholder extends StatelessWidget {
           Stack(
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.only(
+                borderRadius: const BorderRadius.only(
                   bottomLeft: Radius.circular(30.0),
                   bottomRight: Radius.circular(30.0),
                 ),
@@ -250,15 +254,15 @@ class SeriesDetailPlaceholder extends StatelessWidget {
           ),
           Container(
             height: getIt<LayoutFactory>().getDimension(baseDimension: 148.0),
-            padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
+            padding: const EdgeInsets.fromLTRB(10, 2, 10, 2),
             child: ListView.builder(
-              padding: EdgeInsets.only(left: 16),
+              padding: const EdgeInsets.only(left: 16),
               scrollDirection: Axis.horizontal,
               itemCount: amtOfCards,
               itemBuilder: (context, index) => Container(
                 width: getIt<LayoutFactory>().getDimension(
                     layoutDimension: LayoutDimension.CONTENT_TAB_WIDTH),
-                margin: EdgeInsets.all(8),
+                margin: const EdgeInsets.all(8),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -277,11 +281,11 @@ class SeriesDetailPlaceholder extends StatelessWidget {
             ),
           ),
           Container(
-            margin: EdgeInsets.only(top: 0, bottom: 15),
+            margin: const EdgeInsets.only(top: 0, bottom: 15),
             height: getIt<LayoutFactory>().getDimension(baseDimension: 60.0),
             child: Container(
               width: 0.9 * MediaQuery.of(context).size.width,
-              padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
+              padding: const EdgeInsets.fromLTRB(10, 2, 10, 2),
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(8),
                 color: Colors.grey.shade200,
@@ -307,7 +311,7 @@ List<Widget> _buildContentTabs(
             .getDimension(layoutDimension: LayoutDimension.CONTENT_TAB_WIDTH),
         child: Tab(
           child: Container(
-            padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
+            padding: const EdgeInsets.fromLTRB(10, 2, 10, 2),
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(10),
               color: _getStatusColor(
@@ -316,7 +320,7 @@ List<Widget> _buildContentTabs(
                 BoxShadow(
                   color: Colors.grey.withValues(alpha: 0.2),
                   blurRadius: 5.0,
-                  offset: Offset(0, 5),
+                  offset: const Offset(0, 5),
                 )
               ],
             ),
@@ -326,9 +330,9 @@ List<Widget> _buildContentTabs(
                 children: [
                   _getTodayIndicator(element.date),
                   getIt<TextFactory>().regular('${_getMonth(element.date)}'),
-                  SizedBox(height: 3),
+                  const SizedBox(height: 3),
                   getIt<TextFactory>().heading('${_getDate(element.date)}'),
-                  SizedBox(height: 3),
+                  const SizedBox(height: 3),
                   _getStatusIndicator(element.isCompleted, element.isDraft, 1)
                 ],
               ),
@@ -354,7 +358,7 @@ List<Widget> _buildContentChildren(
     _element.availableContentTypes.asMap().forEach((j, element) {
       listChildren.add(
         Container(
-          margin: EdgeInsets.only(top: 0, bottom: 15),
+          margin: const EdgeInsets.only(top: 0, bottom: 15),
           height: MediaQuery.of(context).textScaler.scale(getIt<LayoutFactory>()
               .getDimension(baseDimension: kContentChildrenHeight)),
           child: Tab(
@@ -372,7 +376,7 @@ List<Widget> _buildContentChildren(
               },
               child: Container(
                 width: 0.9 * MediaQuery.of(context).size.width,
-                padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
+                padding: const EdgeInsets.fromLTRB(10, 2, 10, 2),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
                   color: Colors.grey.shade100,
@@ -380,7 +384,7 @@ List<Widget> _buildContentChildren(
                     BoxShadow(
                       color: Colors.grey.withValues(alpha: 0.2),
                       blurRadius: 8.0,
-                      offset: Offset(0, 3),
+                      offset: const Offset(0, 3),
                     )
                   ],
                 ),
@@ -414,8 +418,8 @@ List<Widget> _buildContentChildren(
 
     contentChildren.add(
       ListView(
+        padding: const EdgeInsets.only(top: 20),
         children: listChildren,
-        padding: EdgeInsets.only(top: 20),
       ),
     );
   });
@@ -425,11 +429,11 @@ List<Widget> _buildContentChildren(
 Widget _getPlayingIndicator(AudioPlayerState state, String contentId) {
   if (state.contentId == contentId &&
       state.playerState == PlayerStateEnum.PLAYING) {
-    return Icon(
+    return const Icon(
       Icons.play_arrow_outlined,
     );
   }
-  return Text("");
+  return const Text("");
 }
 
 String _getMonth(Timestamp date) {
@@ -459,9 +463,9 @@ Text _getTodayIndicator(Timestamp date) {
   String today = DateTime.now().toLocal().toString().substring(0, 10);
   String d = date.toDate().toLocal().toString().substring(0, 10);
   if (today == d) {
-    return Text('•');
+    return const Text('•');
   }
-  return Text('');
+  return const Text('');
 }
 
 Widget _getStatusIndicator(bool isCompleted, bool isDraft, double conversion) {
@@ -470,7 +474,7 @@ Widget _getStatusIndicator(bool isCompleted, bool isDraft, double conversion) {
   } else if (isDraft) {
     return Icon(Icons.edit, size: 15 * conversion);
   }
-  return Text('');
+  return const Text('');
 }
 
 Color _getStatusColor(bool isCompleted, bool isDraft, Timestamp date) {

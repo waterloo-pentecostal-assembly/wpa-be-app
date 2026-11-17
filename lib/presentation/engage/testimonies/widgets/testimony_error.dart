@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 // TODO: Add reload button
 class TestimoniesErrorWidget extends StatelessWidget {
@@ -10,7 +10,7 @@ class TestimoniesErrorWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      child: Text('Unable to load Testimonies.'),
+      child: const Text('Unable to load Testimonies.'),
     );
   }
 }

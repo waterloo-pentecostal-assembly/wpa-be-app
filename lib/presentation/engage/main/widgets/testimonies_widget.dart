@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/application/testimonies/testimonies_bloc.dart';
 import 'package:wpa_app/presentation/engage/testimonies/widgets/new_testimony.dart';
@@ -10,6 +10,8 @@ import '../../testimonies/widgets/testimony_card.dart';
 import 'add_card.dart';
 
 class RecentTestimoniesWidget extends StatelessWidget {
+  const RecentTestimoniesWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<TestimoniesBloc, TestimoniesState>(
@@ -23,7 +25,7 @@ class RecentTestimoniesWidget extends StatelessWidget {
             children: [
               Padding(
                 padding:
-                    EdgeInsets.only(left: 24, top: 12, bottom: 12, right: 24),
+                    const EdgeInsets.only(left: 24, top: 12, bottom: 12, right: 24),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
@@ -38,7 +40,7 @@ class RecentTestimoniesWidget extends StatelessWidget {
                 ),
               ),
               _buildList(state, context),
-              SizedBox(height: 16)
+              const SizedBox(height: 16)
             ],
           ),
         );
@@ -57,7 +59,7 @@ class RecentTestimoniesWidget extends StatelessWidget {
               testimony: state.testimonies[i],
               praiseButtonOrIndicator:
                   PraiseButton(testimony: state.testimonies[i]),
-              animation: AlwaysStoppedAnimation(1),
+              animation: const AlwaysStoppedAnimation(1),
             ),
           ),
         );
@@ -80,7 +82,7 @@ class RecentTestimoniesWidget extends StatelessWidget {
 
       return SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
 
@@ -30,7 +30,7 @@ class QuestionContentBodyWidget extends StatelessWidget {
         child: Column(
           children: [
             ListView.builder(
-                physics: ClampingScrollPhysics(),
+                physics: const ClampingScrollPhysics(),
                 shrinkWrap: true,
                 itemCount: questionContentBody.properties.questions.length,
                 itemBuilder: (BuildContext context, int index) {
@@ -47,7 +47,7 @@ class QuestionContentBodyWidget extends StatelessWidget {
 
   Responses toResponses(
       List<String> responses, String contentNum, ResponseType type) {
-    Map<String, Map<String, ResponseDetails>> responseMap = new Map();
+    Map<String, Map<String, ResponseDetails>> responseMap = {};
     responses.forEach((element) {
       ResponseDetails responseDetails =
           ResponseDetails(type: type, response: element);

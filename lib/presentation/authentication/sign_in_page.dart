@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../app/injection.dart';
@@ -6,6 +6,8 @@ import '../../application/authentication/sign_in/sign_in_bloc.dart';
 import 'widgets/sign_in_form.dart';
 
 class SignInPage extends StatelessWidget {
+  const SignInPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

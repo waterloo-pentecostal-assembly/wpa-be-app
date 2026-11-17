@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../application/prayer_requests/prayer_requests_bloc.dart';
@@ -10,6 +10,8 @@ import '../widgets/prayer_request_error.dart';
 import 'prayer_requests.dart';
 
 class AllPrayerRequests extends StatefulWidget {
+  const AllPrayerRequests({super.key});
+
   @override
   _AllPrayerRequestsState createState() => _AllPrayerRequestsState();
 }
@@ -170,7 +172,7 @@ class _AllPrayerRequestsState extends State<AllPrayerRequests>
           ..add(PrayerRequestsRequested(amount: _amountToFetch));
       },
       child: AnimatedList(
-        physics: AlwaysScrollableScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(),
         controller: _scrollController,
         key: _allPrayerRequestsListKey,
         initialItemCount: _prayerRequests.length,

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/application/testimonies/testimonies_bloc.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
@@ -40,7 +40,7 @@ class TestimoniesPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                TestimoniesTitleBar(),
+                const TestimoniesTitleBar(),
                 TabTestimonysWidget(tabIndex: tabIndex),
               ],
             ),
@@ -93,10 +93,10 @@ class _TabTestimonysWidgetState extends State<TabTestimonysWidget>
             padding: const EdgeInsets.only(left: 10),
             color: Colors.transparent,
             child: TabBar(
-              labelPadding: EdgeInsets.all(8),
+              labelPadding: const EdgeInsets.all(8),
               controller: _tabController,
               isScrollable: true,
-              indicator: BoxDecoration(),
+              indicator: const BoxDecoration(),
               indicatorSize: TabBarIndicatorSize.label,
               unselectedLabelColor: Colors.black54,
               labelColor: Colors.black87,
@@ -110,7 +110,7 @@ class _TabTestimonysWidgetState extends State<TabTestimonysWidget>
           ),
           Expanded(
             child: Container(
-              padding: EdgeInsets.all(0),
+              padding: const EdgeInsets.all(0),
               child: TabBarView(
                 controller: _tabController,
                 children: [
@@ -149,7 +149,7 @@ class TestimoniesTitleBar extends StatelessWidget {
                       getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
                 ),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               getIt<TextFactory>().subPageHeading('Testimonies'),
             ],
           ),

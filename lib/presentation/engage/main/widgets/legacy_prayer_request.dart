@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/app/constants.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
@@ -9,6 +9,8 @@ import '../../../../application/prayer_requests/prayer_requests_bloc.dart';
 import '../../../common/text_factory.dart';
 
 class LegacyRecentPrayerRequestsWidget extends StatelessWidget {
+  const LegacyRecentPrayerRequestsWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<PrayerRequestsBloc, PrayerRequestsState>(
@@ -20,7 +22,7 @@ class LegacyRecentPrayerRequestsWidget extends StatelessWidget {
             children: [
               Padding(
                 padding:
-                    EdgeInsets.only(left: 24, top: 12, bottom: 12, right: 24),
+                    const EdgeInsets.only(left: 24, top: 12, bottom: 12, right: 24),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
@@ -29,7 +31,7 @@ class LegacyRecentPrayerRequestsWidget extends StatelessWidget {
                 ),
               ),
               PrayerRequestOptions(),
-              SizedBox(height: 16)
+              const SizedBox(height: 16)
             ],
           ),
         );
@@ -39,13 +41,15 @@ class LegacyRecentPrayerRequestsWidget extends StatelessWidget {
 }
 
 class PrayerRequestOptionsSlider extends StatelessWidget {
+  const PrayerRequestOptionsSlider({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(
       height: getIt<LayoutFactory>()
           .getDimension(baseDimension: kPrayerRequestButtonHeight),
       child: ListView(
-        padding: EdgeInsets.only(left: 16, right: 16),
+        padding: const EdgeInsets.only(left: 16, right: 16),
         scrollDirection: Axis.horizontal,
         children: [
           GestureDetector(
@@ -55,10 +59,10 @@ class PrayerRequestOptionsSlider extends StatelessWidget {
             child: Container(
               width: getIt<LayoutFactory>()
                   .getDimension(baseDimension: kPrayerRequestButtonWidth),
-              margin: EdgeInsets.fromLTRB(8, 0, 8, 0),
+              margin: const EdgeInsets.fromLTRB(8, 0, 8, 0),
               decoration: BoxDecoration(
                 color: Colors.grey[300],
-                borderRadius: BorderRadius.all(Radius.circular(15)),
+                borderRadius: const BorderRadius.all(Radius.circular(15)),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -86,10 +90,10 @@ class PrayerRequestOptionsSlider extends StatelessWidget {
             child: Container(
               width: getIt<LayoutFactory>()
                   .getDimension(baseDimension: kPrayerRequestButtonWidth),
-              margin: EdgeInsets.fromLTRB(8, 0, 8, 0),
+              margin: const EdgeInsets.fromLTRB(8, 0, 8, 0),
               decoration: BoxDecoration(
                 color: Colors.grey[300],
-                borderRadius: BorderRadius.all(Radius.circular(15)),
+                borderRadius: const BorderRadius.all(Radius.circular(15)),
               ),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -124,8 +128,8 @@ class PrayerRequestOptionsSlider extends StatelessWidget {
             child: Container(
               width: getIt<LayoutFactory>()
                   .getDimension(baseDimension: kPrayerRequestButtonHeight),
-              margin: EdgeInsets.fromLTRB(8, 0, 8, 0),
-              decoration: BoxDecoration(
+              margin: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+              decoration: const BoxDecoration(
                 color: Colors.black38,
                 borderRadius: BorderRadius.all(Radius.circular(40)),
               ),
@@ -143,13 +147,15 @@ class PrayerRequestOptionsSlider extends StatelessWidget {
 }
 
 class PrayerRequestOptions extends StatelessWidget {
+  const PrayerRequestOptions({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(
       height: getIt<LayoutFactory>()
           .getDimension(baseDimension: kPrayerRequestButtonHeight),
       child: Container(
-        margin: EdgeInsets.fromLTRB(8, 0, 8, 0),
+        margin: const EdgeInsets.fromLTRB(8, 0, 8, 0),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -160,10 +166,10 @@ class PrayerRequestOptions extends StatelessWidget {
                   Navigator.pushNamed(context, '/prayer_requests');
                 },
                 child: Container(
-                  margin: EdgeInsets.fromLTRB(8, 0, 8, 0),
+                  margin: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
-                    borderRadius: BorderRadius.all(Radius.circular(15)),
+                    borderRadius: const BorderRadius.all(Radius.circular(15)),
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -192,10 +198,10 @@ class PrayerRequestOptions extends StatelessWidget {
                   Navigator.pushNamed(context, '/prayer_requests/mine');
                 },
                 child: Container(
-                  margin: EdgeInsets.fromLTRB(8, 0, 8, 0),
+                  margin: const EdgeInsets.fromLTRB(8, 0, 8, 0),
                   decoration: BoxDecoration(
                     color: Colors.grey[300],
-                    borderRadius: BorderRadius.all(Radius.circular(15)),
+                    borderRadius: const BorderRadius.all(Radius.circular(15)),
                   ),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -231,8 +237,8 @@ class PrayerRequestOptions extends StatelessWidget {
             );
           },
                 child: Container(
-                  margin: EdgeInsets.fromLTRB(8, 0, 8, 0),
-                  decoration: BoxDecoration(
+                  margin: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+                  decoration: const BoxDecoration(
                     color: Colors.black38,
                     borderRadius: BorderRadius.all(Radius.circular(40)),
                   ),

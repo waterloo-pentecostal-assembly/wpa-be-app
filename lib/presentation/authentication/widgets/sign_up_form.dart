@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/presentation/common/text_factory.dart';
@@ -8,6 +8,8 @@ import '../../../application/authentication/sign_up/sign_up_bloc.dart';
 import '../../common/loader.dart';
 
 class SignUpForm extends StatelessWidget {
+  const SignUpForm({super.key});
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<SignUpBloc, SignUpState>(
@@ -28,7 +30,7 @@ class SignUpForm extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Padding(
-                    padding: EdgeInsets.only(
+                    padding: const EdgeInsets.only(
                       top: 60,
                       bottom: 60,
                     ),
@@ -39,7 +41,7 @@ class SignUpForm extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(
+                    padding: const EdgeInsets.only(
                       left: 30,
                       right: 30,
                     ),
@@ -50,18 +52,18 @@ class SignUpForm extends StatelessWidget {
                             BlocProvider.of<SignUpBloc>(context)
                                 .state
                                 .signUpError,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: kErrorTextColor,
                             ),
                           ),
                         },
-                        SizedBox(height: 5),
+                        const SizedBox(height: 5),
                         Form(
                           autovalidateMode: AutovalidateMode.always,
                           child: Column(
                             children: <Widget>[
                               Container(
-                                padding: EdgeInsets.all(5.0),
+                                padding: const EdgeInsets.all(5.0),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(10),
@@ -69,14 +71,14 @@ class SignUpForm extends StatelessWidget {
                                     BoxShadow(
                                       color: Colors.grey.withValues(alpha: 0.2),
                                       blurRadius: 20.0,
-                                      offset: Offset(0, 10),
+                                      offset: const Offset(0, 10),
                                     ),
                                   ],
                                 ),
                                 child: Column(
                                   children: <Widget>[
                                     Container(
-                                      padding: EdgeInsets.all(4.0),
+                                      padding: const EdgeInsets.all(4.0),
                                       decoration: BoxDecoration(
                                         border: Border(
                                           bottom: BorderSide(
@@ -112,7 +114,14 @@ class SignUpForm extends StatelessWidget {
                                       ),
                                     ),
                                     Container(
-                                      padding: EdgeInsets.all(4.0),
+                                      padding: const EdgeInsets.all(4.0),
+                                      decoration: BoxDecoration(
+                                        border: Border(
+                                          bottom: BorderSide(
+                                            color: Colors.grey[200]!,
+                                          ),
+                                        ),
+                                      ),
                                       child: TextFormField(
                                         style: getIt<TextFactory>()
                                             .liteTextStyle(fontSize: 16),
@@ -139,6 +148,9 @@ class SignUpForm extends StatelessWidget {
                                               .hintStyle(fontSize: 16),
                                         ),
                                       ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.all(4.0),
                                       decoration: BoxDecoration(
                                         border: Border(
                                           bottom: BorderSide(
@@ -146,9 +158,6 @@ class SignUpForm extends StatelessWidget {
                                           ),
                                         ),
                                       ),
-                                    ),
-                                    Container(
-                                      padding: EdgeInsets.all(4.0),
                                       child: TextFormField(
                                         style: getIt<TextFactory>()
                                             .liteTextStyle(fontSize: 16),
@@ -174,16 +183,9 @@ class SignUpForm extends StatelessWidget {
                                               .hintStyle(fontSize: 16),
                                         ),
                                       ),
-                                      decoration: BoxDecoration(
-                                        border: Border(
-                                          bottom: BorderSide(
-                                            color: Colors.grey[200]!,
-                                          ),
-                                        ),
-                                      ),
                                     ),
                                     Container(
-                                      padding: EdgeInsets.all(4.0),
+                                      padding: const EdgeInsets.all(4.0),
                                       child: TextFormField(
                                           style: getIt<TextFactory>()
                                               .liteTextStyle(fontSize: 16),
@@ -214,7 +216,7 @@ class SignUpForm extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 height: 50.0,
                               ),
                               ClipRRect(
@@ -222,7 +224,7 @@ class SignUpForm extends StatelessWidget {
                                 child: Container(
                                   padding: EdgeInsets.zero,
                                   height: 50,
-                                  decoration: BoxDecoration(
+                                  decoration: const BoxDecoration(
                                     gradient: LinearGradient(
                                       colors: [
                                         Color.fromRGBO(0, 146, 214, 1),
@@ -246,7 +248,7 @@ class SignUpForm extends StatelessWidget {
                                         : () =>
                                             BlocProvider.of<SignUpBloc>(context)
                                                 .add(
-                                              SignUpWithEmailAndPassword(),
+                                              const SignUpWithEmailAndPassword(),
                                             ),
                                     child: Center(
                                         child: getIt<TextFactory>()
@@ -274,7 +276,7 @@ _signUpSuccessAlert(BuildContext context, String emailAddress) {
   return showDialog(
     context: context,
     builder: (_) => AlertDialog(
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
           borderRadius: BorderRadius.all(Radius.circular(16))),
       buttonPadding: const EdgeInsets.all(20),
       title: getIt<TextFactory>().subHeading("Registration Successful!"),
@@ -282,13 +284,13 @@ _signUpSuccessAlert(BuildContext context, String emailAddress) {
           "Once your account is validated, a confirmation email will be sent to $emailAddress"),
       actions: [
         ClipRRect(
-          borderRadius: BorderRadius.all(Radius.circular(16)),
+          borderRadius: const BorderRadius.all(Radius.circular(16)),
           child: TextButton(
             style: TextButton.styleFrom(
                 foregroundColor: Colors.white,
                 backgroundColor: kWpaBlue.withValues(alpha: 0.8),
-                minimumSize: Size(90, 30),
-                padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
+                minimumSize: const Size(90, 30),
+                padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap),
             onPressed: () {
               Navigator.pushNamed(context, '/sign_in');

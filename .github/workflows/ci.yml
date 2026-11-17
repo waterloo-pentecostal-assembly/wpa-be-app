@@ -1,34 +1,30 @@
-name: Flutter Tests
-on: 
+name: Flutter CI
+on:
   pull_request:
-    branches: 
+    branches:
       - dev
       - master
+
 jobs:
   test:
-    # This job will run on ubuntu virtual machine
     runs-on: ubuntu-latest
     steps:
-    
-    # Setup Java environment in order to build the Android app.
-    - uses: actions/checkout@v1
-    - uses: actions/setup-java@v1
-      with:
-        java-version: '12.x'
-    
-    # Setup the flutter environment.
-    - uses: subosito/flutter-action@v1
-      with:
-        flutter-version: '2.0.1' # This must be the exact version we are running
-    
-    # Get flutter dependencies.
-    - run: flutter pub get
-    
-    # Check for any formatting issues in the code.
-    - run: flutter format --set-exit-if-changed .
-    
-    # Statically analyze the Dart code for any errors.
-    - run: flutter analyze .
-    
-    # Run widget tests for our flutter project.
-    - run: flutter test
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          # Keep in sync with the toolchain used locally (see README).
+          flutter-version: '3.50.0'
+          cache: true
+
+      - run: flutter pub get
+
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze
+        run: flutter analyze
+
+      - name: Test
+        run: flutter test

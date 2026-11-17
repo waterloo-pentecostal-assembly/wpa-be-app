@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/app/constants.dart';
 import 'package:wpa_app/app/injection.dart';
@@ -51,7 +51,7 @@ class ForumPage extends StatelessWidget {
                 child: BlocBuilder<ForumBloc, ForumState>(
                   builder: (context, state) {
                     if (state is ForumLoading) {
-                      return Center(child: CircularProgressIndicator());
+                      return const Center(child: CircularProgressIndicator());
                     } else if (state is ForumLoaded) {
                       if (state.threads.isEmpty) {
                         return Center(
@@ -105,7 +105,7 @@ class ForumTitleBar extends StatelessWidget {
                       getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
                 ),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               getIt<TextFactory>().subPageHeading('Forum'),
             ],
           ),
@@ -114,7 +114,7 @@ class ForumTitleBar extends StatelessWidget {
             child: ClipOval(
               child: Container(
                 color: Colors.grey.shade300,
-                padding: EdgeInsets.all(4),
+                padding: const EdgeInsets.all(4),
                 child: Icon(
                   Icons.add,
                   size:
@@ -133,7 +133,7 @@ class ForumTitleBar extends StatelessWidget {
     final authState = BlocProvider.of<AuthenticationBloc>(context).state;
     if (authState is! Authenticated) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("You must be signed in to create a thread.")),
+        const SnackBar(content: Text("You must be signed in to create a thread.")),
       );
       return;
     }
@@ -212,9 +212,9 @@ class ForumThreadCard extends StatelessWidget {
         });
       },
       child: Container(
-        margin: EdgeInsets.all(8.0),
+        margin: const EdgeInsets.all(8.0),
         width: 0.9 * MediaQuery.of(context).size.width,
-        padding: EdgeInsets.fromLTRB(10, 10, 10, 10),
+        padding: const EdgeInsets.fromLTRB(10, 10, 10, 10),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           color: kCardOverlayGrey,
@@ -222,7 +222,7 @@ class ForumThreadCard extends StatelessWidget {
             BoxShadow(
               color: Colors.grey.withValues(alpha: 0.25),
               blurRadius: 8.0,
-              offset: Offset(0, 3),
+              offset: const Offset(0, 3),
             )
           ],
         ),
@@ -248,7 +248,7 @@ class ForumThreadCard extends StatelessWidget {
                           ),
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -259,7 +259,7 @@ class ForumThreadCard extends StatelessWidget {
                     )
                   ],
                 ),
-                Spacer(),
+                const Spacer(),
                 if (thread.isHidden)
                   Padding(
                     padding: const EdgeInsets.only(left: 8.0),
@@ -272,26 +272,26 @@ class ForumThreadCard extends StatelessWidget {
                     if (state is NotificationSettingsPositions) {
                       if (state.notificationSettings.threadsFollowed
                           .contains(thread.id)) {
-                        return Padding(
-                          padding: const EdgeInsets.only(left: 8.0),
+                        return const Padding(
+                          padding: EdgeInsets.only(left: 8.0),
                           child: Icon(Icons.notifications_active,
                               size: 20, color: kWpaBlue),
                         );
                       }
                     }
-                    return SizedBox.shrink();
+                    return const SizedBox.shrink();
                   },
                 ),
               ],
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             getIt<TextFactory>().subHeading3(thread.title),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Icon(Icons.comment, size: 16, color: Colors.grey),
-                SizedBox(width: 4),
+                const Icon(Icons.comment, size: 16, color: Colors.grey),
+                const SizedBox(width: 4),
                 getIt<TextFactory>()
                     .lite("${thread.commentCount} Comments", fontSize: 12.0),
               ],

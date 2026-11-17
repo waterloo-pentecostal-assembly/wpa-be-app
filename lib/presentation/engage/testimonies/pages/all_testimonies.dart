@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/application/testimonies/testimonies_bloc.dart';
 import 'package:wpa_app/domain/testimonies/entities.dart';
@@ -10,6 +10,8 @@ import '../../../common/toast_message.dart';
 import 'testimonies.dart';
 
 class AllTestimonies extends StatefulWidget {
+  const AllTestimonies({super.key});
+
   @override
   _AllTestimoniesState createState() => _AllTestimoniesState();
 }
@@ -169,7 +171,7 @@ class _AllTestimoniesState extends State<AllTestimonies>
           ..add(TestimoniesRequested(amount: _amountToFetch));
       },
       child: AnimatedList(
-        physics: AlwaysScrollableScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(),
         controller: _scrollController,
         key: _allTestimoniesListKey,
         initialItemCount: _testimonies.length,

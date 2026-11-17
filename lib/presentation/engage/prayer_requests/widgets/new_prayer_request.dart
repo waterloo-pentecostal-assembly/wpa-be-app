@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
 
@@ -29,6 +29,7 @@ class _NewPrayerRequestFormState extends State<NewPrayerRequestForm>
 
   _NewPrayerRequestFormState({required this.entry});
 
+  @override
   initState() {
     super.initState();
 
@@ -84,16 +85,16 @@ class _NewPrayerRequestFormState extends State<NewPrayerRequestForm>
                     ),
                     GestureDetector(
                       child: Container(
-                        margin: EdgeInsets.all(16),
-                        padding: EdgeInsets.all(16),
+                        margin: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          borderRadius: BorderRadius.all(Radius.circular(16)),
+                          borderRadius: const BorderRadius.all(Radius.circular(16)),
                           color: Colors.white,
                           boxShadow: [
                             BoxShadow(
                               color: Colors.grey.shade400,
                               blurRadius: 18.0,
-                              offset: Offset(0, 12),
+                              offset: const Offset(0, 12),
                             )
                           ],
                         ),
@@ -102,7 +103,7 @@ class _NewPrayerRequestFormState extends State<NewPrayerRequestForm>
                           children: [
                             Container(
                               padding:
-                                  EdgeInsets.only(top: 8, left: 8, right: 8),
+                                  const EdgeInsets.only(top: 8, left: 8, right: 8),
                               child: TextFormField(
                                 controller: _textEditingController,
                                 keyboardType: TextInputType.multiline,
@@ -131,9 +132,9 @@ class _NewPrayerRequestFormState extends State<NewPrayerRequestForm>
                             Container(
                               padding: state.errorExist
                                   ? null
-                                  : EdgeInsets.only(bottom: 16),
+                                  : const EdgeInsets.only(bottom: 16),
                               child: state.errorExist
-                                  ? Text('')
+                                  ? const Text('')
                                   : getIt<TextFactory>().textFormFieldInput(
                                       state.prayerRequestError,
                                       color: kErrorTextColor.withValues(
@@ -158,14 +159,14 @@ class _NewPrayerRequestFormState extends State<NewPrayerRequestForm>
                                                   isAnonymous: state));
                                       },
                                     ),
-                                    SizedBox(width: 4),
+                                    const SizedBox(width: 4),
                                     getIt<TextFactory>().lite('Anonymous'),
                                   ],
                                 ),
                                 Wrap(
                                   children: [
                                     CancelButton(entry: entry),
-                                    SizedBox(width: 16),
+                                    const SizedBox(width: 16),
                                     PostButton(
                                       isValid: state.isFormValid,
                                       isAnonymous: state.isAnonymous,
@@ -227,12 +228,12 @@ class _AnonymousCheckboxState extends State<AnonymousCheckbox> {
           color: value ? kWpaBlue.withValues(alpha: 0.65) : Colors.white,
         ),
         child: value
-            ? Icon(
+            ? const Icon(
                 Icons.check,
                 size: 16.0,
                 color: Colors.white,
               )
-            : SizedBox(),
+            : const SizedBox(),
       ),
     );
   }
@@ -275,7 +276,7 @@ class PostButton extends StatelessWidget {
               return Colors.white;
             }),
             padding: WidgetStateProperty.all(
-                EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8)),
+                const EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8)),
             tapTargetSize: MaterialTapTargetSize.shrinkWrap),
         onPressed: !isValid
             ? null
@@ -309,7 +310,7 @@ class CancelButton extends StatelessWidget {
               getIt<LayoutFactory>().getDimension(baseDimension: 90.0),
               getIt<LayoutFactory>().getDimension(baseDimension: 30.0)),
           backgroundColor: kCardGrey,
-          padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
+          padding: const EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
         onPressed: () => entry?.remove(),

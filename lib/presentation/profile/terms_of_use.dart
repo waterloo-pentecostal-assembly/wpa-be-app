@@ -1,17 +1,19 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../app/constants.dart';
 import '../../app/injection.dart';
 import '../common/text_factory.dart';
 
 class TermsOfUsePage extends StatelessWidget {
+  const TermsOfUsePage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Container(
         child: Column(
           children: <Widget>[
-            HeaderWidget(title: 'Terms of Use'),
+            const HeaderWidget(title: 'Terms of Use'),
             Container(
                 padding: const EdgeInsets.all(24),
                 child: getIt<TextFactory>().lite(
@@ -25,7 +27,7 @@ class TermsOfUsePage extends StatelessWidget {
 
 class HeaderWidget extends StatelessWidget {
   final String title;
-  const HeaderWidget({required this.title});
+  const HeaderWidget({super.key, required this.title});
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -34,9 +36,9 @@ class HeaderWidget extends StatelessWidget {
         children: [
           GestureDetector(
             onTap: () => Navigator.pop(context),
-            child: Icon(Icons.arrow_back),
+            child: const Icon(Icons.arrow_back),
           ),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
           getIt<TextFactory>().subPageHeading(title),
         ],
       ),

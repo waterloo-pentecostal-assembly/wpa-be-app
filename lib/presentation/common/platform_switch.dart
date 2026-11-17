@@ -1,7 +1,7 @@
 import 'dart:io';
 
-import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:wpa_app/app/constants.dart';
 
 class PlatformSwitch extends StatefulWidget {
@@ -45,7 +45,7 @@ class _PlatformSwitchState extends State<PlatformSwitch> {
   }
 
   Widget iOSSwitchDisabled() {
-    return CupertinoSwitch(
+    return const CupertinoSwitch(
       value: false,
       onChanged: null,
     );
@@ -61,7 +61,7 @@ class _PlatformSwitchState extends State<PlatformSwitch> {
   }
 
   Widget androidSwitchDisabled() {
-    return Switch(
+    return const Switch(
       value: false,
       onChanged: null,
     );

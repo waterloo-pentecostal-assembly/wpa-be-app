@@ -1,5 +1,5 @@
 import 'package:firebase_analytics/firebase_analytics.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/application/testimonies/testimonies_bloc.dart';
 import 'package:wpa_app/presentation/common/loader.dart';
@@ -26,6 +26,7 @@ import 'widgets/legacy_prayer_request.dart';
 import 'widgets/legacy_testimonies_widget.dart';
 
 class EngagePage extends IIndexedPage {
+  @override
   final GlobalKey<NavigatorState>? navigatorKey;
 
   const EngagePage({Key? key, this.navigatorKey}) : super(key: key);
@@ -52,7 +53,7 @@ class EngagePage extends IIndexedPage {
         BlocProvider<MediaBloc>(
           create: (BuildContext context) => getIt<MediaBloc>()
             ..add(
-              AvailableMediaRequested(),
+              const AvailableMediaRequested(),
             ),
         ),
       ],
@@ -65,7 +66,7 @@ class EngagePage extends IIndexedPage {
               builder: (BuildContext context) {
                 switch (settings.name) {
                   case '/':
-                    return EngageIndex();
+                    return const EngageIndex();
                   case '/bible_series':
                     getIt<FirebaseAnalytics>()
                         .logEvent(name: 'bible_series_viewed');
@@ -76,13 +77,13 @@ class EngagePage extends IIndexedPage {
                   case '/all_bible_series':
                     return AllBibleSeriesPage();
                   case '/prayer_requests':
-                    return PrayerRequestsPage(tabIndex: 0);
+                    return const PrayerRequestsPage(tabIndex: 0);
                   case '/prayer_requests/mine':
-                    return PrayerRequestsPage(tabIndex: 1);
+                    return const PrayerRequestsPage(tabIndex: 1);
                   case '/testimonies':
-                    return TestimoniesPage(tabIndex: 0);
+                    return const TestimoniesPage(tabIndex: 0);
                   case '/testimonies/mine':
-                    return TestimoniesPage(tabIndex: 1);
+                    return const TestimoniesPage(tabIndex: 1);
                   case '/content_detail':
                     getIt<FirebaseAnalytics>()
                         .logEvent(name: 'engagement_viewed');
@@ -108,7 +109,7 @@ class EngagePage extends IIndexedPage {
                     );
                 }
                 // Handles case where no routes match
-                return EngageIndex();
+                return const EngageIndex();
               },
             );
           },
@@ -129,24 +130,24 @@ class EngageIndex extends StatelessWidget {
           List<Widget> children;
           if (state.hasActive) {
             children = <Widget>[
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               HeaderWidget(),
               CurrentBibleSeriesWidget(),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               LegacyRecentPrayerRequestsWidget(),
               LegacyRecentTestimoniesWidget(),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               MediaWidget(),
             ];
           } else {
             children = <Widget>[
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               HeaderWidget(),
               PastBibleSeriesWidget(),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               LegacyRecentPrayerRequestsWidget(),
               LegacyRecentTestimoniesWidget(),
-              SizedBox(height: 16.0),
+              const SizedBox(height: 16.0),
               MediaWidget(),
             ];
           }
@@ -163,8 +164,8 @@ class EngageIndex extends StatelessWidget {
             },
             child: EngageLayoutWidget(
               parentContextBibleSeriesBloc: parentContextBibleSeriesBloc,
-              children: children,
               hasActive: state.hasActive,
+              children: children,
             ),
           );
         }
@@ -199,11 +200,11 @@ class EngageLayoutWidget extends StatelessWidget {
             amount: hasActive ? 15 : 3,
             isActive: hasActive,
           ));
-        BlocProvider.of<MediaBloc>(context)..add(AvailableMediaRequested());
+        BlocProvider.of<MediaBloc>(context)..add(const AvailableMediaRequested());
       },
       child: Container(
         child: ListView(
-          physics: AlwaysScrollableScrollPhysics(),
+          physics: const AlwaysScrollableScrollPhysics(),
           children: children,
         ),
       ),
@@ -212,6 +213,8 @@ class EngageLayoutWidget extends StatelessWidget {
 }
 
 class HeaderWidget extends StatelessWidget {
+  const HeaderWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
     String firstName = '';

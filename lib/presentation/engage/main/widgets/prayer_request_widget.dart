@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:wpa_app/presentation/engage/prayer_requests/widgets/new_prayer_request.dart';
@@ -11,6 +11,8 @@ import '../../prayer_requests/widgets/prayer_request_card.dart';
 import 'add_card.dart';
 
 class RecentPrayerRequestsWidget extends StatelessWidget {
+  const RecentPrayerRequestsWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<PrayerRequestsBloc, PrayerRequestsState>(
@@ -25,7 +27,7 @@ class RecentPrayerRequestsWidget extends StatelessWidget {
             children: [
               Padding(
                 padding:
-                    EdgeInsets.only(left: 24, top: 12, bottom: 12, right: 24),
+                    const EdgeInsets.only(left: 24, top: 12, bottom: 12, right: 24),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: <Widget>[
@@ -40,7 +42,7 @@ class RecentPrayerRequestsWidget extends StatelessWidget {
                 ),
               ),
               _buildList(state, context),
-              SizedBox(height: 16)
+              const SizedBox(height: 16)
             ],
           ),
         );
@@ -59,7 +61,7 @@ class RecentPrayerRequestsWidget extends StatelessWidget {
               prayerRequest: state.prayerRequests[i],
               prayButtonOrIndicator:
                   PrayButton(prayerRequest: state.prayerRequests[i]),
-              animation: AlwaysStoppedAnimation(1),
+              animation: const AlwaysStoppedAnimation(1),
             ),
           ),
         );
@@ -82,7 +84,7 @@ class RecentPrayerRequestsWidget extends StatelessWidget {
 
       return SingleChildScrollView(
         scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 16),
         child: IntrinsicHeight(
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.stretch,

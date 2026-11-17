@@ -1,10 +1,12 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../application/authentication/authentication_bloc.dart';
 import '../common/loader.dart';
 
 class SplashPage extends StatelessWidget {
+  const SplashPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     // return MultiBlocListener(listeners: listeners, child: child);

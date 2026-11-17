@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/app/constants.dart';
 import 'package:wpa_app/app/injection.dart';
@@ -62,13 +62,13 @@ class AudioPlayerWidget extends StatelessWidget {
       child: SliderTheme(
         data: SliderThemeData(
           trackHeight: 10.0,
-          trackShape: RoundedRectSliderTrackShape(),
-          thumbShape: RoundSliderThumbShape(
+          trackShape: const RoundedRectSliderTrackShape(),
+          thumbShape: const RoundSliderThumbShape(
             enabledThumbRadius: 14.0,
             pressedElevation: 8.0,
           ),
           thumbColor: kWpaBlue,
-          overlayShape: RoundSliderOverlayShape(overlayRadius: 14.0),
+          overlayShape: const RoundSliderOverlayShape(overlayRadius: 14.0),
           activeTrackColor: kWpaBlue.withValues(alpha: 0.5),
           inactiveTrackColor: kWpaBlue.withValues(alpha: 0.1),
           disabledActiveTrackColor: kWpaBlue.withValues(alpha: 0.5),
@@ -82,7 +82,7 @@ class AudioPlayerWidget extends StatelessWidget {
           onChanged: (double value) {
             getIt<AudioPlayerBloc>()
               ..add(Seek(
-                position: new Duration(seconds: value.toInt()),
+                position: Duration(seconds: value.toInt()),
               ));
           },
         ),
@@ -120,11 +120,11 @@ class AudioPlayerWidget extends StatelessWidget {
               Container(width: 50, child: Text(_getTimeInSeconds(duration))),
             ],
           )),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           InkWell(
             onTap: () async {
               if (playerState == PlayerStateEnum.PLAYING) {
-                getIt<AudioPlayerBloc>()..add(Pause());
+                getIt<AudioPlayerBloc>()..add(const Pause());
               } else {
                 getIt<AudioPlayerBloc>()
                   ..add(Play(
@@ -141,7 +141,7 @@ class AudioPlayerWidget extends StatelessWidget {
               color: Colors.black87.withValues(alpha: 0.75),
             ),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
         ],
       ),
     );

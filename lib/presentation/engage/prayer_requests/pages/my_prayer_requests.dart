@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../application/prayer_requests/prayer_requests_bloc.dart';
@@ -8,6 +8,8 @@ import '../widgets/prayer_request_card.dart';
 import '../widgets/prayer_request_error.dart';
 
 class MyPrayerRequests extends StatefulWidget {
+  const MyPrayerRequests({super.key});
+
   @override
   _MyPrayerRequestsState createState() => _MyPrayerRequestsState();
 }
@@ -127,7 +129,7 @@ class _MyPrayerRequestsState extends State<MyPrayerRequests>
           ..add(MyPrayerRequestsRequested());
       },
       child: AnimatedList(
-        physics: AlwaysScrollableScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(),
         key: _myPrayerRequestsListKey,
         initialItemCount: state.prayerRequests.length,
         itemBuilder: _buildItem,

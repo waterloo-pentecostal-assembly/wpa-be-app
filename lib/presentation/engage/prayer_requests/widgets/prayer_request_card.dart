@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
 
@@ -32,9 +32,9 @@ class PrayerRequestCard extends StatelessWidget {
     return FadeTransition(
       opacity: animation,
       child: Container(
-        margin: EdgeInsets.all(8.0),
+        margin: const EdgeInsets.all(8.0),
         width: 0.9 * MediaQuery.of(context).size.width,
-        padding: EdgeInsets.fromLTRB(10, 2, 10, 2),
+        padding: const EdgeInsets.fromLTRB(10, 2, 10, 2),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(8),
           color: kCardOverlayGrey,
@@ -42,18 +42,18 @@ class PrayerRequestCard extends StatelessWidget {
             BoxShadow(
               color: Colors.grey.withValues(alpha: 0.25),
               blurRadius: 8.0,
-              offset: Offset(0, 3),
+              offset: const Offset(0, 3),
             )
           ],
         ),
         child: Stack(
           children: [
             Padding(
-              padding: EdgeInsets.only(bottom: 48), // Reserve space for button
+              padding: const EdgeInsets.only(bottom: 48), // Reserve space for button
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -61,9 +61,9 @@ class PrayerRequestCard extends StatelessWidget {
                       PrayerRequestMenuButton(prayerRequest: prayerRequest),
                     ],
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   getIt<TextFactory>().lite(prayerRequest.request),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                 ],
               ),
             ),
@@ -97,7 +97,7 @@ class PrayerRequestMenuButton extends StatelessWidget {
         value = value as MenuButtonValue;
         handleMenuButtonSelection(value, context);
       },
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.all(
           Radius.circular(10.0),
         ),
@@ -138,7 +138,7 @@ class PrayerRequestMenuButton extends StatelessWidget {
               Icons.delete,
               size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
             ),
-            SizedBox(width: 4),
+            const SizedBox(width: 4),
             Expanded(
               child: getIt<TextFactory>().lite('DELETE'),
             )
@@ -155,7 +155,7 @@ class PrayerRequestMenuButton extends StatelessWidget {
                 Icons.check,
                 size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
               ),
-              SizedBox(width: 4),
+              const SizedBox(width: 4),
               Expanded(
                 child: getIt<TextFactory>().lite('PRAYER ANSWERED'),
               )
@@ -173,7 +173,7 @@ class PrayerRequestMenuButton extends StatelessWidget {
               Icons.error,
               size: getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
             ),
-            SizedBox(width: 4),
+            const SizedBox(width: 4),
             Expanded(
                 child: getIt<TextFactory>().lite('REPORT AS INAPPROPRIATE'))
           ],
@@ -209,7 +209,7 @@ class PrayerRequestUserAndDate extends StatelessWidget {
                   ),
           ),
         ),
-        SizedBox(width: 8),
+        const SizedBox(width: 8),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -301,8 +301,8 @@ class _PrayButton extends StatelessWidget {
   Widget _createPrayedButton() {
     return TextButton(
       style: TextButton.styleFrom(
-        minimumSize: Size(0, 24),
-        padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
+        minimumSize: const Size(0, 24),
+        padding: const EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
       ),
       onPressed: null,
@@ -313,8 +313,8 @@ class _PrayButton extends StatelessWidget {
   Widget _createLoadingButton() {
     return TextButton(
       style: TextButton.styleFrom(
-          minimumSize: Size(0, 24),
-          padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
+          minimumSize: const Size(0, 24),
+          padding: const EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap),
       onPressed: null,
       child: getIt<TextFactory>().regular('...'),
@@ -331,8 +331,8 @@ class PrayedByIndicator extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton(
       style: TextButton.styleFrom(
-          minimumSize: Size(0, 24),
-          padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
+          minimumSize: const Size(0, 24),
+          padding: const EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap),
       onPressed: null,
       child: getIt<TextFactory>().regular(
@@ -350,12 +350,14 @@ class PrayedByIndicator extends StatelessWidget {
 }
 
 class PendingIndicator extends StatelessWidget {
+  const PendingIndicator({super.key});
+
   @override
   Widget build(BuildContext context) {
     return TextButton(
       style: TextButton.styleFrom(
-          minimumSize: Size(0, 24),
-          padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
+          minimumSize: const Size(0, 24),
+          padding: const EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap),
       onPressed: null,
       child: getIt<TextFactory>()

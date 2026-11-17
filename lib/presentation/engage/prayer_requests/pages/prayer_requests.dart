@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
 import 'package:wpa_app/presentation/engage/prayer_requests/pages/my_answered_prayer_request.dart';
@@ -41,7 +41,7 @@ class PrayerRequestsPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                PrayerRequestsTitleBar(),
+                const PrayerRequestsTitleBar(),
                 TabPrayerRequestWidget(tabIndex: tabIndex),
               ],
             ),
@@ -94,10 +94,10 @@ class _TabPrayerRequestWidgetState extends State<TabPrayerRequestWidget>
             padding: const EdgeInsets.only(left: 10),
             color: Colors.transparent,
             child: TabBar(
-              labelPadding: EdgeInsets.all(8),
+              labelPadding: const EdgeInsets.all(8),
               controller: _tabController,
               isScrollable: true,
-              indicator: BoxDecoration(),
+              indicator: const BoxDecoration(),
               indicatorSize: TabBarIndicatorSize.label,
               unselectedLabelColor: Colors.black54,
               labelColor: Colors.black87,
@@ -111,7 +111,7 @@ class _TabPrayerRequestWidgetState extends State<TabPrayerRequestWidget>
           ),
           Expanded(
             child: Container(
-              padding: EdgeInsets.all(0),
+              padding: const EdgeInsets.all(0),
               child: TabBarView(
                 controller: _tabController,
                 children: [
@@ -150,7 +150,7 @@ class PrayerRequestsTitleBar extends StatelessWidget {
                       getIt<LayoutFactory>().getDimension(baseDimension: 24.0),
                 ),
               ),
-              SizedBox(width: 8),
+              const SizedBox(width: 8),
               getIt<TextFactory>().subPageHeading('Prayer Requests'),
             ],
           ),

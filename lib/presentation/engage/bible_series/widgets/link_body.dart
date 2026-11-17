@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:wpa_app/app/constants.dart';
 import 'package:wpa_app/app/injection.dart';
@@ -40,11 +40,11 @@ class LinkBodyWidget extends StatelessWidget {
       child: Container(
         width: getIt<LayoutFactory>()
             .getDimension(baseDimension: kLinkButtonWidth),
-        margin: EdgeInsets.fromLTRB(8, 0, 8, 0),
-        padding: EdgeInsets.fromLTRB(8, 8, 8, 8),
+        margin: const EdgeInsets.fromLTRB(8, 0, 8, 0),
+        padding: const EdgeInsets.fromLTRB(8, 8, 8, 8),
         decoration: BoxDecoration(
           color: Colors.grey[300],
-          borderRadius: BorderRadius.all(Radius.circular(15)),
+          borderRadius: const BorderRadius.all(Radius.circular(15)),
         ),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,

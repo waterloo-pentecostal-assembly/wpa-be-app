@@ -77,7 +77,7 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
         emit(state.copyWith(
           PlayerStateEnum.STOPPED,
           state.duration,
-          Duration(),
+          const Duration(),
           state.sourceUrl,
           state.contentId,
         ));
@@ -121,7 +121,7 @@ class AudioPlayerBloc extends Bloc<AudioPlayerEvent, AudioPlayerState> {
       if (state == ProcessingState.completed) {
         await this.player.stop();
         if (!isClosed) {
-          add(Complete());
+          add(const Complete());
         }
       }
     });

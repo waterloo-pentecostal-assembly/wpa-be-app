@@ -5,7 +5,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/cupertino.dart';
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/application/completions/helper.dart';
 import 'package:wpa_app/domain/authentication/entities.dart';
@@ -207,8 +207,8 @@ class CompletionsBloc extends Bloc<CompletionsEvent, CompletionsState> {
       if (event.completionDetails != null) {
         Responses responses = await _iCompletionsRepository.getResponses(
             completionId: event.completionDetails!.id);
-        Map<String, List<String>> downloadMap = Map();
-        Map<String, List<String>> thumbnailMap = Map();
+        Map<String, List<String>> downloadMap = {};
+        Map<String, List<String>> thumbnailMap = {};
         for (var entry1 in responses.responses.entries) {
           for (var entry2 in entry1.value.entries) {
             if (entry2.value.type == ResponseType.IMAGE) {
@@ -240,7 +240,7 @@ class CompletionsBloc extends Bloc<CompletionsEvent, CompletionsState> {
               thumbnailURL: thumbnailMap));
         }
       } else {
-        Responses responses = Responses(responses: Map());
+        Responses responses = Responses(responses: {});
         emit(state.copyWith(responses: responses));
       }
     } on BaseApplicationException catch (e) {
@@ -260,7 +260,7 @@ class CompletionsBloc extends Bloc<CompletionsEvent, CompletionsState> {
   ) async {
     try {
       final LocalUser user = getIt<LocalUser>();
-      Map<String, UploadTask> uploadTask = Map();
+      Map<String, UploadTask> uploadTask = {};
       uploadTask = {
         event.contentNum.toString(): _iCompletionsRepository.uploadImage(
             file: event.image, userId: user.id)
@@ -274,7 +274,7 @@ class CompletionsBloc extends Bloc<CompletionsEvent, CompletionsState> {
       final String downloadURL =
           await _iCompletionsRepository.getDownloadURL(gsUrl: imageLocation);
       List<String> downloadURLList = [];
-      Map<String, List<String>> downloadMap = state.downloadURL ?? Map();
+      Map<String, List<String>> downloadMap = state.downloadURL ?? {};
       if (state.downloadURL != null) {
         downloadURLList =
             state.downloadURL![event.contentNum.toString()] ?? downloadURLList;
@@ -291,7 +291,7 @@ class CompletionsBloc extends Bloc<CompletionsEvent, CompletionsState> {
 
       String responsesIndex = (downloadURLList.length - 1).toString();
 
-      Map<String, List<File>> localImage = Map();
+      Map<String, List<File>> localImage = {};
       List<File> localImageList = [];
       if (state.localImage != null &&
           state.localImage![event.contentNum.toString()] != null) {
@@ -372,7 +372,7 @@ class CompletionsBloc extends Bloc<CompletionsEvent, CompletionsState> {
 
       if (responses.isEmpty) {
         Responses newResponses = Responses(
-          responses: Map(),
+          responses: {},
         );
         emit(
             state.copyWith(responses: newResponses, id: '', isComplete: false));

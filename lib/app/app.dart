@@ -1,7 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/application/audio_player/audio_player_bloc.dart';
 import 'package:wpa_app/application/bible_series/bible_series_bloc.dart';
@@ -20,6 +20,8 @@ import '../services/firebase_messaging_service.dart';
 import 'injection.dart';
 
 class App extends StatelessWidget {
+  const App({super.key});
+
   Future<void> initializeServices() async {
     await Firebase.initializeApp();
     await FirebaseAppCheck.instance.activate(
@@ -60,7 +62,7 @@ class App extends StatelessWidget {
               BlocProvider(
                 create: (context) => getIt<AudioPlayerBloc>()
                   ..add(
-                    InitializePlayer(),
+                    const InitializePlayer(),
                   ),
               )
             ],
@@ -74,6 +76,13 @@ class App extends StatelessWidget {
               debugShowCheckedModeBanner: false,
               title: 'WPA Bible Engagement',
               onGenerateRoute: routes,
+              // Some dependencies (photo_view, cached_network_image, ...) still
+              // use the legacy package:flutter/material.dart library. The bridge
+              // gives them a legacy Theme/Localizations derived from ours.
+              // ignore: deprecated_member_use
+              builder: (context, child) => MaterialUiCompatibilityBridge(
+                child: child!,
+              ),
             ),
           );
         } else {

@@ -1,10 +1,12 @@
 import 'dart:math';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../app/constants.dart';
 
 class Loader extends StatelessWidget {
+  const Loader({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -27,7 +29,7 @@ class ColorLoader extends StatefulWidget {
   final DotType dotType;
   final Icon dotIcon;
 
-  ColorLoader({
+  ColorLoader({super.key, 
     required this.dotOneColor,
     required this.dotTwoColor,
     required this.dotThreeColor,
@@ -56,21 +58,21 @@ class _ColorLoaderState extends State<ColorLoader>
     animation_1 = Tween(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: controller,
-        curve: Interval(0.0, 0.80, curve: Curves.ease),
+        curve: const Interval(0.0, 0.80, curve: Curves.ease),
       ),
     );
 
     animation_2 = Tween(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: controller,
-        curve: Interval(0.1, 0.9, curve: Curves.ease),
+        curve: const Interval(0.1, 0.9, curve: Curves.ease),
       ),
     );
 
     animation_3 = Tween(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
         parent: controller,
-        curve: Interval(0.2, 1.0, curve: Curves.ease),
+        curve: const Interval(0.2, 1.0, curve: Curves.ease),
       ),
     );
 
@@ -161,7 +163,7 @@ class Dot extends StatelessWidget {
   final Icon icon;
 
   Dot(
-      {required this.radius,
+      {super.key, required this.radius,
       required this.color,
       required this.type,
       required this.icon});

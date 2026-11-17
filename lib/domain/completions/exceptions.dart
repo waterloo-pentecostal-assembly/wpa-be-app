@@ -18,11 +18,14 @@ class CompletionsException implements BaseApplicationException {
   });
 
   /// An authentication exception type.
+  @override
   final CompletionsExceptionCode code;
 
   /// A human-readable error message. Should be able to safely display this to the user.
+  @override
   final String message;
 
   /// Error details, possibly null.
+  @override
   final dynamic details;
 }

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/domain/bible_series/entities.dart';
 import 'package:wpa_app/presentation/common/text_factory.dart';

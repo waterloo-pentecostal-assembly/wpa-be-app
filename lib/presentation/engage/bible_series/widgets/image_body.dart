@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:firebase_storage/firebase_storage.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_view/photo_view.dart';
@@ -73,19 +73,19 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
 
         return Column(
           children: [
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             Container(
               child: GestureDetector(
+                onTap: selectImageInput,
                 child: Icon(
                   Icons.add_a_photo,
                   size:
                       getIt<LayoutFactory>().getDimension(baseDimension: 36.0),
                   color: Colors.black87.withValues(alpha: 0.75),
                 ),
-                onTap: selectImageInput,
               ),
             ),
-            SizedBox(height: 4),
+            const SizedBox(height: 4),
             getIt<TextFactory>().lite('Upload Photo!'),
           ],
         );
@@ -180,12 +180,12 @@ class _ImageInputBodyState extends State<ImageInputBodyState> {
                             height: MediaQuery.of(context).size.width * 1.6,
                             child: PhotoView(
                               backgroundDecoration:
-                                  BoxDecoration(color: Colors.transparent),
+                                  const BoxDecoration(color: Colors.transparent),
                               imageProvider: NetworkImage(state.downloadURL![
                                   widget.contentNum.toString()]![0]),
                               minScale: PhotoViewComputedScale.contained * 0.8,
                               maxScale: PhotoViewComputedScale.covered * 2,
-                              loadingBuilder: (context, event) => Center(
+                              loadingBuilder: (context, event) => const Center(
                                 child: CircularProgressIndicator(),
                               ),
                             ),

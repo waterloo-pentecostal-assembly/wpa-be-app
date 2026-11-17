@@ -8,7 +8,6 @@
 .buildlog/
 .history
 .svn/
-*.lock
 .DS_Store
 .todo
 
@@ -57,3 +56,9 @@ app.*.map.json
 
 debug_tokens.md
 discussion-feature.md
+# Release binaries are published as GitHub Releases, not committed
+releases/
+
+# Flutter-generated iOS ephemeral files
+ios/Flutter/ephemeral/
+*.backup

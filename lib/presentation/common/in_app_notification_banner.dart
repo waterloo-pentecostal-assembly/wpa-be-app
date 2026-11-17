@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:wpa_app/app/constants.dart';
 import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/presentation/common/text_factory.dart';
@@ -36,7 +36,7 @@ class InAppNotificationBanner extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1),
+                color: Colors.black.withValues(alpha: 0.1),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),
@@ -70,13 +70,13 @@ class InAppNotificationBanner extends StatelessWidget {
               Align(
                 alignment: Alignment.centerRight,
                 child: ClipRRect(
-                  borderRadius: BorderRadius.all(Radius.circular(16)),
+                  borderRadius: const BorderRadius.all(Radius.circular(16)),
                   child: TextButton(
                     style: TextButton.styleFrom(
                       foregroundColor: Colors.white,
                       backgroundColor: kWpaBlue.withValues(alpha: 0.8),
                       padding:
-                          EdgeInsets.symmetric(horizontal: 24, vertical: 8),
+                          const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     ),
                     onPressed: onView,

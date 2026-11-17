@@ -16,7 +16,7 @@ class AudioPlayerState extends Equatable {
   });
 
   factory AudioPlayerState.initial() {
-    return AudioPlayerState(
+    return const AudioPlayerState(
       playerState: PlayerStateEnum.STOPPED,
       duration: Duration(),
       position: Duration(),

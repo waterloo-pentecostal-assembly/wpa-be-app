@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
 import 'package:wpa_app/presentation/engage/bible_series/widgets/divider_body.dart';
@@ -62,7 +62,7 @@ class ContentDetailWidget extends StatelessWidget {
   final String bibleSeriesId;
   final String seriesContentType;
 
-  ContentDetailWidget(this.bibleSeriesId, this.seriesContentType);
+  ContentDetailWidget(this.bibleSeriesId, this.seriesContentType, {super.key});
 
   List<Widget> contentDetailList(
     SeriesContent seriesContent,
@@ -109,7 +109,7 @@ class ContentDetailWidget extends StatelessWidget {
           titleBody: body[index] as TitleBody,
         ));
       } else if (body[index].type == SeriesContentBodyType.DIVIDER) {
-        contentBodyList.add(DividerBodyWidget());
+        contentBodyList.add(const DividerBodyWidget());
       } else if (body[index].type == SeriesContentBodyType.VIDEO) {
         contentBodyList.add(VideoBodyWidget(
           videoBody: body[index] as VideoBody,
@@ -162,7 +162,7 @@ class ContentDetailWidget extends StatelessWidget {
                     child: Row(
                       children: [
                         backButton(state.seriesContentDetail),
-                        SizedBox(width: 8),
+                        const SizedBox(width: 8),
                         HeaderWidget(
                             contentType: state.seriesContentDetail.contentType),
                       ],
@@ -217,7 +217,7 @@ class ContentDetailWidget extends StatelessWidget {
         context: context,
         builder: (_) => AlertDialog(
           buttonPadding: const EdgeInsets.all(20),
-          shape: RoundedRectangleBorder(
+          shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.all(Radius.circular(16))),
           title:
               getIt<TextFactory>().subHeading2("Uploading Image in Progress"),
@@ -225,13 +225,13 @@ class ContentDetailWidget extends StatelessWidget {
               .lite("Must wait for image to uplaod before exiting this page"),
           actions: [
             ClipRRect(
-              borderRadius: BorderRadius.all(Radius.circular(16)),
+              borderRadius: const BorderRadius.all(Radius.circular(16)),
               child: TextButton(
                 style: TextButton.styleFrom(
                     foregroundColor: Colors.white,
-                    minimumSize: Size(90, 30),
+                    minimumSize: const Size(90, 30),
                     backgroundColor: kWpaBlue.withValues(alpha: 0.8),
-                    padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
+                    padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
                     tapTargetSize: MaterialTapTargetSize.shrinkWrap),
                 onPressed: () {
                   Navigator.of(context, rootNavigator: true).pop();
@@ -291,7 +291,7 @@ class SeriesContentDetailPlaceholder extends StatelessWidget {
                         .getDimension(baseDimension: 24.0),
                   ),
                 ),
-                SizedBox(width: 8),
+                const SizedBox(width: 8),
                 HeaderWidget(contentType: seriesContentType.toString()),
               ],
             ),

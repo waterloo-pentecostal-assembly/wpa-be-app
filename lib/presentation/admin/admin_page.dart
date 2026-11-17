@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/presentation/admin/testimony_approval_page.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
@@ -10,6 +10,7 @@ import 'prayer_approval_page.dart';
 import 'user_verification_page.dart';
 
 class AdminPage extends IIndexedPage {
+  @override
   final GlobalKey<NavigatorState>? navigatorKey;
 
   const AdminPage({Key? key, this.navigatorKey})
@@ -48,15 +49,17 @@ class AdminPage extends IIndexedPage {
 }
 
 class OptionsList extends StatelessWidget {
+  const OptionsList({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(
       // color: Colors.grey.shade100,
       child: ListView(
-        physics: ClampingScrollPhysics(),
+        physics: const ClampingScrollPhysics(),
         children: [
           HeaderWidget(),
-          SizedBox(height: 30),
+          const SizedBox(height: 30),
           Wrap(
             alignment: WrapAlignment.spaceEvenly,
             runSpacing: 32.0,
@@ -75,12 +78,12 @@ class OptionsList extends StatelessWidget {
                       layoutDimension: LayoutDimension.ADMIN_TILE_HEIGHT),
                   decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(15)),
+                      borderRadius: const BorderRadius.all(Radius.circular(15)),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.grey.withValues(alpha: 0.25),
                           blurRadius: 8.0,
-                          offset: Offset(0, 3),
+                          offset: const Offset(0, 3),
                         ),
                       ]),
                   child: Column(
@@ -94,7 +97,7 @@ class OptionsList extends StatelessWidget {
                               layoutDimension: LayoutDimension.ADMIN_ICON_SIZE),
                         ),
                       ),
-                      SizedBox(height: 20),
+                      const SizedBox(height: 20),
                       getIt<TextFactory>().subHeading3('User Verification'),
                     ],
                   ),
@@ -114,12 +117,12 @@ class OptionsList extends StatelessWidget {
                       layoutDimension: LayoutDimension.ADMIN_TILE_HEIGHT),
                   decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(15)),
+                      borderRadius: const BorderRadius.all(Radius.circular(15)),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.grey.withValues(alpha: 0.25),
                           blurRadius: 8.0,
-                          offset: Offset(0, 3),
+                          offset: const Offset(0, 3),
                         ),
                       ]),
                   child: Column(
@@ -133,7 +136,7 @@ class OptionsList extends StatelessWidget {
                               layoutDimension: LayoutDimension.ADMIN_ICON_SIZE),
                         ),
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       getIt<TextFactory>().subHeading3(
                           'Prayer Request Approval',
                           fontSize: getIt<LayoutFactory>().getDimension(
@@ -157,12 +160,12 @@ class OptionsList extends StatelessWidget {
                       layoutDimension: LayoutDimension.ADMIN_TILE_HEIGHT),
                   decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(15)),
+                      borderRadius: const BorderRadius.all(Radius.circular(15)),
                       boxShadow: [
                         BoxShadow(
                           color: Colors.grey.withValues(alpha: 0.25),
                           blurRadius: 8.0,
-                          offset: Offset(0, 3),
+                          offset: const Offset(0, 3),
                         ),
                       ]),
                   child: Column(
@@ -176,7 +179,7 @@ class OptionsList extends StatelessWidget {
                               layoutDimension: LayoutDimension.ADMIN_ICON_SIZE),
                         ),
                       ),
-                      SizedBox(height: 16),
+                      const SizedBox(height: 16),
                       getIt<TextFactory>().subHeading3('Testimony Approval',
                           fontSize: getIt<LayoutFactory>().getDimension(
                               layoutDimension:
@@ -194,6 +197,8 @@ class OptionsList extends StatelessWidget {
 }
 
 class HeaderWidget extends StatelessWidget {
+  const HeaderWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(

@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:wpa_app/services/firebase_messaging_service.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher_string.dart';
@@ -20,13 +20,17 @@ import 'engage/main/engage.dart';
 import 'profile/profile.dart';
 
 class EmptyPage extends IIndexedPage {
+  const EmptyPage({super.key});
+
   @override
   Widget build(BuildContext context) {
-    return SizedBox.shrink();
+    return const SizedBox.shrink();
   }
 }
 
 class IndexPage extends StatelessWidget {
+  const IndexPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -38,7 +42,7 @@ class IndexPage extends StatelessWidget {
             create: (BuildContext context) =>
                 getIt<LinksBloc>()..add(LinksRequested()))
       ],
-      child: _IndexPage(),
+      child: const _IndexPage(),
     );
   }
 }

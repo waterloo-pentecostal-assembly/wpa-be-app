@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/application/notification_settings/notification_settings_bloc.dart';
@@ -8,6 +8,8 @@ import 'package:wpa_app/presentation/common/text_factory.dart';
 import 'package:wpa_app/presentation/common/toast_message.dart';
 
 class NotificationSettingsPage extends StatelessWidget {
+  const NotificationSettingsPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<NotificationSettingsBloc, NotificationSettingsState>(
@@ -70,7 +72,7 @@ class NotificationSettingsPage extends StatelessWidget {
                               .getDimension(baseDimension: 24.0),
                         ),
                       ),
-                      SizedBox(width: 8),
+                      const SizedBox(width: 8),
                       getIt<TextFactory>()
                           .subPageHeading('Notification Settings'),
                     ],
@@ -157,7 +159,7 @@ class NotificationSettingsPage extends StatelessWidget {
                           }
                         },
                       ),
-                      SizedBox(height: 24),
+                      const SizedBox(height: 24),
                       _buildSectionHeader("Discussion Forum"),
                       _buildSwitchTile(
                         title: "New Threads",
@@ -236,7 +238,7 @@ class NotificationSettingsPage extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         getIt<TextFactory>().regular(title.toUpperCase()),
-        Divider(),
+        const Divider(),
       ],
     );
   }
@@ -259,7 +261,7 @@ class NotificationSettingsPage extends StatelessWidget {
               children: [
                 getIt<TextFactory>().lite(title),
                 if (subtitle != null) ...[
-                  SizedBox(height: 2),
+                  const SizedBox(height: 2),
                   getIt<TextFactory>()
                       .lite(subtitle, fontSize: 10.0, color: Colors.grey),
                 ]
@@ -273,7 +275,7 @@ class NotificationSettingsPage extends StatelessWidget {
                     value: value,
                     onChanged: onChanged,
                   )
-                : PlatformSwitch(disabled: true),
+                : const PlatformSwitch(disabled: true),
           ),
         ],
       ),

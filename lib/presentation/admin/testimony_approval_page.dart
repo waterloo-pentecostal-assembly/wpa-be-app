@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/app/constants.dart';
 import 'package:wpa_app/app/injection.dart';
@@ -10,6 +10,8 @@ import 'package:wpa_app/presentation/common/text_factory.dart';
 import 'package:wpa_app/presentation/admin/helper.dart';
 
 class TestimonyApprovalPage extends StatefulWidget {
+  const TestimonyApprovalPage({super.key});
+
   @override
   _TestimonyApprovalPageState createState() => _TestimonyApprovalPageState();
 }
@@ -37,11 +39,11 @@ class _TestimonyApprovalPageState extends State<TestimonyApprovalPage> {
             },
             child: Column(
               children: [
-                HeaderWidget(title: 'Testimony Request Approval'),
+                const HeaderWidget(title: 'Testimony Request Approval'),
                 Expanded(
                     child: AnimatedList(
                   key: key,
-                  physics: AlwaysScrollableScrollPhysics(),
+                  physics: const AlwaysScrollableScrollPhysics(),
                   shrinkWrap: true,
                   initialItemCount: testimonyRequestCards.length,
                   itemBuilder: (context, index, animation) =>
@@ -59,7 +61,7 @@ class _TestimonyApprovalPageState extends State<TestimonyApprovalPage> {
                   BlocProvider.of<AdminBloc>(context)
                     ..add(LoadUnverifiedUsers());
                 },
-                child: Column(
+                child: const Column(
                   children: [
                     HeaderWidget(title: 'Testimony Request Approval'),
                   ],
@@ -108,7 +110,7 @@ class _TestimonyApprovalPageState extends State<TestimonyApprovalPage> {
               BoxShadow(
                 color: Colors.grey.withValues(alpha: 0.25),
                 blurRadius: 8.0,
-                offset: Offset(0, 3),
+                offset: const Offset(0, 3),
               )
             ],
           ),
@@ -137,7 +139,7 @@ class _TestimonyApprovalPageState extends State<TestimonyApprovalPage> {
                             .getDimension(baseDimension: 40.0),
                       ),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     GestureDetector(
                       onTap: () {
                         BlocProvider.of<AdminBloc>(context)

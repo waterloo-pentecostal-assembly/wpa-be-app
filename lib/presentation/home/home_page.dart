@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../app/app_config.dart';
@@ -9,6 +9,7 @@ import '../../domain/authentication/entities.dart';
 import '../common/interfaces.dart';
 
 class HomePage extends IIndexedPage {
+  @override
   final GlobalKey<NavigatorState>? navigatorKey;
 
   const HomePage({Key? key, this.navigatorKey}) : super(key: key);
@@ -46,6 +47,8 @@ class HomePage extends IIndexedPage {
 }
 
 class HomeIndex extends StatelessWidget {
+  const HomeIndex({super.key});
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -59,10 +62,10 @@ class HomeIndex extends StatelessWidget {
                   : 'unregistered'),
             ),
             Container(
-              child: Text('HOME'),
+              child: const Text('HOME'),
             ),
             ElevatedButton(
-              child: Text('Engage'),
+              child: const Text('Engage'),
               onPressed: () {
                 BlocProvider.of<NavigationBarBloc>(context)
                   ..add(

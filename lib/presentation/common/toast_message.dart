@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
 import '../../app/constants.dart';
@@ -33,7 +33,7 @@ class ToastMessage {
         ),
       ),
       gravity: ToastGravity.BOTTOM,
-      toastDuration: Duration(seconds: 3),
+      toastDuration: const Duration(seconds: 3),
     );
   }
 }

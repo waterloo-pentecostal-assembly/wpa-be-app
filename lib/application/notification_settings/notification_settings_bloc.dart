@@ -55,7 +55,7 @@ class NotificationSettingsBloc
       emit(NotificationSettingsPositions(
           notificationSettings: notificationSettings));
     } catch (e) {
-      emit(NotificationSettingsError(
+      emit(const NotificationSettingsError(
           message: "Error loading notification settings"));
     }
   }
@@ -75,7 +75,7 @@ class NotificationSettingsBloc
             .subscribeToDailyEngagementReminder();
       } catch (e) {
         emit(currentState);
-        emit(DailyEngagementReminderError(message: "Unable to subscribe"));
+        emit(const DailyEngagementReminderError(message: "Unable to subscribe"));
       }
     } else {
       try {
@@ -83,7 +83,7 @@ class NotificationSettingsBloc
             .subscribeToDailyEngagementReminder();
         add(NotificationSettingsRequested());
       } catch (e) {
-        emit(DailyEngagementReminderError(message: "Unable to subscribe"));
+        emit(const DailyEngagementReminderError(message: "Unable to subscribe"));
       }
     }
   }
@@ -103,7 +103,7 @@ class NotificationSettingsBloc
             .unsubscribeFromDailyEngagementReminder();
       } catch (e) {
         emit(currentState);
-        emit(DailyEngagementReminderError(message: "Unable to unsubscribe"));
+        emit(const DailyEngagementReminderError(message: "Unable to unsubscribe"));
       }
     } else {
       try {
@@ -111,7 +111,7 @@ class NotificationSettingsBloc
             .unsubscribeFromDailyEngagementReminder();
         add(NotificationSettingsRequested());
       } catch (e) {
-        emit(DailyEngagementReminderError(message: "Unable to unsubscribe"));
+        emit(const DailyEngagementReminderError(message: "Unable to unsubscribe"));
       }
     }
   }
@@ -130,14 +130,14 @@ class NotificationSettingsBloc
         await _iNotificationSettingsService.subscribeToPrayerNotifications();
       } catch (e) {
         emit(currentState);
-        emit(PrayerNotificationError(message: "Unable to subscribe"));
+        emit(const PrayerNotificationError(message: "Unable to subscribe"));
       }
     } else {
       try {
         await _iNotificationSettingsService.subscribeToPrayerNotifications();
         add(NotificationSettingsRequested());
       } catch (e) {
-        emit(PrayerNotificationError(message: "Unable to subscribe"));
+        emit(const PrayerNotificationError(message: "Unable to subscribe"));
       }
     }
   }
@@ -157,7 +157,7 @@ class NotificationSettingsBloc
             .unsubscribeFromPrayerNotifications();
       } catch (e) {
         emit(currentState);
-        emit(PrayerNotificationError(message: "Unable to unsubscribe"));
+        emit(const PrayerNotificationError(message: "Unable to unsubscribe"));
       }
     } else {
       try {
@@ -165,7 +165,7 @@ class NotificationSettingsBloc
             .unsubscribeFromPrayerNotifications();
         add(NotificationSettingsRequested());
       } catch (e) {
-        emit(PrayerNotificationError(message: "Unable to unsubscribe"));
+        emit(const PrayerNotificationError(message: "Unable to unsubscribe"));
       }
     }
   }
@@ -184,14 +184,14 @@ class NotificationSettingsBloc
         await _iNotificationSettingsService.subscribeToNewPrayerRequests();
       } catch (e) {
         emit(currentState);
-        emit(PrayerNotificationError(message: "Unable to subscribe"));
+        emit(const PrayerNotificationError(message: "Unable to subscribe"));
       }
     } else {
       try {
         await _iNotificationSettingsService.subscribeToNewPrayerRequests();
         add(NotificationSettingsRequested());
       } catch (e) {
-        emit(PrayerNotificationError(message: "Unable to subscribe"));
+        emit(const PrayerNotificationError(message: "Unable to subscribe"));
       }
     }
   }
@@ -210,14 +210,14 @@ class NotificationSettingsBloc
         await _iNotificationSettingsService.unsubscribeFromNewPrayerRequests();
       } catch (e) {
         emit(currentState);
-        emit(PrayerNotificationError(message: "Unable to unsubscribe"));
+        emit(const PrayerNotificationError(message: "Unable to unsubscribe"));
       }
     } else {
       try {
         await _iNotificationSettingsService.unsubscribeFromNewPrayerRequests();
         add(NotificationSettingsRequested());
       } catch (e) {
-        emit(PrayerNotificationError(message: "Unable to unsubscribe"));
+        emit(const PrayerNotificationError(message: "Unable to unsubscribe"));
       }
     }
   }
@@ -236,14 +236,14 @@ class NotificationSettingsBloc
         await _iNotificationSettingsService.subscribeToTestimonyNotifications();
       } catch (e) {
         emit(currentState);
-        emit(TestimonyNotificationError(message: "Unable to subscribe"));
+        emit(const TestimonyNotificationError(message: "Unable to subscribe"));
       }
     } else {
       try {
         await _iNotificationSettingsService.subscribeToTestimonyNotifications();
         add(NotificationSettingsRequested());
       } catch (e) {
-        emit(TestimonyNotificationError(message: "Unable to subscribe"));
+        emit(const TestimonyNotificationError(message: "Unable to subscribe"));
       }
     }
   }
@@ -263,7 +263,7 @@ class NotificationSettingsBloc
             .unsubscribeFromTestimonyNotifications();
       } catch (e) {
         emit(currentState);
-        emit(TestimonyNotificationError(message: "Unable to unsubscribe"));
+        emit(const TestimonyNotificationError(message: "Unable to unsubscribe"));
       }
     } else {
       try {
@@ -271,7 +271,7 @@ class NotificationSettingsBloc
             .unsubscribeFromTestimonyNotifications();
         add(NotificationSettingsRequested());
       } catch (e) {
-        emit(TestimonyNotificationError(message: "Unable to unsubscribe"));
+        emit(const TestimonyNotificationError(message: "Unable to unsubscribe"));
       }
     }
   }
@@ -290,14 +290,14 @@ class NotificationSettingsBloc
         await _iNotificationSettingsService.subscribeToNewTestimonies();
       } catch (e) {
         emit(currentState);
-        emit(TestimonyNotificationError(message: "Unable to subscribe"));
+        emit(const TestimonyNotificationError(message: "Unable to subscribe"));
       }
     } else {
       try {
         await _iNotificationSettingsService.subscribeToNewTestimonies();
         add(NotificationSettingsRequested());
       } catch (e) {
-        emit(TestimonyNotificationError(message: "Unable to subscribe"));
+        emit(const TestimonyNotificationError(message: "Unable to subscribe"));
       }
     }
   }
@@ -316,14 +316,14 @@ class NotificationSettingsBloc
         await _iNotificationSettingsService.unsubscribeFromNewTestimonies();
       } catch (e) {
         emit(currentState);
-        emit(TestimonyNotificationError(message: "Unable to unsubscribe"));
+        emit(const TestimonyNotificationError(message: "Unable to unsubscribe"));
       }
     } else {
       try {
         await _iNotificationSettingsService.unsubscribeFromNewTestimonies();
         add(NotificationSettingsRequested());
       } catch (e) {
-        emit(TestimonyNotificationError(message: "Unable to unsubscribe"));
+        emit(const TestimonyNotificationError(message: "Unable to unsubscribe"));
       }
     }
   }
@@ -342,14 +342,14 @@ class NotificationSettingsBloc
         await _iNotificationSettingsService.subscribeToNewForumThreads();
       } catch (e) {
         emit(currentState);
-        emit(NotificationSettingsError(message: "Unable to subscribe"));
+        emit(const NotificationSettingsError(message: "Unable to subscribe"));
       }
     } else {
       try {
         await _iNotificationSettingsService.subscribeToNewForumThreads();
         add(NotificationSettingsRequested());
       } catch (e) {
-        emit(NotificationSettingsError(message: "Unable to subscribe"));
+        emit(const NotificationSettingsError(message: "Unable to subscribe"));
       }
     }
   }
@@ -368,14 +368,14 @@ class NotificationSettingsBloc
         await _iNotificationSettingsService.unsubscribeFromNewForumThreads();
       } catch (e) {
         emit(currentState);
-        emit(NotificationSettingsError(message: "Unable to unsubscribe"));
+        emit(const NotificationSettingsError(message: "Unable to unsubscribe"));
       }
     } else {
       try {
         await _iNotificationSettingsService.unsubscribeFromNewForumThreads();
         add(NotificationSettingsRequested());
       } catch (e) {
-        emit(NotificationSettingsError(message: "Unable to unsubscribe"));
+        emit(const NotificationSettingsError(message: "Unable to unsubscribe"));
       }
     }
   }
@@ -394,14 +394,14 @@ class NotificationSettingsBloc
         await _iNotificationSettingsService.subscribeToForumCommentReplies();
       } catch (e) {
         emit(currentState);
-        emit(NotificationSettingsError(message: "Unable to subscribe"));
+        emit(const NotificationSettingsError(message: "Unable to subscribe"));
       }
     } else {
       try {
         await _iNotificationSettingsService.subscribeToForumCommentReplies();
         add(NotificationSettingsRequested());
       } catch (e) {
-        emit(NotificationSettingsError(message: "Unable to subscribe"));
+        emit(const NotificationSettingsError(message: "Unable to subscribe"));
       }
     }
   }
@@ -421,7 +421,7 @@ class NotificationSettingsBloc
             .unsubscribeFromForumCommentReplies();
       } catch (e) {
         emit(currentState);
-        emit(NotificationSettingsError(message: "Unable to unsubscribe"));
+        emit(const NotificationSettingsError(message: "Unable to unsubscribe"));
       }
     } else {
       try {
@@ -429,7 +429,7 @@ class NotificationSettingsBloc
             .unsubscribeFromForumCommentReplies();
         add(NotificationSettingsRequested());
       } catch (e) {
-        emit(NotificationSettingsError(message: "Unable to unsubscribe"));
+        emit(const NotificationSettingsError(message: "Unable to unsubscribe"));
       }
     }
   }
@@ -448,14 +448,14 @@ class NotificationSettingsBloc
         await _iNotificationSettingsService.subscribeToForumCommentLikes();
       } catch (e) {
         emit(currentState);
-        emit(NotificationSettingsError(message: "Unable to subscribe"));
+        emit(const NotificationSettingsError(message: "Unable to subscribe"));
       }
     } else {
       try {
         await _iNotificationSettingsService.subscribeToForumCommentLikes();
         add(NotificationSettingsRequested());
       } catch (e) {
-        emit(NotificationSettingsError(message: "Unable to subscribe"));
+        emit(const NotificationSettingsError(message: "Unable to subscribe"));
       }
     }
   }
@@ -474,14 +474,14 @@ class NotificationSettingsBloc
         await _iNotificationSettingsService.unsubscribeFromForumCommentLikes();
       } catch (e) {
         emit(currentState);
-        emit(NotificationSettingsError(message: "Unable to unsubscribe"));
+        emit(const NotificationSettingsError(message: "Unable to unsubscribe"));
       }
     } else {
       try {
         await _iNotificationSettingsService.unsubscribeFromForumCommentLikes();
         add(NotificationSettingsRequested());
       } catch (e) {
-        emit(NotificationSettingsError(message: "Unable to unsubscribe"));
+        emit(const NotificationSettingsError(message: "Unable to unsubscribe"));
       }
     }
   }
@@ -500,14 +500,14 @@ class NotificationSettingsBloc
         await _iNotificationSettingsService.subscribeToForumThreadComments();
       } catch (e) {
         emit(currentState);
-        emit(NotificationSettingsError(message: "Unable to subscribe"));
+        emit(const NotificationSettingsError(message: "Unable to subscribe"));
       }
     } else {
       try {
         await _iNotificationSettingsService.subscribeToForumThreadComments();
         add(NotificationSettingsRequested());
       } catch (e) {
-        emit(NotificationSettingsError(message: "Unable to subscribe"));
+        emit(const NotificationSettingsError(message: "Unable to subscribe"));
       }
     }
   }
@@ -527,7 +527,7 @@ class NotificationSettingsBloc
             .unsubscribeFromForumThreadComments();
       } catch (e) {
         emit(currentState);
-        emit(NotificationSettingsError(message: "Unable to unsubscribe"));
+        emit(const NotificationSettingsError(message: "Unable to unsubscribe"));
       }
     } else {
       try {
@@ -535,7 +535,7 @@ class NotificationSettingsBloc
             .unsubscribeFromForumThreadComments();
         add(NotificationSettingsRequested());
       } catch (e) {
-        emit(NotificationSettingsError(message: "Unable to unsubscribe"));
+        emit(const NotificationSettingsError(message: "Unable to unsubscribe"));
       }
     }
   }
@@ -559,14 +559,14 @@ class NotificationSettingsBloc
         await _iNotificationSettingsService.followThread(event.threadId);
       } catch (e) {
         emit(currentState);
-        emit(NotificationSettingsError(message: "Unable to follow thread"));
+        emit(const NotificationSettingsError(message: "Unable to follow thread"));
       }
     } else {
       try {
         await _iNotificationSettingsService.followThread(event.threadId);
         add(NotificationSettingsRequested());
       } catch (e) {
-        emit(NotificationSettingsError(message: "Unable to follow thread"));
+        emit(const NotificationSettingsError(message: "Unable to follow thread"));
       }
     }
   }
@@ -590,14 +590,14 @@ class NotificationSettingsBloc
         await _iNotificationSettingsService.unfollowThread(event.threadId);
       } catch (e) {
         emit(currentState);
-        emit(NotificationSettingsError(message: "Unable to unfollow thread"));
+        emit(const NotificationSettingsError(message: "Unable to unfollow thread"));
       }
     } else {
       try {
         await _iNotificationSettingsService.unfollowThread(event.threadId);
         add(NotificationSettingsRequested());
       } catch (e) {
-        emit(NotificationSettingsError(message: "Unable to unfollow thread"));
+        emit(const NotificationSettingsError(message: "Unable to unfollow thread"));
       }
     }
   }

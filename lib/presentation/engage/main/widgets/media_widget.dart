@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
@@ -11,6 +11,8 @@ import '../../../common/text_factory.dart';
 import '../../../common/toast_message.dart';
 
 class MediaWidget extends StatelessWidget {
+  const MediaWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<MediaBloc, MediaState>(
@@ -20,7 +22,7 @@ class MediaWidget extends StatelessWidget {
           children: [
             Padding(
               padding:
-                  EdgeInsets.only(left: 24, top: 12, bottom: 12, right: 24),
+                  const EdgeInsets.only(left: 24, top: 12, bottom: 12, right: 24),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
@@ -64,7 +66,7 @@ class MediaWidgetLoaded extends StatelessWidget {
               MediaQuery.of(context).textScaler.scale(getIt<LayoutFactory>()
                   .getDimension(baseDimension: kMediaTileDescriptionHeight)),
       child: ListView.builder(
-        padding: EdgeInsets.only(left: 16),
+        padding: const EdgeInsets.only(left: 16),
         scrollDirection: Axis.horizontal,
         itemCount: mediaList.length,
         itemBuilder: (context, index) => MediaCard(
@@ -76,6 +78,8 @@ class MediaWidgetLoaded extends StatelessWidget {
 }
 
 class MediaWidgetLoading extends StatelessWidget {
+  const MediaWidgetLoading({super.key});
+
   @override
   Widget build(BuildContext context) {
     int amtOfCards = (MediaQuery.of(context).size.width /
@@ -88,7 +92,7 @@ class MediaWidgetLoading extends StatelessWidget {
               MediaQuery.of(context).textScaler.scale(getIt<LayoutFactory>()
                   .getDimension(baseDimension: kMediaTileDescriptionHeight)),
       child: ListView.builder(
-        padding: EdgeInsets.only(left: 16),
+        padding: const EdgeInsets.only(left: 16),
         scrollDirection: Axis.horizontal,
         itemCount: amtOfCards,
         itemBuilder: (context, index) => MediaCardPlaceholder(),
@@ -116,7 +120,7 @@ class MediaCard extends StatelessWidget {
       child: Container(
         width:
             getIt<LayoutFactory>().getDimension(baseDimension: kMediaTileWidth),
-        padding: EdgeInsets.all(8),
+        padding: const EdgeInsets.all(8),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -158,12 +162,14 @@ class MediaCard extends StatelessWidget {
 }
 
 class MediaCardPlaceholder extends StatelessWidget {
+  const MediaCardPlaceholder({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(
       width:
           getIt<LayoutFactory>().getDimension(baseDimension: kMediaTileWidth),
-      padding: EdgeInsets.all(8),
+      padding: const EdgeInsets.all(8),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

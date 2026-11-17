@@ -25,7 +25,7 @@ class MediaBloc extends Bloc<MediaEvent, MediaState> {
       List<Media> media = await _iMediaRepository.getAvailableMedia();
       emit(AvailableMediaLoaded(media: media));
     } catch (e) {
-      emit(AvailableMediaError(message: 'Unable to load media'));
+      emit(const AvailableMediaError(message: 'Unable to load media'));
     }
   }
 }

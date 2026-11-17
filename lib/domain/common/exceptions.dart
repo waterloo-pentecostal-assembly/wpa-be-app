@@ -30,8 +30,11 @@ enum ValueObjectExceptionCode {
 
 /// Implements [BaseApplicationException] to provide an exception type specific to Value Objects.
 class ValueObjectException implements BaseApplicationException {
+  @override
   final ValueObjectExceptionCode code;
+  @override
   final String message;
+  @override
   final dynamic details;
 
   /// Creates a [ValueObjectException] with the specified error [type],
@@ -52,8 +55,11 @@ enum ApplicationExceptionCode {
 
 /// Implements [BaseApplicationException] to provide an exception type for Application level errors.
 class ApplicationException implements BaseApplicationException {
+  @override
   final ApplicationExceptionCode code;
+  @override
   final String message;
+  @override
   final dynamic details;
 
   /// Creates a [ApplicationException] with the specified error [type],
@@ -75,8 +81,11 @@ enum FirebaseStorageExceptionCode {
 
 /// Implements [BaseApplicationException] to provide an exception type for firebase storage level errors.
 class FirebaseStorageException implements BaseApplicationException {
+  @override
   final FirebaseStorageExceptionCode code;
+  @override
   final String message;
+  @override
   final dynamic details;
 
   /// Creates a [ApplicationException] with the specified error [type],
@@ -95,8 +104,11 @@ enum FirebaseFirestoreExceptionCode {
 
 /// Implements [BaseApplicationException] to provide an exception type for firebase firestore level errors.
 class FirebaseFirestoreException implements BaseApplicationException {
+  @override
   final FirebaseFirestoreExceptionCode code;
+  @override
   final String message;
+  @override
   final dynamic details;
 
   /// Creates a [ApplicationException] with the specified error [type],

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/presentation/common/text_factory.dart';
 
@@ -16,7 +16,7 @@ class TextContentBodyWidget extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
         child: ListView.builder(
           shrinkWrap: true,
-          physics: ClampingScrollPhysics(),
+          physics: const ClampingScrollPhysics(),
           itemCount: textContentBody.properties.paragraphs.length,
           itemBuilder: (BuildContext context, int index) {
             return Padding(

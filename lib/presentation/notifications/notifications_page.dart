@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../../app/injection.dart';
 import '../common/interfaces.dart';
 import '../common/text_factory.dart';
 
 class NotificationsPage extends IIndexedPage {
+  @override
   final GlobalKey<NavigatorState>? navigatorKey;
 
   const NotificationsPage({Key? key, this.navigatorKey}) : super(key: key);
@@ -35,6 +36,8 @@ class NotificationsPage extends IIndexedPage {
 }
 
 class NoNotifications extends StatelessWidget {
+  const NoNotifications({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -45,6 +48,8 @@ class NoNotifications extends StatelessWidget {
 }
 
 class NotificationsPageRoot extends StatelessWidget {
+  const NotificationsPageRoot({super.key});
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -52,7 +57,7 @@ class NotificationsPageRoot extends StatelessWidget {
         child: ListView(
           children: <Widget>[
             HeaderWidget(),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             NoNotifications(),
             // RaisedButton(
             //   child: Text('Example Notification'),
@@ -68,15 +73,17 @@ class NotificationsPageRoot extends StatelessWidget {
 }
 
 class NotificationDetail extends StatelessWidget {
+  const NotificationDetail({super.key});
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Container(
         child: Column(
           children: <Widget>[
-            Text('Example notification details'),
+            const Text('Example notification details'),
             ElevatedButton(
-              child: Text('Back'),
+              child: const Text('Back'),
               onPressed: () {
                 Navigator.pop(context);
               },
@@ -89,6 +96,8 @@ class NotificationDetail extends StatelessWidget {
 }
 
 class HeaderWidget extends StatelessWidget {
+  const HeaderWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(

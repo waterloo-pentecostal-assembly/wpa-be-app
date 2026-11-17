@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/presentation/common/text_factory.dart';
@@ -10,6 +10,8 @@ import '../../../application/navigation_bar/navigation_bar_bloc.dart';
 import '../../common/loader.dart';
 
 class SignInForm extends StatelessWidget {
+  const SignInForm({super.key});
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<SignInBloc, SignInState>(
@@ -45,7 +47,7 @@ class SignInForm extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Padding(
-                    padding: EdgeInsets.only(
+                    padding: const EdgeInsets.only(
                       top: 60,
                       bottom: 60,
                     ),
@@ -56,7 +58,7 @@ class SignInForm extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(
+                    padding: const EdgeInsets.only(
                       left: 30,
                       right: 30,
                     ),
@@ -67,18 +69,18 @@ class SignInForm extends StatelessWidget {
                             BlocProvider.of<SignInBloc>(context)
                                 .state
                                 .signInError,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: kErrorTextColor,
                             ),
                           ),
                         },
-                        SizedBox(height: 5),
+                        const SizedBox(height: 5),
                         Form(
                           autovalidateMode: AutovalidateMode.always,
                           child: Column(
                             children: <Widget>[
                               Container(
-                                padding: EdgeInsets.all(5.0),
+                                padding: const EdgeInsets.all(5.0),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(10),
@@ -86,14 +88,14 @@ class SignInForm extends StatelessWidget {
                                     BoxShadow(
                                       color: Colors.grey.withValues(alpha: 0.2),
                                       blurRadius: 20.0,
-                                      offset: Offset(0, 10),
+                                      offset: const Offset(0, 10),
                                     ),
                                   ],
                                 ),
                                 child: Column(
                                   children: <Widget>[
                                     Container(
-                                      padding: EdgeInsets.all(4.0),
+                                      padding: const EdgeInsets.all(4.0),
                                       decoration: BoxDecoration(
                                         border: Border(
                                           bottom: BorderSide(
@@ -128,7 +130,7 @@ class SignInForm extends StatelessWidget {
                                       ),
                                     ),
                                     Container(
-                                      padding: EdgeInsets.all(4.0),
+                                      padding: const EdgeInsets.all(4.0),
                                       child: TextFormField(
                                         style: getIt<TextFactory>()
                                             .liteTextStyle(fontSize: 16),
@@ -160,7 +162,7 @@ class SignInForm extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 height: 10.0,
                               ),
                               Align(
@@ -174,7 +176,7 @@ class SignInForm extends StatelessWidget {
                                   },
                                 ),
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 height: 30.0,
                               ),
                               ClipRRect(
@@ -182,7 +184,7 @@ class SignInForm extends StatelessWidget {
                                 child: Container(
                                   padding: EdgeInsets.zero,
                                   height: 50,
-                                  decoration: BoxDecoration(
+                                  decoration: const BoxDecoration(
                                     gradient: LinearGradient(
                                       colors: [
                                         Color.fromRGBO(0, 146, 214, 1),
@@ -209,7 +211,7 @@ class SignInForm extends StatelessWidget {
                                         : () =>
                                             BlocProvider.of<SignInBloc>(context)
                                                 .add(
-                                              SignInWithEmailAndPassword(),
+                                              const SignInWithEmailAndPassword(),
                                             ),
                                     child: Center(
                                       child: getIt<TextFactory>()
@@ -218,7 +220,7 @@ class SignInForm extends StatelessWidget {
                                   ),
                                 ),
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 height: 30.0,
                               ),
                               Row(
@@ -226,7 +228,7 @@ class SignInForm extends StatelessWidget {
                                 children: <Widget>[
                                   getIt<TextFactory>()
                                       .lite2('Don\'t have an account?'),
-                                  SizedBox(
+                                  const SizedBox(
                                     width: 3,
                                   ),
                                   GestureDetector(

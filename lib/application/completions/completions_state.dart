@@ -25,7 +25,7 @@ class CompletionsState extends Equatable {
     return CompletionsState(
       errorMessage: '',
       id: '',
-      responses: new Responses(responses: Map()),
+      responses: Responses(responses: <String, Map<String, ResponseDetails>>{}),
       isComplete: null,
       uploadTask: null,
       downloadURL: null,

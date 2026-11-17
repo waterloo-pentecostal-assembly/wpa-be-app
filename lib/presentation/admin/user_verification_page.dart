@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/app/constants.dart';
 import 'package:wpa_app/app/injection.dart';
@@ -10,6 +10,8 @@ import 'package:wpa_app/presentation/common/text_factory.dart';
 import 'package:wpa_app/presentation/admin/helper.dart';
 
 class UserVerificationPage extends StatefulWidget {
+  const UserVerificationPage({super.key});
+
   @override
   _UserVerificationPageState createState() => _UserVerificationPageState();
 }
@@ -36,12 +38,12 @@ class _UserVerificationPageState extends State<UserVerificationPage> {
               },
               child: Column(
                 children: [
-                  HeaderWidget(title: 'User Verification'),
+                  const HeaderWidget(title: 'User Verification'),
                   Expanded(
                     child: Container(
                       child: AnimatedList(
                         key: key,
-                        physics: AlwaysScrollableScrollPhysics(),
+                        physics: const AlwaysScrollableScrollPhysics(),
                         shrinkWrap: true,
                         initialItemCount: userCards.length,
                         itemBuilder: (context, index, animation) =>
@@ -62,7 +64,7 @@ class _UserVerificationPageState extends State<UserVerificationPage> {
                   BlocProvider.of<AdminBloc>(context)
                     ..add(LoadUnverifiedUsers());
                 },
-                child: Column(
+                child: const Column(
                   children: [
                     HeaderWidget(title: 'User Verification'),
                   ],
@@ -109,7 +111,7 @@ class _UserVerificationPageState extends State<UserVerificationPage> {
             BoxShadow(
               color: Colors.grey.withValues(alpha: 0.25),
               blurRadius: 8.0,
-              offset: Offset(0, 3),
+              offset: const Offset(0, 3),
             )
           ],
         ),
@@ -122,7 +124,7 @@ class _UserVerificationPageState extends State<UserVerificationPage> {
                 children: [
                   getIt<TextFactory>()
                       .regular(user.firstName + ' ' + user.lastName),
-                  SizedBox(height: 8),
+                  const SizedBox(height: 8),
                   getIt<TextFactory>().lite(user.email),
                 ],
               ),
@@ -146,7 +148,7 @@ class _UserVerificationPageState extends State<UserVerificationPage> {
                             .getDimension(baseDimension: 40.0),
                       ),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     GestureDetector(
                         onTap: () {
                           BlocProvider.of<AdminBloc>(context)

@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/application/testimonies/testimonies_bloc.dart';
 import 'package:wpa_app/domain/testimonies/entities.dart';
@@ -8,6 +8,8 @@ import '../widgets/testimony_card.dart';
 import '../widgets/testimony_error.dart';
 
 class MyTestimonies extends StatefulWidget {
+  const MyTestimonies({super.key});
+
   @override
   _MyTestimoniesState createState() => _MyTestimoniesState();
 }
@@ -126,7 +128,7 @@ class _MyTestimoniesState extends State<MyTestimonies>
           ..add(MyTestimoniesRequested());
       },
       child: AnimatedList(
-        physics: AlwaysScrollableScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(),
         key: _myTestimoniesListKey,
         initialItemCount: state.testimonies.length,
         itemBuilder: _buildItem,

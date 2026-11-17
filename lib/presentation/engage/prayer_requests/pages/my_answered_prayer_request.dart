@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/application/prayer_requests/prayer_requests_bloc.dart';
 import 'package:wpa_app/domain/prayer_requests/entities.dart';
@@ -7,6 +7,8 @@ import 'package:wpa_app/presentation/engage/prayer_requests/widgets/prayer_reque
 import 'package:wpa_app/presentation/engage/prayer_requests/widgets/prayer_request_error.dart';
 
 class MyAnsweredPrayerRequest extends StatefulWidget {
+  const MyAnsweredPrayerRequest({super.key});
+
   @override
   _MyAnsweredPrayerRequestState createState() =>
       _MyAnsweredPrayerRequestState();
@@ -124,7 +126,7 @@ class _MyAnsweredPrayerRequestState extends State<MyAnsweredPrayerRequest>
           ..add(MyAnsweredPrayerRequestsRequested());
       },
       child: AnimatedList(
-        physics: AlwaysScrollableScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(),
         key: _myPrayerRequestsListKey,
         initialItemCount: state.prayerRequests.length,
         itemBuilder: _buildItem,

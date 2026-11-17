@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:rflutter_alert/rflutter_alert.dart';
 import 'package:wpa_app/app/injection.dart';
@@ -9,6 +9,8 @@ import '../../../application/authentication/password_reset/password_reset_bloc.d
 import '../../common/loader.dart';
 
 class PasswordResetForm extends StatelessWidget {
+  const PasswordResetForm({super.key});
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<PasswordResetBloc, PasswordResetState>(
@@ -29,7 +31,7 @@ class PasswordResetForm extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: <Widget>[
                   Padding(
-                    padding: EdgeInsets.only(
+                    padding: const EdgeInsets.only(
                       top: 60,
                       bottom: 60,
                     ),
@@ -40,7 +42,7 @@ class PasswordResetForm extends StatelessWidget {
                     ),
                   ),
                   Padding(
-                    padding: EdgeInsets.only(
+                    padding: const EdgeInsets.only(
                       left: 30,
                       right: 30,
                     ),
@@ -51,18 +53,18 @@ class PasswordResetForm extends StatelessWidget {
                             BlocProvider.of<PasswordResetBloc>(context)
                                 .state
                                 .passwordResetError,
-                            style: TextStyle(
+                            style: const TextStyle(
                               color: kErrorTextColor,
                             ),
                           ),
                         },
-                        SizedBox(height: 5),
+                        const SizedBox(height: 5),
                         Form(
                           autovalidateMode: AutovalidateMode.always,
                           child: Column(
                             children: <Widget>[
                               Container(
-                                padding: EdgeInsets.all(5.0),
+                                padding: const EdgeInsets.all(5.0),
                                 decoration: BoxDecoration(
                                   color: Colors.white,
                                   borderRadius: BorderRadius.circular(10),
@@ -70,14 +72,14 @@ class PasswordResetForm extends StatelessWidget {
                                     BoxShadow(
                                       color: Colors.grey.withValues(alpha: 0.2),
                                       blurRadius: 20.0,
-                                      offset: Offset(0, 10),
+                                      offset: const Offset(0, 10),
                                     ),
                                   ],
                                 ),
                                 child: Column(
                                   children: <Widget>[
                                     Container(
-                                      padding: EdgeInsets.all(4.0),
+                                      padding: const EdgeInsets.all(4.0),
                                       child: TextFormField(
                                         style: getIt<TextFactory>()
                                             .liteTextStyle(fontSize: 16),
@@ -109,7 +111,7 @@ class PasswordResetForm extends StatelessWidget {
                                   ],
                                 ),
                               ),
-                              SizedBox(
+                              const SizedBox(
                                 height: 30.0,
                               ),
                               ClipRRect(
@@ -117,7 +119,7 @@ class PasswordResetForm extends StatelessWidget {
                                 child: Container(
                                   padding: EdgeInsets.zero,
                                   height: 50,
-                                  decoration: BoxDecoration(
+                                  decoration: const BoxDecoration(
                                     gradient: LinearGradient(
                                       colors: [
                                         Color.fromRGBO(0, 146, 214, 1),
@@ -142,7 +144,7 @@ class PasswordResetForm extends StatelessWidget {
                                             BlocProvider.of<PasswordResetBloc>(
                                                     context)
                                                 .add(
-                                              ResetPassword(),
+                                              const ResetPassword(),
                                             ),
                                     child: Center(
                                         child: getIt<TextFactory>()
@@ -174,14 +176,14 @@ _passwordResetSuccessAlert(context) {
     desc: "Please follow instructions in email to reset password.",
     buttons: [
       DialogButton(
-        child: Text(
-          "OK",
-          style: TextStyle(color: Colors.white, fontSize: 20),
-        ),
         onPressed: () {
           Navigator.pushNamed(context, '/sign_in');
         },
         width: 120,
+        child: const Text(
+          "OK",
+          style: TextStyle(color: Colors.white, fontSize: 20),
+        ),
       )
     ],
   ).show();

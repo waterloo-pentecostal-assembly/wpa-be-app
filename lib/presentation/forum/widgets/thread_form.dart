@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:wpa_app/app/constants.dart';
 import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
@@ -81,16 +81,16 @@ class _ThreadFormState extends State<ThreadForm> with TickerProviderStateMixin {
             ),
             GestureDetector(
               child: Container(
-                margin: EdgeInsets.all(16),
-                padding: EdgeInsets.all(16),
+                margin: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.all(Radius.circular(16)),
+                  borderRadius: const BorderRadius.all(Radius.circular(16)),
                   color: Colors.white,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.grey.shade400,
                       blurRadius: 18.0,
-                      offset: Offset(0, 12),
+                      offset: const Offset(0, 12),
                     )
                   ],
                 ),
@@ -98,7 +98,7 @@ class _ThreadFormState extends State<ThreadForm> with TickerProviderStateMixin {
                   shrinkWrap: true,
                   children: [
                     Container(
-                      padding: EdgeInsets.only(top: 8, left: 8, right: 8),
+                      padding: const EdgeInsets.only(top: 8, left: 8, right: 8),
                       child: TextFormField(
                         controller: _textEditingController,
                         keyboardType: TextInputType.multiline,
@@ -122,7 +122,7 @@ class _ThreadFormState extends State<ThreadForm> with TickerProviderStateMixin {
                         style: getIt<TextFactory>().textFormFieldInputStyle(),
                       ),
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     Wrap(
                       runSpacing: 16.0,
                       alignment: WrapAlignment.end,
@@ -131,7 +131,7 @@ class _ThreadFormState extends State<ThreadForm> with TickerProviderStateMixin {
                         Wrap(
                           children: [
                             _CancelButton(onCancel: widget.onCancel),
-                            SizedBox(width: 16),
+                            const SizedBox(width: 16),
                             _SaveButton(
                               isValid: _isValid,
                               text: widget.saveButtonText,
@@ -189,7 +189,7 @@ class _SaveButton extends StatelessWidget {
               return Colors.white;
             }),
             padding: WidgetStateProperty.all(
-                EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8)),
+                const EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8)),
             tapTargetSize: MaterialTapTargetSize.shrinkWrap),
         onPressed: !isValid ? null : onPressed,
         child: getIt<TextFactory>().regularButton(text),
@@ -214,7 +214,7 @@ class _CancelButton extends StatelessWidget {
               getIt<LayoutFactory>().getDimension(baseDimension: 90.0),
               getIt<LayoutFactory>().getDimension(baseDimension: 30.0)),
           backgroundColor: kCardGrey,
-          padding: EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
+          padding: const EdgeInsets.only(top: 4, bottom: 4, left: 8, right: 8),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
         ),
         onPressed: onCancel,

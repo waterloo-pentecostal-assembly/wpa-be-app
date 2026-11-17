@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:video_player/video_player.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:wpa_app/app/injection.dart';
@@ -65,7 +65,7 @@ class _VideoBodyWidgetState extends State<VideoBodyWidget> {
         children: [
           if (widget.videoBody.properties.title.isNotEmpty) ...[
             getIt<TextFactory>().subHeading(widget.videoBody.properties.title),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
           ],
           if (_initialized)
             if (_isYoutube)
@@ -91,7 +91,7 @@ class _VideoBodyWidgetState extends State<VideoBodyWidget> {
                     VideoProgressIndicator(
                       _videoPlayerController!,
                       allowScrubbing: true,
-                      colors: VideoProgressColors(
+                      colors: const VideoProgressColors(
                         playedColor: Colors.red,
                         backgroundColor: Colors.grey,
                         bufferedColor: Colors.white,
@@ -104,7 +104,7 @@ class _VideoBodyWidgetState extends State<VideoBodyWidget> {
             Container(
               height: 200,
               color: Colors.black12,
-              child: Center(
+              child: const Center(
                 child: CircularProgressIndicator(),
               ),
             ),
@@ -125,13 +125,13 @@ class _ControlsOverlay extends StatelessWidget {
     return Stack(
       children: <Widget>[
         AnimatedSwitcher(
-          duration: Duration(milliseconds: 50),
-          reverseDuration: Duration(milliseconds: 200),
+          duration: const Duration(milliseconds: 50),
+          reverseDuration: const Duration(milliseconds: 200),
           child: controller.value.isPlaying
-              ? SizedBox.shrink()
+              ? const SizedBox.shrink()
               : Container(
                   color: Colors.black26,
-                  child: Center(
+                  child: const Center(
                     child: Icon(
                       Icons.play_arrow,
                       color: Colors.white,

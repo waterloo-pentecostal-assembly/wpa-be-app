@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/presentation/common/layout_factory.dart';
 
@@ -11,6 +11,8 @@ import '../../../common/loader.dart';
 import '../../../common/text_factory.dart';
 
 class AllBibleSeriesPage extends StatelessWidget {
+  const AllBibleSeriesPage({super.key});
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<BibleSeriesBloc>(
@@ -21,7 +23,7 @@ class AllBibleSeriesPage extends StatelessWidget {
           child: Column(
             children: [
               Container(
-                padding: EdgeInsets.all(kHeadingPadding),
+                padding: const EdgeInsets.all(kHeadingPadding),
                 alignment: Alignment.centerLeft,
                 child: Row(
                   children: [
@@ -33,7 +35,7 @@ class AllBibleSeriesPage extends StatelessWidget {
                             .getDimension(baseDimension: 24.0),
                       ),
                     ),
-                    SizedBox(width: 8),
+                    const SizedBox(width: 8),
                     getIt<TextFactory>().subPageHeading('Bible Series'),
                   ],
                 ),
@@ -44,7 +46,7 @@ class AllBibleSeriesPage extends StatelessWidget {
                   builder: (context, state) {
                     if (state is RecentBibleSeries) {
                       return ListView.builder(
-                        padding: EdgeInsets.symmetric(horizontal: 8),
+                        padding: const EdgeInsets.symmetric(horizontal: 8),
                         itemCount: state.bibleSeriesList.length,
                         itemBuilder: (context, index) {
                           return Padding(
@@ -84,7 +86,7 @@ class BibleSeriesListCard extends StatelessWidget {
             arguments: {'bibleSeriesId': bibleSeries.id});
       },
       child: Container(
-        margin: EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
+        margin: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 4.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(16),
           color: Colors.white,
@@ -92,7 +94,7 @@ class BibleSeriesListCard extends StatelessWidget {
             BoxShadow(
               color: Colors.grey.withValues(alpha: 0.25),
               blurRadius: 8.0,
-              offset: Offset(0, 3),
+              offset: const Offset(0, 3),
             )
           ],
         ),
@@ -120,10 +122,10 @@ class BibleSeriesListCard extends StatelessWidget {
                       children: [
                         getIt<TextFactory>().subHeading3(bibleSeries.title),
                         if (bibleSeries.subTitle.isNotEmpty) ...[
-                          SizedBox(height: 4),
+                          const SizedBox(height: 4),
                           getIt<TextFactory>().lite(bibleSeries.subTitle),
                         ],
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         getIt<TextFactory>().liteSmall(
                             '${dateFormatter.timeStampToString(bibleSeries.startDate)} - ${dateFormatter.timeStampToString(bibleSeries.endDate)}'),
                       ],

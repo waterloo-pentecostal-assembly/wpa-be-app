@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/application/testimonies/testimonies_bloc.dart';
 import 'package:wpa_app/domain/testimonies/entities.dart';
@@ -7,6 +7,8 @@ import 'package:wpa_app/presentation/engage/testimonies/widgets/testimony_card.d
 import 'package:wpa_app/presentation/engage/testimonies/widgets/testimony_error.dart';
 
 class MyArchivedTestimonies extends StatefulWidget {
+  const MyArchivedTestimonies({super.key});
+
   @override
   _MyArchivedTestimoniesState createState() => _MyArchivedTestimoniesState();
 }
@@ -122,7 +124,7 @@ class _MyArchivedTestimoniesState extends State<MyArchivedTestimonies>
           ..add(MyArchivedTestimoniesRequested());
       },
       child: AnimatedList(
-        physics: AlwaysScrollableScrollPhysics(),
+        physics: const AlwaysScrollableScrollPhysics(),
         key: _myTestimoniesListKey,
         initialItemCount: state.testimonies.length,
         itemBuilder: _buildItem,

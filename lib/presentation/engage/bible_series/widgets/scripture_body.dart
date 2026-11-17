@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:wpa_app/app/injection.dart';
 import 'package:wpa_app/presentation/common/text_factory.dart';
 
@@ -19,7 +19,7 @@ class ScriptureContentBodyWidget extends StatelessWidget {
           children: [
             ListView.builder(
                 shrinkWrap: true,
-                physics: ClampingScrollPhysics(),
+                physics: const ClampingScrollPhysics(),
                 itemCount: scriptureContentBody.properties.scriptures.length,
                 itemBuilder: (BuildContext context, int index) {
                   return scripture(
@@ -54,7 +54,7 @@ List<Widget> buildCombinedScripture(Scripture script, List<int> sortedVerses) {
       padding: const EdgeInsets.only(top: 0),
       shrinkWrap: true,
       itemCount: sortedVerses.length,
-      physics: ClampingScrollPhysics(),
+      physics: const ClampingScrollPhysics(),
       itemBuilder: (BuildContext context, int index) {
         String key = sortedVerses[index].toString();
         return Padding(

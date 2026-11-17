@@ -165,7 +165,9 @@ class ISeriesContentBody {
 }
 
 class LinkBody implements ISeriesContentBody {
+  @override
   final SeriesContentBodyType type;
+  @override
   final LinkBodyProperties properties;
 
   LinkBody({
@@ -181,7 +183,9 @@ class LinkBodyProperties {
 }
 
 class AudioBody implements ISeriesContentBody {
+  @override
   final SeriesContentBodyType type;
+  @override
   final AudioBodyProperties properties;
 
   AudioBody({
@@ -196,7 +200,9 @@ class AudioBodyProperties {
 }
 
 class VideoBody implements ISeriesContentBody {
+  @override
   final SeriesContentBodyType type;
+  @override
   final VideoBodyProperties properties;
 
   VideoBody({
@@ -211,17 +217,23 @@ class VideoBodyProperties {
 }
 
 class DividerBody implements ISeriesContentBody {
+  @override
   final SeriesContentBodyType type = SeriesContentBodyType.DIVIDER;
+  @override
   get properties {}
 }
 
 class DefaultEmptyBody implements ISeriesContentBody {
+  @override
   final SeriesContentBodyType type = SeriesContentBodyType.EMPTY;
+  @override
   get properties {}
 }
 
 class TitleBody implements ISeriesContentBody {
+  @override
   final SeriesContentBodyType type;
+  @override
   final TitleBodyProperties properties;
 
   TitleBody({
@@ -235,7 +247,9 @@ class TitleBodyProperties {
 }
 
 class TextBody implements ISeriesContentBody {
+  @override
   final SeriesContentBodyType type;
+  @override
   final TextBodyProperties properties;
 
   TextBody({
@@ -249,7 +263,9 @@ class TextBodyProperties {
 }
 
 class ScriptureBody implements ISeriesContentBody {
+  @override
   final SeriesContentBodyType type;
+  @override
   final ScriptureBodyProperties properties;
 
   ScriptureBody({
@@ -281,7 +297,9 @@ class Scripture {
 }
 
 class QuestionBody implements ISeriesContentBody {
+  @override
   final SeriesContentBodyType type;
+  @override
   final QuestionBodyProperties properties;
 
   QuestionBody({
@@ -305,6 +323,7 @@ class Question {
 }
 
 class ImageInputBody implements ISeriesContentBody {
+  @override
   final SeriesContentBodyType type;
 
   ImageInputBody({

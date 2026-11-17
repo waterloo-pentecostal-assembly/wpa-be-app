@@ -1,0 +1,19 @@
+include: package:flutter_lints/flutter.yaml
+
+analyzer:
+  exclude:
+    - build/**
+    - ios/**
+    - android/**
+  language:
+    strict-casts: false
+
+linter:
+  rules:
+    prefer_const_constructors: true
+    prefer_final_fields: true
+    unawaited_futures: true
+    avoid_print: true
+    always_declare_return_types: true
+    annotate_overrides: true
+    use_build_context_synchronously: true

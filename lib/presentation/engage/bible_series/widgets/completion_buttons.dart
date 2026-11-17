@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/app/constants.dart';
 import 'package:wpa_app/app/injection.dart';
@@ -16,7 +16,7 @@ class CompletionButton extends StatelessWidget {
   final SeriesContent seriesContent;
   final CompletionDetails? completionDetails;
   final String bibleId;
-  CompletionButton(this.seriesContent, this.completionDetails, this.bibleId);
+  CompletionButton(this.seriesContent, this.completionDetails, this.bibleId, {super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -40,14 +40,14 @@ class CompletionButton extends StatelessWidget {
                       BlocProvider.of<CompletionsBloc>(context)
                           .add(MarkAsComplete(completionDetails));
                     },
+                    customBorder: const CircleBorder(),
+                    splashColor: Colors.lightGreenAccent,
                     child: Icon(
                       Icons.check_circle,
                       color: Colors.black87.withValues(alpha: 0.5),
                       size: getIt<LayoutFactory>()
                           .getDimension(baseDimension: 60.0),
                     ),
-                    customBorder: new CircleBorder(),
-                    splashColor: Colors.lightGreenAccent,
                   ),
                 ));
           } else if (state.isComplete!) {
@@ -82,7 +82,7 @@ class ResponseCompletionButton extends StatelessWidget {
   final CompletionDetails? completionDetails;
   final String bibleId;
   ResponseCompletionButton(
-      this.seriesContent, this.completionDetails, this.bibleId);
+      this.seriesContent, this.completionDetails, this.bibleId, {super.key});
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<CompletionsBloc, CompletionsState>(
@@ -100,7 +100,7 @@ class ResponseCompletionButton extends StatelessWidget {
                           context: context,
                           builder: (_) => AlertDialog(
                             buttonPadding: const EdgeInsets.all(20),
-                            shape: RoundedRectangleBorder(
+                            shape: const RoundedRectangleBorder(
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(16))),
                             title: getIt<TextFactory>()
@@ -110,14 +110,14 @@ class ResponseCompletionButton extends StatelessWidget {
                             actions: [
                               ClipRRect(
                                 borderRadius:
-                                    BorderRadius.all(Radius.circular(16)),
+                                    const BorderRadius.all(Radius.circular(16)),
                                 child: TextButton(
                                   style: TextButton.styleFrom(
                                       foregroundColor: Colors.white,
-                                      minimumSize: Size(90, 30),
+                                      minimumSize: const Size(90, 30),
                                       backgroundColor:
                                           kWpaBlue.withValues(alpha: 0.8),
-                                      padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
+                                      padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
                                       tapTargetSize:
                                           MaterialTapTargetSize.shrinkWrap),
                                   onPressed: () {
@@ -145,7 +145,7 @@ class ResponseCompletionButton extends StatelessWidget {
                         showDialog(
                           context: context,
                           builder: (_) => AlertDialog(
-                            shape: RoundedRectangleBorder(
+                            shape: const RoundedRectangleBorder(
                                 borderRadius:
                                     BorderRadius.all(Radius.circular(16))),
                             buttonPadding: const EdgeInsets.all(20),
@@ -156,14 +156,14 @@ class ResponseCompletionButton extends StatelessWidget {
                             actions: [
                               ClipRRect(
                                 borderRadius:
-                                    BorderRadius.all(Radius.circular(16)),
+                                    const BorderRadius.all(Radius.circular(16)),
                                 child: TextButton(
                                   style: TextButton.styleFrom(
                                       foregroundColor: Colors.white,
-                                      minimumSize: Size(90, 30),
+                                      minimumSize: const Size(90, 30),
                                       backgroundColor:
                                           kWpaBlue.withValues(alpha: 0.8),
-                                      padding: EdgeInsets.fromLTRB(8, 4, 8, 4),
+                                      padding: const EdgeInsets.fromLTRB(8, 4, 8, 4),
                                       tapTargetSize:
                                           MaterialTapTargetSize.shrinkWrap),
                                   onPressed: () {
@@ -189,7 +189,7 @@ class ResponseCompletionButton extends StatelessWidget {
                           ..add(MarkAsComplete(completionDetails));
                       }
                     },
-                    customBorder: new CircleBorder(),
+                    customBorder: const CircleBorder(),
                     splashColor: Colors.lightGreenAccent,
                     child: Icon(
                       Icons.check_circle,

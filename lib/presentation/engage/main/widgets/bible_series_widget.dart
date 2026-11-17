@@ -1,5 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wpa_app/application/achievements/achievements_bloc.dart';
 import 'package:wpa_app/app/constants.dart';
@@ -9,6 +9,8 @@ import '../../../../domain/bible_series/entities.dart';
 import '../../../common/text_factory.dart';
 
 class CurrentBibleSeriesWidget extends StatelessWidget {
+  const CurrentBibleSeriesWidget({super.key});
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<BibleSeriesBloc, BibleSeriesState>(
@@ -63,7 +65,7 @@ class ActiveBibleSeriesCard extends StatelessWidget {
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.2),
                 blurRadius: 8,
-                offset: Offset(0, 4),
+                offset: const Offset(0, 4),
               ),
             ],
           ),
@@ -77,7 +79,7 @@ class ActiveBibleSeriesCard extends StatelessWidget {
                   color: Colors.white70,
                   fontSize: 14.0,
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 Text(
                   bibleSeries.title,
                   style: getIt<TextFactory>()
@@ -86,9 +88,9 @@ class ActiveBibleSeriesCard extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
                 _buildProgressBar(userProgress, expectedProgress),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -98,7 +100,7 @@ class ActiveBibleSeriesCard extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
                       ),
-                      padding: EdgeInsets.symmetric(vertical: 12),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
                     ),
                     onPressed: () {
                       Navigator.pushNamed(context, '/bible_series',
@@ -107,7 +109,7 @@ class ActiveBibleSeriesCard extends StatelessWidget {
                     child: getIt<TextFactory>().regular('Continue Reading'),
                   ),
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 Center(
                   child: GestureDetector(
                     onTap: () =>
@@ -165,7 +167,7 @@ class ActiveBibleSeriesCard extends StatelessWidget {
             ),
           ],
         ),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
