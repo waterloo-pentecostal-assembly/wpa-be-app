@@ -26,16 +26,14 @@ class _VideoBodyWidgetState extends State<VideoBodyWidget> {
     String videoUrl = widget.videoBody.properties.link;
     print('initializing video player with: $videoUrl');
 
-    String? videoId = YoutubePlayer.convertUrlToId(videoUrl);
+    String? videoId = YoutubePlayerController.convertUrlToId(videoUrl);
 
     if (videoId != null) {
       _isYoutube = true;
-      _youtubePlayerController = YoutubePlayerController(
-        initialVideoId: videoId,
-        flags: const YoutubePlayerFlags(
-          autoPlay: false,
-          mute: false,
-        ),
+      _youtubePlayerController = YoutubePlayerController.fromVideoId(
+        videoId: videoId,
+        autoPlay: false,
+        params: const YoutubePlayerParams(mute: false),
       );
       _initialized = true;
     } else {
@@ -54,7 +52,7 @@ class _VideoBodyWidgetState extends State<VideoBodyWidget> {
   @override
   void dispose() {
     _videoPlayerController?.dispose();
-    _youtubePlayerController?.dispose();
+    _youtubePlayerController?.close();
     super.dispose();
   }
 
@@ -71,20 +69,16 @@ class _VideoBodyWidgetState extends State<VideoBodyWidget> {
           ],
           if (_initialized)
             if (_isYoutube)
-              YoutubePlayer(
-                controller: _youtubePlayerController!,
-                showVideoProgressIndicator: true,
-                progressIndicatorColor: Colors.red,
-                progressColors: const ProgressBarColors(
-                  playedColor: Colors.red,
-                  handleColor: Colors.redAccent,
+              // v10's built-in controls already include the progress bar,
+              // position/duration and playback-speed picker that v9 needed
+              // configured by hand; the theme keeps the red progress bar.
+              Theme(
+                data: Theme.of(context).copyWith(
+                  extensions: const [
+                    YoutubePlayerTheme(progressBarActiveColor: Colors.red),
+                  ],
                 ),
-                bottomActions: [
-                  const CurrentPosition(),
-                  const ProgressBar(isExpanded: true),
-                  const RemainingDuration(),
-                  const PlaybackSpeedButton(),
-                ],
+                child: YoutubePlayer(controller: _youtubePlayerController!),
               )
             else
               AspectRatio(
