@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../domain/audio/entities.dart';
 import '../../domain/authentication/session.dart';
 import '../../domain/bible_series/entities.dart';
 import '../../domain/bible_series/interfaces.dart';
@@ -34,6 +35,7 @@ class ContentDetailState extends Equatable {
   const ContentDetailState({
     this.status = LoadStatus.initial,
     this.content,
+    this.series,
     this.errorMessage,
     this.completionId = '',
     this.isComplete,
@@ -49,6 +51,10 @@ class ContentDetailState extends Equatable {
 
   final LoadStatus status;
   final SeriesContent? content;
+
+  /// The series of the content, loaded only when it has audio (its title and
+  /// image are shown on the lock screen). `null` until loaded or if it fails.
+  final BibleSeries? series;
   final String? errorMessage;
 
   /// Id of the completion document ('' when there is none).
@@ -79,6 +85,7 @@ class ContentDetailState extends Equatable {
   ContentDetailState copyWith({
     LoadStatus? status,
     SeriesContent? content,
+    BibleSeries? series,
     String? errorMessage,
     String? completionId,
     bool? isComplete,
@@ -94,6 +101,7 @@ class ContentDetailState extends Equatable {
     return ContentDetailState(
       status: status ?? this.status,
       content: content ?? this.content,
+      series: series ?? this.series,
       errorMessage: errorMessage ?? this.errorMessage,
       completionId: completionId ?? this.completionId,
       isComplete: isComplete ?? this.isComplete,
@@ -112,6 +120,7 @@ class ContentDetailState extends Equatable {
   List<Object?> get props => [
         status,
         content,
+        series,
         errorMessage,
         completionId,
         isComplete,
@@ -199,12 +208,49 @@ class ContentDetailCubit extends Cubit<ContentDetailState> {
         next = await _withLoadedResponses(next, completion.id);
       }
       _safeEmit(next);
+      if (content.body.any((b) => b is AudioBody)) unawaited(_loadSeries());
     } catch (e, stackTrace) {
       _safeEmit(state.copyWith(
         status: LoadStatus.failure,
         errorMessage: userMessageFor(e, stackTrace: stackTrace),
       ));
     }
+  }
+
+  /// Best-effort: without the series, audio still plays (no artwork).
+  Future<void> _loadSeries() async {
+    try {
+      final series = await _bibleSeries.getBibleSeriesDetails(
+          bibleSeriesId: bibleSeriesId);
+      _safeEmit(state.copyWith(series: series));
+    } catch (e, stackTrace) {
+      reportError(e, stackTrace);
+    }
+  }
+
+  /// The player track of the audio body at [bodyIndex]: titled by the body
+  /// (or the content), with the content and series as subtitle, the series
+  /// image as artwork, and this content as origin.
+  AudioTrack audioTrackFor(int bodyIndex, AudioBody body) {
+    final content = state.content;
+    final contentTitle = content?.title ?? '';
+    final title = body.title.trim().isNotEmpty ? body.title : contentTitle;
+    final subtitle = [
+      if (contentTitle.isNotEmpty && contentTitle != title) contentTitle,
+      if (state.series != null) state.series!.title,
+    ].join(' · ');
+    return AudioTrack(
+      id: '$contentId/$bodyIndex',
+      url: body.audioFileUrl,
+      title: title.isNotEmpty ? title : 'Audio',
+      subtitle: subtitle.isEmpty ? null : subtitle,
+      artworkUrl: state.series?.imageUrl,
+      origin: AudioTrackOrigin(
+        seriesId: bibleSeriesId,
+        contentId: contentId,
+        contentType: content?.contentType,
+      ),
+    );
   }
 
   Future<ContentDetailState> _withLoadedResponses(

@@ -5,16 +5,21 @@ import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:wpa_app/app/router/app_router.dart';
 import 'package:wpa_app/app/router/deep_links.dart';
+import 'package:wpa_app/application/audio_player/audio_player_cubit.dart';
 import 'package:wpa_app/application/authentication/authentication_cubit.dart';
 import 'package:wpa_app/application/links/links_cubit.dart';
 import 'package:wpa_app/application/notifications/notifications_cubit.dart';
+import 'package:wpa_app/domain/audio/entities.dart';
 import 'package:wpa_app/domain/authentication/entities.dart';
 import 'package:wpa_app/domain/authentication/interfaces.dart';
 import 'package:wpa_app/domain/links/interface.dart';
 import 'package:wpa_app/domain/notifications/entities.dart';
 import 'package:wpa_app/infrastructure/session/app_session.dart';
+import 'package:wpa_app/presentation/features/audio/mini_player.dart';
 import 'package:wpa_app/presentation/features/shell/app_shell.dart';
 import 'package:wpa_app/presentation/foundation/navigation/app_navigator.dart';
+
+import '../helpers/fakes.dart' show FakeAudioPlayer;
 
 class _MockFacade extends Mock implements IAuthenticationFacade {}
 
@@ -78,6 +83,7 @@ void main() {
   late _MockFacade facade;
   late AuthenticationCubit auth;
   late GoRouter router;
+  late AudioPlayerCubit audio;
 
   // Created inside each test so stream events run in the test's fake-async
   // zone.
@@ -86,9 +92,11 @@ void main() {
     facade = _MockFacade();
     auth = AuthenticationCubit(facade, session);
     router = buildAppRouter(auth: auth, screens: _stubScreens());
+    audio = AudioPlayerCubit(FakeAudioPlayer());
     addTearDown(() {
       router.dispose();
       auth.close();
+      audio.close();
     });
   }
 
@@ -107,6 +115,7 @@ void main() {
           providers: [
             BlocProvider.value(value: auth),
             BlocProvider(create: (_) => LinksCubit(links)),
+            BlocProvider.value(value: audio),
             BlocProvider(
               create: (_) =>
                   NotificationsCubit(const Stream<PushNotification>.empty()),
@@ -141,6 +150,27 @@ void main() {
     expect(find.byType(AppShell), findsOneWidget);
     expect(find.text('ADMIN'), findsNothing);
     expect(find.text('GIVE'), findsOneWidget);
+  });
+
+  testWidgets('the mini player shows on every tab, not over the keyboard',
+      (tester) async {
+    await pumpApp(tester);
+    await signIn(tester, admin: true);
+    expect(find.byType(MiniPlayer), findsOneWidget);
+    expect(find.text('Sermon'), findsNothing);
+
+    await audio.play(const AudioTrack(id: 't', url: 'u', title: 'Sermon'));
+    await tester.pumpAndSettle();
+    expect(find.text('Sermon'), findsOneWidget);
+
+    await tester.tap(find.text('PROFILE'));
+    await tester.pumpAndSettle();
+    expect(find.text('Sermon'), findsOneWidget);
+
+    tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+    addTearDown(tester.view.resetViewInsets);
+    await tester.pumpAndSettle();
+    expect(find.byType(MiniPlayer), findsNothing);
   });
 
   testWidgets('an unknown location falls back to the Engage root',

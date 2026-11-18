@@ -166,7 +166,15 @@ Other rules and limits:
   - Images loaded from the server show via the `_200x200` thumbnail; tapping opens a zoomable viewer.
   - Delete (✕) removes the image and its thumbnail (best-effort).
   - Upload or delete marks a completed item incomplete.
-- **Audio:** one app-scope `AudioPlayerCubit`, provided in `lib/app/app.dart` over the `IAudioPlayer` port implemented by `JustAudioPlayer`. The playing item shows a play icon in the series detail list.
+- **Audio:**
+  - Play, pause, drag-to-scrub (seeks on release), back 10 s / forward 30 s, playback speed (1x, 1.25x, 1.5x, 2x, 0.75x). Rules: `domain/audio/rules.dart`.
+  - Playback continues when leaving the page, when the app is in the background, and when it is closed (swiped away) **while playing**; swiping the app away while paused ends the session.
+  - Lock screen, notification, headset and Bluetooth controls: play/pause, back/forward, seek bar, stop; shows the title, `content · series` subtitle and the series image.
+  - Pauses for calls and when headphones are unplugged; other apps' audio pauses while ours plays (spoken-word audio session).
+  - A mini player in the main shell shows the current track on every tab; tapping it opens the content, ✕ stops playback.
+  - At the end the track rewinds to the start, paused. Load/playback failures show `This audio couldn't be played. Check your connection and try again.` with Retry (recorded via `reportError`).
+  - The playing item shows a play icon in the series detail list.
+  - Implemented by: `domain/audio/` (`AudioTrack`, `AudioPlayback`, `IAudioPlayer`), `WpaAudioHandler` (`services/audio/`, just_audio + audio_service), `initAudioPlayer()` (started in `bootstrap`), app-scope `AudioPlayerCubit`, `ContentDetailCubit.audioTrackFor`, `features/audio/` widgets.
 - Every change to a completion emits `CompletionChanged`, and `BibleSeriesDetailCubit` re-reads that content's completion. This replaces the old refresh-after-pop.
 - Analytics:
   - `bible_series_viewed`: `BibleSeriesDetailCubit.load`, including deep links

@@ -33,7 +33,8 @@ lib/
 │   ├── session/app_session.dart     ISession implementation
 │   └── analytics/firebase_analytics_adapter.dart   IAnalytics implementation
 ├── services/                 Thin Firebase/plugin wrappers: Storage (putData + shared URL
-│                             cache, best-effort tryGetDownloadUrl), Messaging streams, just_audio
+│                             cache, best-effort tryGetDownloadUrl), Messaging streams,
+│                             audio/ (WpaAudioHandler: just_audio + audio_service)
 └── presentation/
     ├── foundation/           Look-agnostic (keep on redesign): layout/ (WindowSize, AdaptiveShell,
     │                         ContentConstraint, ResponsiveGrid), formatting/, feedback/ (toast,
@@ -64,7 +65,6 @@ presentation ──▶ application ──▶ domain ◀── infrastructure ─
 These rules were checked against the import graph at the Phase 7 commit: domain imports nothing outside `domain`; application imports only `domain`; infrastructure never imports application/presentation/app; presentation never imports infrastructure/services/app; `get_it` appears only under `lib/app/`.
 
 Known exceptions (deliberate or tolerated):
-- `services/just_audio_player.dart` implements `IAudioPlayer`, which is declared in `application/audio_player/audio_player_port.dart`, not in `domain`. So `services` imports `application` here.
 - `presentation` imports `domain` types directly (entities, `DayStatus`, `ImageData`, `CommunityPost`). Rendering uses them; decisions come from the cubit (e.g. the current series card renders `EngageHomeState.expectedSeriesProgress`, computed by the cubit with an injectable clock).
 - `app/router/routes.dart` and `deep_links.dart` import `PostsTab` from `presentation/foundation/navigation/app_navigator.dart`. `foundation` is the stable part of presentation, so this is fine, but `PostsTab` is part of the route contract.
 - `FirebaseAuthenticationFacade` takes the concrete `AppSession` (it writes the session), not `ISession`.
@@ -160,6 +160,14 @@ Wiring is in `lib/app/app.dart`:
 - `localDev` points Firestore at the emulator: `10.0.2.2:8081` on Android, `localhost:8081` elsewhere. It uses `defaultTargetPlatform`, not `dart:io`.
 - The version shown on Profile is `AppInfo.version = String.fromEnvironment('APP_VERSION', defaultValue: '3.0.1')`. Pass `--dart-define=APP_VERSION=x.y.z` in release builds and keep the default in sync with `pubspec.yaml`.
 
+## 9b. Audio playback
+
+- **Port:** `domain/audio/interfaces.dart` `IAudioPlayer` (load, play, pause, seek, skip, speed, stop) with `AudioTrack` (id, url, title, subtitle, artwork, origin) and an `AudioPlayback` snapshot stream plus a position stream.
+- **Implementation:** `services/audio/wpa_audio_handler.dart` `WpaAudioHandler` extends audio_service's `BaseAudioHandler` and wraps one just_audio `AudioPlayer`. It publishes state to the OS (`playbackState`, `mediaItem` → lock screen, notification, headset/Bluetooth controls) and to the app (`IAudioPlayer`). OS commands (play/pause/seek/rewind/fastForward/stop) call the same methods as the app.
+- **Startup:** `bootstrap` calls `initAudioPlayer()` (`services/audio/audio_setup.dart`): configures the audio session for speech, then `AudioService.init` (notification channel, icon, 10 s / 30 s skip intervals, foreground service kept while paused). If the service can't start, a plain `WpaAudioHandler` is used (foreground-only playback) and the failure is reported. The handler is registered as `IAudioPlayer` via `configureDependencies(config, audioPlayer:)`.
+- **App:** one app-scope `AudioPlayerCubit` mirrors the handler; it starts from the handler's current state, so the UI is correct when reopened while audio plays in the background. Closing the cubit never stops playback.
+- **Platform setup:** Android — `MainActivity` extends `AudioServiceActivity`; the manifest declares `AudioService` (`foregroundServiceType="mediaPlayback"`), `MediaButtonReceiver`, `WAKE_LOCK`, `FOREGROUND_SERVICE`, `FOREGROUND_SERVICE_MEDIA_PLAYBACK`; `res/raw/keep.xml` keeps the notification icon. iOS — `UIBackgroundModes` includes `audio`.
+
 ## 10. Error handling
 
 - **Single exception family**: everything the app throws on purpose extends `BaseApplicationException` (`domain/common/exceptions.dart`), whose `message` is safe to show to users. Examples: `AuthenticationException`, `DatabaseException`, `StorageException`, `ApplicationException`, `ValueObjectException`, and the per-feature `*Exception` classes.
@@ -197,7 +205,7 @@ These need a device or real Firebase and are **not** covered by tests:
 - Firestore security rules, Cloud Functions (topic subscriptions, `series_progress`, account deletion) and server timestamps
 - Storage uploads and the thumbnail-resize extension
 - App Check, FCM delivery, `getInitialMessage` and `onMessageOpenedApp`
-- platform plugins (image picker, just_audio, video/YouTube, url_launcher)
+- platform plugins (image picker, just_audio / audio_service playback, background and lock screen, video/YouTube, url_launcher). `WpaAudioHandler` is unit-tested against a fake just_audio player.
 - `bootstrap.dart` and `injection.dart`
 
 Known gaps:

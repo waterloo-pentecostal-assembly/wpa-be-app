@@ -68,6 +68,10 @@ flutter run -t lib/app/flavors/main_prod.dart --flavor prod
 - To change signing or run from Xcode, open `ios/Runner.xcworkspace` (not the `.xcodeproj`) and pick the `Dev` or `Prod` scheme.
 - iPhone is portrait-only; iPad and Android support all orientations.
 
+### Background audio
+
+Audio keeps playing in the background and when the app is closed, with lock screen / notification controls (`audio_service`). This needs the platform setup already in the repo: the iOS `audio` background mode in `Info.plist`, and on Android `MainActivity` extending `AudioServiceActivity` plus the `AudioService` / `MediaButtonReceiver` entries and foreground-service permissions in `AndroidManifest.xml`. Verify background and lock screen behaviour on physical devices. See `docs/ARCHITECTURE.md` §9b.
+
 ### VS Code
 
 `.vscode/` is gitignored. To run and debug from VS Code, create `.vscode/launch.json`:

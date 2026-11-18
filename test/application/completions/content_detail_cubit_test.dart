@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:wpa_app/application/common/app_events.dart';
 import 'package:wpa_app/application/common/load_status.dart';
 import 'package:wpa_app/application/completions/content_detail_cubit.dart';
+import 'package:wpa_app/domain/audio/entities.dart';
 import 'package:wpa_app/domain/bible_series/entities.dart';
 import 'package:wpa_app/domain/common/analytics.dart';
 import 'package:wpa_app/domain/common/media_upload.dart';
@@ -538,5 +539,78 @@ void main() {
     expect(a.isUploading, isTrue);
     expect(
         const ContentDetailState().uploads, isA<Map<String, UploadHandle>>());
+  });
+
+  group('audio', () {
+    final listen = SeriesContent(
+      id: 'listen',
+      contentType: 'LISTEN',
+      date: DateTime(2026, 3, 2),
+      title: 'Day 2',
+      subTitle: '',
+      body: const [
+        AudioBody(audioFileUrl: 'https://example.com/a.mp3', title: 'Sermon'),
+        AudioBody(audioFileUrl: 'https://example.com/b.mp3', title: ''),
+      ],
+    );
+
+    setUp(() {
+      bibleSeries
+        ..contents['listen'] = listen
+        ..seriesById[_seriesId] = buildSeries(id: _seriesId, days: []);
+    });
+
+    test('loads the series for lock-screen metadata when there is audio',
+        () async {
+      final cubit = await loaded(contentId: 'listen');
+      await pumpEventQueue();
+
+      expect(cubit.state.series?.id, _seriesId);
+      final track = cubit.audioTrackFor(0, listen.body[0] as AudioBody);
+      expect(
+        track,
+        const AudioTrack(
+          id: 'listen/0',
+          url: 'https://example.com/a.mp3',
+          title: 'Sermon',
+          subtitle: 'Day 2 · Series $_seriesId',
+          artworkUrl: 'https://img/$_seriesId',
+          origin: AudioTrackOrigin(
+            seriesId: _seriesId,
+            contentId: 'listen',
+            contentType: 'LISTEN',
+          ),
+        ),
+      );
+      await cubit.close();
+    });
+
+    test('an untitled audio body is titled by the content', () async {
+      final cubit = await loaded(contentId: 'listen');
+      await pumpEventQueue();
+      final track = cubit.audioTrackFor(1, listen.body[1] as AudioBody);
+      expect(track.id, 'listen/1');
+      expect(track.title, 'Day 2');
+      expect(track.subtitle, 'Series $_seriesId');
+      await cubit.close();
+    });
+
+    test('without the series, audio still has a track (no artwork)', () async {
+      bibleSeries.seriesById.clear();
+      final cubit = await loaded(contentId: 'listen');
+      await pumpEventQueue();
+      final track = cubit.audioTrackFor(0, listen.body[0] as AudioBody);
+      expect(track.artworkUrl, isNull);
+      expect(track.subtitle, 'Day 2');
+      expect(cubit.state.status, LoadStatus.success);
+      await cubit.close();
+    });
+
+    test('content without audio does not load the series', () async {
+      final cubit = await loaded();
+      await pumpEventQueue();
+      expect(bibleSeries.calls, isNot(contains('getBibleSeriesDetails')));
+      await cubit.close();
+    });
   });
 }

@@ -9,9 +9,11 @@ library;
 import 'dart:async';
 import 'dart:typed_data';
 
-import 'package:wpa_app/application/audio_player/audio_player_port.dart';
 import 'package:wpa_app/domain/achievements/entities.dart';
 import 'package:wpa_app/domain/achievements/interfaces.dart';
+import 'package:wpa_app/domain/audio/entities.dart';
+import 'package:wpa_app/domain/audio/exceptions.dart';
+import 'package:wpa_app/domain/audio/interfaces.dart';
 import 'package:wpa_app/domain/admin/interfaces.dart';
 import 'package:wpa_app/domain/authentication/entities.dart';
 import 'package:wpa_app/domain/authentication/interfaces.dart';
@@ -1136,59 +1138,121 @@ class FakeLinksRepository with FakeCalls implements ILinksRepository {
 // ---------------------------------------------------------------------------
 
 class FakeAudioPlayer with FakeCalls implements IAudioPlayer {
-  final positionController = StreamController<Duration>.broadcast(sync: true);
-  final durationController = StreamController<Duration?>.broadcast(sync: true);
-  final completedController = StreamController<void>.broadcast(sync: true);
+  FakeAudioPlayer({this.trackDuration = const Duration(minutes: 3)});
+
+  /// Duration reported for every loaded track.
+  Duration trackDuration;
+
+  final _playback = StreamController<AudioPlayback>.broadcast(sync: true);
+  final _position = StreamController<Duration>.broadcast(sync: true);
+
+  @override
+  AudioPlayback playback = const AudioPlayback();
 
   @override
   Duration position = Duration.zero;
 
-  @override
-  Duration? duration;
-
-  /// Duration reported by the next [setUrl].
-  Duration? durationForUrl = const Duration(minutes: 3);
-  final List<String> urls = [];
+  final List<AudioTrack> loaded = [];
   final List<Duration> seeks = [];
-  bool disposed = false;
 
   @override
-  Stream<Duration> get positionStream => positionController.stream;
+  Stream<AudioPlayback> get playbackStream => _playback.stream;
 
   @override
-  Stream<Duration?> get durationStream => durationController.stream;
+  Stream<Duration> get positionStream => _position.stream;
 
-  @override
-  Stream<void> get completedStream => completedController.stream;
+  /// Emits a new snapshot (as the real player does on every change).
+  void emit(AudioPlayback next) {
+    playback = next;
+    _playback.add(next);
+  }
 
+  void emitPosition(Duration next) {
+    position = next;
+    _position.add(next);
+  }
+
+  AudioPlayback _with({
+    AudioTrack? track,
+    AudioProcessing? processing,
+    bool? playing,
+    double? speed,
+    String? errorMessage,
+  }) =>
+      AudioPlayback(
+        track: track ?? playback.track,
+        processing: processing ?? playback.processing,
+        playing: playing ?? playback.playing,
+        duration: playback.duration,
+        bufferedPosition: playback.bufferedPosition,
+        speed: speed ?? playback.speed,
+        errorMessage: errorMessage,
+      );
+
+  /// Like the real player: the track becomes current at once; a failure
+  /// (see [failOn]) marks it failed and throws.
   @override
-  Future<Duration?> setUrl(String url) async {
-    record('setUrl');
-    urls.add(url);
-    position = Duration.zero;
-    duration = durationForUrl;
-    return duration;
+  Future<void> load(AudioTrack track) async {
+    loaded.add(track);
+    emitPosition(Duration.zero);
+    emit(AudioPlayback(
+      track: track,
+      processing: AudioProcessing.loading,
+      speed: playback.speed,
+    ));
+    try {
+      record('load');
+    } catch (_) {
+      emit(AudioPlayback(
+        track: track,
+        speed: playback.speed,
+        errorMessage: kAudioPlaybackErrorMessage,
+      ));
+      rethrow;
+    }
+    emit(AudioPlayback(
+      track: track,
+      processing: AudioProcessing.ready,
+      duration: trackDuration,
+      speed: playback.speed,
+    ));
   }
 
   @override
-  Future<void> play() async => record('play');
+  Future<void> play() async {
+    record('play');
+    emit(_with(playing: true));
+  }
 
   @override
-  Future<void> pause() async => record('pause');
-
-  @override
-  Future<void> stop() async => record('stop');
+  Future<void> pause() async {
+    record('pause');
+    emit(_with(playing: false));
+  }
 
   @override
   Future<void> seek(Duration position) async {
     record('seek');
     seeks.add(position);
-    this.position = position;
+    emitPosition(position);
   }
 
   @override
-  Future<void> dispose() async {
-    record('dispose');
-    disposed = true;
+  Future<void> skipBackward() async => record('skipBackward');
+
+  @override
+  Future<void> skipForward() async => record('skipForward');
+
+  @override
+  Future<void> setSpeed(double speed) async {
+    record('setSpeed');
+    emit(_with(speed: speed));
+  }
+
+  @override
+  Future<void> stop() async {
+    record('stop');
+    emitPosition(Duration.zero);
+    emit(const AudioPlayback());
   }
 }

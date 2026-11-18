@@ -34,6 +34,7 @@
 	<string>Access to Photo Library for uploading profile photos, drawings, or scribes</string>
 	<key>UIBackgroundModes</key>
 	<array>
+		<string>audio</string>
 		<string>fetch</string>
 		<string>remote-notification</string>
 	</array>

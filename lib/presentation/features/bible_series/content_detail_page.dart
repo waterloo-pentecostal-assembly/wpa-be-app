@@ -110,7 +110,7 @@ class _ContentBodies extends StatelessWidget {
   }
 
   Widget _body(int index, SeriesContentBody body) => switch (body) {
-        AudioBody() => AudioBodyView(body: body, contentId: content.id),
+        AudioBody() => AudioBodyView(body: body, bodyIndex: index),
         TextBody() => TextBodyView(body: body),
         ScriptureBody() => ScriptureBodyView(body: body),
         QuestionBody() => QuestionBodyView(body: body, bodyIndex: index),

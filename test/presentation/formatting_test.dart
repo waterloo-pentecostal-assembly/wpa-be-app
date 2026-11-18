@@ -29,9 +29,12 @@ void main() {
   });
 
   test('durations', () {
-    expect(formatMinutesSeconds(null), '00:00');
+    expect(formatPlaybackTime(Duration.zero), '0:00');
+    expect(formatPlaybackTime(const Duration(minutes: 3, seconds: 7)), '3:07');
     expect(
-        formatMinutesSeconds(const Duration(minutes: 3, seconds: 7)), '03:07');
-    expect(formatMinutesSeconds(const Duration(hours: 1, seconds: 5)), '00:05');
+        formatPlaybackTime(const Duration(minutes: 59, seconds: 59)), '59:59');
+    expect(formatPlaybackTime(const Duration(hours: 1, minutes: 5, seconds: 9)),
+        '1:05:09');
+    expect(formatPlaybackTime(const Duration(seconds: -3)), '0:00');
   });
 }

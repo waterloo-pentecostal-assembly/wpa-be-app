@@ -5,14 +5,15 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../domain/common/error_reporting.dart';
+import '../services/audio/audio_setup.dart';
 import '../services/firebase_messaging_service.dart';
 import 'app.dart';
 import 'app_config.dart';
 import 'error_handling.dart';
 import 'injection.dart';
 
-/// Shared start-up for every flavour: Firebase, App Check, dependencies,
-/// push notifications, then the app.
+/// Shared start-up for every flavour: Firebase, App Check, the background
+/// audio service, dependencies, push notifications, then the app.
 Future<void> bootstrap(AppConfig config) async {
   WidgetsFlutterBinding.ensureInitialized();
   installErrorHandling();
@@ -25,7 +26,8 @@ Future<void> bootstrap(AppConfig config) async {
         ? const AppleAppAttestWithDeviceCheckFallbackProvider()
         : const AppleDebugProvider(),
   );
-  configureDependencies(config);
+  final audioPlayer = await initAudioPlayer();
+  configureDependencies(config, audioPlayer: audioPlayer);
   try {
     await getIt<FirebaseMessagingService>().initialize();
   } catch (e, stackTrace) {

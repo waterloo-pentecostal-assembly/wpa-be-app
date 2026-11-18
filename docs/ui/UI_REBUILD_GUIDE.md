@@ -44,6 +44,8 @@ App (lib/app/app.dart)
  ├─ RepositoryProvider<AppNavigator>       → GoRouterAppNavigator (lib/app/router/app_navigator_impl.dart)
  ├─ RepositoryProvider<NewPostCubitFactory>
  ├─ BlocProvider: AuthenticationCubit, AudioPlayerCubit, LinksCubit, NotificationsCubit   (app scope)
+ │     (AudioPlayerCubit mirrors the background audio player; the inline AudioPlayerCard and the
+ │      shell's MiniPlayer in features/audio/ are replaceable views over it)
  └─ MaterialApp.router(theme: buildAppTheme(), routerConfig: buildAppRouter(...))
       └─ GoRouter (lib/app/router/app_router.dart)
            ├─ /splash /sign-in /sign-up /password-reset      → ScreenRegistry.splash/signIn/…

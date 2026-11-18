@@ -6,6 +6,7 @@ import '../../../application/notifications/notifications_cubit.dart';
 import '../../foundation/layout/adaptive_shell.dart';
 import '../../foundation/navigation/app_navigator.dart';
 import '../../foundation/platform/external_links.dart';
+import '../audio/mini_player.dart';
 import 'in_app_notification_banner.dart';
 
 /// Main tab shell: HOME, GIVE (external link), PROFILE and ADMIN (admins).
@@ -69,6 +70,9 @@ class AppShell extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Read above the shell's Scaffold, which hides the keyboard inset from
+    // its body.
+    final keyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
     return BlocListener<NotificationsCubit, NotificationsState>(
       listenWhen: (a, b) => b.latest != null && a.id != b.id,
       listener: (context, state) {
@@ -87,7 +91,14 @@ class AppShell extends StatelessWidget {
           destinations: [_home, _give, _profile, if (isAdmin) _admin],
           selectedIndex: _selectedDestination,
           onDestinationSelected: (i) => _onDestination(context, i),
-          body: child,
+          // The mini player stays visible on every tab while audio plays
+          // (hidden while typing, to leave room above the keyboard).
+          body: Column(
+            children: [
+              Expanded(child: child),
+              if (!keyboardOpen) const MiniPlayer(),
+            ],
+          ),
         ),
       ),
     );

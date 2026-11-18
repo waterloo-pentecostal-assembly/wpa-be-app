@@ -6,9 +6,9 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
 
-import '../application/audio_player/audio_player_port.dart';
 import '../application/common/app_events.dart';
 import '../domain/achievements/interfaces.dart';
+import '../domain/audio/interfaces.dart';
 import '../domain/admin/interfaces.dart';
 import '../domain/authentication/interfaces.dart';
 import '../domain/authentication/session.dart';
@@ -38,7 +38,6 @@ import '../infrastructure/testimonies/testimonies_repository.dart';
 import '../infrastructure/user_profile/user_profile_repository.dart';
 import '../services/firebase_messaging_service.dart';
 import '../services/firebase_storage_service.dart';
-import '../services/just_audio_player.dart';
 import 'app_config.dart';
 
 /// Service locator. Only used inside `lib/app` (composition root); everything
@@ -46,10 +45,15 @@ import 'app_config.dart';
 final GetIt getIt = GetIt.instance;
 
 /// Registers services, repositories and app-wide singletons. Screen cubits
-/// are created by `router/screen_registry.dart`.
-void configureDependencies(AppConfig config) {
+/// are created by `router/screen_registry.dart`. [audioPlayer] is created by
+/// `bootstrap` (it starts the background audio service).
+void configureDependencies(
+  AppConfig config, {
+  required IAudioPlayer audioPlayer,
+}) {
   getIt
     ..registerSingleton<AppConfig>(config)
+    ..registerSingleton<IAudioPlayer>(audioPlayer)
     // Firebase SDKs
     ..registerLazySingleton<FirebaseStorage>(() => FirebaseStorage.instance)
     ..registerLazySingleton<FirebaseMessaging>(() => FirebaseMessaging.instance)
@@ -75,7 +79,6 @@ void configureDependencies(AppConfig config) {
         () => FirebaseStorageService(getIt()))
     ..registerLazySingleton<FirebaseMessagingService>(
         () => FirebaseMessagingService(getIt()))
-    ..registerLazySingleton<IAudioPlayer>(JustAudioPlayer.new)
     // App-wide state
     ..registerLazySingleton<AppSession>(AppSession.new)
     ..registerLazySingleton<ISession>(() => getIt<AppSession>())

@@ -8,7 +8,6 @@ import 'package:material_ui/material_ui.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:wpa_app/application/admin/admin_queue_cubit.dart';
 import 'package:wpa_app/application/audio_player/audio_player_cubit.dart';
-import 'package:wpa_app/application/audio_player/audio_player_port.dart';
 import 'package:wpa_app/application/authentication/authentication_cubit.dart';
 import 'package:wpa_app/application/authentication/sign_in_cubit.dart';
 import 'package:wpa_app/application/bible_series/all_bible_series_cubit.dart';
@@ -62,6 +61,8 @@ import 'package:wpa_app/presentation/features/profile/notification_settings_page
 import 'package:wpa_app/presentation/features/profile/profile_page.dart';
 import 'package:wpa_app/presentation/foundation/navigation/app_navigator.dart';
 
+import '../helpers/fakes.dart' show FakeAudioPlayer;
+
 class _MockNavigator extends Mock implements AppNavigator {}
 
 class _MockFacade extends Mock implements IAuthenticationFacade {}
@@ -89,31 +90,6 @@ class _MockAchievements extends Mock implements IAchievementsRepository {}
 class _NoopAnalytics implements IAnalytics {
   @override
   Future<void> log(String name, [Map<String, Object>? params]) async {}
-}
-
-class _FakePlayer implements IAudioPlayer {
-  @override
-  Stream<Duration> get positionStream => const Stream.empty();
-  @override
-  Stream<Duration?> get durationStream => const Stream.empty();
-  @override
-  Stream<void> get completedStream => const Stream.empty();
-  @override
-  Duration get position => Duration.zero;
-  @override
-  Duration? get duration => null;
-  @override
-  Future<Duration?> setUrl(String url) async => const Duration(minutes: 3);
-  @override
-  Future<void> play() async {}
-  @override
-  Future<void> pause() async {}
-  @override
-  Future<void> stop() async {}
-  @override
-  Future<void> seek(Duration position) async {}
-  @override
-  Future<void> dispose() async {}
 }
 
 final _now = DateTime.now();
@@ -290,7 +266,7 @@ void main() {
               create: (_) => AuthenticationCubit(_MockFacade(), session),
             ),
             BlocProvider(create: (_) => LinksCubit(links)..load()),
-            BlocProvider(create: (_) => AudioPlayerCubit(_FakePlayer())),
+            BlocProvider(create: (_) => AudioPlayerCubit(FakeAudioPlayer())),
           ],
           child: MaterialApp(theme: buildAppTheme(), home: screen),
         ),
