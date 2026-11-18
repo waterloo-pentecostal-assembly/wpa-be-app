@@ -33,11 +33,12 @@ class LinksCubit extends Cubit<LinksState> {
       if (!isClosed) {
         emit(LinksState(status: LoadStatus.success, links: links));
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (!isClosed) {
         emit(LinksState(
           status: LoadStatus.failure,
-          errorMessage: userMessageFor(e, fallback: 'An unknown error occured'),
+          errorMessage: userMessageFor(e,
+              stackTrace: stackTrace, fallback: 'An unknown error occured'),
         ));
       }
     }

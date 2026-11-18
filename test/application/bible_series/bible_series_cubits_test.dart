@@ -6,6 +6,8 @@ import 'package:wpa_app/application/common/app_events.dart';
 import 'package:wpa_app/application/common/load_status.dart';
 import 'package:wpa_app/domain/bible_series/progress.dart';
 import 'package:wpa_app/domain/common/analytics.dart';
+import 'package:wpa_app/domain/common/error_reporting.dart';
+import 'package:wpa_app/domain/common/exceptions.dart';
 
 import '../../helpers/fakes.dart';
 
@@ -34,6 +36,23 @@ void main() {
         expect(bibleSeries.lastIsActive, isFalse);
       },
     );
+
+    test('an unexpected failure is recorded with its stack trace', () async {
+      final recorded = <(Object, StackTrace?)>[];
+      ErrorHooks.install(record: (e, st) => recorded.add((e, st)));
+      addTearDown(ErrorHooks.reset);
+      final error = StateError('network down');
+      bibleSeries.failOn('getBibleSeries', error);
+
+      final cubit = AllBibleSeriesCubit(bibleSeries);
+      await cubit.load();
+
+      expect(cubit.state.status, LoadStatus.failure);
+      expect(cubit.state.errorMessage, kUnknownErrorMessage);
+      expect(recorded.single.$1, same(error));
+      expect(recorded.single.$2, isNotNull);
+      await cubit.close();
+    });
 
     blocTest<AllBibleSeriesCubit, AllBibleSeriesState>(
       'reports a failure with the user-safe message',

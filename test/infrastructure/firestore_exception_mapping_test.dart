@@ -1,11 +1,13 @@
 import 'dart:async';
 
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:wpa_app/domain/common/error_reporting.dart';
 import 'package:wpa_app/domain/common/exceptions.dart';
 import 'package:wpa_app/domain/notification_settings/entities.dart';
 import 'package:wpa_app/domain/prayer_requests/exceptions.dart';
-import 'package:wpa_app/infrastructure/common/firestore_errors.dart';
+import 'package:wpa_app/infrastructure/common/firebase_error_translator.dart';
 import 'package:wpa_app/infrastructure/forum/forum_repository.dart';
 import 'package:wpa_app/infrastructure/notification_settings/notification_settings_service.dart';
 import 'package:wpa_app/infrastructure/prayer_requests/prayer_requests_repository.dart';
@@ -13,45 +15,92 @@ import 'package:wpa_app/infrastructure/user_profile/user_profile_repository.dart
 
 import '_support/fakes.dart';
 
-final throwsPermissionDenied = throwsA(isA<DatabaseException>()
-    .having((e) => e.code, 'code', DatabaseExceptionCode.permissionDenied)
-    .having((e) => e.message, 'message',
-        'You do not have permission to execute this operation'));
+/// The original Firebase error reaches the caller: not swallowed (B4) and
+/// not replaced, so its details and stack trace are kept for reporting.
+final throwsPermissionDenied = throwsA(isA<FirebaseException>()
+    .having((e) => e.code, 'code', 'permission-denied'));
 
 void main() {
-  group('mapFirestoreError', () {
-    test('permission-denied maps to DatabaseException(permissionDenied)', () {
+  group('translateFirebaseError', () {
+    test('permission-denied becomes DatabaseException(permissionDenied)', () {
       final error = firestoreError('permission-denied');
-      final mapped = mapFirestoreError(error);
       expect(
-        mapped,
+        translateFirebaseError(error),
         isA<DatabaseException>()
             .having(
                 (e) => e.code, 'code', DatabaseExceptionCode.permissionDenied)
+            .having((e) => e.message, 'message',
+                'You do not have permission to execute this operation')
             .having((e) => e.details, 'details', same(error)),
       );
     });
 
-    test('other Firebase errors map to an unknown ApplicationException', () {
-      final mapped = mapFirestoreError(firestoreError('unavailable'));
-      expect(
-        mapped,
-        isA<ApplicationException>()
-            .having((e) => e.code, 'code', ApplicationExceptionCode.unknown)
-            .having((e) => e.message, 'message', kUnknownErrorMessage),
-      );
-    });
-
-    test('domain exceptions pass through unchanged', () {
-      const domain = PrayerRequestsException(
-        code: PrayerRequestsExceptionCode.alreadyReported,
-        message: 'x',
-      );
-      expect(mapFirestoreError(domain), same(domain));
+    test('other errors are not recognised', () {
+      expect(translateFirebaseError(firestoreError('unavailable')), isNull);
+      expect(translateFirebaseError(StateError('x')), isNull);
     });
   });
 
-  group('repositories throw mapped Firestore failures (B4)', () {
+  group('userMessageFor with the Firebase translator', () {
+    final recorded = <(Object, StackTrace?)>[];
+
+    setUp(() {
+      recorded.clear();
+      ErrorHooks.install(
+        translate: translateFirebaseError,
+        record: (e, st) => recorded.add((e, st)),
+      );
+    });
+
+    tearDown(ErrorHooks.reset);
+
+    test('a permission error gets its message and is recorded with its trace',
+        () {
+      final error = firestoreError('permission-denied');
+      final trace = StackTrace.current;
+
+      expect(userMessageFor(error, stackTrace: trace),
+          'You do not have permission to execute this operation');
+      expect(recorded.single.$1, same(error));
+      expect(recorded.single.$2, same(trace));
+    });
+
+    test('an unrecognised error gets the fallback and is recorded', () {
+      expect(
+          userMessageFor(firestoreError('unavailable')), kUnknownErrorMessage);
+      expect(recorded, hasLength(1));
+    });
+
+    test('expected app exceptions keep their message and are not recorded', () {
+      const domain = PrayerRequestsException(
+        code: PrayerRequestsExceptionCode.alreadyReported,
+        message: 'already',
+      );
+      expect(userMessageFor(domain), 'already');
+      expect(recorded, isEmpty);
+    });
+
+    test('app exceptions wrapping a cause are recorded', () {
+      final wrapped = StorageException(
+        code: StorageExceptionCode.unknown,
+        message: 'upload failed',
+        details: firestoreError('unavailable'),
+      );
+      expect(userMessageFor(wrapped), 'upload failed');
+      expect(recorded.single.$1, same(wrapped));
+    });
+
+    test('reportError records only unexpected errors', () {
+      reportError(StateError('boom'));
+      reportError(const PrayerRequestsException(
+        code: PrayerRequestsExceptionCode.alreadyReported,
+        message: 'x',
+      ));
+      expect(recorded.map((r) => r.$1), [isA<StateError>()]);
+    });
+  });
+
+  group('repositories propagate Firestore failures (B4)', () {
     late MockFirebaseFirestore firestore;
     late MockCollectionReference collection;
     late MockDocumentReference document;
@@ -94,7 +143,8 @@ void main() {
 
       await expectLater(
         prayerRequests().getPrayerRequests(limit: 10),
-        throwsA(isA<ApplicationException>()),
+        throwsA(isA<FirebaseException>()
+            .having((e) => e.code, 'code', 'unavailable')),
       );
     });
 
@@ -170,8 +220,8 @@ void main() {
       );
       await expectLater(
         repository.watchThreads('forum-1'),
-        emitsError(isA<DatabaseException>().having(
-            (e) => e.code, 'code', DatabaseExceptionCode.permissionDenied)),
+        emitsError(isA<FirebaseException>()
+            .having((e) => e.code, 'code', 'permission-denied')),
       );
     });
   });

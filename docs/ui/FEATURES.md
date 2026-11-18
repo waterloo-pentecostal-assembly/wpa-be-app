@@ -418,7 +418,7 @@ All names are constants in `AnalyticsEvents` (`domain/common/analytics.dart`), l
 |---|---|
 | B1 | App Check uses Play Integrity / App Attest (DeviceCheck fallback) in prod and debug providers otherwise (`lib/app/bootstrap.dart`). The prod providers must be registered in the Firebase console before enforcement. |
 | B2, B3 | Every flavour calls `bootstrap(AppConfig)`, which initializes once before `runApp`. |
-| B4 | Mapped Firestore exceptions are thrown everywhere (`guardFirestore` in `infrastructure/common/firestore_errors.dart`). |
+| B4 | Firestore errors are no longer discarded: they propagate to the cubit, which records them and shows a translated message (`userMessageFor` + `translateFirebaseError`). |
 | B5 | Repositories are stateless. Paging uses `PageResult` / `PageCursor`, and the cursor is held by `AllPostsCubit`. |
 | B6 | Admin pull-to-refresh calls the queue's own `load()`. |
 | B7 | One `EngageHomeCubit` per Engage home. |

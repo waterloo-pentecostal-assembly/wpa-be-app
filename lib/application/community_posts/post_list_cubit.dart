@@ -148,10 +148,10 @@ abstract class PostListCubit<T extends CommunityPost>
     try {
       final posts = await fetch();
       safeEmit(PostListState<T>(status: LoadStatus.success, posts: posts));
-    } catch (e) {
+    } catch (e, stackTrace) {
       safeEmit(state.copyWith(
         status: LoadStatus.failure,
-        errorMessage: userMessageFor(e),
+        errorMessage: userMessageFor(e, stackTrace: stackTrace),
       ));
     }
   }
@@ -228,10 +228,10 @@ class AllPostsCubit<T extends CommunityPost> extends PostListCubit<T> {
         posts: page.items,
         isEndOfList: page.isEnd,
       ));
-    } catch (e) {
+    } catch (e, stackTrace) {
       safeEmit(state.copyWith(
         status: LoadStatus.failure,
-        errorMessage: userMessageFor(e),
+        errorMessage: userMessageFor(e, stackTrace: stackTrace),
       ));
     }
   }
@@ -249,9 +249,10 @@ class AllPostsCubit<T extends CommunityPost> extends PostListCubit<T> {
         isEndOfList: page.isEnd,
         isLoadingMore: false,
       ));
-    } catch (e) {
+    } catch (e, stackTrace) {
       safeEmit(state.copyWith(isLoadingMore: false));
-      showMessage(userMessageFor(e), PostListMessageKind.error);
+      showMessage(
+          userMessageFor(e, stackTrace: stackTrace), PostListMessageKind.error);
     }
   }
 

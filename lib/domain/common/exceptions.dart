@@ -1,3 +1,7 @@
+import 'error_reporting.dart';
+
+export 'error_reporting.dart' show reportError;
+
 /// Generic fallback shown to users when no more specific message exists.
 const String kUnknownErrorMessage = 'An unknown error occurred';
 
@@ -26,10 +30,18 @@ abstract class BaseApplicationException<C extends Enum> implements Exception {
   String toString() => '[$runtimeType: ${code.name}] $message ${details ?? ''}';
 }
 
-/// Returns a message that is safe to show to the user for [error].
-String userMessageFor(Object error, {String fallback = kUnknownErrorMessage}) {
-  if (error is BaseApplicationException) return error.message;
-  return fallback;
+/// Returns a message that is safe to show to the user for [error], first
+/// recording it if it is unexpected (see [reportError]) so the original error
+/// and [stackTrace] are not lost. Errors from outside the domain are
+/// translated by [ErrorHooks] (e.g. Firestore permission errors); anything
+/// unrecognised gets [fallback].
+String userMessageFor(
+  Object error, {
+  StackTrace? stackTrace,
+  String fallback = kUnknownErrorMessage,
+}) {
+  reportError(error, stackTrace);
+  return ErrorHooks.translate(error)?.message ?? fallback;
 }
 
 enum ValueObjectExceptionCode { invalidFormat, tooLong, tooShort }

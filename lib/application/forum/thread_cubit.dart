@@ -167,8 +167,8 @@ class ThreadCubit extends Cubit<ThreadState> {
   Future<void> _guard(Future<void> Function() action) async {
     try {
       await action();
-    } catch (e) {
-      _message(userMessageFor(e));
+    } catch (e, stackTrace) {
+      _message(userMessageFor(e, stackTrace: stackTrace));
     }
   }
 
@@ -194,15 +194,16 @@ class ThreadCubit extends Cubit<ThreadState> {
               closeRequested: state.closeRequested,
             ),
           ),
-          onError: (Object _) {},
+          onError: reportError,
         );
     _commentsSub = _forum.watchComments(threadId, forumId).listen(
           (comments) => _safeEmit(
             state.copyWith(status: LoadStatus.success, comments: comments),
           ),
-          onError: (Object e) => _safeEmit(state.copyWith(
+          onError: (Object e, StackTrace stackTrace) =>
+              _safeEmit(state.copyWith(
             status: LoadStatus.failure,
-            errorMessage: userMessageFor(e),
+            errorMessage: userMessageFor(e, stackTrace: stackTrace),
           )),
         );
     try {
@@ -210,7 +211,8 @@ class ThreadCubit extends Cubit<ThreadState> {
       _safeEmit(state.copyWith(
         isFollowing: settings.threadsFollowed.contains(threadId),
       ));
-    } catch (_) {
+    } catch (e, stackTrace) {
+      reportError(e, stackTrace);
       // Follow option hidden when settings are unavailable.
     }
   }
@@ -332,7 +334,8 @@ class ThreadCubit extends Cubit<ThreadState> {
           : await _notifications.unfollowThread(threadId);
       _events
           .emit(ThreadFollowChanged(threadId: threadId, isFollowing: follow));
-    } catch (_) {
+    } catch (e, stackTrace) {
+      reportError(e, stackTrace);
       _safeEmit(state.copyWith(isFollowing: !follow));
       _message(
           follow ? 'Unable to follow thread' : 'Unable to unfollow thread');

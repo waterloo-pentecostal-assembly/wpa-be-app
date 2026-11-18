@@ -5,7 +5,6 @@ import '../../domain/notification_settings/entities.dart';
 import '../../domain/notification_settings/exceptions.dart';
 import '../../domain/notification_settings/interfaces.dart';
 import '../common/firestore_data.dart';
-import '../common/firestore_errors.dart';
 
 /// Firestore field name for each [NotificationSetting].
 const Map<NotificationSetting, String> kNotificationSettingFields = {
@@ -34,7 +33,7 @@ class NotificationSettingsService implements INotificationSettingsService {
 
   Future<DocumentSnapshot<Map<String, dynamic>>> _settingsDoc() async {
     final settings = _settings();
-    final snapshot = await guardFirestore(settings.get);
+    final snapshot = await settings.get();
     if (snapshot.docs.isEmpty) {
       throw const NotificationSettingsException(
         code: NotificationSettingsExceptionCode.noNotificationSettings,
@@ -48,7 +47,7 @@ class NotificationSettingsService implements INotificationSettingsService {
   /// also queues while offline.
   Future<void> _update(Map<String, dynamic> data) async {
     final doc = await _settingsDoc();
-    await guardFirestore(() => doc.reference.update(data));
+    await doc.reference.update(data);
   }
 
   @override
@@ -76,16 +75,16 @@ class NotificationSettingsService implements INotificationSettingsService {
   // FCM topic (un)subscription is done by Cloud Functions reacting to these
   // flags (the Dart SDK cannot manage topics across a user's devices).
   @override
-  Future<void> setSetting(NotificationSetting setting, bool enabled) =>
+  Future<void> setSetting(NotificationSetting setting, bool enabled) async =>
       _update({kNotificationSettingFields[setting]!: enabled});
 
   @override
-  Future<void> followThread(String threadId) => _update({
+  Future<void> followThread(String threadId) async => _update({
         'threads_followed': FieldValue.arrayUnion([threadId]),
       });
 
   @override
-  Future<void> unfollowThread(String threadId) => _update({
+  Future<void> unfollowThread(String threadId) async => _update({
         'threads_followed': FieldValue.arrayRemove([threadId]),
       });
 }

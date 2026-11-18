@@ -8,6 +8,7 @@ import '../../domain/authentication/session.dart';
 import '../../domain/common/media_upload.dart';
 import '../../domain/user_profile/interfaces.dart';
 import '../../domain/user_profile/policies.dart';
+import '../../domain/common/exceptions.dart';
 
 class ProfileState extends Equatable {
   const ProfileState({
@@ -76,7 +77,7 @@ class ProfileCubit extends Cubit<ProfileState> {
       await _progressSub?.cancel();
       _progressSub = handle.progress.listen(
         (p) => _emit(percent: () => p.percent),
-        onError: (Object _) {},
+        onError: reportError,
       );
       final location = await handle.location;
       await _repository.setProfilePhoto(
@@ -86,7 +87,8 @@ class ProfileCubit extends Cubit<ProfileState> {
       await _repository.refreshCurrentUser();
       await _progressSub?.cancel();
       _emit(percent: () => null, image: image);
-    } catch (_) {
+    } catch (e, stackTrace) {
+      reportError(e, stackTrace);
       await _progressSub?.cancel();
       _emit(percent: () => null, error: 'Error uploading photo');
     }

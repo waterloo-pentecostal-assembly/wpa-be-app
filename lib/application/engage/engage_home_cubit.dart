@@ -131,7 +131,8 @@ class EngageHomeCubit extends Cubit<EngageHomeState> {
     bool hasActive;
     try {
       hasActive = await _bibleSeries.hasActiveBibleSeries();
-    } catch (_) {
+    } catch (e, stackTrace) {
+      reportError(e, stackTrace);
       hasActive = false;
     }
     if (isClosed) return;
@@ -159,11 +160,11 @@ class EngageHomeCubit extends Cubit<EngageHomeState> {
               : 0,
         ));
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (!isClosed) {
         emit(state.copyWith(
           seriesStatus: LoadStatus.failure,
-          seriesError: userMessageFor(e),
+          seriesError: userMessageFor(e, stackTrace: stackTrace),
         ));
       }
     }
@@ -176,7 +177,8 @@ class EngageHomeCubit extends Cubit<EngageHomeState> {
       if (!isClosed) {
         emit(state.copyWith(mediaStatus: LoadStatus.success, media: media));
       }
-    } catch (_) {
+    } catch (e, stackTrace) {
+      reportError(e, stackTrace);
       if (!isClosed) {
         emit(state.copyWith(
           mediaStatus: LoadStatus.failure,
@@ -193,9 +195,10 @@ class EngageHomeCubit extends Cubit<EngageHomeState> {
         (a) {
           if (!isClosed) emit(state.copyWith(seriesProgress: a.seriesProgress));
         },
-        onError: (Object _) {},
+        onError: reportError,
       );
-    } catch (_) {
+    } catch (e, stackTrace) {
+      reportError(e, stackTrace);
       // Progress stays at 0 when achievements are unavailable.
     }
   }

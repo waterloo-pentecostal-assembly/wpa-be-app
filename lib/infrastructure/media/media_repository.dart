@@ -4,7 +4,6 @@ import '../../domain/media/entities.dart';
 import '../../domain/media/interfaces.dart';
 import '../../services/firebase_storage_service.dart';
 import '../common/firestore_data.dart';
-import '../common/firestore_errors.dart';
 
 class MediaRepository implements IMediaRepository {
   MediaRepository(this._firestore, this._firebaseStorageService);
@@ -28,7 +27,7 @@ class MediaRepository implements IMediaRepository {
   /// Media whose document or thumbnail cannot be read is skipped.
   @override
   Future<List<Media>> getAvailableMedia() async {
-    final snapshot = await guardFirestore(_firestore.collection('media').get);
+    final snapshot = await _firestore.collection('media').get();
     return parseAllSkippingInvalid(snapshot.docs, _parse);
   }
 }

@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../domain/notification_settings/entities.dart';
 import '../../domain/notification_settings/interfaces.dart';
 import '../common/load_status.dart';
+import '../../domain/common/exceptions.dart';
 
 class NotificationSettingsState extends Equatable {
   const NotificationSettingsState({
@@ -44,7 +45,8 @@ class NotificationSettingsCubit extends Cubit<NotificationSettingsState> {
           settings: settings,
         ));
       }
-    } catch (_) {
+    } catch (e, stackTrace) {
+      reportError(e, stackTrace);
       if (!isClosed) {
         emit(NotificationSettingsState(
           status: LoadStatus.failure,
@@ -66,7 +68,8 @@ class NotificationSettingsCubit extends Cubit<NotificationSettingsState> {
     ));
     try {
       await _service.setSetting(setting, enabled);
-    } catch (_) {
+    } catch (e, stackTrace) {
+      reportError(e, stackTrace);
       if (!isClosed) {
         emit(NotificationSettingsState(
           status: LoadStatus.success,

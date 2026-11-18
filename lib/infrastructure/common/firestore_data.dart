@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer' as developer;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -71,8 +70,8 @@ Map<String, dynamic> dataOf(DocumentSnapshot doc) =>
     (doc.data() as Map<String, dynamic>?) ?? {};
 
 /// Parses every document of a list in parallel, **skipping** documents that
-/// fail to parse so one malformed document cannot break a whole list. Skips
-/// are logged for debugging.
+/// fail to parse so one malformed document cannot break a whole list. Each
+/// skip is reported (see [reportError]) so bad data is not silently lost.
 Future<List<T>> parseAllSkippingInvalid<D extends DocumentSnapshot, T>(
   Iterable<D> docs,
   FutureOr<T> Function(D doc) parse,
@@ -80,14 +79,22 @@ Future<List<T>> parseAllSkippingInvalid<D extends DocumentSnapshot, T>(
   final results = await Future.wait(docs.map((doc) async {
     try {
       return await parse(doc);
-    } catch (e) {
-      developer.log(
-        'Skipping malformed document ${doc.reference.path}',
-        name: 'firestore',
-        error: e,
-      );
+    } catch (e, stackTrace) {
+      reportError(
+          MalformedDocumentException(doc.reference.path, e), stackTrace);
       return null;
     }
   }));
   return results.whereType<T>().toList();
+}
+
+/// Recorded when [parseAllSkippingInvalid] skips a document.
+class MalformedDocumentException implements Exception {
+  const MalformedDocumentException(this.path, this.cause);
+
+  final String path;
+  final Object cause;
+
+  @override
+  String toString() => 'Skipped malformed document $path: $cause';
 }

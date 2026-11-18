@@ -26,7 +26,7 @@ lib/
 │   └── common/               LoadStatus, nextEffectId(), AppEventBus/AppEvent
 ├── infrastructure/<feature>/ Firestore/Firebase implementations of domain interfaces + document
 │                             parse/write functions (`*_documents.dart`, `user_document.dart`)
-│   ├── common/               firestore_errors.dart (mapFirestoreError, guardFirestore),
+│   ├── common/               firebase_error_translator.dart (Firebase error → message),
 │   │                         firestore_data.dart (typed field reads, parseAllSkippingInvalid),
 │   │                         FirestorePageCursor, user_snippet.dart
 │   ├── community_posts/      FirestorePostStore: shared by prayer requests, testimonies, admin
@@ -163,14 +163,18 @@ Wiring is in `lib/app/app.dart`:
 ## 10. Error handling
 
 - **Single exception family**: everything the app throws on purpose extends `BaseApplicationException` (`domain/common/exceptions.dart`), whose `message` is safe to show to users. Examples: `AuthenticationException`, `DatabaseException`, `StorageException`, `ApplicationException`, `ValueObjectException`, and the per-feature `*Exception` classes.
-- **Mapping at the edge**:
-  - `infrastructure/common/firestore_errors.dart`: `mapFirestoreError(e)` passes `BaseApplicationException` through, maps `permission-denied` to `DatabaseException`, and maps anything else (including parse errors) to `ApplicationException.unknown` ("An unknown error occurred").
-  - Repositories wrap every Firestore call (and single-document parsing) in `guardFirestore(() => …)`, so they only ever throw domain exceptions (fix B4). Streams use `.mapFirestoreErrors()`.
+- **Repositories don't wrap Firebase calls.** Firestore errors propagate unchanged, with their original stack trace, to the cubit that awaited them. Repositories throw app exceptions only for their own rules (not found, already reported, missing field, …). They are never swallowed (fix B4).
+- **Translate and record once, where an error becomes a message** (`domain/common/error_reporting.dart`):
+  - `userMessageFor(e, stackTrace: st)` records the error if it is unexpected, then returns the app exception's message, a translated message, or the generic fallback ("An unknown error occurred").
+  - `reportError(e, st)` records an error that is caught and **not** shown (best-effort work, skipped documents, fixed-copy failures). Every `catch` in `lib/application` calls one of the two.
+  - "Unexpected" = not an app exception, or an app exception wrapping a cause (`details`). Expected outcomes (validation, already reported, wrong password) are not recorded.
+  - Hooks are installed by `installErrorHandling()` (`lib/app/error_handling.dart`, called first in `bootstrap`): the translator is `translateFirebaseError` (`permission-denied` → "You do not have permission to execute this operation"), the recorder is `recordError`. Uncaught Flutter and platform errors go to the same recorder.
+  - `recordError` currently logs (DevTools/console, terminal in debug). It is the single place to forward errors to a crash reporter for release builds.
   - Document fields are read with the typed helpers in `firestore_data.dart` (`require<T>`, `optional`, `requireDate`, `stringList`, …): a missing or wrongly typed required field is an `ApplicationException(missingKey)`, never a raw `TypeError`.
   - `FirebaseStorageService` throws `StorageException`.
   - `FirebaseAuthenticationFacade` maps Firebase Auth codes to `AuthenticationException` messages.
 - **Cubits never throw to the UI**. They catch and put a message in state, either from `userMessageFor(e)` (the exception's message, or the generic fallback) or from fixed feature copy. Fixed copy is used in `PostActionCopy` (e.g. `Unable to delete prayer request`), `Unable to load media`, `Error loading notification settings`, `Unable to subscribe`, `Error uploading photo` and `Unable to initiate account deletion`. Load failures go to `status = failure` + `errorMessage`; action failures go to a one-shot effect.
-- Malformed documents in lists are skipped (`parseAllSkippingInvalid`, logged under `firestore`) rather than failing the whole list: posts, admin queues, users, Bible series, media, completions.
+- Malformed documents in lists are skipped (`parseAllSkippingInvalid`, each skip reported as a `MalformedDocumentException`) rather than failing the whole list: posts, admin queues, users, Bible series, media, completions.
 - Decorative image URLs (avatars, profile photos) are best-effort (`FirebaseStorageService.tryGetDownloadUrl`): a deleted image reads as `null` instead of failing a list or sign-in.
 - Writes that read nothing use plain `update()`/`set()`; transactions are reserved for read-modify-write (pray/amen, report, add comment). Multi-document deletes use a `WriteBatch` (`markAsIncomplete`).
 
@@ -210,7 +214,7 @@ The example below is a hypothetical read-only "Announcements" list. The smallest
    - Rules or permissions go in `rules.dart` / `policies.dart` as pure functions that take `now` and the `LocalUser?` (see `domain/forum/policies.dart`). Add analytics names to `AnalyticsEvents`.
 2. **Infrastructure** (`lib/infrastructure/announcements/`):
    - Parse/write functions (`announcement_documents.dart`) using the typed readers in `common/firestore_data.dart` and `toTimestamp` for writes.
-   - A repository implementing the interface. It takes `FirebaseFirestore` and, if needed, `ISession` / `FirebaseStorageService` through its constructor, and holds no paging state; use `Query.page()` and `nextCursorFor` from `common/firestore_page_cursor.dart`. Wrap Firebase calls in `guardFirestore` and parse lists with `parseAllSkippingInvalid`.
+   - A repository implementing the interface. It takes `FirebaseFirestore` and, if needed, `ISession` / `FirebaseStorageService` through its constructor, and holds no paging state; use `Query.page()` and `nextCursorFor` from `common/firestore_page_cursor.dart`. Call Firebase directly (errors propagate to the cubit, which reports them via `userMessageFor` / `reportError`) and parse lists with `parseAllSkippingInvalid`.
    - Document the collection in `docs/firestore/`.
 3. **Application** (`lib/application/announcements/announcements_cubit.dart`): `AnnouncementsState { LoadStatus status; List<Announcement> items; bool isEndOfList; String? errorMessage }` and a cubit that depends on the interface (plus `IAnalytics` / `AppEventBus` if needed) and keeps the cursor. Copy `AllPostsCubit` in `application/community_posts/post_list_cubit.dart` for paging. If another screen must refresh, add an `AppEvent` subclass in `application/common/app_events.dart`.
 4. **Composition root**:

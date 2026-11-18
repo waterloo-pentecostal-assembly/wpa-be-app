@@ -6,7 +6,6 @@ import '../../domain/common/paging.dart';
 import '../../domain/user_profile/entities.dart';
 import '../../services/firebase_storage_service.dart';
 import '../common/firestore_data.dart';
-import '../common/firestore_errors.dart';
 import '../common/firestore_page_cursor.dart';
 import '../common/user_snippet.dart';
 
@@ -106,25 +105,25 @@ class FirestorePostStore<T> {
 
   Future<List<T>> _list(Query query) async {
     final userId = _session.requireUser().id;
-    final snapshot = await guardFirestore(query.get);
+    final snapshot = await query.get();
     return parseAllSkippingInvalid(snapshot.docs, (doc) => _parse(doc, userId));
   }
 
   /// Re-reads a document after a write and parses it.
   Future<T> _reread(DocumentReference ref) async {
     final userId = _session.requireUser().id;
-    return guardFirestore(() async => _parse(await ref.get(), userId));
+    return _parse(await ref.get(), userId);
   }
 
   /// Approved, open posts, newest first.
   Future<PageResult<T>> page({required int limit, PageCursor? after}) async {
     final userId = _session.requireUser().id;
-    final snapshot = await guardFirestore(_collection
+    final snapshot = await _collection
         .where('is_approved', isEqualTo: true)
         .where(_c.closedField, isEqualTo: false)
         .orderBy('date', descending: true)
         .page(limit: limit, after: after)
-        .get);
+        .get();
     return PageResult(
       items: await parseAllSkippingInvalid(
           snapshot.docs, (doc) => _parse(doc, userId)),
@@ -141,76 +140,72 @@ class FirestorePostStore<T> {
   /// Whether the current user has fewer approved posts than the limit.
   Future<bool> canAdd() async {
     final userId = _session.requireUser().id;
-    final count = await guardFirestore(() async {
-      final snapshot = await _collection
-          .where('user_id', isEqualTo: userId)
-          .where('is_approved', isEqualTo: true)
-          .count()
-          .get();
-      return snapshot.count ?? 0;
-    });
-    return count < _c.perUserLimit;
+    final snapshot = await _collection
+        .where('user_id', isEqualTo: userId)
+        .where('is_approved', isEqualTo: true)
+        .count()
+        .get();
+    return (snapshot.count ?? 0) < _c.perUserLimit;
   }
 
   /// Posts start unapproved; moderation sets `is_approved`.
   Future<T> create({required String body, required bool isAnonymous}) async {
     final user = _session.requireUser();
-    final ref = await guardFirestore(() => _collection.add({
-          'date': Timestamp.now(),
-          'is_anonymous': isAnonymous,
-          'is_approved': false,
-          _c.closedField: false,
-          'request': body,
-          'user_id': user.id,
-          'user_snippet': userSnippetDocument(user),
-        }));
+    final ref = await _collection.add({
+      'date': Timestamp.now(),
+      'is_anonymous': isAnonymous,
+      'is_approved': false,
+      _c.closedField: false,
+      'request': body,
+      'user_id': user.id,
+      'user_snippet': userSnippetDocument(user),
+    });
     return _reread(ref);
   }
 
-  Future<void> delete(String id) =>
-      guardFirestore(() => _collection.doc(id).delete());
+  Future<void> delete(String id) async => _collection.doc(id).delete();
 
   Future<T> close(String id) async {
     final ref = _collection.doc(id);
-    await guardFirestore(() => ref.update({_c.closedField: true}));
+    await ref.update({_c.closedField: true});
     return _reread(ref);
   }
 
   /// Adds the current user to the reaction list (prayed / amen).
   Future<void> react(String id) async {
     final userId = _session.requireUser().id;
-    await guardFirestore(() => _firestore.runTransaction((transaction) async {
-          final ref = _collection.doc(id);
-          final data = (await transaction.get(ref)).data();
-          if (data == null) throw _c.notFound();
-          transaction.update(ref, {
-            _c.reactedByField: [
-              ...data.optional<List>(_c.reactedByField, const []),
-              userId,
-            ],
-          });
-        }));
+    await _firestore.runTransaction((transaction) async {
+      final ref = _collection.doc(id);
+      final data = (await transaction.get(ref)).data();
+      if (data == null) throw _c.notFound();
+      transaction.update(ref, {
+        _c.reactedByField: [
+          ...data.optional<List>(_c.reactedByField, const []),
+          userId,
+        ],
+      });
+    });
   }
 
   /// Reports the post and resets `is_approved` so it is re-moderated.
   Future<void> report(String id) async {
     final userId = _session.requireUser().id;
-    await guardFirestore(() => _firestore.runTransaction((transaction) async {
-          final ref = _collection.doc(id);
-          final data = (await transaction.get(ref)).data() ?? {};
-          final reportedBy = data.optional<List>('reported_by', const []);
-          if (reportedBy.contains(userId)) throw _c.alreadyReported();
-          transaction.update(ref, {
-            'reported_by': [...reportedBy, userId],
-            'is_approved': false,
-          });
-        }));
+    await _firestore.runTransaction((transaction) async {
+      final ref = _collection.doc(id);
+      final data = (await transaction.get(ref)).data() ?? {};
+      final reportedBy = data.optional<List>('reported_by', const []);
+      if (reportedBy.contains(userId)) throw _c.alreadyReported();
+      transaction.update(ref, {
+        'reported_by': [...reportedBy, userId],
+        'is_approved': false,
+      });
+    });
   }
 
   /// Posts awaiting moderation (admin queue).
-  Future<List<T>> unapproved() =>
+  Future<List<T>> unapproved() async =>
       _list(_collection.where('is_approved', isEqualTo: false));
 
-  Future<void> approve(String id) =>
-      guardFirestore(() => _collection.doc(id).update({'is_approved': true}));
+  Future<void> approve(String id) async =>
+      _collection.doc(id).update({'is_approved': true});
 }

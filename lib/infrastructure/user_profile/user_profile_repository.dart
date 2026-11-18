@@ -7,7 +7,6 @@ import '../../domain/common/media_upload.dart';
 import '../../domain/user_profile/exceptions.dart';
 import '../../domain/user_profile/interfaces.dart';
 import '../../services/firebase_storage_service.dart';
-import '../common/firestore_errors.dart';
 
 class UserProfileRepository implements IUserProfileRepository {
   UserProfileRepository(
@@ -24,7 +23,7 @@ class UserProfileRepository implements IUserProfileRepository {
 
   /// Delegates to the facade, which publishes the user to the session.
   @override
-  Future<LocalUser> refreshCurrentUser() =>
+  Future<LocalUser> refreshCurrentUser() async =>
       _authenticationFacade.getSignedInUser();
 
   @override
@@ -48,10 +47,9 @@ class UserProfileRepository implements IUserProfileRepository {
     required String thumbnail,
   }) async {
     final userId = _session.requireUser().id;
-    await guardFirestore(
-        () => _firestore.collection('users').doc(userId).update({
-              'thumbnail': thumbnail,
-              'profile_photo': profilePhoto,
-            }));
+    await _firestore.collection('users').doc(userId).update({
+      'thumbnail': thumbnail,
+      'profile_photo': profilePhoto,
+    });
   }
 }

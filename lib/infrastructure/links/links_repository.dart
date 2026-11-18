@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../../domain/links/entities.dart';
 import '../../domain/links/interface.dart';
 import '../common/firestore_data.dart';
-import '../common/firestore_errors.dart';
 
 class LinksRepository implements ILinksRepository {
   LinksRepository(this._firestore);
@@ -12,7 +11,7 @@ class LinksRepository implements ILinksRepository {
 
   @override
   Future<AppLinks> getLinks() async {
-    final snapshot = await guardFirestore(_firestore.collection('links').get);
+    final snapshot = await _firestore.collection('links').get();
     if (snapshot.docs.isEmpty) return const AppLinks();
     // Only one document exists in this collection.
     final data = snapshot.docs.first.data();

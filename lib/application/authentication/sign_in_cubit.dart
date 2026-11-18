@@ -71,7 +71,8 @@ String validationError(void Function() validate) {
     return '';
   } on ValueObjectException catch (e) {
     return e.message;
-  } catch (_) {
+  } catch (e, stackTrace) {
+    reportError(e, stackTrace);
     return kUnknownErrorMessage;
   }
 }
@@ -104,7 +105,9 @@ class SignInCubit extends Cubit<SignInState> {
       if (!await _facade.deviceTokenExists(userId)) {
         await _facade.addDeviceToken(userId);
       }
-    } catch (_) {}
+    } catch (e, stackTrace) {
+      reportError(e, stackTrace);
+    }
   }
 
   Future<void> submit() async {
@@ -119,12 +122,12 @@ class SignInCubit extends Cubit<SignInState> {
       if (!isClosed) {
         emit(state.copyWith(status: FormStatus.success, errorMessage: ''));
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       unawaited(_facade.signOut());
       if (!isClosed) {
         emit(state.copyWith(
           status: FormStatus.failure,
-          errorMessage: userMessageFor(e),
+          errorMessage: userMessageFor(e, stackTrace: stackTrace),
         ));
       }
     }

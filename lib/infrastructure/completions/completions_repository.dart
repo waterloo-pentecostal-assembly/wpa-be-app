@@ -7,7 +7,6 @@ import '../../domain/completions/exceptions.dart';
 import '../../domain/completions/interfaces.dart';
 import '../../services/firebase_storage_service.dart';
 import '../common/firestore_data.dart';
-import '../common/firestore_errors.dart';
 import 'completion_documents.dart';
 
 class CompletionsRepository implements ICompletionsRepository {
@@ -34,8 +33,8 @@ class CompletionsRepository implements ICompletionsRepository {
     required CompletionDetails completionDetails,
   }) async {
     final userId = _session.requireUser().id;
-    final ref = await guardFirestore(() =>
-        _completions.add(newCompletionDocument(completionDetails, userId)));
+    final ref = await _completions
+        .add(newCompletionDocument(completionDetails, userId));
     return ref.id;
   }
 
@@ -45,18 +44,17 @@ class CompletionsRepository implements ICompletionsRepository {
   Future<void> markAsIncomplete({
     required String completionId,
     required bool isResponsePossible,
-  }) =>
-      guardFirestore(() async {
-        final batch = _firestore.batch();
-        if (isResponsePossible) {
-          final responses = await _myResponses(completionId).get();
-          for (final doc in responses.docs) {
-            batch.delete(doc.reference);
-          }
-        }
-        batch.delete(_completions.doc(completionId));
-        await batch.commit();
-      });
+  }) async {
+    final batch = _firestore.batch();
+    if (isResponsePossible) {
+      final responses = await _myResponses(completionId).get();
+      for (final doc in responses.docs) {
+        batch.delete(doc.reference);
+      }
+    }
+    batch.delete(_completions.doc(completionId));
+    await batch.commit();
+  }
 
   @override
   Future<String> putResponses({
@@ -66,13 +64,11 @@ class CompletionsRepository implements ICompletionsRepository {
     final data = responsesDocument(responses, _session.requireUser().id);
     final collection = _completions.doc(completionId).collection('responses');
     final id = responses.id;
-    return guardFirestore(() async {
-      if (id != null) {
-        await collection.doc(id).set(data);
-        return id;
-      }
-      return (await collection.add(data)).id;
-    });
+    if (id != null) {
+      await collection.doc(id).set(data);
+      return id;
+    }
+    return (await collection.add(data)).id;
   }
 
   /// The user's completions of a series keyed by content id. A malformed
@@ -81,10 +77,10 @@ class CompletionsRepository implements ICompletionsRepository {
   Future<Map<String, CompletionDetails>> getAllCompletions({
     required String bibleSeriesId,
   }) async {
-    final snapshot = await guardFirestore(_completions
+    final snapshot = await _completions
         .where('user_id', isEqualTo: _session.requireUser().id)
         .where('series_id', isEqualTo: bibleSeriesId)
-        .get);
+        .get();
     final completions =
         await parseAllSkippingInvalid(snapshot.docs, parseCompletion);
     return {for (final c in completions) c.contentId: c};
@@ -95,26 +91,20 @@ class CompletionsRepository implements ICompletionsRepository {
     required String seriesContentId,
   }) async {
     final userId = _session.requireUser().id;
-    return guardFirestore(() async {
-      final snapshot = await _completions
-          .where('user_id', isEqualTo: userId)
-          .where('content_id', isEqualTo: seriesContentId)
-          .get();
-      return snapshot.docs.isEmpty
-          ? null
-          : parseCompletion(snapshot.docs.first);
-    });
+    final snapshot = await _completions
+        .where('user_id', isEqualTo: userId)
+        .where('content_id', isEqualTo: seriesContentId)
+        .get();
+    return snapshot.docs.isEmpty ? null : parseCompletion(snapshot.docs.first);
   }
 
   @override
   Future<Responses> getResponses({required String completionId}) async {
     final query = _myResponses(completionId);
-    return guardFirestore(() async {
-      final snapshot = await query.get();
-      return snapshot.docs.isEmpty
-          ? const Responses()
-          : parseResponses(snapshot.docs.first);
-    });
+    final snapshot = await query.get();
+    return snapshot.docs.isEmpty
+        ? const Responses()
+        : parseResponses(snapshot.docs.first);
   }
 
   @override
@@ -123,7 +113,7 @@ class CompletionsRepository implements ICompletionsRepository {
     required String completionId,
   }) async {
     final ref = _completions.doc(completionId);
-    await guardFirestore(() => ref.update(completionUpdate(completionDetails)));
+    await ref.update(completionUpdate(completionDetails));
     return ref.id;
   }
 
@@ -158,6 +148,6 @@ class CompletionsRepository implements ICompletionsRepository {
   }
 
   @override
-  Future<String> getDownloadUrl({required String gsUrl}) =>
+  Future<String> getDownloadUrl({required String gsUrl}) async =>
       _firebaseStorageService.getDownloadUrl(gsUrl);
 }

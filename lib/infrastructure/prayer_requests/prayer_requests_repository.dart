@@ -62,21 +62,21 @@ class PrayerRequestsRepository implements IPrayerRequestsRepository {
       _posts.page(limit: limit, after: after);
 
   @override
-  Future<List<PrayerRequest>> getMyPrayerRequests() =>
+  Future<List<PrayerRequest>> getMyPrayerRequests() async =>
       _posts.mine(closed: false);
 
   @override
-  Future<List<PrayerRequest>> getMyAnsweredPrayerRequests() =>
+  Future<List<PrayerRequest>> getMyAnsweredPrayerRequests() async =>
       _posts.mine(closed: true);
 
   @override
-  Future<bool> canAddPrayerRequest() => _posts.canAdd();
+  Future<bool> canAddPrayerRequest() async => _posts.canAdd();
 
   @override
   Future<void> deletePrayerRequest({required String id}) => _posts.delete(id);
 
   @override
-  Future<PrayerRequest> closePrayerRequest({required String id}) =>
+  Future<PrayerRequest> closePrayerRequest({required String id}) async =>
       _posts.close(id);
 
   @override

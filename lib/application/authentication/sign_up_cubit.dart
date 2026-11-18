@@ -127,10 +127,10 @@ class SignUpCubit extends Cubit<SignUpState> {
         lastName: Name(state.lastName),
       );
       emit(state.copyWith(status: FormStatus.success, errorMessage: ''));
-    } catch (e) {
+    } catch (e, stackTrace) {
       emit(state.copyWith(
         status: FormStatus.failure,
-        errorMessage: userMessageFor(e),
+        errorMessage: userMessageFor(e, stackTrace: stackTrace),
       ));
     }
   }

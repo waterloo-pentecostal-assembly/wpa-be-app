@@ -112,15 +112,16 @@ class ForumCubit extends Cubit<ForumState> {
     await _threadsSub?.cancel();
     _forumSub = _forum.watchForum(forumId).listen(
           (forum) => _safeEmit(state.copyWith(forum: forum)),
-          onError: (Object _) {},
+          onError: reportError,
         );
     _threadsSub = _forum.watchThreads(forumId, isAdmin: state.isAdmin).listen(
           (threads) => _safeEmit(
             state.copyWith(status: LoadStatus.success, threads: threads),
           ),
-          onError: (Object e) => _safeEmit(state.copyWith(
+          onError: (Object e, StackTrace stackTrace) =>
+              _safeEmit(state.copyWith(
             status: LoadStatus.failure,
-            errorMessage: userMessageFor(e),
+            errorMessage: userMessageFor(e, stackTrace: stackTrace),
           )),
         );
     try {
@@ -128,7 +129,8 @@ class ForumCubit extends Cubit<ForumState> {
       _safeEmit(state.copyWith(
         followedThreadIds: settings.threadsFollowed.toSet(),
       ));
-    } catch (_) {
+    } catch (e, stackTrace) {
+      reportError(e, stackTrace);
       // Follow markers are optional.
     }
   }
@@ -153,8 +155,8 @@ class ForumCubit extends Cubit<ForumState> {
       ));
       await _notifications.followThread(threadId);
       _events.emit(ThreadFollowChanged(threadId: threadId, isFollowing: true));
-    } catch (e) {
-      _message(userMessageFor(e));
+    } catch (e, stackTrace) {
+      _message(userMessageFor(e, stackTrace: stackTrace));
     }
   }
 

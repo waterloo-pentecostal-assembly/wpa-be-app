@@ -165,8 +165,8 @@ class ContentDetailCubit extends Cubit<ContentDetailState> {
         CompletionChanged(seriesId: bibleSeriesId, contentId: contentId),
       );
 
-  void _fail(Object e) => _safeEmit(state.copyWith(
-        actionError: userMessageFor(e),
+  void _fail(Object e, StackTrace stackTrace) => _safeEmit(state.copyWith(
+        actionError: userMessageFor(e, stackTrace: stackTrace),
         effect: ContentDetailEffect.actionError,
         effectId: nextEffectId(),
       ));
@@ -199,10 +199,10 @@ class ContentDetailCubit extends Cubit<ContentDetailState> {
         next = await _withLoadedResponses(next, completion.id);
       }
       _safeEmit(next);
-    } catch (e) {
+    } catch (e, stackTrace) {
       _safeEmit(state.copyWith(
         status: LoadStatus.failure,
-        errorMessage: userMessageFor(e),
+        errorMessage: userMessageFor(e, stackTrace: stackTrace),
       ));
     }
   }
@@ -302,8 +302,8 @@ class ContentDetailCubit extends Cubit<ContentDetailState> {
         responses: state.responses.withId(responseId),
       ));
       _notifyChanged();
-    } catch (e) {
-      _fail(e);
+    } catch (e, stackTrace) {
+      _fail(e, stackTrace);
     }
   }
 
@@ -326,8 +326,8 @@ class ContentDetailCubit extends Cubit<ContentDetailState> {
         responses: state.responses.withId(responseId),
       ));
       _notifyChanged();
-    } catch (e) {
-      _fail(e);
+    } catch (e, stackTrace) {
+      _fail(e, stackTrace);
     }
   }
 
@@ -339,8 +339,8 @@ class ContentDetailCubit extends Cubit<ContentDetailState> {
       );
       _safeEmit(state.copyWith(isComplete: false, completionId: ''));
       _notifyChanged();
-    } catch (e) {
-      _fail(e);
+    } catch (e, stackTrace) {
+      _fail(e, stackTrace);
     }
   }
 
@@ -396,9 +396,9 @@ class ContentDetailCubit extends Cubit<ContentDetailState> {
         isComplete: false,
       ));
       _notifyChanged();
-    } catch (e) {
+    } catch (e, stackTrace) {
       _safeEmit(state.copyWith(uploads: const {}));
-      _fail(e);
+      _fail(e, stackTrace);
     }
   }
 
@@ -433,8 +433,8 @@ class ContentDetailCubit extends Cubit<ContentDetailState> {
         isComplete: false,
       ));
       _notifyChanged();
-    } catch (e) {
-      _fail(e);
+    } catch (e, stackTrace) {
+      _fail(e, stackTrace);
     }
   }
 }

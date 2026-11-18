@@ -7,6 +7,7 @@ import '../../domain/authentication/entities.dart';
 import '../../domain/authentication/interfaces.dart';
 import '../../domain/authentication/session.dart';
 import '../common/load_status.dart';
+import '../../domain/common/exceptions.dart';
 
 enum AuthStatus { unknown, authenticated, unauthenticated }
 
@@ -58,7 +59,8 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
       if (!isClosed) {
         emit(AuthenticationState(status: AuthStatus.authenticated, user: user));
       }
-    } catch (_) {
+    } catch (e, stackTrace) {
+      reportError(e, stackTrace);
       if (!isClosed) {
         emit(const AuthenticationState(status: AuthStatus.unauthenticated));
       }
@@ -82,7 +84,8 @@ class AuthenticationCubit extends Cubit<AuthenticationState> {
       if (!isClosed) {
         emit(const AuthenticationState(status: AuthStatus.unauthenticated));
       }
-    } catch (_) {
+    } catch (e, stackTrace) {
+      reportError(e, stackTrace);
       if (!isClosed) {
         emit(AuthenticationState(
           status: state.status,

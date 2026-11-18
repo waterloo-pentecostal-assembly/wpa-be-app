@@ -91,7 +91,8 @@ class PostActions<T extends CommunityPost> {
       unawaited(_analytics.log(copy.createdEvent));
       _events.emit(PostCreated<T>(post));
       return post;
-    } catch (_) {
+    } catch (e, stackTrace) {
+      reportError(e, stackTrace);
       throw PostActionException(copy.createError);
     }
   }
@@ -101,7 +102,8 @@ class PostActions<T extends CommunityPost> {
       await repository.delete(id: id);
       unawaited(_analytics.log(copy.deletedEvent));
       _events.emit(PostDeleted<T>(id));
-    } catch (_) {
+    } catch (e, stackTrace) {
+      reportError(e, stackTrace);
       throw PostActionException(copy.deleteError);
     }
   }
@@ -111,7 +113,8 @@ class PostActions<T extends CommunityPost> {
       await repository.report(id: id);
       unawaited(_analytics.log(copy.reportedEvent));
       _events.emit(PostReported<T>(id));
-    } catch (e) {
+    } catch (e, stackTrace) {
+      reportError(e, stackTrace);
       throw PostActionException(
         e is BaseApplicationException && e.code.name == 'alreadyReported'
             ? e.message
@@ -126,7 +129,8 @@ class PostActions<T extends CommunityPost> {
       unawaited(_analytics.log(copy.closedEvent));
       _events.emit(PostClosed<T>(post));
       return post;
-    } catch (_) {
+    } catch (e, stackTrace) {
+      reportError(e, stackTrace);
       throw PostActionException(copy.closeError);
     }
   }
@@ -136,7 +140,8 @@ class PostActions<T extends CommunityPost> {
       await repository.react(id: id);
       unawaited(_analytics.log(copy.reactedEvent));
       _events.emit(PostReacted<T>(id));
-    } catch (_) {
+    } catch (e, stackTrace) {
+      reportError(e, stackTrace);
       throw PostActionException(copy.reactError);
     }
   }

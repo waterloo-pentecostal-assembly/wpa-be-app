@@ -55,12 +55,12 @@ class AdminQueueCubit<T> extends Cubit<AdminQueueState<T>> {
       if (!isClosed) {
         emit(AdminQueueState<T>(status: LoadStatus.success, items: items));
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (!isClosed) {
         emit(AdminQueueState<T>(
           status: LoadStatus.failure,
           items: state.items,
-          errorMessage: userMessageFor(e),
+          errorMessage: userMessageFor(e, stackTrace: stackTrace),
           errorId: state.errorId + 1,
         ));
       }
@@ -80,12 +80,12 @@ class AdminQueueCubit<T> extends Cubit<AdminQueueState<T>> {
     ));
     try {
       await action(id);
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (!isClosed) {
         emit(AdminQueueState<T>(
           status: state.status,
           items: state.items,
-          errorMessage: userMessageFor(e),
+          errorMessage: userMessageFor(e, stackTrace: stackTrace),
           errorId: state.errorId + 1,
         ));
       }

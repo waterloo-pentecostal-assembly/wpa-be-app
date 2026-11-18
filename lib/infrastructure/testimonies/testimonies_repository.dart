@@ -62,14 +62,15 @@ class TestimoniesRepository implements ITestimoniesRepository {
       _posts.page(limit: limit, after: after);
 
   @override
-  Future<List<Testimony>> getMyTestimonies() => _posts.mine(closed: false);
+  Future<List<Testimony>> getMyTestimonies() async =>
+      _posts.mine(closed: false);
 
   @override
-  Future<List<Testimony>> getMyArchivedTestimonies() =>
+  Future<List<Testimony>> getMyArchivedTestimonies() async =>
       _posts.mine(closed: true);
 
   @override
-  Future<bool> canAddTestimony() => _posts.canAdd();
+  Future<bool> canAddTestimony() async => _posts.canAdd();
 
   @override
   Future<void> deleteTestimony({required String id}) => _posts.delete(id);

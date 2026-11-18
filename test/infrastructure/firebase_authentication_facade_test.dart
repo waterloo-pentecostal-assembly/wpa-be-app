@@ -201,8 +201,7 @@ void main() {
           throwsAuth(AuthenticationExceptionCode.userCollectionNotFound));
     });
 
-    test('a Firestore failure is thrown as the mapped DatabaseException',
-        () async {
+    test('a Firestore failure is rethrown unchanged', () async {
       final db = MockFirebaseFirestore();
       final users = MockCollectionReference();
       final doc = MockDocumentReference();
@@ -213,8 +212,8 @@ void main() {
 
       await expectLater(
         buildFacade(db).getSignedInUser(),
-        throwsA(isA<DatabaseException>().having(
-            (e) => e.code, 'code', DatabaseExceptionCode.permissionDenied)),
+        throwsA(isA<FirebaseException>()
+            .having((e) => e.code, 'code', 'permission-denied')),
       );
     });
   });
@@ -285,8 +284,7 @@ void main() {
       await expectLater(register(facade), throwsUnknown);
     });
 
-    test('a Firestore failure deletes the auth user and throws mapped',
-        () async {
+    test('a Firestore failure deletes the auth user and rethrows it', () async {
       stubCreate();
       final db = MockFirebaseFirestore();
       final users = MockCollectionReference();
@@ -297,7 +295,7 @@ void main() {
 
       await expectLater(
         register(buildFacade(db)),
-        throwsA(isA<DatabaseException>()),
+        throwsA(isA<FirebaseException>()),
       );
       verify(() => user.delete()).called(1);
     });

@@ -61,7 +61,8 @@ class FirebaseStorageService {
     if (gsUrl == null || gsUrl.isEmpty) return null;
     try {
       return await getDownloadUrl(gsUrl);
-    } catch (_) {
+    } catch (e, stackTrace) {
+      reportError(e, stackTrace);
       return null;
     }
   }

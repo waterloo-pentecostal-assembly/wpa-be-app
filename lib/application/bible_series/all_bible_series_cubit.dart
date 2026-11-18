@@ -35,11 +35,11 @@ class AllBibleSeriesCubit extends Cubit<AllBibleSeriesState> {
       if (!isClosed) {
         emit(AllBibleSeriesState(status: LoadStatus.success, series: series));
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (!isClosed) {
         emit(AllBibleSeriesState(
           status: LoadStatus.failure,
-          errorMessage: userMessageFor(e),
+          errorMessage: userMessageFor(e, stackTrace: stackTrace),
         ));
       }
     }

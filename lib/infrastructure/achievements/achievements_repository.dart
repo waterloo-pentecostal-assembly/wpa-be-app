@@ -4,7 +4,6 @@ import '../../domain/achievements/entities.dart';
 import '../../domain/achievements/interfaces.dart';
 import '../../domain/authentication/session.dart';
 import '../common/firestore_data.dart';
-import '../common/firestore_errors.dart';
 
 class AchievementsRepository implements IAchievementsRepository {
   AchievementsRepository(this._firestore, this._session);
@@ -24,10 +23,10 @@ class AchievementsRepository implements IAchievementsRepository {
   @override
   Future<Achievements> getAchievements() async {
     final doc = _doc();
-    return _fromData((await guardFirestore(doc.get)).data());
+    return _fromData((await doc.get()).data());
   }
 
   @override
   Stream<Achievements> watchAchievements() =>
-      _doc().snapshots().map((s) => _fromData(s.data())).mapFirestoreErrors();
+      _doc().snapshots().map((s) => _fromData(s.data()));
 }

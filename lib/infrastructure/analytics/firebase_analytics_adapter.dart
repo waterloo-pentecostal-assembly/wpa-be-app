@@ -8,6 +8,6 @@ class FirebaseAnalyticsAdapter implements IAnalytics {
   final FirebaseAnalytics _analytics;
 
   @override
-  Future<void> log(String name, [Map<String, Object>? params]) =>
+  Future<void> log(String name, [Map<String, Object>? params]) async =>
       _analytics.logEvent(name: name, parameters: params);
 }

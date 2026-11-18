@@ -64,7 +64,8 @@ class NewPostCubit<T extends CommunityPost> extends Cubit<NewPostState> {
       emit(state.copyWith(body: validate(value), bodyError: ''));
     } on ValueObjectException catch (e) {
       emit(state.copyWith(body: value, bodyError: e.message));
-    } catch (_) {
+    } catch (e, stackTrace) {
+      reportError(e, stackTrace);
       emit(state.copyWith(body: value, bodyError: 'Unknown Error.'));
     }
   }

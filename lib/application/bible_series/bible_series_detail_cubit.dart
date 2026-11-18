@@ -86,11 +86,11 @@ class BibleSeriesDetailCubit extends Cubit<BibleSeriesDetailState> {
               initialDayIndex(series.seriesContentSnippet, _clock()),
         ));
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       if (!isClosed) {
         emit(BibleSeriesDetailState(
           status: LoadStatus.failure,
-          errorMessage: userMessageFor(e),
+          errorMessage: userMessageFor(e, stackTrace: stackTrace),
         ));
       }
     }
@@ -108,7 +108,8 @@ class BibleSeriesDetailCubit extends Cubit<BibleSeriesDetailState> {
           series: applyContentCompletion(state.series!, contentId, completion),
         ));
       }
-    } catch (_) {
+    } catch (e, stackTrace) {
+      reportError(e, stackTrace);
       // Keep the current status on failure.
     }
   }
