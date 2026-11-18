@@ -838,7 +838,7 @@ All dialogs are Material `AlertDialog`s from `design_system/components/app_dialo
 
 ## Content body catalogue
 
-Sources: `lib/domain/bible_series/entities.dart` (sealed `SeriesContentBody`, `SeriesContentBodyType`), `lib/infrastructure/bible_series/series_content_dto.dart` (Firestore `body[].body_type` + properties), and `lib/presentation/features/bible_series/bodies/` (widgets). The body index in the list is the key under which responses are stored. `ContentDetailPage._ContentBodies` switches on the body type.
+Sources: `lib/domain/bible_series/entities.dart` (sealed `SeriesContentBody`, `SeriesContentBodyType`), `lib/infrastructure/bible_series/bible_series_documents.dart` (Firestore `body[].body_type` + properties), and `lib/presentation/features/bible_series/bodies/` (widgets). The body index in the list is the key under which responses are stored. `ContentDetailPage._ContentBodies` switches on the body type.
 
 | Firestore `body_type` | Domain type | Data fields (Firestore → domain) | Widget | Display / interaction |
 |---|---|---|---|---|
@@ -853,7 +853,7 @@ Sources: `lib/domain/bible_series/entities.dart` (sealed `SeriesContentBody`, `S
 | `divider` | `DividerBody` | — | `Divider()` | Material divider |
 | *(other)* | — | — | — | the DTO throws `Invalid body_type: <x>`, so the whole content fails to load (`Error: Invalid body_type: <x>`). `EmptyBody` exists in the domain and renders `SizedBox.shrink()`, but the DTO never produces it. |
 
-`*` = required (`findOrThrowException`); `(x)` = default.
+`*` = required (`require<T>`); `(x)` = default.
 
 Response storage (`completions/{id}/responses/{id}`): `{user_id, responses: {"<bodyIndex>": {"<qIndex>": {response, type: 'text'|'image'}}}}`. Unchanged.
 

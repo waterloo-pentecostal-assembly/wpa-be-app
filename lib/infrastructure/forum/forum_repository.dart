@@ -1,15 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../domain/forum/entities.dart';
+import '../../domain/forum/exceptions.dart';
 import '../../domain/forum/interfaces.dart';
-import '../../services/firebase_firestore_service.dart';
+import '../common/firestore_errors.dart';
 import 'forum_dto.dart';
 
 class ForumRepository implements IForumRepository {
-  ForumRepository(this._firestore, this._firebaseFirestoreService);
+  ForumRepository(this._firestore);
 
   final FirebaseFirestore _firestore;
-  final FirebaseFirestoreService _firebaseFirestoreService;
 
   DocumentReference<Map<String, dynamic>> _forum(String forumId) =>
       _firestore.collection('forums').doc(forumId);
@@ -30,22 +30,9 @@ class ForumRepository implements IForumRepository {
   ) =>
       _thread(threadId, forumId).collection('comments').doc(commentId);
 
-  Future<void> _guard(Future<void> Function() action) async {
-    try {
-      await action();
-    } catch (e) {
-      throw _firebaseFirestoreService.handleException(e);
-    }
-  }
-
-  Never _rethrowMapped(Object e) =>
-      throw _firebaseFirestoreService.handleException(e);
-
   @override
-  Stream<Forum> watchForum(String forumId) => _forum(forumId)
-      .snapshots()
-      .map(forumFromFirestore)
-      .handleError(_rethrowMapped);
+  Stream<Forum> watchForum(String forumId) =>
+      _forum(forumId).snapshots().map(forumFromFirestore).mapFirestoreErrors();
 
   @override
   Stream<List<ForumThread>> watchThreads(String forumId,
@@ -58,7 +45,7 @@ class ForumRepository implements IForumRepository {
         .map((snapshot) => snapshot.docs
             .map((doc) => threadFromFirestore(forumId, doc.id, doc.data()))
             .toList())
-        .handleError(_rethrowMapped);
+        .mapFirestoreErrors();
   }
 
   @override
@@ -68,26 +55,28 @@ class ForumRepository implements IForumRepository {
           .map((doc) => doc.exists && doc.data() != null
               ? threadFromFirestore(forumId, doc.id, doc.data()!)
               : null)
-          .handleError(_rethrowMapped);
+          .mapFirestoreErrors();
 
   @override
   Future<String> createThread(NewThread thread) async {
     final ref = _threads(thread.forumId).doc();
-    await _guard(() => ref.set(newThreadDocument(thread)));
+    await guardFirestore(() => ref.set(newThreadDocument(thread)));
     return ref.id;
   }
 
   @override
   Future<void> freezeThread(String threadId, String forumId, bool isFrozen) =>
-      _guard(() => _thread(threadId, forumId).update({'is_frozen': isFrozen}));
+      guardFirestore(
+          () => _thread(threadId, forumId).update({'is_frozen': isFrozen}));
 
   @override
   Future<void> hideThread(String threadId, String forumId, bool isHidden) =>
-      _guard(() => _thread(threadId, forumId).update({'is_hidden': isHidden}));
+      guardFirestore(
+          () => _thread(threadId, forumId).update({'is_hidden': isHidden}));
 
   @override
   Future<void> updateThread(String threadId, String forumId, String newTitle) =>
-      _guard(() => _thread(threadId, forumId).update({
+      guardFirestore(() => _thread(threadId, forumId).update({
             'title': newTitle,
             'updated_at': FieldValue.serverTimestamp(),
           }));
@@ -101,15 +90,20 @@ class ForumRepository implements IForumRepository {
           .map((snapshot) => snapshot.docs
               .map((doc) => commentFromFirestore(threadId, doc.id, doc.data()))
               .toList())
-          .handleError(_rethrowMapped);
+          .mapFirestoreErrors();
 
   @override
   Future<void> addComment(NewComment comment, String forumId) {
-    return _guard(() async {
+    return guardFirestore(() async {
       final threadRef = _thread(comment.threadId, forumId);
       await _firestore.runTransaction((transaction) async {
         final threadSnapshot = await transaction.get(threadRef);
-        if (!threadSnapshot.exists) throw Exception('Thread does not exist');
+        if (!threadSnapshot.exists) {
+          throw const ForumException(
+            code: ForumExceptionCode.threadNotFound,
+            message: 'This thread no longer exists',
+          );
+        }
         transaction.set(
           threadRef.collection('comments').doc(),
           newCommentDocument(comment),
@@ -123,7 +117,7 @@ class ForumRepository implements IForumRepository {
   @override
   Future<void> deleteComment(
           String commentId, String threadId, String forumId) =>
-      _guard(() =>
+      guardFirestore(() =>
           _comment(commentId, threadId, forumId).update({'is_deleted': true}));
 
   @override
@@ -133,7 +127,7 @@ class ForumRepository implements IForumRepository {
     String forumId,
     String reason,
   ) =>
-      _guard(() => _comment(commentId, threadId, forumId)
+      guardFirestore(() => _comment(commentId, threadId, forumId)
           .update({'report_count': FieldValue.increment(1)}));
 
   @override
@@ -143,7 +137,7 @@ class ForumRepository implements IForumRepository {
     String forumId,
     String userId,
   ) =>
-      _guard(() => _comment(commentId, threadId, forumId).update({
+      guardFirestore(() => _comment(commentId, threadId, forumId).update({
             'liked_by': FieldValue.arrayUnion([userId]),
           }));
 
@@ -154,7 +148,7 @@ class ForumRepository implements IForumRepository {
     String forumId,
     String userId,
   ) =>
-      _guard(() => _comment(commentId, threadId, forumId).update({
+      guardFirestore(() => _comment(commentId, threadId, forumId).update({
             'liked_by': FieldValue.arrayRemove([userId]),
           }));
 
@@ -165,7 +159,7 @@ class ForumRepository implements IForumRepository {
     String forumId,
     String newBody,
   ) =>
-      _guard(() => _comment(commentId, threadId, forumId).update({
+      guardFirestore(() => _comment(commentId, threadId, forumId).update({
             'body': newBody,
             'updated_at': FieldValue.serverTimestamp(),
           }));

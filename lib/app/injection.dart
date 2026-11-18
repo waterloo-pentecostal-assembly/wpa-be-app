@@ -36,7 +36,6 @@ import '../infrastructure/prayer_requests/prayer_requests_repository.dart';
 import '../infrastructure/session/app_session.dart';
 import '../infrastructure/testimonies/testimonies_repository.dart';
 import '../infrastructure/user_profile/user_profile_repository.dart';
-import '../services/firebase_firestore_service.dart';
 import '../services/firebase_messaging_service.dart';
 import '../services/firebase_storage_service.dart';
 import '../services/just_audio_player.dart';
@@ -76,8 +75,6 @@ void configureDependencies(AppConfig config) {
         () => FirebaseStorageService(getIt()))
     ..registerLazySingleton<FirebaseMessagingService>(
         () => FirebaseMessagingService(getIt()))
-    ..registerLazySingleton<FirebaseFirestoreService>(
-        FirebaseFirestoreService.new)
     ..registerLazySingleton<IAudioPlayer>(JustAudioPlayer.new)
     // App-wide state
     ..registerLazySingleton<AppSession>(AppSession.new)
@@ -91,30 +88,27 @@ void configureDependencies(AppConfig config) {
         getIt(),
         getIt(),
         getIt(),
-        getIt(),
         getIt<AppSession>(),
       ),
     )
     ..registerLazySingleton<IBibleSeriesRepository>(
-        () => BibleSeriesRepository(getIt(), getIt(), getIt(), getIt()))
+        () => BibleSeriesRepository(getIt(), getIt(), getIt()))
     ..registerLazySingleton<ICompletionsRepository>(
-        () => CompletionsRepository(getIt(), getIt(), getIt(), getIt()))
+        () => CompletionsRepository(getIt(), getIt(), getIt()))
     ..registerLazySingleton<IAchievementsRepository>(
-        () => AchievementsRepository(getIt(), getIt(), getIt()))
+        () => AchievementsRepository(getIt(), getIt()))
     ..registerLazySingleton<IPrayerRequestsRepository>(
-        () => PrayerRequestsRepository(getIt(), getIt(), getIt(), getIt()))
+        () => PrayerRequestsRepository(getIt(), getIt(), getIt()))
     ..registerLazySingleton<ITestimoniesRepository>(
-        () => TestimoniesRepository(getIt(), getIt(), getIt(), getIt()))
+        () => TestimoniesRepository(getIt(), getIt(), getIt()))
     ..registerLazySingleton<IMediaRepository>(
-        () => MediaRepository(getIt(), getIt(), getIt()))
+        () => MediaRepository(getIt(), getIt()))
     ..registerLazySingleton<INotificationSettingsService>(
-        () => NotificationSettingsService(getIt(), getIt(), getIt()))
-    ..registerLazySingleton<IUserProfileRepository>(() =>
-        UserProfileRepository(getIt(), getIt(), getIt(), getIt(), getIt()))
+        () => NotificationSettingsService(getIt(), getIt()))
+    ..registerLazySingleton<IUserProfileRepository>(
+        () => UserProfileRepository(getIt(), getIt(), getIt(), getIt()))
     ..registerLazySingleton<IAdminService>(
-        () => AdminService(getIt(), getIt(), getIt(), getIt()))
-    ..registerLazySingleton<ILinksRepository>(
-        () => LinksRepository(getIt(), getIt()))
-    ..registerLazySingleton<IForumRepository>(
-        () => ForumRepository(getIt(), getIt()));
+        () => AdminService(getIt(), getIt(), getIt()))
+    ..registerLazySingleton<ILinksRepository>(() => LinksRepository(getIt()))
+    ..registerLazySingleton<IForumRepository>(() => ForumRepository(getIt()));
 }

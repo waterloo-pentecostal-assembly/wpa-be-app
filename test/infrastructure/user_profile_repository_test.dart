@@ -6,7 +6,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:wpa_app/domain/common/media_upload.dart';
 import 'package:wpa_app/domain/user_profile/exceptions.dart';
 import 'package:wpa_app/infrastructure/user_profile/user_profile_repository.dart';
-import 'package:wpa_app/services/firebase_firestore_service.dart';
 
 import '_support/fakes.dart';
 
@@ -29,7 +28,6 @@ void main() {
     facade = MockAuthenticationFacade();
     repository = UserProfileRepository(
       firestore,
-      const FirebaseFirestoreService(),
       storage,
       facade,
       sessionWith(),

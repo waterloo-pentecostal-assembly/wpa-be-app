@@ -9,7 +9,6 @@ import 'package:wpa_app/domain/authentication/value_objects.dart';
 import 'package:wpa_app/domain/common/exceptions.dart';
 import 'package:wpa_app/infrastructure/authentication/firebase_authentication_facade.dart';
 import 'package:wpa_app/infrastructure/session/app_session.dart';
-import 'package:wpa_app/services/firebase_firestore_service.dart';
 import 'package:wpa_app/services/firebase_messaging_service.dart';
 
 import '_support/fakes.dart';
@@ -58,7 +57,6 @@ void main() {
         db,
         createStorageMock(),
         messaging,
-        const FirebaseFirestoreService(),
         session,
       );
 
@@ -315,33 +313,6 @@ void main() {
       );
     });
 
-    test('deleteUser: requires-recent-login is thrown, document kept',
-        () async {
-      await firestore.collection('users').doc('uid-1').set(userDoc());
-      when(() => auth.currentUser).thenReturn(user);
-      when(() => user.delete())
-          .thenThrow(FirebaseAuthException(code: 'requires-recent-login'));
-
-      await expectLater(facade.deleteUser(),
-          throwsAuth(AuthenticationExceptionCode.requiresRecentLogin));
-      expect((await firestore.collection('users').doc('uid-1').get()).exists,
-          isTrue);
-    });
-
-    test('deleteUser deletes the user document and clears the session',
-        () async {
-      session.update(testUser);
-      await firestore.collection('users').doc('uid-1').set(userDoc());
-      when(() => auth.currentUser).thenReturn(user);
-
-      await facade.deleteUser();
-
-      verify(() => user.delete()).called(1);
-      expect((await firestore.collection('users').doc('uid-1').get()).exists,
-          isFalse);
-      expect(session.currentUser, isNull);
-    });
-
     test('initiateDelete writes the exact deletion request', () async {
       session.update(testUser);
 
@@ -379,6 +350,37 @@ void main() {
       });
       expect(data!['created_at'], isA<Timestamp>());
       expect(await facade.deviceTokenExists('uid-1'), isTrue);
+    });
+
+    test('without an FCM token nothing is registered', () async {
+      when(() => messaging.getToken()).thenAnswer((_) async => null);
+
+      expect(await facade.deviceTokenExists('uid-1'), isFalse);
+      await facade.addDeviceToken('uid-1');
+
+      final devices = await firestore
+          .collection('users')
+          .doc('uid-1')
+          .collection('devices')
+          .get();
+      expect(devices.docs, isEmpty);
+    });
+
+    test('a profile photo that cannot be resolved does not block sign-in',
+        () async {
+      final storage = createStorageMock();
+      when(() => storage.tryGetDownloadUrl(any()))
+          .thenAnswer((_) async => null);
+      facade = FirebaseAuthenticationFacade(
+          auth, firestore, storage, messaging, session);
+      await firestore.collection('users').doc('uid-1').set(userDoc());
+      when(() => auth.currentUser).thenReturn(user);
+
+      final signedIn = await facade.getSignedInUser();
+
+      expect(signedIn.profilePhoto, 'gs://bucket/p.jpg');
+      expect(signedIn.profilePhotoUrl, isNull);
+      expect(session.currentUser, signedIn);
     });
 
     test('signOut removes the device token and clears the session', () async {

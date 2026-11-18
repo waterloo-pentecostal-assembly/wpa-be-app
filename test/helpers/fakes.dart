@@ -439,9 +439,6 @@ class FakeAuthenticationFacade with FakeCalls implements IAuthenticationFacade {
     record('initiateDelete');
     if (session?.currentUser != null) session?.user = null;
   }
-
-  @override
-  Future<void> deleteUser() async => record('deleteUser');
 }
 
 // ---------------------------------------------------------------------------

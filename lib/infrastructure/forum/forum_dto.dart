@@ -1,16 +1,16 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../domain/forum/entities.dart';
-import '../common/helpers.dart';
+import '../common/firestore_data.dart';
 
 Forum forumFromFirestore(DocumentSnapshot<Map<String, dynamic>> snapshot) {
   final data = snapshot.data();
   if (!snapshot.exists || data == null) return const Forum.empty();
   return Forum(
     id: snapshot.id,
-    title: data['title'] ?? '',
-    isFrozen: data['is_frozen'] ?? false,
-    isReadOnly: data['is_read_only'] ?? false,
+    title: data.optional('title', ''),
+    isFrozen: data.optional('is_frozen', false),
+    isReadOnly: data.optional('is_read_only', false),
   );
 }
 
@@ -22,16 +22,16 @@ ForumThread threadFromFirestore(
   return ForumThread(
     id: id,
     forumId: forumId,
-    title: data['title'] ?? '',
-    authorId: data['author_id'] ?? '',
-    authorName: data['author_name'] ?? '',
-    authorImageUrl: data['author_image_url'],
+    title: data.optional('title', ''),
+    authorId: data.optional('author_id', ''),
+    authorName: data.optional('author_name', ''),
+    authorImageUrl: data.nullable<String>('author_image_url'),
     // Pending server timestamps (local writes) read as null; use "now".
-    createdAt: toDateTime(data['created_at']),
-    updatedAt: toDateTime(data['updated_at']),
-    commentCount: data['comment_count'] ?? 0,
-    isFrozen: data['is_frozen'] ?? false,
-    isHidden: data['is_hidden'] ?? false,
+    createdAt: data.pendingDate('created_at'),
+    updatedAt: data.pendingDate('updated_at'),
+    commentCount: data.optionalInt('comment_count'),
+    isFrozen: data.optional('is_frozen', false),
+    isHidden: data.optional('is_hidden', false),
   );
 }
 
@@ -55,17 +55,17 @@ Comment commentFromFirestore(
   return Comment(
     id: id,
     threadId: threadId,
-    body: data['body'] ?? '',
-    authorId: data['author_id'] ?? '',
-    authorName: data['author_name'] ?? '',
-    authorImageUrl: data['author_image_url'],
-    createdAt: toDateTime(data['created_at']),
-    updatedAt: toDateTime(data['updated_at']),
-    parentId: data['parent_id'],
-    isHidden: data['is_hidden'] ?? false,
-    isDeleted: data['is_deleted'] ?? false,
-    likedBy: List<String>.from(data['liked_by'] ?? []),
-    reportCount: data['report_count'] ?? 0,
+    body: data.optional('body', ''),
+    authorId: data.optional('author_id', ''),
+    authorName: data.optional('author_name', ''),
+    authorImageUrl: data.nullable<String>('author_image_url'),
+    createdAt: data.pendingDate('created_at'),
+    updatedAt: data.pendingDate('updated_at'),
+    parentId: data.nullable<String>('parent_id'),
+    isHidden: data.optional('is_hidden', false),
+    isDeleted: data.optional('is_deleted', false),
+    likedBy: data.stringList('liked_by'),
+    reportCount: data.optionalInt('report_count'),
   );
 }
 

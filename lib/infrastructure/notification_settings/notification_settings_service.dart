@@ -4,8 +4,8 @@ import '../../domain/authentication/session.dart';
 import '../../domain/notification_settings/entities.dart';
 import '../../domain/notification_settings/exceptions.dart';
 import '../../domain/notification_settings/interfaces.dart';
-import '../../services/firebase_firestore_service.dart';
-import '../common/helpers.dart';
+import '../common/firestore_data.dart';
+import '../common/firestore_errors.dart';
 
 /// Firestore field name for each [NotificationSetting].
 const Map<NotificationSetting, String> kNotificationSettingFields = {
@@ -22,14 +22,9 @@ const Map<NotificationSetting, String> kNotificationSettingFields = {
 
 /// Stateless: the settings document id is looked up for each write.
 class NotificationSettingsService implements INotificationSettingsService {
-  NotificationSettingsService(
-    this._firestore,
-    this._firebaseFirestoreService,
-    this._session,
-  );
+  NotificationSettingsService(this._firestore, this._session);
 
   final FirebaseFirestore _firestore;
-  final FirebaseFirestoreService _firebaseFirestoreService;
   final ISession _session;
 
   CollectionReference<Map<String, dynamic>> _settings() => _firestore
@@ -38,12 +33,8 @@ class NotificationSettingsService implements INotificationSettingsService {
       .collection('notification_settings');
 
   Future<DocumentSnapshot<Map<String, dynamic>>> _settingsDoc() async {
-    final QuerySnapshot<Map<String, dynamic>> snapshot;
-    try {
-      snapshot = await _settings().get();
-    } on Exception catch (e) {
-      throw _firebaseFirestoreService.handleException(e);
-    }
+    final settings = _settings();
+    final snapshot = await guardFirestore(settings.get);
     if (snapshot.docs.isEmpty) {
       throw const NotificationSettingsException(
         code: NotificationSettingsExceptionCode.noNotificationSettings,
@@ -53,23 +44,19 @@ class NotificationSettingsService implements INotificationSettingsService {
     return snapshot.docs.first;
   }
 
+  /// A plain update (no transaction needed: nothing is read first), so it
+  /// also queues while offline.
   Future<void> _update(Map<String, dynamic> data) async {
     final doc = await _settingsDoc();
-    try {
-      await _firestore.runTransaction((transaction) async {
-        transaction.update(doc.reference, data);
-      });
-    } on Exception catch (e) {
-      throw _firebaseFirestoreService.handleException(e);
-    }
+    await guardFirestore(() => doc.reference.update(data));
   }
 
   @override
   Future<NotificationSettingsEntity> getNotificationSettings() async {
     final doc = await _settingsDoc();
-    final data = doc.data() ?? {};
+    final data = dataOf(doc);
     bool flag(NotificationSetting s) =>
-        findOrDefaultTo(data, kNotificationSettingFields[s], false);
+        data.optional(kNotificationSettingFields[s]!, false);
     return NotificationSettingsEntity(
       id: doc.id,
       dailyEngagementReminder:
@@ -82,7 +69,7 @@ class NotificationSettingsService implements INotificationSettingsService {
       forumCommentReplies: flag(NotificationSetting.forumCommentReplies),
       forumThreadComments: flag(NotificationSetting.forumThreadComments),
       forumCommentLikes: flag(NotificationSetting.forumCommentLikes),
-      threadsFollowed: toStringList(data['threads_followed']),
+      threadsFollowed: data.stringList('threads_followed'),
     );
   }
 

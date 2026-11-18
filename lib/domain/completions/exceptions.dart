@@ -5,6 +5,7 @@ enum CompletionsExceptionCode {
   noResponses,
   noCompletionInfo,
   unableToUploadImage,
+  unableToDeleteImage,
 }
 
 class CompletionsException

@@ -5,7 +5,6 @@ import 'package:wpa_app/domain/testimonies/entities.dart';
 import 'package:wpa_app/domain/testimonies/exceptions.dart';
 import 'package:wpa_app/domain/user_profile/entities.dart';
 import 'package:wpa_app/infrastructure/testimonies/testimonies_repository.dart';
-import 'package:wpa_app/services/firebase_firestore_service.dart';
 
 import '_support/fakes.dart';
 
@@ -46,7 +45,6 @@ void main() {
     repository = TestimoniesRepository(
       firestore,
       createStorageMock(),
-      const FirebaseFirestoreService(),
       sessionWith(),
     );
   });

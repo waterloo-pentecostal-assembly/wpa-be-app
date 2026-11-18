@@ -1,12 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:wpa_app/domain/common/exceptions.dart';
 import 'package:wpa_app/domain/prayer_requests/entities.dart';
 import 'package:wpa_app/domain/prayer_requests/exceptions.dart';
 import 'package:wpa_app/domain/user_profile/entities.dart';
 import 'package:wpa_app/infrastructure/prayer_requests/prayer_requests_repository.dart';
-import 'package:wpa_app/services/firebase_firestore_service.dart';
 
 import '_support/fakes.dart';
 
@@ -50,7 +50,6 @@ void main() {
     repository = PrayerRequestsRepository(
       firestore,
       createStorageMock(),
-      const FirebaseFirestoreService(),
       sessionWith(),
     );
   });
@@ -144,22 +143,51 @@ void main() {
       expect(await repository.canAddPrayerRequest(), isFalse);
     });
 
-    test('a malformed document throws the missing-key ApplicationException',
+    test('a malformed document is skipped instead of failing the list',
+        () async {
+      await collection().doc('good').set(prayerDoc(day: 2));
+      await collection().doc('bad').set({
+        ...prayerDoc(day: 1),
+        'request': null, // required
+      });
+      await collection().doc('wrong-type').set({
+        ...prayerDoc(day: 3),
+        'is_anonymous': 'no', // must be a bool
+      });
+
+      final page = await repository.getPrayerRequests(limit: 5);
+
+      expect(page.items.map((p) => p.id), ['good']);
+    });
+
+    test('a malformed single document throws the missing-key exception',
         () async {
       await collection().doc('bad').set({
-        'date': ts(1),
-        'is_approved': true,
-        'is_answered': false,
-        'user_id': 'x',
-        'is_anonymous': false,
-        'user_snippet': {'first_name': 'J', 'last_name': 'D'},
+        ...prayerDoc(day: 1, userId: testUser.id),
+        'request': 42,
       });
 
       await expectLater(
-        repository.getPrayerRequests(limit: 5),
+        repository.closePrayerRequest(id: 'bad'),
         throwsA(isA<ApplicationException>().having(
             (e) => e.code, 'code', ApplicationExceptionCode.missingKey)),
       );
+    });
+
+    test('an author avatar that cannot be resolved reads as no avatar',
+        () async {
+      final storage = createStorageMock();
+      when(() => storage.tryGetDownloadUrl(any()))
+          .thenAnswer((_) async => null);
+      repository = PrayerRequestsRepository(firestore, storage, sessionWith());
+      await collection()
+          .doc('p1')
+          .set(prayerDoc(day: 1, thumbnail: 'gs://bucket/deleted.jpg'));
+
+      final post = (await repository.getPrayerRequests(limit: 5)).items.single;
+
+      expect(post.userSnippet.thumbnail, 'gs://bucket/deleted.jpg');
+      expect(post.userSnippet.thumbnailUrl, isNull);
     });
   });
 
@@ -238,7 +266,6 @@ void main() {
       repository = PrayerRequestsRepository(
         firestore,
         createStorageMock(),
-        const FirebaseFirestoreService(),
         sessionWith(null),
       );
       await expectLater(

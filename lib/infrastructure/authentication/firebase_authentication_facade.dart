@@ -6,11 +6,11 @@ import '../../domain/authentication/exceptions.dart';
 import '../../domain/authentication/interfaces.dart';
 import '../../domain/authentication/value_objects.dart';
 import '../../domain/common/exceptions.dart';
-import '../../services/firebase_firestore_service.dart';
 import '../../services/firebase_messaging_service.dart';
 import '../../services/firebase_storage_service.dart';
 import '../session/app_session.dart';
-import 'firebase_user_dto.dart';
+import '../common/firestore_errors.dart';
+import 'user_document.dart';
 
 class FirebaseAuthenticationFacade implements IAuthenticationFacade {
   FirebaseAuthenticationFacade(
@@ -18,7 +18,6 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
     this._firestore,
     this._firebaseStorageService,
     this._firebaseMessagingService,
-    this._firebaseFirestoreService,
     this._session,
   );
 
@@ -26,7 +25,6 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
   final FirebaseFirestore _firestore;
   final FirebaseStorageService _firebaseStorageService;
   final FirebaseMessagingService _firebaseMessagingService;
-  final FirebaseFirestoreService _firebaseFirestoreService;
   final AppSession _session;
 
   CollectionReference<Map<String, dynamic>> get _users =>
@@ -42,20 +40,16 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
       );
     }
 
-    final DocumentSnapshot<Map<String, dynamic>> userSnapshot;
-    try {
-      userSnapshot = await _users.doc(user.uid).get();
-    } on Exception catch (e) {
-      throw _firebaseFirestoreService.handleException(e);
-    }
-    if (userSnapshot.data() == null) {
-      throw const AuthenticationException(
-        code: AuthenticationExceptionCode.userCollectionNotFound,
-        message: 'User details not found',
-      );
-    }
-    final domainUser = await FirebaseUserDto.fromFirestore(userSnapshot)
-        .toDomain(_firebaseStorageService);
+    final domainUser = await guardFirestore(() async {
+      final snapshot = await _users.doc(user.uid).get();
+      if (snapshot.data() == null) {
+        throw const AuthenticationException(
+          code: AuthenticationExceptionCode.userCollectionNotFound,
+          message: 'User details not found',
+        );
+      }
+      return parseUser(snapshot, _firebaseStorageService);
+    });
 
     if (!domainUser.isVerified) {
       throw const AuthenticationException(
@@ -115,9 +109,10 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
           .doc(uid)
           .collection('notification_settings')
           .add(defaultNotificationSettings());
-    } on Exception catch (e) {
+    } catch (e) {
+      // Do not leave an auth account without its user document.
       await userCredential.user?.delete();
-      throw _firebaseFirestoreService.handleException(e);
+      throw mapFirestoreError(e);
     }
   }
 
@@ -202,31 +197,6 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
   }
 
   @override
-  Future<void> deleteUser() async {
-    String? uid;
-    try {
-      uid = _firebaseAuth.currentUser?.uid;
-      await _firebaseAuth.currentUser?.delete();
-    } on FirebaseAuthException catch (e) {
-      if (e.code == 'requires-recent-login') {
-        throw const AuthenticationException(
-          code: AuthenticationExceptionCode.requiresRecentLogin,
-          message: 'Please sign out and sign in again before deleting account',
-        );
-      }
-    } catch (e) {
-      throw ApplicationException.unknown(e);
-    }
-
-    try {
-      if (uid != null) await _users.doc(uid).delete();
-    } on Exception catch (e) {
-      throw _firebaseFirestoreService.handleException(e);
-    }
-    _session.clear();
-  }
-
-  @override
   Future<void> sendAccountVerificationEmail({
     required EmailAddress emailAddress,
     required Password password,
@@ -235,52 +205,43 @@ class FirebaseAuthenticationFacade implements IAuthenticationFacade {
       emailAddress: emailAddress,
       password: password,
     );
-    try {
-      await _firebaseAuth.currentUser?.sendEmailVerification();
-    } on Exception catch (e) {
-      throw _firebaseFirestoreService.handleException(e);
-    }
+    await guardFirestore(
+        () async => _firebaseAuth.currentUser?.sendEmailVerification());
   }
 
+  /// Registers this device's FCM token. Without a token (simulator,
+  /// notifications denied) there is nothing to register.
   @override
   Future<void> addDeviceToken(String userId) async {
     final deviceToken = await _firebaseMessagingService.getToken();
+    if (deviceToken == null) return;
     final platform = _firebaseMessagingService.getPlatform();
-    try {
-      await _users.doc(userId).collection('devices').doc(deviceToken).set({
-        'token': deviceToken,
-        'created_at': Timestamp.now(),
-        'platform': platform,
-      });
-    } on Exception catch (e) {
-      throw _firebaseFirestoreService.handleException(e);
-    }
+    await guardFirestore(
+        () => _users.doc(userId).collection('devices').doc(deviceToken).set({
+              'token': deviceToken,
+              'created_at': Timestamp.now(),
+              'platform': platform,
+            }));
   }
 
   @override
   Future<bool> deviceTokenExists(String userId) async {
     final deviceToken = await _firebaseMessagingService.getToken();
-    try {
-      final doc =
-          await _users.doc(userId).collection('devices').doc(deviceToken).get();
-      return doc.data() != null;
-    } on Exception catch (e) {
-      throw _firebaseFirestoreService.handleException(e);
-    }
+    if (deviceToken == null) return false;
+    final doc = await guardFirestore(
+        () => _users.doc(userId).collection('devices').doc(deviceToken).get());
+    return doc.data() != null;
   }
 
   @override
   Future<void> initiateDelete(String userId) async {
-    try {
-      await _firestore.collection('account_deletion_requests').doc().set({
-        'account_disabled': false,
-        'user_data_deleted': false,
-        'user_id': userId,
-        'request_date': Timestamp.now(),
-      });
-    } on Exception catch (e) {
-      throw _firebaseFirestoreService.handleException(e);
-    }
+    await guardFirestore(
+        () => _firestore.collection('account_deletion_requests').doc().set({
+              'account_disabled': false,
+              'user_data_deleted': false,
+              'user_id': userId,
+              'request_date': Timestamp.now(),
+            }));
     _session.clear();
   }
 }

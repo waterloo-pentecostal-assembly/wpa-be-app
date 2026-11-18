@@ -3,9 +3,8 @@ import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wpa_app/domain/notification_settings/entities.dart';
 import 'package:wpa_app/domain/notification_settings/exceptions.dart';
-import 'package:wpa_app/infrastructure/authentication/firebase_user_dto.dart';
+import 'package:wpa_app/infrastructure/authentication/user_document.dart';
 import 'package:wpa_app/infrastructure/notification_settings/notification_settings_service.dart';
-import 'package:wpa_app/services/firebase_firestore_service.dart';
 
 import '_support/fakes.dart';
 
@@ -36,7 +35,6 @@ void main() {
     firestore = FakeFirebaseFirestore();
     service = NotificationSettingsService(
       firestore,
-      const FirebaseFirestoreService(),
       sessionWith(),
     );
   });

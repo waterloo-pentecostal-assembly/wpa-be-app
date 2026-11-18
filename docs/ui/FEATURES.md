@@ -88,7 +88,7 @@ Other rules and limits:
   `invalid-credential` is newly mapped; current SDKs return it for a wrong password.
 - On any sign-in error, `SignInCubit` calls `signOut()` and shows the error above the form.
 - **On successful sign-in:**
-  - The device token is saved to `users/{uid}/devices/{fcmToken}` = `{token, created_at: Timestamp.now(), platform}` if it doesn't exist yet. `platform` is `defaultTargetPlatform.name.toLowerCase()`, e.g. `ios` / `android`.
+  - The device token is saved to `users/{uid}/devices/{fcmToken}` = `{token, created_at: Timestamp.now(), platform}` if it doesn't exist yet. `platform` is `defaultTargetPlatform.name.toLowerCase()`, e.g. `ios` / `android`. Registration is best-effort: without an FCM token (simulator, notifications denied) nothing is written, and a failure never fails the sign-in.
   - The session change moves `AuthenticationCubit` to `authenticated`, and `RedirectPolicy` sends the user to the remembered location or `/engage`.
 - **Password reset:**
   - `user-not-found` → `User not found, please verify email and try again`.
@@ -110,7 +110,7 @@ Other rules and limits:
   - `interfaces.dart`: `IAuthenticationFacade`
   - `session.dart`: `ISession`, `requireUser()`
 - Application: `AuthenticationCubit` (app-scope; `AuthStatus {unknown, authenticated, unauthenticated}`, `user`, `isAdmin`), `SignInCubit`, `SignUpCubit`, `PasswordResetCubit`, `FormStatus`
-- Infrastructure: `FirebaseAuthenticationFacade`, `FirebaseUserDto` (`newUserDocument`, `defaultNotificationSettings`), `AppSession`
+- Infrastructure: `FirebaseAuthenticationFacade`, `user_document.dart` (`parseUser`, `newUserDocument`, `defaultNotificationSettings`), `AppSession`
 - Routing: `RedirectPolicy` (`app/router/redirect_policy.dart`)
 
 ---
@@ -187,7 +187,7 @@ Other rules and limits:
     - `rules.dart`, `validators.dart`, `value_objects.dart`
   - `domain/achievements/`
 - Application: `EngageHomeCubit`, `AllBibleSeriesCubit`, `BibleSeriesDetailCubit`, `ContentDetailCubit` (`ContentDetailEffect`), `AudioPlayerCubit`
-- Infrastructure: `BibleSeriesRepository`, `BibleSeriesDto`, `SeriesContentDto`, `CompletionsRepository`, `CompletionsDto`, `ResponsesDto`, `AchievementsRepository`, `MediaRepository`. Services: `FirebaseStorageService` (download-URL cache, `startUpload`), `JustAudioPlayer`.
+- Infrastructure: `BibleSeriesRepository` (`bible_series_documents.dart`), `CompletionsRepository` (`completion_documents.dart`), `AchievementsRepository`, `MediaRepository`. Services: `FirebaseStorageService` (shared download-URL cache, best-effort `tryGetDownloadUrl`, `startUpload`), `JustAudioPlayer`.
 
 ---
 
@@ -203,7 +203,7 @@ Other rules and limits:
 **Business rules**
 - **All:** `prayer_requests where is_approved==true && is_answered==false orderBy date desc`. It is paged with an opaque cursor that `AllPrayerRequestsCubit` holds; the repository is stateless (fix B5). Page size is 15.
 - **Mine:** `user_id==me && is_answered==false orderBy date desc` (includes unapproved). **Answered:** `user_id==me && is_answered==true orderBy date desc`.
-- **New request** (`PrayerRequestsDto.newDocument`) writes `{request, user_id, date: Timestamp.now(), is_anonymous, is_approved:false, is_answered:false, user_snippet:{first_name,last_name,thumbnail}}`.
+- **New request** (`FirestorePostStore.create`) writes `{request, user_id, date: Timestamp.now(), is_anonymous, is_approved:false, is_answered:false, user_snippet:{first_name,last_name,thumbnail}}`.
   - The body is validated by `PrayerRequestBody` (trimmed, `< kMaxPrayerRequestBody`). POST is enabled only when the body is non-empty and valid.
   - On success the toast **Prayer Request Submitted** shows, and the post appears at the top of *My Open Requests* via `PostCreated`.
   - On failure: `Unable to add prayer request.`
@@ -220,7 +220,7 @@ Other rules and limits:
 **Implemented by**
 - Domain: `domain/prayer_requests/` (`PrayerRequest` implements `CommunityPost`, `IPrayerRequestsRepository`, `PrayerRequestBody`, `PrayerRequestsException`)
 - Application: `PrayerRequestActions` (a `PostActions<PrayerRequest>`), `AllPrayerRequestsCubit` / `MyPrayerRequestsCubit` / `MyAnsweredPrayerRequestsCubit` (the `AllPostsCubit` / `MyPostsCubit` / `MyClosedPostsCubit` bases in `application/community_posts/post_list_cubit.dart`), `NewPrayerRequestCubit` (a `NewPostCubit`)
-- Infrastructure: `PrayerRequestsRepository`, `PrayerRequestsDto`, `UserSnippetDto`, `FirestorePageCursor`
+- Infrastructure: `PrayerRequestsRepository` (config `prayerRequestCollection` over `FirestorePostStore`), `user_snippet.dart`, `FirestorePageCursor`
 
 ---
 
@@ -241,7 +241,7 @@ Testimonies mirror prayer requests and share the same generic cubits, `PostActio
 - Validation uses `TestimonyBody` (`kMaxTestimonyBody`, `500 character limit exceeded`).
 - Errors: `Unable to add testimony.`, `Unable to delete testimony`, `Unable to report testimony`, `You already reported this testimony`, `Unable to close testimony`, `Unable to complete request.`
 
-**Implemented by**: `domain/testimonies/*`; `TestimonyActions`, `AllTestimoniesCubit`, `MyTestimoniesCubit`, `MyArchivedTestimoniesCubit`, `NewTestimonyCubit` (`application/testimonies/testimonies_cubits.dart`); `TestimoniesRepository`, `TestimoniesDto`.
+**Implemented by**: `domain/testimonies/*`; `TestimonyActions`, `AllTestimoniesCubit`, `MyTestimoniesCubit`, `MyArchivedTestimoniesCubit`, `NewTestimonyCubit` (`application/testimonies/testimonies_cubits.dart`); `TestimoniesRepository` (config `testimonyCollection` over `FirestorePostStore`).
 
 ---
 
@@ -275,7 +275,7 @@ Testimonies mirror prayer requests and share the same generic cubits, `PostActio
   - **HIDE THREAD / UNHIDE THREAD**: admins only → `is_hidden`, then the screen closes (`closeRequested`)
   - **FOLLOW THREAD / UNFOLLOW THREAD**: once notification settings have loaded (`isFollowing != null`). The update is optimistic, with snackbar `Thread followed` / `Thread unfollowed`. On failure it reverts with `Unable to follow thread` / `Unable to unfollow thread`.
 - **Comments:** `.../threads/{id}/comments orderBy created_at asc`, live. `threadedComments` orders parents followed by their non-collapsed replies.
-  - Adding a comment is a transaction that sets `{thread_id, body, author_id, author_name, author_image_url, created_at/updated_at: serverTimestamp, parent_id, is_hidden:false, is_deleted:false, liked_by:[], report_count:0}` and increments the thread's `comment_count`.
+  - Adding a comment is a transaction that sets `{thread_id, body, author_id, author_name, author_image_url, created_at/updated_at: serverTimestamp, parent_id, is_hidden:false, is_deleted:false, liked_by:[], report_count:0}` and increments the thread's `comment_count`. If the thread was deleted meanwhile, nothing is written and `This thread no longer exists` is shown (`ForumException.threadNotFound`).
 - **Comment menu** (`ThreadCubit.permissionsFor` → `CommentPermissions`):
   - **REPORT**: everyone, including on own and deleted comments → `report_count += 1`. The snackbar `Reported` is shown before the write.
   - **DELETE**: `canDeleteComment`, meaning the author on a non-deleted comment → `is_deleted: true`
@@ -329,7 +329,7 @@ Testimonies mirror prayer requests and share the same generic cubits, `PostActio
   - Discussion Forum: New Threads, Replies, Thread Comments, Comment Likes
 - Stored in the first doc of `users/{uid}/notification_settings`.
   - Fields: `daily_engagement_reminder, prayers, new_prayer_request, testimonies, new_testimony, new_forum_thread, forum_comment_replies, forum_thread_comments, forum_comment_likes, threads_followed[]` (`kNotificationSettingFields`).
-  - Writes are single-field transaction updates.
+  - Writes are single-field `update()`s (no transaction; they queue offline).
   - FCM topic subscription is done by Cloud Functions, not the app.
 - Errors: `Error loading notification settings`, `Unable to subscribe`, `Unable to unsubscribe`. The follow errors are in §5.
 - Until settings load, every switch is disabled and off (`isEnabled == false`).
@@ -339,7 +339,7 @@ Testimonies mirror prayer requests and share the same generic cubits, `PostActio
 
 - The **ADMIN** destination appears only for admins. The shell rebuilds when `AuthenticationState.isAdmin` changes. `RedirectPolicy` sends non-admins away from every `/admin/**` route to `/engage`.
 - **User Verification:** `users where is_verified==false`.
-  - ✓ → transaction update `is_verified: true`.
+  - ✓ → update `is_verified: true`.
   - ✕ → hard delete of the `users/{uid}` doc. The Auth account remains.
 - **Prayer Request Approval:** `prayer_requests where is_approved==false`.
   - ✓ → `is_approved: true`. ✕ → hard delete.
@@ -418,7 +418,7 @@ All names are constants in `AnalyticsEvents` (`domain/common/analytics.dart`), l
 |---|---|
 | B1 | App Check uses Play Integrity / App Attest (DeviceCheck fallback) in prod and debug providers otherwise (`lib/app/bootstrap.dart`). The prod providers must be registered in the Firebase console before enforcement. |
 | B2, B3 | Every flavour calls `bootstrap(AppConfig)`, which initializes once before `runApp`. |
-| B4 | Mapped Firestore exceptions are thrown everywhere (`throw _firebaseFirestoreService.handleException(e)`). |
+| B4 | Mapped Firestore exceptions are thrown everywhere (`guardFirestore` in `infrastructure/common/firestore_errors.dart`). |
 | B5 | Repositories are stateless. Paging uses `PageResult` / `PageCursor`, and the cursor is held by `AllPostsCubit`. |
 | B6 | Admin pull-to-refresh calls the queue's own `load()`. |
 | B7 | One `EngageHomeCubit` per Engage home. |

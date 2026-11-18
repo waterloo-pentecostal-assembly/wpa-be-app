@@ -97,6 +97,16 @@ class SignInCubit extends Cubit<SignInState> {
     ));
   }
 
+  /// Saves this device's push token on first sign-in from it. Best-effort:
+  /// failing to register (e.g. offline) must not fail the sign-in.
+  Future<void> _registerDevice(String userId) async {
+    try {
+      if (!await _facade.deviceTokenExists(userId)) {
+        await _facade.addDeviceToken(userId);
+      }
+    } catch (_) {}
+  }
+
   Future<void> submit() async {
     if (!state.isValid || state.isSubmitting) return;
     emit(state.copyWith(status: FormStatus.submitting));
@@ -105,9 +115,7 @@ class SignInCubit extends Cubit<SignInState> {
         emailAddress: EmailAddress(state.emailAddress),
         password: Password(state.password),
       );
-      // Save this device's push token on first sign-in from it.
-      final exists = await _facade.deviceTokenExists(user.id);
-      if (!exists) unawaited(_facade.addDeviceToken(user.id));
+      unawaited(_registerDevice(user.id));
       if (!isClosed) {
         emit(state.copyWith(status: FormStatus.success, errorMessage: ''));
       }

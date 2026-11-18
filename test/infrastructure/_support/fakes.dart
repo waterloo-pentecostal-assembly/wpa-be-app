@@ -41,6 +41,10 @@ MockFirebaseStorageService createStorageMock() {
     final String? location = i.positionalArguments[0];
     return location == null ? null : downloadUrlFor(location);
   });
+  when(() => storage.tryGetDownloadUrl(any())).thenAnswer((i) async {
+    final String? location = i.positionalArguments[0];
+    return location == null ? null : downloadUrlFor(location);
+  });
   return storage;
 }
 

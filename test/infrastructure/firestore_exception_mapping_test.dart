@@ -5,11 +5,11 @@ import 'package:mocktail/mocktail.dart';
 import 'package:wpa_app/domain/common/exceptions.dart';
 import 'package:wpa_app/domain/notification_settings/entities.dart';
 import 'package:wpa_app/domain/prayer_requests/exceptions.dart';
+import 'package:wpa_app/infrastructure/common/firestore_errors.dart';
 import 'package:wpa_app/infrastructure/forum/forum_repository.dart';
 import 'package:wpa_app/infrastructure/notification_settings/notification_settings_service.dart';
 import 'package:wpa_app/infrastructure/prayer_requests/prayer_requests_repository.dart';
 import 'package:wpa_app/infrastructure/user_profile/user_profile_repository.dart';
-import 'package:wpa_app/services/firebase_firestore_service.dart';
 
 import '_support/fakes.dart';
 
@@ -19,12 +19,10 @@ final throwsPermissionDenied = throwsA(isA<DatabaseException>()
         'You do not have permission to execute this operation'));
 
 void main() {
-  group('FirebaseFirestoreService.handleException', () {
-    const service = FirebaseFirestoreService();
-
+  group('mapFirestoreError', () {
     test('permission-denied maps to DatabaseException(permissionDenied)', () {
       final error = firestoreError('permission-denied');
-      final mapped = service.handleException(error);
+      final mapped = mapFirestoreError(error);
       expect(
         mapped,
         isA<DatabaseException>()
@@ -35,7 +33,7 @@ void main() {
     });
 
     test('other Firebase errors map to an unknown ApplicationException', () {
-      final mapped = service.handleException(firestoreError('unavailable'));
+      final mapped = mapFirestoreError(firestoreError('unavailable'));
       expect(
         mapped,
         isA<ApplicationException>()
@@ -49,7 +47,7 @@ void main() {
         code: PrayerRequestsExceptionCode.alreadyReported,
         message: 'x',
       );
-      expect(service.handleException(domain), same(domain));
+      expect(mapFirestoreError(domain), same(domain));
     });
   });
 
@@ -78,7 +76,6 @@ void main() {
     PrayerRequestsRepository prayerRequests() => PrayerRequestsRepository(
           firestore,
           createStorageMock(),
-          const FirebaseFirestoreService(),
           sessionWith(),
         );
 
@@ -126,7 +123,6 @@ void main() {
           .thenThrow(firestoreError('permission-denied'));
       final repository = UserProfileRepository(
         firestore,
-        const FirebaseFirestoreService(),
         createStorageMock(),
         MockAuthenticationFacade(),
         sessionWith(),
@@ -145,7 +141,6 @@ void main() {
       when(() => settings.get()).thenThrow(firestoreError('permission-denied'));
       final service = NotificationSettingsService(
         firestore,
-        const FirebaseFirestoreService(),
         sessionWith(),
       );
 
@@ -167,8 +162,7 @@ void main() {
           .thenThrow(firestoreError('permission-denied'));
       when(() => query.snapshots())
           .thenAnswer((_) => Stream.error(firestoreError('permission-denied')));
-      final repository =
-          ForumRepository(firestore, const FirebaseFirestoreService());
+      final repository = ForumRepository(firestore);
 
       await expectLater(
         repository.freezeThread('th1', 'forum-1', true),

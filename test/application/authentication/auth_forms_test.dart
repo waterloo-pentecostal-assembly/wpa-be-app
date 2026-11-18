@@ -158,7 +158,7 @@ void main() {
     blocTest<SignInCubit, SignInState>(
       'submit failure with an unexpected error shows the generic message',
       build: () {
-        facade.failOn('deviceTokenExists', StateError('boom'));
+        facade.failOn('signInWithEmailAndPassword', StateError('boom'));
         return SignInCubit(facade);
       },
       seed: () => const SignInState(
@@ -172,6 +172,24 @@ void main() {
             .having((s) => s.status, 'status', FormStatus.failure)
             .having((s) => s.errorMessage, 'errorMessage', kUnknownErrorMessage)
       ],
+    );
+
+    blocTest<SignInCubit, SignInState>(
+      'a device token registration failure does not fail the sign-in',
+      build: () {
+        facade.failOn('deviceTokenExists', StateError('offline'));
+        return SignInCubit(facade);
+      },
+      seed: () => const SignInState(
+        emailAddress: 'jane@example.com',
+        password: 'password1',
+      ),
+      act: (c) => c.submit(),
+      skip: 1,
+      expect: () => [
+        isA<SignInState>().having((s) => s.status, 'status', FormStatus.success)
+      ],
+      verify: (_) => expect(facade.calls, isNot(contains('signOut'))),
     );
   });
 

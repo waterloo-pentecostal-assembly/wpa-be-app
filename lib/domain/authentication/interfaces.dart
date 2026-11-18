@@ -37,6 +37,4 @@ abstract class IAuthenticationFacade {
 
   /// Files an account deletion request and clears the session.
   Future<void> initiateDelete(String userId);
-
-  Future<void> deleteUser();
 }

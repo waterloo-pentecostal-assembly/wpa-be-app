@@ -10,18 +10,30 @@ class FirebaseStorageService {
   FirebaseStorageService(this._firebaseStorage);
 
   final FirebaseStorage _firebaseStorage;
-  final Map<String, String> _downloadUrlCache = {};
+
+  /// Pending or resolved URL per `gs://` location. Concurrent lookups of the
+  /// same location (e.g. one author's avatar on many posts) share a single
+  /// request; failed lookups are evicted so they can be retried.
+  final Map<String, Future<String>> _downloadUrls = {};
 
   String get storageBucket => _firebaseStorage.bucket;
 
   /// Resolves a `gs://` location to a download URL (cached per location).
-  Future<String> getDownloadUrl(String gsUrl) async {
-    final cached = _downloadUrlCache[gsUrl];
+  Future<String> getDownloadUrl(String gsUrl) {
+    final cached = _downloadUrls[gsUrl];
     if (cached != null) return cached;
+    final request = _fetchDownloadUrl(gsUrl);
+    _downloadUrls[gsUrl] = request;
+    // Evict failures (callers still receive the error from [request]).
+    unawaited(request.then<void>((_) {}, onError: (Object _) {
+      if (identical(_downloadUrls[gsUrl], request)) _downloadUrls.remove(gsUrl);
+    }));
+    return request;
+  }
+
+  Future<String> _fetchDownloadUrl(String gsUrl) async {
     try {
-      final url = await _firebaseStorage.refFromURL(gsUrl).getDownloadURL();
-      _downloadUrlCache[gsUrl] = url;
-      return url;
+      return await _firebaseStorage.refFromURL(gsUrl).getDownloadURL();
     } on FirebaseException catch (e) {
       // See https://firebase.google.com/docs/storage/flutter/handle-errors
       final code = e.code.contains('object-not-found')
@@ -42,6 +54,18 @@ class FirebaseStorageService {
     return getDownloadUrl(gsUrl);
   }
 
+  /// Best-effort lookup for decorative images (avatars, thumbnails): `null`
+  /// when there is no location or it cannot be resolved (e.g. the file was
+  /// deleted), so one missing image never fails a whole list.
+  Future<String?> tryGetDownloadUrl(String? gsUrl) async {
+    if (gsUrl == null || gsUrl.isEmpty) return null;
+    try {
+      return await getDownloadUrl(gsUrl);
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Starts uploading [image] to [filePath] (relative to the bucket root).
   UploadHandle startUpload(String filePath, ImageData image) {
     try {
@@ -60,7 +84,7 @@ class FirebaseStorageService {
   }
 
   Future<void> deleteFile(String gsUrl) async {
-    _downloadUrlCache.remove(gsUrl);
+    unawaited(_downloadUrls.remove(gsUrl));
     try {
       await _firebaseStorage.refFromURL(gsUrl).delete();
     } catch (e) {

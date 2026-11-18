@@ -6,20 +6,18 @@ import '../../domain/authentication/session.dart';
 import '../../domain/common/media_upload.dart';
 import '../../domain/user_profile/exceptions.dart';
 import '../../domain/user_profile/interfaces.dart';
-import '../../services/firebase_firestore_service.dart';
 import '../../services/firebase_storage_service.dart';
+import '../common/firestore_errors.dart';
 
 class UserProfileRepository implements IUserProfileRepository {
   UserProfileRepository(
     this._firestore,
-    this._firebaseFirestoreService,
     this._firebaseStorageService,
     this._authenticationFacade,
     this._session,
   );
 
   final FirebaseFirestore _firestore;
-  final FirebaseFirestoreService _firebaseFirestoreService;
   final FirebaseStorageService _firebaseStorageService;
   final IAuthenticationFacade _authenticationFacade;
   final ISession _session;
@@ -50,13 +48,10 @@ class UserProfileRepository implements IUserProfileRepository {
     required String thumbnail,
   }) async {
     final userId = _session.requireUser().id;
-    try {
-      await _firestore.collection('users').doc(userId).update({
-        'thumbnail': thumbnail,
-        'profile_photo': profilePhoto,
-      });
-    } on Exception catch (e) {
-      throw _firebaseFirestoreService.handleException(e);
-    }
+    await guardFirestore(
+        () => _firestore.collection('users').doc(userId).update({
+              'thumbnail': thumbnail,
+              'profile_photo': profilePhoto,
+            }));
   }
 }

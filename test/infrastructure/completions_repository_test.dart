@@ -9,7 +9,6 @@ import 'package:wpa_app/domain/common/media_upload.dart';
 import 'package:wpa_app/domain/completions/entities.dart';
 import 'package:wpa_app/domain/completions/exceptions.dart';
 import 'package:wpa_app/infrastructure/completions/completions_repository.dart';
-import 'package:wpa_app/services/firebase_firestore_service.dart';
 
 import '_support/fakes.dart';
 
@@ -31,7 +30,6 @@ void main() {
     storage = createStorageMock();
     repository = CompletionsRepository(
       firestore,
-      const FirebaseFirestoreService(),
       storage,
       sessionWith(),
     );
@@ -178,19 +176,51 @@ void main() {
       );
     });
 
-    test('markAsIncomplete deletes the completion document', () async {
+    test('markAsIncomplete deletes the completion and my responses together',
+        () async {
       await completions().doc('c1').set({'user_id': 'user-1'});
       await completions().doc('c2').set({'user_id': 'user-1'});
+      final responses = completions().doc('c1').collection('responses');
+      await responses.doc('mine').set({'user_id': 'user-1', 'responses': {}});
+      await responses.doc('theirs').set({'user_id': 'other', 'responses': {}});
 
       await repository.markAsIncomplete(
           completionId: 'c1', isResponsePossible: true);
 
-      // The response clean-up cannot be asserted with fake_cloud_firestore:
-      // deleting a document there also hides its sub-collections from
-      // queries (real Firestore keeps them), so the repository's follow-up
-      // `responses` query sees nothing.
       expect((await completions().doc('c1').get()).exists, isFalse);
       expect((await completions().doc('c2').get()).exists, isTrue);
+      expect((await responses.get()).docs.map((d) => d.id), ['theirs']);
+    });
+
+    test('markAsIncomplete without questions leaves responses alone', () async {
+      await completions().doc('c1').set({'user_id': 'user-1'});
+      final responses = completions().doc('c1').collection('responses');
+      await responses.doc('mine').set({'user_id': 'user-1', 'responses': {}});
+
+      await repository.markAsIncomplete(
+          completionId: 'c1', isResponsePossible: false);
+
+      expect((await completions().doc('c1').get()).exists, isFalse);
+      expect((await responses.get()).docs, hasLength(1));
+    });
+
+    test('a malformed completion is skipped, not fatal for the series',
+        () async {
+      await completions().add({
+        'user_id': 'user-1',
+        'series_id': 's1',
+        'content_id': 'ok',
+        'is_draft': true,
+      });
+      await completions().add({
+        'user_id': 'user-1',
+        'series_id': 's1',
+        'is_draft': true, // content_id missing
+      });
+
+      final all = await repository.getAllCompletions(bibleSeriesId: 's1');
+
+      expect(all.keys, ['ok']);
     });
   });
 
@@ -304,7 +334,8 @@ void main() {
 
       await expectLater(
         repository.deleteImage(gsUrl: 'gs://bucket/x.jpg'),
-        throwsA(isA<CompletionsException>()),
+        throwsA(isA<CompletionsException>().having((e) => e.code, 'code',
+            CompletionsExceptionCode.unableToDeleteImage)),
       );
     });
   });

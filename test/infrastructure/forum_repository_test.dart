@@ -1,10 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wpa_app/domain/common/exceptions.dart';
 import 'package:wpa_app/domain/forum/entities.dart';
+import 'package:wpa_app/domain/forum/exceptions.dart';
 import 'package:wpa_app/infrastructure/forum/forum_repository.dart';
-import 'package:wpa_app/services/firebase_firestore_service.dart';
 
 import '_support/fakes.dart';
 
@@ -63,7 +62,7 @@ void main() {
 
   setUp(() {
     firestore = FakeFirebaseFirestore();
-    repository = ForumRepository(firestore, const FirebaseFirestoreService());
+    repository = ForumRepository(firestore);
   });
 
   group('reading', () {
@@ -223,7 +222,8 @@ void main() {
               threadId: 'missing', body: 'x', authorId: 'u', authorName: 'U'),
           forumId,
         ),
-        throwsA(isA<ApplicationException>()),
+        throwsA(isA<ForumException>()
+            .having((e) => e.code, 'code', ForumExceptionCode.threadNotFound)),
       );
       expect((await comments('missing').get()).docs, isEmpty);
     });
