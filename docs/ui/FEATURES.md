@@ -100,6 +100,10 @@ Other rules and limits:
 - **Account deletion** (`AuthenticationCubit.initiateDelete`): writes `account_deletion_requests/{auto}` = `{account_disabled: false, user_data_deleted: false, user_id, request_date: Timestamp.now()}` and clears the session, so the app shows Sign in.
   - **[KEPT]** Firebase Auth is *not* signed out, so the next cold start signs the user back in until the backend disables the account.
   - On failure the state carries `errorMessage: 'Unable to initiate account deletion'`, shown as an error toast on Profile.
+- **Last active** (`LastActiveRecorder`, created in `lib/app/app.dart`): sets `users/{uid}.last_active` to the server time (`FieldValue.serverTimestamp()`) whenever the user opens the app:
+  - when a session starts: launch with a remembered user, or sign-in. Republishing the same user (e.g. after a photo change) does not count;
+  - each time the app returns from the background (`AppLifecycleListener.onShow`). Briefly covering the app, e.g. with the notification shade or control centre, does not count.
+  - Best-effort: failures go to `reportError`, and the user sees nothing. Nothing in the app reads the field.
 
 **Implemented by**
 - Domain: `domain/authentication/`
@@ -407,7 +411,7 @@ All names are constants in `AnalyticsEvents` (`domain/common/analytics.dart`), l
 
 | Path | Read by | Written by |
 |---|---|---|
-| `users/{uid}` | `FirebaseAuthenticationFacade.getSignedInUser`, `AdminService.getUnverifiedUsers` | sign-up (create), `UserProfileRepository.setProfilePhoto` (`thumbnail`, `profile_photo`), `AdminService` (`is_verified`, delete) |
+| `users/{uid}` | `FirebaseAuthenticationFacade.getSignedInUser`, `AdminService.getUnverifiedUsers` | sign-up (create), `UserProfileRepository.setProfilePhoto` (`thumbnail`, `profile_photo`), `UserProfileRepository.updateLastActive` (`last_active`), `AdminService` (`is_verified`, delete) |
 | `users/{uid}/devices/{token}` | `deviceTokenExists` | `addDeviceToken` (sign-in), delete on sign-out |
 | `users/{uid}/notification_settings/{auto}` | `NotificationSettingsService` | sign-up (create), toggles, `threads_followed` |
 | `account_deletion_requests/{auto}` | — | `initiateDelete` |

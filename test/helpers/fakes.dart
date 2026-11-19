@@ -1121,6 +1121,15 @@ class FakeUserProfileRepository
     record('setProfilePhoto');
     lastSetPhoto = (profilePhoto: profilePhoto, thumbnail: thumbnail);
   }
+
+  /// User ids passed to [updateLastActive], in order.
+  final List<String> lastActiveUpdates = [];
+
+  @override
+  Future<void> updateLastActive(String userId) async {
+    record('updateLastActive');
+    lastActiveUpdates.add(userId);
+  }
 }
 
 class FakeLinksRepository with FakeCalls implements ILinksRepository {

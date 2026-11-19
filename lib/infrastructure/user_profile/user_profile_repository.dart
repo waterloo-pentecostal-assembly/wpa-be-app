@@ -52,4 +52,13 @@ class UserProfileRepository implements IUserProfileRepository {
       'profile_photo': profilePhoto,
     });
   }
+
+  /// Server time, so a wrong device clock cannot skew it.
+  @override
+  Future<void> updateLastActive(String userId) async {
+    await _firestore
+        .collection('users')
+        .doc(userId)
+        .update({'last_active': FieldValue.serverTimestamp()});
+  }
 }

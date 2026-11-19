@@ -75,7 +75,7 @@ Known exceptions (deliberate or tolerated):
 - `configureDependencies(AppConfig)` registers Firebase SDK instances, services, `AppSession` (also as `ISession`), `AppEventBus`, `IAnalytics`, and every repository as lazy singletons. Repositories are **stateless**, so singletons are safe.
 - Every other class takes its dependencies through constructors.
 - **Screen cubits** are created per route in `router/screen_registry.dart` (`BlocProvider(create: (_) => XCubit(getIt(), …)..load())`). They live as long as the route does.
-- **App-scope cubits** are created once in `_AppState` (`lib/app/app.dart`) and provided above `MaterialApp.router`. They are `AuthenticationCubit`, `AudioPlayerCubit`, `LinksCubit` and `NotificationsCubit`. `AppNavigator` and `NewPostCubitFactory` are provided as `RepositoryProvider`s.
+- **App-scope cubits** are created once in `_AppState` (`lib/app/app.dart`) and provided above `MaterialApp.router`. They are `AuthenticationCubit`, `AudioPlayerCubit`, `LinksCubit` and `NotificationsCubit`. `AppNavigator` and `NewPostCubitFactory` are provided as `RepositoryProvider`s. `_AppState` also owns `LastActiveRecorder` (application/user_activity), driven by the session and an `AppLifecycleListener`; it has no UI state, so it is not provided.
 - Widgets get cubits with `context.read/select/watch`, `BlocBuilder` or `BlocListener`, and navigation with `context.navigator`. They never construct repositories.
 
 ## 4. State shape conventions

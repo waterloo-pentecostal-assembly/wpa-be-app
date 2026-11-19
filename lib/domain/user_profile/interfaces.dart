@@ -14,4 +14,7 @@ abstract class IUserProfileRepository {
     required String profilePhoto,
     required String thumbnail,
   });
+
+  /// Sets `users/{userId}.last_active` to the server's current time.
+  Future<void> updateLastActive(String userId);
 }

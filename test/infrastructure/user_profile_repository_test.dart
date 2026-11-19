@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -58,6 +59,28 @@ void main() {
           'gs://bucket/users/user-1/profile_photo/thumbs/image_200x200.png',
       'profile_photo': 'gs://bucket/users/user-1/profile_photo/image.png',
     });
+  });
+
+  test('updateLastActive sets only last_active, to a timestamp', () async {
+    final userDoc = {
+      'first_name': 'Jane',
+      'last_name': 'Doe',
+      'email': 'jane@example.com',
+      'reports': 0,
+      'is_verified': true,
+      'is_admin': false,
+    };
+    await firestore.collection('users').doc('u1').set(userDoc);
+
+    await repository.updateLastActive('u1');
+
+    final data = (await firestore.collection('users').doc('u1').get()).data()!;
+    expect(data['last_active'], isA<Timestamp>());
+    expect(data..remove('last_active'), userDoc);
+  });
+
+  test('updateLastActive fails for a missing user document', () async {
+    await expectLater(repository.updateLastActive('nobody'), throwsA(anything));
   });
 
   test('uploadProfilePhoto uploads to the pre-refactor path', () {

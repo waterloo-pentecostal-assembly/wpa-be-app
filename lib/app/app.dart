@@ -13,6 +13,7 @@ import '../application/links/links_cubit.dart';
 import '../application/notifications/notifications_cubit.dart';
 import '../application/prayer_requests/prayer_requests_cubits.dart';
 import '../application/testimonies/testimonies_cubits.dart';
+import '../application/user_activity/last_active_recorder.dart';
 import '../domain/notifications/entities.dart';
 import '../presentation/design_system/theme.dart';
 import '../presentation/foundation/navigation/app_navigator.dart';
@@ -69,10 +70,16 @@ class _AppState extends State<App> {
     ),
   );
   StreamSubscription<RemoteMessage>? _openedSub;
+  late final LastActiveRecorder _lastActive;
+  late final AppLifecycleListener _lifecycle;
 
   @override
   void initState() {
     super.initState();
+    // Created before authentication resolves so the first session is seen.
+    _lastActive = LastActiveRecorder(getIt(), getIt());
+    // onShow: back from the background, not e.g. the notification shade.
+    _lifecycle = AppLifecycleListener(onShow: _lastActive.appShown);
     // Notification tapped while the app was in the background.
     _openedSub = _messaging.openedMessageStream
         .listen((message) => _opener.open(message.data));
@@ -86,6 +93,8 @@ class _AppState extends State<App> {
   @override
   void dispose() {
     _openedSub?.cancel();
+    _lifecycle.dispose();
+    _lastActive.close();
     _router.dispose();
     _auth.close();
     _audio.close();
