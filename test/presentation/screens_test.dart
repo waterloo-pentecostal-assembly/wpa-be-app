@@ -123,6 +123,7 @@ BibleSeries _series({
       endDate: _now.add(const Duration(days: 2)),
       isActive: true,
       isVisible: true,
+      scriptureBibleId: 'bible-1',
       seriesContentSnippet: [
         for (var i = -2; i <= 2; i++)
           SeriesContentSnippet(
@@ -393,7 +394,12 @@ void main() {
       when(() => completions.getCompletionOrNull(seriesContentId: 'q'))
           .thenAnswer((_) async => null);
       final passages = _MockPassages();
-      when(() => passages.getPassage('JHN.3.16-JHN.3.17')).thenAnswer(
+      when(() => series.getBibleSeriesDetails(bibleSeriesId: 's1'))
+          .thenAnswer((_) async => _series());
+      when(() => passages.getPassage(
+            bibleId: 'bible-1',
+            passageId: 'JHN.3.16-JHN.3.17',
+          )).thenAnswer(
         (_) async => const BiblePassage(
           id: 'JHN.3.16-JHN.3.17',
           reference: 'John 3:16-17',
@@ -401,7 +407,8 @@ void main() {
           copyright: 'Copyright Biblica',
         ),
       );
-      when(() => passages.getPassage('PSA.23.1')).thenAnswer(
+      when(() => passages.getPassage(bibleId: 'bible-1', passageId: 'PSA.23.1'))
+          .thenAnswer(
         (_) async => const BiblePassage(
           id: 'PSA.23.1',
           reference: 'Psalm 23:1',

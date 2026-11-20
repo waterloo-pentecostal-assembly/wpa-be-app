@@ -14,7 +14,8 @@ typedef IdTokenProvider = Future<String?> Function(bool forceRefresh);
 
 /// [IBiblePassageRepository] backed by the WPA Bible API proxy
 /// (`GET /v1/bibles/{bibleId}/passages/{passageId}?content-type=text`),
-/// authenticated with the user's Firebase ID token.
+/// authenticated with the user's Firebase ID token. The `bibleId` comes from
+/// the series (`bible_series.scripture_bible_id`).
 ///
 /// Passages never change, so successful responses are kept in memory for the
 /// life of the app; concurrent requests for the same passage share one call.
@@ -23,7 +24,6 @@ class BibleApiRepository implements IBiblePassageRepository {
     required http.Client client,
     required IdTokenProvider idToken,
     Uri? baseUrl,
-    this.bibleId = defaultBibleId,
     this.timeout = const Duration(seconds: 60),
   })  : _client = client,
         _idToken = idToken,
@@ -32,35 +32,39 @@ class BibleApiRepository implements IBiblePassageRepository {
   static final Uri defaultBaseUrl =
       Uri.parse('https://wpa-be-bible-proxy.onrender.com/');
 
-  /// The Bible version shown in the app.
-  static const String defaultBibleId = '78a9f6124f344018-01';
-
   final http.Client _client;
   final IdTokenProvider _idToken;
   final Uri _baseUrl;
-  final String bibleId;
 
   /// Generous: the proxy may need to cold start.
   final Duration timeout;
 
+  /// Keyed by `bibleId/passageId`.
   final Map<String, Future<BiblePassage>> _passages = {};
 
   @override
-  Future<BiblePassage> getPassage(String passageId) => _passages.putIfAbsent(
-        passageId,
-        () => _fetch(passageId).catchError((Object e, StackTrace st) {
-          _passages.remove(passageId); // retry on the next call
-          Error.throwWithStackTrace(e, st);
-        }),
-      );
+  Future<BiblePassage> getPassage({
+    required String bibleId,
+    required String passageId,
+  }) {
+    final key = '$bibleId/$passageId';
+    return _passages.putIfAbsent(
+      key,
+      () => _fetch(bibleId, passageId).catchError((Object e, StackTrace st) {
+        _passages.remove(key); // retry on the next call
+        Error.throwWithStackTrace(e, st);
+      }),
+    );
+  }
 
-  Uri passageUri(String passageId) => _baseUrl.resolveUri(Uri(
+  Uri passageUri({required String bibleId, required String passageId}) =>
+      _baseUrl.resolveUri(Uri(
         pathSegments: ['v1', 'bibles', bibleId, 'passages', passageId],
         queryParameters: {'content-type': 'text'},
       ));
 
-  Future<BiblePassage> _fetch(String passageId) async {
-    final uri = passageUri(passageId);
+  Future<BiblePassage> _fetch(String bibleId, String passageId) async {
+    final uri = passageUri(bibleId: bibleId, passageId: passageId);
     var response = await _get(uri, forceRefresh: false);
     if (response.statusCode == 401) {
       // The cached token may have just expired.

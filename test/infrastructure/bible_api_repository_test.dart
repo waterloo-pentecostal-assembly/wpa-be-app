@@ -7,6 +7,7 @@ import 'package:wpa_app/domain/bible_series/entities.dart';
 import 'package:wpa_app/domain/bible_series/exceptions.dart';
 import 'package:wpa_app/infrastructure/bible_series/bible_api_repository.dart';
 
+const _bibleId = 'de4e12af7f28f599-02';
 const _passageId = '1KI.2.1-1KI.2.3';
 const _content = ' [1] Now the days of David drew nigh that he should die; and '
     'he charged Solomon his son, saying, [2] I go the way of all the earth: be '
@@ -20,7 +21,7 @@ Map<String, dynamic> _body() => {
       'data': {
         'id': _passageId,
         'orgId': _passageId,
-        'bibleId': 'de4e12af7f28f599-02',
+        'bibleId': _bibleId,
         'bookId': '1KI',
         'chapterIds': ['1KI.2'],
         'reference': '1 Kings 2:1-3',
@@ -61,8 +62,12 @@ void main() {
         },
       );
 
+  Future<BiblePassage> get(BibleApiRepository repository,
+          {String bibleId = _bibleId}) =>
+      repository.getPassage(bibleId: bibleId, passageId: _passageId);
+
   test('requests the text passage with the ID token and parses it', () async {
-    final passage = await build().getPassage(_passageId);
+    final passage = await get(build());
 
     expect(
       passage,
@@ -77,7 +82,7 @@ void main() {
     expect(request.method, 'GET');
     expect(
       request.url.toString(),
-      'https://wpa-be-bible-proxy.onrender.com/v1/bibles/78a9f6124f344018-01'
+      'https://wpa-be-bible-proxy.onrender.com/v1/bibles/de4e12af7f28f599-02'
       '/passages/1KI.2.1-1KI.2.3?content-type=text',
     );
     expect(request.headers['Authorization'], 'Bearer token-1');
@@ -85,14 +90,20 @@ void main() {
 
   test('caches passages and shares concurrent requests', () async {
     final repository = build();
-    final results = await Future.wait([
-      repository.getPassage(_passageId),
-      repository.getPassage(_passageId),
-    ]);
-    await repository.getPassage(_passageId);
+    final results = await Future.wait([get(repository), get(repository)]);
+    await get(repository);
 
     expect(results[0], results[1]);
     expect(requests, hasLength(1));
+  });
+
+  test('caches the same passage of different Bibles separately', () async {
+    final repository = build();
+    await get(repository);
+    await get(repository, bibleId: 'other-bible');
+
+    expect(
+        requests.map((r) => r.url.pathSegments[2]), [_bibleId, 'other-bible']);
   });
 
   test('retries once with a refreshed token on 401', () async {
@@ -107,7 +118,7 @@ void main() {
       idToken: (forceRefresh) async => forceRefresh ? 'fresh' : 'stale',
     );
 
-    final passage = await repository.getPassage(_passageId);
+    final passage = await get(repository);
 
     expect(passage.reference, '1 Kings 2:1-3');
     expect(requests, hasLength(2));
@@ -118,7 +129,7 @@ void main() {
     final repository = build();
 
     await expectLater(
-      repository.getPassage(_passageId),
+      get(repository),
       throwsA(isA<BibleSeriesException>().having(
         (e) => e.code,
         'code',
@@ -127,14 +138,14 @@ void main() {
     );
 
     respond = (_) => _json(_body());
-    expect((await repository.getPassage(_passageId)).id, _passageId);
+    expect((await get(repository)).id, _passageId);
     expect(requests, hasLength(2));
   });
 
   test('signed out: throws without calling the API', () async {
     token = null;
     await expectLater(
-      build().getPassage(_passageId),
+      get(build()),
       throwsA(isA<BibleSeriesException>()),
     );
     expect(requests, isEmpty);

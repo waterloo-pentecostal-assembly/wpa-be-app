@@ -199,6 +199,10 @@ class ContentDetailCubit extends Cubit<ContentDetailState> {
   final ISession _session;
   final DateTime Function() _clock;
 
+  /// The in-flight or completed series request; cleared on failure so the
+  /// next caller retries.
+  Future<BibleSeries>? _seriesRequest;
+
   void _safeEmit(ContentDetailState s) {
     if (!isClosed) emit(s);
   }
@@ -270,10 +274,26 @@ class ContentDetailCubit extends Cubit<ContentDetailState> {
     await _loadPassage(passageId);
   }
 
+  /// The series (fetched once): its Bible id is needed to load passages and
+  /// its title and image enrich audio tracks.
+  Future<BibleSeries> _series() => _seriesRequest ??= _bibleSeries
+          .getBibleSeriesDetails(bibleSeriesId: bibleSeriesId)
+          .then((series) {
+        _safeEmit(state.copyWith(series: series));
+        return series;
+      }).catchError((Object e, StackTrace st) {
+        _seriesRequest = null;
+        Error.throwWithStackTrace(e, st);
+      });
+
   Future<void> _loadPassage(String passageId) async {
     PassageLoad result;
     try {
-      result = PassageLoad.loaded(await _passages.getPassage(passageId));
+      final series = await _series();
+      result = PassageLoad.loaded(await _passages.getPassage(
+        bibleId: series.scriptureBibleId,
+        passageId: passageId,
+      ));
     } catch (e, stackTrace) {
       reportError(e, stackTrace);
       result = const PassageLoad.failed();
@@ -284,9 +304,7 @@ class ContentDetailCubit extends Cubit<ContentDetailState> {
   /// Best-effort: without the series, audio still plays (no artwork).
   Future<void> _loadSeries() async {
     try {
-      final series = await _bibleSeries.getBibleSeriesDetails(
-          bibleSeriesId: bibleSeriesId);
-      _safeEmit(state.copyWith(series: series));
+      await _series();
     } catch (e, stackTrace) {
       reportError(e, stackTrace);
     }

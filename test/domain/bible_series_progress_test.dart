@@ -26,6 +26,7 @@ BibleSeries series(List<SeriesContentSnippet> days) => BibleSeries(
       endDate: days.last.date,
       isActive: true,
       isVisible: true,
+      scriptureBibleId: 'bible-1',
       seriesContentSnippet: days,
     );
 

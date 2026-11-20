@@ -641,7 +641,11 @@ void main() {
       ],
     );
 
-    setUp(() => bibleSeries.contents['read'] = read);
+    setUp(() {
+      bibleSeries
+        ..contents['read'] = read
+        ..seriesById[_seriesId] = buildSeries(id: _seriesId, days: []);
+    });
 
     test('content is shown first, then every passage is loaded once', () async {
       passages.passages
@@ -657,6 +661,32 @@ void main() {
         psalm.id: const PassageLoad.loaded(psalm),
       });
       expect(passages.callCount('getPassage'), 2);
+      expect(passages.bibleIds, ['bible-$_seriesId', 'bible-$_seriesId']);
+      expect(bibleSeries.callCount('getBibleSeriesDetails'), 1);
+      await cubit.close();
+    });
+
+    test('without the series, passages fail and a retry reloads the series',
+        () async {
+      passages.passages
+        ..[john.id] = john
+        ..[psalm.id] = psalm;
+      final series = bibleSeries.seriesById.remove(_seriesId)!;
+      final cubit = build(contentId: 'read');
+      await cubit.load();
+      await pumpEventQueue();
+
+      expect(cubit.state.status, LoadStatus.success);
+      expect(cubit.state.passages, {
+        john.id: const PassageLoad.failed(),
+        psalm.id: const PassageLoad.failed(),
+      });
+      expect(passages.calls, isEmpty);
+
+      bibleSeries.seriesById[_seriesId] = series;
+      await cubit.retryPassage(john.id);
+      expect(cubit.state.passages[john.id], const PassageLoad.loaded(john));
+      expect(passages.bibleIds, ['bible-$_seriesId']);
       await cubit.close();
     });
 

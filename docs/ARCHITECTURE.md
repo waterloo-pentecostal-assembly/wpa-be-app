@@ -163,8 +163,8 @@ Wiring is in `lib/app/app.dart`:
 ## 9a. Bible text (Bible API)
 
 - A scripture body stores only Bible API passage ids (`passage_ids`, an array). The reference, text and copyright all come from the API.
-- **Port:** `IBiblePassageRepository.getPassage(passageId)` → `BiblePassage` (id, reference, plain-text content with inline `[n]` verse markers, copyright) in `domain/bible_series/interfaces.dart`.
-- **Implementation:** `infrastructure/bible_series/bible_api_repository.dart` `BibleApiRepository` calls the proxy at `https://wpa-be-bible-proxy.onrender.com/` (`GET /v1/bibles/78a9f6124f344018-01/passages/<passage_id>?content-type=text`) with `Authorization: Bearer <Firebase ID token>`. On a 401 it retries once with a refreshed token. Successful passages are cached in memory for the life of the app (they never change) and concurrent requests share one call; failures are not cached.
+- **Port:** `IBiblePassageRepository.getPassage(bibleId:, passageId:)` → `BiblePassage` (id, reference, plain-text content with inline `[n]` verse markers, copyright) in `domain/bible_series/interfaces.dart`.
+- **Implementation:** `infrastructure/bible_series/bible_api_repository.dart` `BibleApiRepository` calls the proxy at `https://wpa-be-bible-proxy.onrender.com/` (`GET /v1/bibles/<bible_id>/passages/<passage_id>?content-type=text`, where `<bible_id>` is the series' `scripture_bible_id`; `ContentDetailCubit` loads the series once before its passages) with `Authorization: Bearer <Firebase ID token>`. On a 401 it retries once with a refreshed token. Successful passages are cached in memory per Bible and passage for the life of the app (they never change) and concurrent requests share one call; failures are not cached.
 - **App:** `ContentDetailCubit` shows the content as soon as it is read from Firestore, then loads each passage separately into `ContentDetailState.passages` (`PassageLoad` loading / loaded / failed). A failed passage is reported (`reportError`) and can be retried (`retryPassage`); it never fails the screen.
 
 ## 9b. Audio playback

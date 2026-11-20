@@ -253,6 +253,7 @@ BibleSeries buildSeries({
       endDate: days.isEmpty ? DateTime(2026) : days.last,
       isActive: isActive,
       isVisible: true,
+      scriptureBibleId: 'bible-$id',
       seriesContentSnippet: [
         for (var i = 0; i < days.length; i++)
           SeriesContentSnippet(
@@ -516,9 +517,16 @@ class FakeBiblePassageRepository
   /// Keyed by passage id.
   final Map<String, BiblePassage> passages = {};
 
+  /// The `bibleId` of every [getPassage] call, in order.
+  final List<String> bibleIds = [];
+
   @override
-  Future<BiblePassage> getPassage(String passageId) async {
+  Future<BiblePassage> getPassage({
+    required String bibleId,
+    required String passageId,
+  }) async {
     record('getPassage');
+    bibleIds.add(bibleId);
     final passage = passages[passageId];
     if (passage == null) {
       throw BibleSeriesException(

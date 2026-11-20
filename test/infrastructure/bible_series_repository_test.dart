@@ -20,6 +20,7 @@ Map<String, dynamic> seriesDoc({
       'end_date': ts(startDay + 1),
       'is_active': isActive,
       'is_visible': isVisible,
+      'scripture_bible_id': 'bible-$startDay',
       'series_content_snippet': [
         {
           'date': ts(startDay),
@@ -48,6 +49,9 @@ void main() {
     await series().doc('s1').set(seriesDoc(startDay: 1));
     await series().doc('s5').set(seriesDoc(startDay: 5));
     await series().doc('bad').set({...seriesDoc(startDay: 3), 'title': null});
+    await series()
+        .doc('no-bible')
+        .set({...seriesDoc(startDay: 6), 'scripture_bible_id': null});
     await series().doc('hidden').set(seriesDoc(startDay: 4, isVisible: false));
 
     final result = await repository.getBibleSeries(limit: 10);
@@ -56,6 +60,7 @@ void main() {
     final s5 = result.first;
     expect(s5.imageUrl, downloadUrlFor('gs://bucket/s5.jpg'));
     expect(s5.startDate, day(5));
+    expect(s5.scriptureBibleId, 'bible-5');
     final content = s5.seriesContentSnippet.single.availableContentTypes.single;
     expect(content.seriesContentType, 'READ');
     expect(content.contentId, 'c5');

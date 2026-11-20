@@ -24,6 +24,7 @@ class BibleSeries extends Equatable {
     required this.endDate,
     required this.isActive,
     required this.isVisible,
+    required this.scriptureBibleId,
     required this.seriesContentSnippet,
   });
 
@@ -36,6 +37,9 @@ class BibleSeries extends Equatable {
   final DateTime endDate;
   final bool isActive;
   final bool isVisible;
+
+  /// Bible API id of the Bible version the series' scripture is read from.
+  final String scriptureBibleId;
 
   /// One entry per day of the series, in series order.
   final List<SeriesContentSnippet> seriesContentSnippet;
@@ -51,6 +55,7 @@ class BibleSeries extends Equatable {
       endDate: endDate,
       isActive: isActive,
       isVisible: isVisible,
+      scriptureBibleId: scriptureBibleId,
       seriesContentSnippet: seriesContentSnippet ?? this.seriesContentSnippet,
     );
   }
@@ -66,6 +71,7 @@ class BibleSeries extends Equatable {
         endDate,
         isActive,
         isVisible,
+        scriptureBibleId,
         seriesContentSnippet,
       ];
 }

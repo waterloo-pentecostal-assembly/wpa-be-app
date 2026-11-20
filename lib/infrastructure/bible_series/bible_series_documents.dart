@@ -22,6 +22,7 @@ Future<BibleSeries> parseBibleSeries(
     endDate: data.requireDate('end_date'),
     isActive: data.optional('is_active', false),
     isVisible: data.optional('is_visible', false),
+    scriptureBibleId: data.require<String>('scripture_bible_id'),
     seriesContentSnippet: [
       for (final day in data.optional<List>('series_content_snippet', const []))
         _parseSnippet(Map<String, dynamic>.from(day as Map)),
