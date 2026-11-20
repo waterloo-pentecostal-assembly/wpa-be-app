@@ -96,15 +96,7 @@ void main() {
         },
         {
           'body_type': 'scripture',
-          'bible_version': 'NIV',
-          'attribution': 'Biblica',
-          'scriptures': [
-            {
-              'book': 'John',
-              'chapter': 3, // numbers are accepted
-              'verses': {'16': 'For God so loved...'},
-            },
-          ],
+          'passage_ids': ['JHN.3.16-JHN.3.18', 'PSA.23'],
         },
         {
           'body_type': 'question',
@@ -133,9 +125,10 @@ void main() {
         ImageInputBody,
         DividerBody,
       ]);
-      final scripture = content.body[2] as ScriptureBody;
-      expect(scripture.scriptures.single.chapter, '3');
-      expect(scripture.scriptures.single.fullChapter, isFalse);
+      expect(
+        content.body[2],
+        const ScriptureBody(passageIds: ['JHN.3.16-JHN.3.18', 'PSA.23']),
+      );
       final questions = (content.body[3] as QuestionBody).questions;
       expect(questions.map((q) => q.location), [
         [3, 0],

@@ -48,6 +48,7 @@ ResponseDetails _text(String s) =>
 
 void main() {
   late FakeBibleSeriesRepository bibleSeries;
+  late FakeBiblePassageRepository passages;
   late FakeCompletionsRepository completions;
   late FakeAnalytics analytics;
   late AppEventBus events;
@@ -59,6 +60,7 @@ void main() {
     bibleSeries = FakeBibleSeriesRepository()
       ..contents[_contentId] = _content
       ..contents['read-only'] = _readOnlyContent;
+    passages = FakeBiblePassageRepository();
     completions = FakeCompletionsRepository();
     analytics = FakeAnalytics();
     events = AppEventBus();
@@ -75,6 +77,7 @@ void main() {
         bibleSeriesId: _seriesId,
         contentId: contentId,
         bibleSeriesRepository: bibleSeries,
+        biblePassageRepository: passages,
         completionsRepository: completions,
         analytics: analytics,
         events: events,
@@ -610,6 +613,77 @@ void main() {
       final cubit = await loaded();
       await pumpEventQueue();
       expect(bibleSeries.calls, isNot(contains('getBibleSeriesDetails')));
+      await cubit.close();
+    });
+  });
+
+  group('scripture', () {
+    const john = BiblePassage(
+      id: 'JHN.3.16-JHN.3.17',
+      reference: 'John 3:16-17',
+      content: '[16] For God so loved the world [17] For God did not send',
+    );
+    const psalm = BiblePassage(
+      id: 'PSA.23.1',
+      reference: 'Psalm 23:1',
+      content: '[1] The Lord is my shepherd',
+    );
+    final read = SeriesContent(
+      id: 'read',
+      contentType: 'READ',
+      date: DateTime(2026, 3, 2),
+      title: 'Day 2',
+      subTitle: '',
+      body: const [
+        ScriptureBody(passageIds: ['JHN.3.16-JHN.3.17', 'PSA.23.1']),
+        TextBody(paragraphs: ['Between']),
+        ScriptureBody(passageIds: ['PSA.23.1']),
+      ],
+    );
+
+    setUp(() => bibleSeries.contents['read'] = read);
+
+    test('content is shown first, then every passage is loaded once', () async {
+      passages.passages
+        ..[john.id] = john
+        ..[psalm.id] = psalm;
+      final cubit = build(contentId: 'read');
+      await cubit.load();
+
+      expect(cubit.state.status, LoadStatus.success);
+      await pumpEventQueue();
+      expect(cubit.state.passages, {
+        john.id: const PassageLoad.loaded(john),
+        psalm.id: const PassageLoad.loaded(psalm),
+      });
+      expect(passages.callCount('getPassage'), 2);
+      await cubit.close();
+    });
+
+    test('a failed passage does not fail the content and can be retried',
+        () async {
+      passages.passages[john.id] = john;
+      final cubit = build(contentId: 'read');
+      await cubit.load();
+      await pumpEventQueue();
+
+      expect(cubit.state.status, LoadStatus.success);
+      expect(cubit.state.passages[john.id], const PassageLoad.loaded(john));
+      expect(cubit.state.passages[psalm.id], const PassageLoad.failed());
+
+      passages.passages[psalm.id] = psalm;
+      final retry = cubit.retryPassage(psalm.id);
+      expect(cubit.state.passages[psalm.id], const PassageLoad.loading());
+      await retry;
+      expect(cubit.state.passages[psalm.id], const PassageLoad.loaded(psalm));
+      await cubit.close();
+    });
+
+    test('content without scripture loads no passages', () async {
+      final cubit = await loaded();
+      await pumpEventQueue();
+      expect(cubit.state.passages, isEmpty);
+      expect(passages.calls, isEmpty);
       await cubit.close();
     });
   });

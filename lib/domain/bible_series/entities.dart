@@ -205,57 +205,49 @@ class TextBody extends SeriesContentBody {
   List<Object?> get props => [type, paragraphs];
 }
 
+/// Scripture passages. Everything shown (reference, text, copyright) comes
+/// from the Bible API passages [passageIds].
 class ScriptureBody extends SeriesContentBody {
-  const ScriptureBody({
-    required this.bibleVersion,
-    required this.attribution,
-    required this.scriptures,
-  });
+  const ScriptureBody({required this.passageIds});
 
-  final String bibleVersion;
-  final String attribution;
-  final List<Scripture> scriptures;
+  /// Bible API passage ids, e.g. `JHN.3.16-JHN.3.18`, in display order.
+  final List<String> passageIds;
 
   @override
   SeriesContentBodyType get type => SeriesContentBodyType.scripture;
 
   @override
-  List<Object?> get props => [type, bibleVersion, attribution, scriptures];
+  List<Object?> get props => [type, passageIds];
 }
 
-class Scripture extends Equatable {
-  const Scripture({
-    required this.book,
-    required this.chapter,
-    this.title,
-    required this.fullChapter,
-    required this.verses,
+/// A passage of the Bible, as returned by the Bible API.
+class BiblePassage extends Equatable {
+  const BiblePassage({
+    required this.id,
+    required this.reference,
+    required this.content,
+    this.copyright = '',
   });
 
-  final String book;
-  final String chapter;
-  final String? title;
-  final bool fullChapter;
+  /// Bible API passage id, e.g. `JHN.3.16-JHN.3.18`.
+  final String id;
 
-  /// Verse number (as a string) -> verse text.
-  final Map<String, String> verses;
+  /// Human readable reference, e.g. `John 3:16-18`.
+  final String reference;
 
-  /// Verse numbers in ascending numeric order.
-  List<int> get sortedVerseNumbers =>
-      verses.keys.map(int.parse).toList()..sort();
+  /// Plain text of the passage. Verse numbers appear inline as `[16]`;
+  /// paragraphs are separated by line breaks.
+  final String content;
+  final String copyright;
 
-  /// Reference such as `John 3: 16 - 18` or `John 3` for full chapters.
-  String get reference {
-    final sorted = sortedVerseNumbers;
-    if (fullChapter || sorted.isEmpty) return '$book $chapter';
-    final start = sorted.first;
-    final end = sorted.last;
-    if (start == end) return '$book $chapter: $start';
-    return '$book $chapter: $start - $end';
-  }
+  /// Non-empty paragraphs of [content], trimmed.
+  List<String> get paragraphs => [
+        for (final line in content.split('\n'))
+          if (line.trim().isNotEmpty) line.trim(),
+      ];
 
   @override
-  List<Object?> get props => [book, chapter, title, fullChapter, verses];
+  List<Object?> get props => [id, reference, content, copyright];
 }
 
 class QuestionBody extends SeriesContentBody {

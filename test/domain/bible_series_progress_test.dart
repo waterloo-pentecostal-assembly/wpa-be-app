@@ -122,24 +122,16 @@ void main() {
     });
   });
 
-  group('Scripture.reference', () {
-    Scripture scripture(Map<String, String> verses, {bool full = false}) =>
-        Scripture(
-            book: 'John', chapter: '3', fullChapter: full, verses: verses);
-
-    test('range, single verse and full chapter', () {
-      expect(
-        scripture({'18': 'c', '16': 'a', '17': 'b'}).reference,
-        'John 3: 16 - 18',
+  group('BiblePassage.paragraphs', () {
+    test('splits on line breaks, trimming and dropping blank lines', () {
+      const passage = BiblePassage(
+        id: 'JHN.3.16-JHN.3.18',
+        reference: 'John 3:16-18',
+        content: '     [16] For God so loved\n\n  [17] For God did not  \n',
       );
-      expect(scripture({'16': 'a'}).reference, 'John 3: 16');
-      expect(scripture({'1': 'a', '2': 'b'}, full: true).reference, 'John 3');
-    });
-
-    test('verses sort numerically, not lexically', () {
       expect(
-        scripture({'10': 'x', '9': 'y', '2': 'z'}).sortedVerseNumbers,
-        [2, 9, 10],
+        passage.paragraphs,
+        ['[16] For God so loved', '[17] For God did not'],
       );
     });
   });

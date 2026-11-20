@@ -52,9 +52,7 @@ For each `body_type` there are different keys in the `map`. These are described 
 |---|---|---|
 |`audio`   |`audio_file_url` *(string)*   |URL for the location of the    |
 |`text`   |`paragraphs` *(array)*   |This is an `array` of `strings`. Each `string` item is a paragraph of the text   |
-|`scripture`   |`bible_version` *(string)*   | The version of the Bible that piece of scripture is taken from    |
-|              |`attribution` *(string)*   |Statement crediting copyright holder   |
-|              |`scriptures` *(array)*   |Each element in the `array` is a `map` with keys: `book` *(string)*, `chapter` *(string)*, [optional] `title` *(string)* and `verses` *(map)*. In the `verses` map, the key corresponds to the verse number and the value is the verse itself.   |
+|`scripture`   |`passage_ids` *(array)*   |An `array` of Bible API passage ids (e.g. `JHN.3.16-JHN.3.18`), in display order. For each one the app shows the reference, text and copyright from the Bible API proxy (`GET https://wpa-be-bible-proxy.onrender.com/v1/bibles/78a9f6124f344018-01/passages/<passage_id>?content-type=text`, `Authorization: Bearer <Firebase ID token>`). Any other keys (legacy `bible_version`, `attribution`, `scriptures`) are ignored.   |
 |`question`   |`questions` *(array)*   | An `array` of `strings`, each one being a question. The `questions` type is the only one that allows for a typed response from the user. The responses are stored in the `completions` collections.    |
 |`image_input`   |N/A   |N/A    |
 

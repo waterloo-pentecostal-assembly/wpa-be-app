@@ -95,6 +95,7 @@ abstract final class ScreenRegistry {
           bibleSeriesId: route.seriesId,
           contentId: route.contentId,
           bibleSeriesRepository: getIt(),
+          biblePassageRepository: getIt(),
           completionsRepository: getIt(),
           analytics: getIt(),
           events: getIt(),

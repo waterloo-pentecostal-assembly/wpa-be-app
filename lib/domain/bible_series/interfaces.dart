@@ -18,3 +18,9 @@ abstract class IBibleSeriesRepository {
     bool isActive = false,
   });
 }
+
+/// Reads Bible text from the Bible API.
+abstract class IBiblePassageRepository {
+  /// The passage [passageId] (e.g. `JHN.3.16-JHN.3.18`).
+  Future<BiblePassage> getPassage(String passageId);
+}

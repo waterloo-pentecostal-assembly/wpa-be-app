@@ -71,6 +71,8 @@ class _MockLinks extends Mock implements ILinksRepository {}
 
 class _MockSeries extends Mock implements IBibleSeriesRepository {}
 
+class _MockPassages extends Mock implements IBiblePassageRepository {}
+
 class _MockCompletions extends Mock implements ICompletionsRepository {}
 
 class _MockForum extends Mock implements IForumRepository {}
@@ -144,19 +146,7 @@ SeriesContent _content() => SeriesContent(
         TitleBody(text: 'Born again'),
         AudioBody(audioFileUrl: 'https://example.com/a.mp3', title: 'Listen'),
         TextBody(paragraphs: ['First paragraph.', 'Second paragraph.']),
-        ScriptureBody(
-          bibleVersion: 'NIV',
-          attribution: 'Biblica',
-          scriptures: [
-            Scripture(
-              book: 'John',
-              chapter: '3',
-              title: 'Jesus teaches Nicodemus',
-              fullChapter: false,
-              verses: {'16': 'For God so loved the world...', '17': 'For God'},
-            ),
-          ],
-        ),
+        ScriptureBody(passageIds: ['JHN.3.16-JHN.3.17', 'PSA.23.1']),
         DividerBody(),
         QuestionBody(questions: [
           Question(question: 'What stood out?', location: [5, 0]),
@@ -402,6 +392,23 @@ void main() {
           )).thenAnswer((_) async => _content());
       when(() => completions.getCompletionOrNull(seriesContentId: 'q'))
           .thenAnswer((_) async => null);
+      final passages = _MockPassages();
+      when(() => passages.getPassage('JHN.3.16-JHN.3.17')).thenAnswer(
+        (_) async => const BiblePassage(
+          id: 'JHN.3.16-JHN.3.17',
+          reference: 'John 3:16-17',
+          content: '[16] For God so loved the world... [17] For God',
+          copyright: 'Copyright Biblica',
+        ),
+      );
+      when(() => passages.getPassage('PSA.23.1')).thenAnswer(
+        (_) async => const BiblePassage(
+          id: 'PSA.23.1',
+          reference: 'Psalm 23:1',
+          content: '[1] The Lord is my shepherd',
+          copyright: 'Copyright Biblica',
+        ),
+      );
       await pumpScreen(
         tester,
         BlocProvider(
@@ -409,6 +416,7 @@ void main() {
             bibleSeriesId: 's1',
             contentId: 'q',
             bibleSeriesRepository: series,
+            biblePassageRepository: passages,
             completionsRepository: completions,
             analytics: _NoopAnalytics(),
             events: AppEventBus(),
@@ -419,7 +427,9 @@ void main() {
         width: width,
       );
       expect(find.text('Born again'), findsOneWidget);
-      expect(find.text('John 3: 16 - 17'), findsOneWidget);
+      expect(find.text('John 3:16-17'), findsOneWidget);
+      expect(find.text('Psalm 23:1'), findsOneWidget);
+      expect(find.text('Copyright Biblica'), findsOneWidget);
       expect(find.text('What stood out?'), findsOneWidget);
       expect(find.text('Upload Photo!'), findsOneWidget);
       await tester.scrollUntilVisible(

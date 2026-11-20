@@ -5,6 +5,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:get_it/get_it.dart';
+import 'package:http/http.dart' as http;
 
 import '../application/common/app_events.dart';
 import '../domain/achievements/interfaces.dart';
@@ -26,6 +27,7 @@ import '../infrastructure/achievements/achievements_repository.dart';
 import '../infrastructure/admin/admin_service.dart';
 import '../infrastructure/analytics/firebase_analytics_adapter.dart';
 import '../infrastructure/authentication/firebase_authentication_facade.dart';
+import '../infrastructure/bible_series/bible_api_repository.dart';
 import '../infrastructure/bible_series/bible_series_repository.dart';
 import '../infrastructure/completions/completions_repository.dart';
 import '../infrastructure/forum/forum_repository.dart';
@@ -96,6 +98,13 @@ void configureDependencies(
     )
     ..registerLazySingleton<IBibleSeriesRepository>(
         () => BibleSeriesRepository(getIt(), getIt(), getIt()))
+    ..registerLazySingleton<IBiblePassageRepository>(
+      () => BibleApiRepository(
+        client: http.Client(),
+        idToken: (forceRefresh) async =>
+            getIt<FirebaseAuth>().currentUser?.getIdToken(forceRefresh),
+      ),
+    )
     ..registerLazySingleton<ICompletionsRepository>(
         () => CompletionsRepository(getIt(), getIt(), getIt()))
     ..registerLazySingleton<IAchievementsRepository>(

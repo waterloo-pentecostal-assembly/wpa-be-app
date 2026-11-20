@@ -510,6 +510,27 @@ class FakeBibleSeriesRepository
   }
 }
 
+class FakeBiblePassageRepository
+    with FakeCalls
+    implements IBiblePassageRepository {
+  /// Keyed by passage id.
+  final Map<String, BiblePassage> passages = {};
+
+  @override
+  Future<BiblePassage> getPassage(String passageId) async {
+    record('getPassage');
+    final passage = passages[passageId];
+    if (passage == null) {
+      throw BibleSeriesException(
+        code: BibleSeriesExceptionCode.passageUnavailable,
+        message: 'Unable to load scripture',
+        details: '$passageId not found',
+      );
+    }
+    return passage;
+  }
+}
+
 class FakeAchievementsRepository
     with FakeCalls
     implements IAchievementsRepository {

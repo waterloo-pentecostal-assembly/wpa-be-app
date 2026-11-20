@@ -84,14 +84,7 @@ SeriesContentBody _parseBody(Map<String, dynamic> json, int index) {
           Question(location: [index, j], question: questions[j]),
       ]);
     case 'scripture':
-      return ScriptureBody(
-        bibleVersion: json.require<String>('bible_version'),
-        attribution: json.require<String>('attribution'),
-        scriptures: [
-          for (final s in json.require<List>('scriptures'))
-            _parseScripture(Map<String, dynamic>.from(s as Map)),
-        ],
-      );
+      return ScriptureBody(passageIds: _strings(json, 'passage_ids'));
     case 'image_input':
       return const ImageInputBody();
     case 'divider':
@@ -116,14 +109,3 @@ SeriesContentBody _parseBody(Map<String, dynamic> json, int index) {
       );
   }
 }
-
-Scripture _parseScripture(Map<String, dynamic> json) => Scripture(
-      title: json.optional('title', ''),
-      book: json.require<String>('book'),
-      // Accept a number too (chapters entered as numbers by other tools).
-      chapter: json.require<Object>('chapter').toString(),
-      fullChapter: json.optional('full_chapter', false),
-      verses: json
-          .requireMap('verses')
-          .map((verse, text) => MapEntry(verse, text as String)),
-    );

@@ -24,7 +24,7 @@ lib/
 │                             ImageData/UploadHandle, CommunityPost, ValueObject
 ├── application/<feature>/    One Cubit per screen (+ shared PostActions, AdminQueueCubit)
 │   └── common/               LoadStatus, nextEffectId(), AppEventBus/AppEvent
-├── infrastructure/<feature>/ Firestore/Firebase implementations of domain interfaces + document
+├── infrastructure/<feature>/ Firestore/Firebase (and Bible API) implementations of domain interfaces + document
 │                             parse/write functions (`*_documents.dart`, `user_document.dart`)
 │   ├── common/               firebase_error_translator.dart (Firebase error → message),
 │   │                         firestore_data.dart (typed field reads, parseAllSkippingInvalid),
@@ -159,6 +159,13 @@ Wiring is in `lib/app/app.dart`:
 - The prod App Check providers must be registered in the Firebase console before enforcement is turned on. Enforcement itself was not changed.
 - `localDev` points Firestore at the emulator: `10.0.2.2:8081` on Android, `localhost:8081` elsewhere. It uses `defaultTargetPlatform`, not `dart:io`.
 - The version shown on Profile is `AppInfo.version = String.fromEnvironment('APP_VERSION', defaultValue: '3.0.1')`. Pass `--dart-define=APP_VERSION=x.y.z` in release builds and keep the default in sync with `pubspec.yaml`.
+
+## 9a. Bible text (Bible API)
+
+- A scripture body stores only Bible API passage ids (`passage_ids`, an array). The reference, text and copyright all come from the API.
+- **Port:** `IBiblePassageRepository.getPassage(passageId)` → `BiblePassage` (id, reference, plain-text content with inline `[n]` verse markers, copyright) in `domain/bible_series/interfaces.dart`.
+- **Implementation:** `infrastructure/bible_series/bible_api_repository.dart` `BibleApiRepository` calls the proxy at `https://wpa-be-bible-proxy.onrender.com/` (`GET /v1/bibles/78a9f6124f344018-01/passages/<passage_id>?content-type=text`) with `Authorization: Bearer <Firebase ID token>`. On a 401 it retries once with a refreshed token. Successful passages are cached in memory for the life of the app (they never change) and concurrent requests share one call; failures are not cached.
+- **App:** `ContentDetailCubit` shows the content as soon as it is read from Firestore, then loads each passage separately into `ContentDetailState.passages` (`PassageLoad` loading / loaded / failed). A failed passage is reported (`reportError`) and can be retried (`retryPassage`); it never fails the screen.
 
 ## 9b. Audio playback
 
