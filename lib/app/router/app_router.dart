@@ -28,6 +28,7 @@ class RouteScreens {
     this.testimonies = ScreenRegistry.testimonies,
     this.profile = ScreenRegistry.profile,
     this.notificationSettings = ScreenRegistry.notificationSettings,
+    this.bibleNotes = ScreenRegistry.bibleNotes,
     this.adminHome = ScreenRegistry.adminHome,
     this.userVerification = ScreenRegistry.userVerification,
     this.prayerRequestApproval = ScreenRegistry.prayerRequestApproval,
@@ -49,6 +50,7 @@ class RouteScreens {
   final Widget Function(TestimoniesRoute) testimonies;
   final Widget Function() profile;
   final Widget Function() notificationSettings;
+  final Widget Function() bibleNotes;
   final Widget Function() adminHome;
   final Widget Function() userVerification;
   final Widget Function() prayerRequestApproval;
@@ -175,6 +177,7 @@ GoRouter buildAppRouter({
                     Paths.notificationSettings,
                     (_) => screens.notificationSettings(),
                   ),
+                  leaf(Paths.bibleNotes, (_) => screens.bibleNotes()),
                 ],
               ),
             ],

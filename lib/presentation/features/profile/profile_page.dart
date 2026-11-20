@@ -41,6 +41,12 @@ class ProfilePage extends StatelessWidget {
                       const _PhotoAndName(),
                       const _LogoutButton(),
                       const SizedBox(height: 24),
+                      const LabeledDivider('Bible'),
+                      SettingsRow(
+                        label: 'My Notes & Saved Verses',
+                        onTap: () => context.navigator.openBibleNotes(),
+                      ),
+                      const SizedBox(height: 24),
                       const LabeledDivider('Settings'),
                       SettingsRow(
                         label: 'Notification Settings',

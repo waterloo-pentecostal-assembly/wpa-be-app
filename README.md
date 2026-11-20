@@ -8,7 +8,7 @@ A Flutter app (iOS and Android) for the WPA community: Bible series with daily e
 - [`docs/ui/FEATURES.md`](docs/ui/FEATURES.md): features and business rules.
 - [`docs/ui/SCREENS.md`](docs/ui/SCREENS.md): the UI contract, screen by screen.
 - [`docs/ui/UI_REBUILD_GUIDE.md`](docs/ui/UI_REBUILD_GUIDE.md): what a UI redesign may and may not change.
-- [`docs/firestore/`](docs/firestore/): Firestore schema notes (`bible_series`, `completions`).
+- [`docs/firestore/`](docs/firestore/): Firestore schema notes (`bible_series`, `completions`, `saved_verses`).
 
 ## Prerequisites
 

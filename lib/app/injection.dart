@@ -13,6 +13,7 @@ import '../domain/audio/interfaces.dart';
 import '../domain/admin/interfaces.dart';
 import '../domain/authentication/interfaces.dart';
 import '../domain/authentication/session.dart';
+import '../domain/bible/interfaces.dart';
 import '../domain/bible_series/interfaces.dart';
 import '../domain/common/analytics.dart';
 import '../domain/completions/interfaces.dart';
@@ -27,7 +28,8 @@ import '../infrastructure/achievements/achievements_repository.dart';
 import '../infrastructure/admin/admin_service.dart';
 import '../infrastructure/analytics/firebase_analytics_adapter.dart';
 import '../infrastructure/authentication/firebase_authentication_facade.dart';
-import '../infrastructure/bible_series/bible_api_repository.dart';
+import '../infrastructure/bible/bible_api_repository.dart';
+import '../infrastructure/bible/bible_reader_repository.dart';
 import '../infrastructure/bible_series/bible_series_repository.dart';
 import '../infrastructure/completions/completions_repository.dart';
 import '../infrastructure/forum/forum_repository.dart';
@@ -98,13 +100,19 @@ void configureDependencies(
     )
     ..registerLazySingleton<IBibleSeriesRepository>(
         () => BibleSeriesRepository(getIt(), getIt(), getIt()))
-    ..registerLazySingleton<IBiblePassageRepository>(
+    ..registerLazySingleton<BibleApiRepository>(
       () => BibleApiRepository(
         client: http.Client(),
         idToken: (forceRefresh) async =>
             getIt<FirebaseAuth>().currentUser?.getIdToken(forceRefresh),
       ),
     )
+    ..registerLazySingleton<IBiblePassageRepository>(
+        () => getIt<BibleApiRepository>())
+    ..registerLazySingleton<IBibleVersionRepository>(
+        () => getIt<BibleApiRepository>())
+    ..registerLazySingleton<IBibleReaderRepository>(
+        () => BibleReaderRepository(getIt(), getIt()))
     ..registerLazySingleton<ICompletionsRepository>(
         () => CompletionsRepository(getIt(), getIt(), getIt()))
     ..registerLazySingleton<IAchievementsRepository>(

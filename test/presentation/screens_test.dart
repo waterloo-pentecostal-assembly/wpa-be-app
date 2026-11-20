@@ -10,6 +10,8 @@ import 'package:wpa_app/application/admin/admin_queue_cubit.dart';
 import 'package:wpa_app/application/audio_player/audio_player_cubit.dart';
 import 'package:wpa_app/application/authentication/authentication_cubit.dart';
 import 'package:wpa_app/application/authentication/sign_in_cubit.dart';
+import 'package:wpa_app/application/bible/bible_notes_cubit.dart';
+import 'package:wpa_app/application/bible/scripture_cubit.dart';
 import 'package:wpa_app/application/bible_series/all_bible_series_cubit.dart';
 import 'package:wpa_app/application/bible_series/bible_series_detail_cubit.dart';
 import 'package:wpa_app/application/common/app_events.dart';
@@ -27,6 +29,7 @@ import 'package:wpa_app/domain/achievements/interfaces.dart';
 import 'package:wpa_app/domain/admin/interfaces.dart';
 import 'package:wpa_app/domain/authentication/entities.dart';
 import 'package:wpa_app/domain/authentication/interfaces.dart';
+import 'package:wpa_app/domain/bible/entities.dart';
 import 'package:wpa_app/domain/bible_series/entities.dart';
 import 'package:wpa_app/domain/bible_series/interfaces.dart';
 import 'package:wpa_app/domain/common/analytics.dart';
@@ -49,6 +52,7 @@ import 'package:wpa_app/presentation/design_system/theme.dart';
 import 'package:wpa_app/presentation/features/admin/admin_home_page.dart';
 import 'package:wpa_app/presentation/features/admin/admin_queue_page.dart';
 import 'package:wpa_app/presentation/features/auth/sign_in_page.dart';
+import 'package:wpa_app/presentation/features/bible_notes/bible_notes_page.dart';
 import 'package:wpa_app/presentation/features/bible_series/all_bible_series_page.dart';
 import 'package:wpa_app/presentation/features/bible_series/bible_series_detail_page.dart';
 import 'package:wpa_app/presentation/features/bible_series/content_detail_page.dart';
@@ -61,7 +65,13 @@ import 'package:wpa_app/presentation/features/profile/notification_settings_page
 import 'package:wpa_app/presentation/features/profile/profile_page.dart';
 import 'package:wpa_app/presentation/foundation/navigation/app_navigator.dart';
 
-import '../helpers/fakes.dart' show FakeAudioPlayer;
+import '../helpers/fakes.dart'
+    show
+        FakeAudioPlayer,
+        FakeBiblePassageRepository,
+        FakeBibleReaderRepository,
+        FakeBibleVersionRepository,
+        buildPassage;
 
 class _MockNavigator extends Mock implements AppNavigator {}
 
@@ -70,8 +80,6 @@ class _MockFacade extends Mock implements IAuthenticationFacade {}
 class _MockLinks extends Mock implements ILinksRepository {}
 
 class _MockSeries extends Mock implements IBibleSeriesRepository {}
-
-class _MockPassages extends Mock implements IBiblePassageRepository {}
 
 class _MockCompletions extends Mock implements ICompletionsRepository {}
 
@@ -393,42 +401,51 @@ void main() {
           )).thenAnswer((_) async => _content());
       when(() => completions.getCompletionOrNull(seriesContentId: 'q'))
           .thenAnswer((_) async => null);
-      final passages = _MockPassages();
       when(() => series.getBibleSeriesDetails(bibleSeriesId: 's1'))
           .thenAnswer((_) async => _series());
-      when(() => passages.getPassage(
-            bibleId: 'bible-1',
-            passageId: 'JHN.3.16-JHN.3.17',
-          )).thenAnswer(
-        (_) async => const BiblePassage(
+      final passages = FakeBiblePassageRepository()
+        ..passages['JHN.3.16-JHN.3.17'] = buildPassage(
           id: 'JHN.3.16-JHN.3.17',
           reference: 'John 3:16-17',
-          content: '[16] For God so loved the world... [17] For God',
+          verses: {
+            'JHN.3.16': 'For God so loved the world...',
+            'JHN.3.17': 'For God',
+          },
           copyright: 'Copyright Biblica',
-        ),
-      );
-      when(() => passages.getPassage(bibleId: 'bible-1', passageId: 'PSA.23.1'))
-          .thenAnswer(
-        (_) async => const BiblePassage(
+        )
+        ..passages['PSA.23.1'] = buildPassage(
           id: 'PSA.23.1',
           reference: 'Psalm 23:1',
-          content: '[1] The Lord is my shepherd',
+          verses: {'PSA.23.1': 'The Lord is my shepherd'},
           copyright: 'Copyright Biblica',
-        ),
-      );
+        );
       await pumpScreen(
         tester,
-        BlocProvider(
-          create: (_) => ContentDetailCubit(
-            bibleSeriesId: 's1',
-            contentId: 'q',
-            bibleSeriesRepository: series,
-            biblePassageRepository: passages,
-            completionsRepository: completions,
-            analytics: _NoopAnalytics(),
-            events: AppEventBus(),
-            session: AppSession()..update(_user),
-          )..load(),
+        MultiBlocProvider(
+          providers: [
+            BlocProvider(
+              create: (_) => ContentDetailCubit(
+                bibleSeriesId: 's1',
+                contentId: 'q',
+                bibleSeriesRepository: series,
+                completionsRepository: completions,
+                analytics: _NoopAnalytics(),
+                events: AppEventBus(),
+                session: AppSession()..update(_user),
+              )..load(),
+            ),
+            BlocProvider(
+              create: (_) => ScriptureCubit(
+                bibleSeriesId: 's1',
+                contentId: 'q',
+                bibleSeriesRepository: series,
+                biblePassageRepository: passages,
+                bibleVersionRepository: FakeBibleVersionRepository(),
+                bibleReaderRepository: FakeBibleReaderRepository(),
+                events: AppEventBus(),
+              ),
+            ),
+          ],
           child: const ContentDetailPage(contentType: 'REFLECT'),
         ),
         width: width,
@@ -437,17 +454,23 @@ void main() {
       expect(find.text('John 3:16-17'), findsOneWidget);
       expect(find.text('Psalm 23:1'), findsOneWidget);
       expect(find.text('Copyright Biblica'), findsOneWidget);
+      expect(find.text('Version'), findsOneWidget); // versions not listed
+      final scrollable = find
+          .descendant(
+            of: find.byType(ListView),
+            matching: find.byType(Scrollable),
+          )
+          .first;
+      await tester.scrollUntilVisible(find.text('What stood out?'), 200,
+          scrollable: scrollable);
       expect(find.text('What stood out?'), findsOneWidget);
+      await tester.scrollUntilVisible(find.text('Upload Photo!'), 200,
+          scrollable: scrollable);
       expect(find.text('Upload Photo!'), findsOneWidget);
       await tester.scrollUntilVisible(
         find.byIcon(Icons.check_circle),
         200,
-        scrollable: find
-            .descendant(
-              of: find.byType(ListView),
-              matching: find.byType(Scrollable),
-            )
-            .first,
+        scrollable: scrollable,
       );
       expect(find.byIcon(Icons.check_circle), findsOneWidget);
     });
@@ -573,6 +596,34 @@ void main() {
       expect(find.text('Profile'), findsOneWidget);
       expect(find.text('Ada Lovelace'), findsOneWidget);
       expect(find.text('Version 3.0.1'), findsOneWidget);
+      expect(find.text('My Notes & Saved Verses'), findsOneWidget);
+    });
+
+    testWidgets('bible notes ($w)', (tester) async {
+      final reader = FakeBibleReaderRepository();
+      await reader.addSavedVerse(const NewSavedVerse(
+        verseIds: ['JHN.3.16'],
+        reference: 'John 3:16',
+        bibleId: 'kjv',
+        versionAbbreviation: 'KJV',
+        note: 'A long note that should wrap onto more than one line on phones',
+        seriesId: 's1',
+        contentId: 'c1',
+      ));
+      await pumpScreen(
+        tester,
+        BlocProvider(
+          create: (_) => BibleNotesCubit(
+            bibleReaderRepository: reader,
+            biblePassageRepository: FakeBiblePassageRepository(),
+            events: AppEventBus(),
+          )..load(),
+          child: const BibleNotesPage(),
+        ),
+        width: width,
+      );
+      expect(find.text('Notes & Saved Verses'), findsOneWidget);
+      expect(find.text('John 3:16 (KJV)'), findsOneWidget);
     });
 
     testWidgets('notification settings ($w)', (tester) async {

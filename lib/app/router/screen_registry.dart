@@ -5,6 +5,8 @@ import '../../application/admin/admin_queue_cubit.dart';
 import '../../application/authentication/password_reset_cubit.dart';
 import '../../application/authentication/sign_in_cubit.dart';
 import '../../application/authentication/sign_up_cubit.dart';
+import '../../application/bible/bible_notes_cubit.dart';
+import '../../application/bible/scripture_cubit.dart';
 import '../../application/bible_series/all_bible_series_cubit.dart';
 import '../../application/bible_series/bible_series_detail_cubit.dart';
 import '../../application/community_posts/post_list_cubit.dart';
@@ -25,6 +27,7 @@ import '../../presentation/features/auth/password_reset_page.dart';
 import '../../presentation/features/auth/sign_in_page.dart';
 import '../../presentation/features/auth/sign_up_page.dart';
 import '../../presentation/features/auth/splash_page.dart';
+import '../../presentation/features/bible_notes/bible_notes_page.dart';
 import '../../presentation/features/bible_series/all_bible_series_page.dart';
 import '../../presentation/features/bible_series/bible_series_detail_page.dart';
 import '../../presentation/features/bible_series/content_detail_page.dart';
@@ -90,17 +93,32 @@ abstract final class ScreenRegistry {
         child: const BibleSeriesDetailPage(),
       );
 
-  static Widget contentDetail(ContentRoute route) => BlocProvider(
-        create: (_) => ContentDetailCubit(
-          bibleSeriesId: route.seriesId,
-          contentId: route.contentId,
-          bibleSeriesRepository: getIt(),
-          biblePassageRepository: getIt(),
-          completionsRepository: getIt(),
-          analytics: getIt(),
-          events: getIt(),
-          session: getIt(),
-        )..load(),
+  static Widget contentDetail(ContentRoute route) => MultiBlocProvider(
+        providers: [
+          BlocProvider(
+            create: (_) => ContentDetailCubit(
+              bibleSeriesId: route.seriesId,
+              contentId: route.contentId,
+              bibleSeriesRepository: getIt(),
+              completionsRepository: getIt(),
+              analytics: getIt(),
+              events: getIt(),
+              session: getIt(),
+            )..load(),
+          ),
+          // Loaded by the page once the content's passage ids are known.
+          BlocProvider(
+            create: (_) => ScriptureCubit(
+              bibleSeriesId: route.seriesId,
+              contentId: route.contentId,
+              bibleSeriesRepository: getIt(),
+              biblePassageRepository: getIt(),
+              bibleVersionRepository: getIt(),
+              bibleReaderRepository: getIt(),
+              events: getIt(),
+            ),
+          ),
+        ],
         child: ContentDetailPage(contentType: route.contentType ?? ''),
       );
 
@@ -199,6 +217,15 @@ abstract final class ScreenRegistry {
   static Widget notificationSettings() => BlocProvider(
         create: (_) => NotificationSettingsCubit(getIt())..load(),
         child: const NotificationSettingsPage(),
+      );
+
+  static Widget bibleNotes() => BlocProvider(
+        create: (_) => BibleNotesCubit(
+          bibleReaderRepository: getIt(),
+          biblePassageRepository: getIt(),
+          events: getIt(),
+        )..load(),
+        child: const BibleNotesPage(),
       );
 
   // ---- admin -------------------------------------------------------------

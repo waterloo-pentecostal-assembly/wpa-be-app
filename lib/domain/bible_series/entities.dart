@@ -44,6 +44,13 @@ class BibleSeries extends Equatable {
   /// One entry per day of the series, in series order.
   final List<SeriesContentSnippet> seriesContentSnippet;
 
+  /// The 1-based day of the series that has [contentId], or `null`.
+  int? dayOf(String contentId) {
+    final index = seriesContentSnippet.indexWhere((day) =>
+        day.availableContentTypes.any((c) => c.contentId == contentId));
+    return index < 0 ? null : index + 1;
+  }
+
   BibleSeries copyWith({List<SeriesContentSnippet>? seriesContentSnippet}) {
     return BibleSeries(
       id: id,
@@ -172,6 +179,14 @@ class SeriesContent extends Equatable {
   bool get isResponsePossible =>
       body.any((b) => b.type == SeriesContentBodyType.question);
 
+  /// Passage ids of the scripture bodies, in order, each once.
+  List<String> get scripturePassageIds => [
+        ...{
+          for (final b in body)
+            if (b is ScriptureBody) ...b.passageIds,
+        },
+      ];
+
   @override
   List<Object?> get props => [id, contentType, date, title, subTitle, body];
 }
@@ -224,36 +239,6 @@ class ScriptureBody extends SeriesContentBody {
 
   @override
   List<Object?> get props => [type, passageIds];
-}
-
-/// A passage of the Bible, as returned by the Bible API.
-class BiblePassage extends Equatable {
-  const BiblePassage({
-    required this.id,
-    required this.reference,
-    required this.content,
-    this.copyright = '',
-  });
-
-  /// Bible API passage id, e.g. `JHN.3.16-JHN.3.18`.
-  final String id;
-
-  /// Human readable reference, e.g. `John 3:16-18`.
-  final String reference;
-
-  /// Plain text of the passage. Verse numbers appear inline as `[16]`;
-  /// paragraphs are separated by line breaks.
-  final String content;
-  final String copyright;
-
-  /// Non-empty paragraphs of [content], trimmed.
-  List<String> get paragraphs => [
-        for (final line in content.split('\n'))
-          if (line.trim().isNotEmpty) line.trim(),
-      ];
-
-  @override
-  List<Object?> get props => [id, reference, content, copyright];
 }
 
 class QuestionBody extends SeriesContentBody {

@@ -32,6 +32,7 @@ abstract final class Paths {
 
   // Children of [profile] (relative).
   static const notificationSettings = 'notification-settings';
+  static const bibleNotes = 'bible-notes';
 
   // Children of [admin] (relative).
   static const userVerification = 'user-verification';
@@ -67,6 +68,7 @@ abstract final class Routes {
   static const profile = _Fixed(Paths.profile);
   static const notificationSettings =
       _Fixed('${Paths.profile}/${Paths.notificationSettings}');
+  static const bibleNotes = _Fixed('${Paths.profile}/${Paths.bibleNotes}');
   static const admin = _Fixed(Paths.admin);
   static const userVerification =
       _Fixed('${Paths.admin}/${Paths.userVerification}');

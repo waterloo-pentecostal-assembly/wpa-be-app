@@ -31,28 +31,6 @@ enum ContentDetailEffect {
   actionError,
 }
 
-/// A scripture passage of the content, loaded from the Bible API.
-class PassageLoad extends Equatable {
-  const PassageLoad.loading()
-      : status = LoadStatus.loading,
-        passage = null;
-
-  const PassageLoad.loaded(BiblePassage this.passage)
-      : status = LoadStatus.success;
-
-  const PassageLoad.failed()
-      : status = LoadStatus.failure,
-        passage = null;
-
-  final LoadStatus status;
-
-  /// Set when [status] is success.
-  final BiblePassage? passage;
-
-  @override
-  List<Object?> get props => [status, passage];
-}
-
 class ContentDetailState extends Equatable {
   const ContentDetailState({
     this.status = LoadStatus.initial,
@@ -66,7 +44,6 @@ class ContentDetailState extends Equatable {
     this.thumbnailUrls = const {},
     this.localImages = const {},
     this.uploads = const {},
-    this.passages = const {},
     this.actionError,
     this.effect,
     this.effectId = 0,
@@ -99,10 +76,6 @@ class ContentDetailState extends Equatable {
   /// Body index -> running upload.
   final Map<String, UploadHandle> uploads;
 
-  /// Passage id -> passage of the scripture bodies. Loaded after the content
-  /// so a slow Bible API never delays the rest of the screen.
-  final Map<String, PassageLoad> passages;
-
   final String? actionError;
   final ContentDetailEffect? effect;
   final int effectId;
@@ -121,7 +94,6 @@ class ContentDetailState extends Equatable {
     Map<String, List<String>>? thumbnailUrls,
     Map<String, List<ImageData>>? localImages,
     Map<String, UploadHandle>? uploads,
-    Map<String, PassageLoad>? passages,
     String? actionError,
     ContentDetailEffect? effect,
     int? effectId,
@@ -138,7 +110,6 @@ class ContentDetailState extends Equatable {
       thumbnailUrls: thumbnailUrls ?? this.thumbnailUrls,
       localImages: localImages ?? this.localImages,
       uploads: uploads ?? this.uploads,
-      passages: passages ?? this.passages,
       actionError: actionError ?? this.actionError,
       effect: effect ?? this.effect,
       effectId: effectId ?? this.effectId,
@@ -158,15 +129,15 @@ class ContentDetailState extends Equatable {
         thumbnailUrls,
         localImages,
         uploads.keys.toList(),
-        passages,
         actionError,
         effect,
         effectId,
       ];
 }
 
-/// State holder of the series content detail screen: content, scripture
-/// passages, completion, question responses and image responses.
+/// State holder of the series content detail screen: content, completion,
+/// question responses and image responses. Scripture bodies are handled by
+/// the screen's `ScriptureCubit`.
 ///
 /// Completion data written to Firestore is identical to the pre-refactor app.
 class ContentDetailCubit extends Cubit<ContentDetailState> {
@@ -174,14 +145,12 @@ class ContentDetailCubit extends Cubit<ContentDetailState> {
     required this.bibleSeriesId,
     required this.contentId,
     required IBibleSeriesRepository bibleSeriesRepository,
-    required IBiblePassageRepository biblePassageRepository,
     required ICompletionsRepository completionsRepository,
     required IAnalytics analytics,
     required AppEventBus events,
     required ISession session,
     DateTime Function()? clock,
   })  : _bibleSeries = bibleSeriesRepository,
-        _passages = biblePassageRepository,
         _completions = completionsRepository,
         _analytics = analytics,
         _events = events,
@@ -192,7 +161,6 @@ class ContentDetailCubit extends Cubit<ContentDetailState> {
   final String bibleSeriesId;
   final String contentId;
   final IBibleSeriesRepository _bibleSeries;
-  final IBiblePassageRepository _passages;
   final ICompletionsRepository _completions;
   final IAnalytics _analytics;
   final AppEventBus _events;
@@ -232,18 +200,11 @@ class ContentDetailCubit extends Cubit<ContentDetailState> {
       ]);
       final content = results[0] as SeriesContent;
       final completion = results[1] as CompletionDetails?;
-      final passageIds = {
-        for (final body in content.body)
-          if (body is ScriptureBody) ...body.passageIds,
-      };
       var next = state.copyWith(
         status: LoadStatus.success,
         content: content,
         completionId: completion?.id ?? '',
         isComplete: completion != null && !completion.isDraft,
-        passages: {
-          for (final id in passageIds) id: const PassageLoad.loading(),
-        },
       );
       final hasResponseBodies = content.body.any((b) =>
           b.type == SeriesContentBodyType.question ||
@@ -252,9 +213,6 @@ class ContentDetailCubit extends Cubit<ContentDetailState> {
         next = await _withLoadedResponses(next, completion.id);
       }
       _safeEmit(next);
-      for (final id in passageIds) {
-        unawaited(_loadPassage(id));
-      }
       if (content.body.any((b) => b is AudioBody)) unawaited(_loadSeries());
     } catch (e, stackTrace) {
       _safeEmit(state.copyWith(
@@ -264,18 +222,7 @@ class ContentDetailCubit extends Cubit<ContentDetailState> {
     }
   }
 
-  /// Reloads a passage that failed to load.
-  Future<void> retryPassage(String passageId) async {
-    if (state.passages[passageId]?.status != LoadStatus.failure) return;
-    _safeEmit(state.copyWith(passages: {
-      ...state.passages,
-      passageId: const PassageLoad.loading(),
-    }));
-    await _loadPassage(passageId);
-  }
-
-  /// The series (fetched once): its Bible id is needed to load passages and
-  /// its title and image enrich audio tracks.
+  /// The series (fetched once): its title and image enrich audio tracks.
   Future<BibleSeries> _series() => _seriesRequest ??= _bibleSeries
           .getBibleSeriesDetails(bibleSeriesId: bibleSeriesId)
           .then((series) {
@@ -285,21 +232,6 @@ class ContentDetailCubit extends Cubit<ContentDetailState> {
         _seriesRequest = null;
         Error.throwWithStackTrace(e, st);
       });
-
-  Future<void> _loadPassage(String passageId) async {
-    PassageLoad result;
-    try {
-      final series = await _series();
-      result = PassageLoad.loaded(await _passages.getPassage(
-        bibleId: series.scriptureBibleId,
-        passageId: passageId,
-      ));
-    } catch (e, stackTrace) {
-      reportError(e, stackTrace);
-      result = const PassageLoad.failed();
-    }
-    _safeEmit(state.copyWith(passages: {...state.passages, passageId: result}));
-  }
 
   /// Best-effort: without the series, audio still plays (no artwork).
   Future<void> _loadSeries() async {

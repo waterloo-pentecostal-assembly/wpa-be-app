@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
+import '../../../application/bible/scripture_cubit.dart';
 import '../../../application/common/load_status.dart';
 import '../../../application/completions/content_detail_cubit.dart';
 import '../../../domain/bible_series/entities.dart';
@@ -15,15 +16,23 @@ import 'bodies/scripture_body.dart';
 import 'bodies/simple_bodies.dart';
 import 'bodies/video_body.dart';
 import 'completion_button.dart';
+import 'scripture/verse_action_bar.dart';
 
 /// A content of a series day (READ, REFLECT, ...). Expects a
-/// [ContentDetailCubit] above it. [contentType] is shown while loading.
+/// [ContentDetailCubit] and a [ScriptureCubit] above it; the scripture is
+/// loaded once the content is. [contentType] is shown while loading.
 class ContentDetailPage extends StatelessWidget {
   const ContentDetailPage({super.key, required this.contentType});
 
   final String contentType;
 
   void _back(BuildContext context) {
+    // Back first clears a verse selection.
+    final scripture = context.read<ScriptureCubit>();
+    if (scripture.state.selectedVerseIds.isNotEmpty) {
+      scripture.clearSelection();
+      return;
+    }
     if (context.read<ContentDetailCubit>().requestExit()) {
       Navigator.of(context).pop();
     }
@@ -31,15 +40,32 @@ class ContentDetailPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<ContentDetailCubit, ContentDetailState>(
-      listenWhen: (a, b) => a.effectId != b.effectId && b.effect != null,
-      listener: (context, state) => _showEffect(context, state),
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<ContentDetailCubit, ContentDetailState>(
+          listenWhen: (a, b) => a.effectId != b.effectId && b.effect != null,
+          listener: (context, state) => _showEffect(context, state),
+        ),
+        BlocListener<ContentDetailCubit, ContentDetailState>(
+          listenWhen: (a, b) => !a.status.isSuccess && b.status.isSuccess,
+          listener: (context, state) => context
+              .read<ScriptureCubit>()
+              .load(state.content!.scripturePassageIds),
+        ),
+        BlocListener<ScriptureCubit, ScriptureState>(
+          listenWhen: (a, b) => a.messageId != b.messageId && b.message != null,
+          listener: (context, state) => state.messageIsError
+              ? AppToast.error(context, state.message!)
+              : AppToast.info(context, state.message!),
+        ),
+      ],
       child: PopScope(
         canPop: false,
         onPopInvokedWithResult: (didPop, _) {
           if (!didPop) _back(context);
         },
         child: Scaffold(
+          bottomNavigationBar: const VerseActionBar(),
           body: SafeArea(
             child: BlocBuilder<ContentDetailCubit, ContentDetailState>(
               buildWhen: (a, b) => a.status != b.status,

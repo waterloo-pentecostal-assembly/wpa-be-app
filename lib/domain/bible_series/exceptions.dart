@@ -10,7 +10,6 @@ enum BibleSeriesExceptionCode {
   noResponses,
   unsupportedResponseType,
   noStartingDocument,
-  passageUnavailable,
 }
 
 class BibleSeriesException

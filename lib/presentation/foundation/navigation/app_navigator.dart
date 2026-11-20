@@ -40,6 +40,9 @@ abstract class AppNavigator {
 
   void openNotificationSettings();
 
+  /// The user's verse notes and saved verses.
+  void openBibleNotes();
+
   void openUserVerification();
   void openPrayerRequestApproval();
   void openTestimonyApproval();

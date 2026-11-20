@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import '../../domain/bible/entities.dart';
 import '../../domain/common/community_post.dart';
 
 /// Cross-screen invalidation events. Replaces `.then(refresh)` after pops:
@@ -47,6 +48,18 @@ class PostReported<T extends CommunityPost> extends AppEvent {
 /// The signed-in user prayed for / said amen to a post.
 class PostReacted<T extends CommunityPost> extends AppEvent {
   const PostReacted(this.id);
+  final String id;
+}
+
+/// A saved verse was created or changed (e.g. its note).
+class SavedVerseChanged extends AppEvent {
+  const SavedVerseChanged(this.savedVerse);
+  final SavedVerse savedVerse;
+}
+
+/// A saved verse (and its note) was removed.
+class SavedVerseDeleted extends AppEvent {
+  const SavedVerseDeleted(this.id);
   final String id;
 }
 

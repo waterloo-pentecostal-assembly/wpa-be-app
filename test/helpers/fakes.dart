@@ -19,6 +19,9 @@ import 'package:wpa_app/domain/authentication/entities.dart';
 import 'package:wpa_app/domain/authentication/interfaces.dart';
 import 'package:wpa_app/domain/authentication/session.dart';
 import 'package:wpa_app/domain/authentication/value_objects.dart';
+import 'package:wpa_app/domain/bible/entities.dart';
+import 'package:wpa_app/domain/bible/exceptions.dart';
+import 'package:wpa_app/domain/bible/interfaces.dart';
 import 'package:wpa_app/domain/bible_series/entities.dart';
 import 'package:wpa_app/domain/bible_series/exceptions.dart';
 import 'package:wpa_app/domain/bible_series/interfaces.dart';
@@ -514,11 +517,17 @@ class FakeBibleSeriesRepository
 class FakeBiblePassageRepository
     with FakeCalls
     implements IBiblePassageRepository {
-  /// Keyed by passage id.
+  /// Keyed by passage id; returned for any Bible (with its `bibleId` set).
   final Map<String, BiblePassage> passages = {};
+
+  /// Keyed by `bibleId/passageId`; takes precedence over [passages].
+  final Map<String, BiblePassage> passagesByBible = {};
 
   /// The `bibleId` of every [getPassage] call, in order.
   final List<String> bibleIds = [];
+
+  /// The `passageId` of every [getPassage] call, in order.
+  final List<String> passageIds = [];
 
   @override
   Future<BiblePassage> getPassage({
@@ -527,15 +536,153 @@ class FakeBiblePassageRepository
   }) async {
     record('getPassage');
     bibleIds.add(bibleId);
-    final passage = passages[passageId];
+    passageIds.add(passageId);
+    final passage = passagesByBible['$bibleId/$passageId'] ??
+        passages[passageId]?.inBible(bibleId);
     if (passage == null) {
-      throw BibleSeriesException(
-        code: BibleSeriesExceptionCode.passageUnavailable,
+      throw BibleException(
+        code: BibleExceptionCode.passageUnavailable,
         message: 'Unable to load scripture',
         details: '$passageId not found',
       );
     }
     return passage;
+  }
+}
+
+extension on BiblePassage {
+  BiblePassage inBible(String bibleId) => BiblePassage(
+        id: id,
+        bibleId: bibleId,
+        reference: reference,
+        blocks: blocks,
+        copyright: copyright,
+      );
+}
+
+/// A one-paragraph passage with [verses] (verse id -> text), e.g.
+/// `{'JHN.3.16': 'For God so loved'}`.
+BiblePassage buildPassage({
+  required String id,
+  required String reference,
+  required Map<String, String> verses,
+  String bibleId = 'bible-1',
+  String copyright = '',
+}) =>
+    BiblePassage(
+      id: id,
+      bibleId: bibleId,
+      reference: reference,
+      copyright: copyright,
+      blocks: [
+        PassageParagraph([
+          for (final MapEntry(key: verseId, value: text) in verses.entries) ...[
+            VerseSegment(
+              text: verseId.split('.').last,
+              verseId: verseId,
+              isVerseNumber: true,
+            ),
+            VerseSegment(text: '$text ', verseId: verseId),
+          ],
+        ]),
+      ],
+    );
+
+class FakeBibleVersionRepository
+    with FakeCalls
+    implements IBibleVersionRepository {
+  List<BibleVersion> versions = [];
+
+  @override
+  Future<List<BibleVersion>> getBibles() async {
+    record('getBibles');
+    return versions;
+  }
+}
+
+class FakeBibleReaderRepository
+    with FakeCalls
+    implements IBibleReaderRepository {
+  String? preferredBibleId;
+  final List<SavedVerse> savedVerses = [];
+
+  /// Every saved verse passed to [addSavedVerse].
+  final List<NewSavedVerse> added = [];
+
+  /// The content id of every [getSavedVersesForContent] call.
+  final List<String> contentQueries = [];
+  int _nextId = 0;
+
+  @override
+  Future<String?> getPreferredBibleId() async {
+    record('getPreferredBibleId');
+    return preferredBibleId;
+  }
+
+  @override
+  Future<void> setPreferredBibleId(String? bibleId) async {
+    record('setPreferredBibleId');
+    preferredBibleId = bibleId;
+  }
+
+  @override
+  Future<List<SavedVerse>> getSavedVersesForContent(String contentId) async {
+    record('getSavedVersesForContent');
+    contentQueries.add(contentId);
+    return [
+      for (final v in savedVerses)
+        if (v.contentId == contentId) v,
+    ];
+  }
+
+  @override
+  Future<PageResult<SavedVerse>> getSavedVersesPage({
+    required int limit,
+    PageCursor? after,
+  }) async {
+    record('getSavedVersesPage');
+    final newestFirst = [...savedVerses]
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    return _page(newestFirst, limit, after);
+  }
+
+  @override
+  Future<SavedVerse> addSavedVerse(NewSavedVerse v) async {
+    record('addSavedVerse');
+    added.add(v);
+    final now = DateTime(2026, 3, 2);
+    final saved = SavedVerse(
+      id: 'saved-${++_nextId}',
+      verseIds: v.verseIds,
+      reference: v.reference,
+      bibleId: v.bibleId,
+      versionAbbreviation: v.versionAbbreviation,
+      note: v.note,
+      seriesId: v.seriesId,
+      contentId: v.contentId,
+      seriesTitle: v.seriesTitle,
+      day: v.day,
+      createdAt: now,
+      updatedAt: now,
+    );
+    savedVerses.add(saved);
+    return saved;
+  }
+
+  @override
+  Future<void> setNote({
+    required String savedVerseId,
+    required String? note,
+  }) async {
+    record('setNote');
+    final i = savedVerses.indexWhere((v) => v.id == savedVerseId);
+    savedVerses[i] = savedVerses[i].withNote(note);
+  }
+
+  @override
+  Future<void> deleteSavedVerse(String savedVerseId) async {
+    record('deleteSavedVerse');
+    savedVerses.removeWhere((v) => v.id == savedVerseId);
   }
 }
 

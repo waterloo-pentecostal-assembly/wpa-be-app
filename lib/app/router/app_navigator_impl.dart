@@ -69,6 +69,9 @@ class GoRouterAppNavigator implements AppNavigator {
   void openNotificationSettings() => _push(Routes.notificationSettings);
 
   @override
+  void openBibleNotes() => _push(Routes.bibleNotes);
+
+  @override
   void openUserVerification() => _push(Routes.userVerification);
 
   @override

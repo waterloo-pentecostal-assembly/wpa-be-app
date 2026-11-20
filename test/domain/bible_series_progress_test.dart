@@ -3,6 +3,8 @@ import 'package:wpa_app/domain/bible_series/entities.dart';
 import 'package:wpa_app/domain/bible_series/progress.dart';
 import 'package:wpa_app/domain/completions/entities.dart';
 
+import '../helpers/fakes.dart';
+
 SeriesContentSnippet day(
   DateTime date, {
   bool completed = false,
@@ -123,17 +125,12 @@ void main() {
     });
   });
 
-  group('BiblePassage.paragraphs', () {
-    test('splits on line breaks, trimming and dropping blank lines', () {
-      const passage = BiblePassage(
-        id: 'JHN.3.16-JHN.3.18',
-        reference: 'John 3:16-18',
-        content: '     [16] For God so loved\n\n  [17] For God did not  \n',
-      );
-      expect(
-        passage.paragraphs,
-        ['[16] For God so loved', '[17] For God did not'],
-      );
-    });
+  test('BibleSeries.dayOf finds the 1-based day of a content', () {
+    final series = buildSeries(
+      days: [DateTime(2026, 3, 1), DateTime(2026, 3, 2)],
+    );
+    expect(series.dayOf('day0-read'), 1);
+    expect(series.dayOf('day1-reflect'), 2);
+    expect(series.dayOf('unknown'), isNull);
   });
 }

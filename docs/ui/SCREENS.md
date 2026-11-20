@@ -12,7 +12,7 @@ Business rules referenced here are described in [`FEATURES.md`](FEATURES.md).
 - Root: [Splash](#splash) · [Sign in](#sign-in) · [Sign up](#sign-up) · [Password reset](#password-reset) · [Main shell](#main-shell-tabs)
 - Engage branch: [Engage home](#engage-home) · [All Bible series](#all-bible-series) · [Bible series detail](#bible-series-detail) · [Series content detail](#series-content-detail) · [Prayer requests](#prayer-requests) · [Testimonies](#testimonies) · [New prayer request / New testimony form](#new-prayer-request--new-testimony-form-overlay) · [Forum](#forum-thread-list) · [Thread form](#thread-form-overlay) · [Thread detail](#thread-detail)
 - Give: [Give](#give-no-screen)
-- Profile branch: [Profile](#profile) · [Notification settings](#notification-settings) · [Terms of use](#terms-of-use-external-link-only) · [Notifications tab](#notifications-tab-planned-not-implemented)
+- Profile branch: [Profile](#profile) · [Notes & saved verses](#notes--saved-verses) · [Notification settings](#notification-settings) · [Terms of use](#terms-of-use-external-link-only) · [Notifications tab](#notifications-tab-planned-not-implemented)
 - Admin branch: [Admin home](#admin-home) · [Admin queues (User verification, Prayer request approval, Testimony approval)](#admin-queues)
 - Global: [Foreground push banner](#foreground-push-banner) · [Toasts](#toasts) · [Snackbars](#snackbars) · [Loader](#loader) · [Dialogs](#dialogs-catalogue) · [Photo viewer](#photo-viewer)
 - [Content body catalogue](#content-body-catalogue) · [Route & overlay index](#route--overlay-index) · [Two-pane readiness](#two-pane-list--detail-readiness-spec-82) · [Deep-link → screen map](#deep-link--screen-map) · [Analytics → screen map](#analytics--screen-map) · [Open issues](#open-issues-summary) · [Styles](#appendix--styles-theme-roles-and-tokens)
@@ -341,7 +341,7 @@ All routes below are children of `/engage` in branch 0. Each builds its own cubi
 - **Responsive notes:** the hero height is a fraction of the *screen* height. This page is the detail of All Bible series and the list for Content detail. On wide screens the day strip and the content list could be split.
 
 ### Series content detail
-- **Route:** `/engage/series/:seriesId/content/:contentId`, with optional query `type` (`Paths.content`, helper `ContentRoute(seriesId:, contentId:, contentType:)`). Branch 0. `ScreenRegistry.contentDetail(route)` → `BlocProvider(ContentDetailCubit(bibleSeriesId:, contentId:, ...)..load())` + `ContentDetailPage(contentType: route.contentType ?? '')`.
+- **Route:** `/engage/series/:seriesId/content/:contentId`, with optional query `type` (`Paths.content`, helper `ContentRoute(seriesId:, contentId:, contentType:)`). Branch 0. `ScreenRegistry.contentDetail(route)` → `MultiBlocProvider(ContentDetailCubit(bibleSeriesId:, contentId:, ...)..load(), ScriptureCubit(bibleSeriesId:, contentId:, ...))` + `ContentDetailPage(contentType: route.contentType ?? '')`. The page calls `ScriptureCubit.load(content.scripturePassageIds)` when the content has loaded.
 - **Entry points:** a content row on Bible series detail.
 - **Inputs:**
   - `seriesId`, `contentId` (path, required)
@@ -361,12 +361,13 @@ All routes below are children of `/engage` in branch 0. Each builds its own cubi
     - `effectId`
     - getter `isUploading`
   - Fixed (B11): existing responses and image URLs are loaded inside `load()`, not from `build()`.
+  - `ScriptureCubit` (route scope) holds the [scripture reader](#scripture-reader) state of the scripture bodies.
   - Audio bodies use the app-scope `AudioPlayerCubit`.
 - **States → what is shown:**
   - Always: `AppHeader(small)` (`titleLarge`) with a back arrow and a title. The title is `content.contentType` once loaded (e.g. `REFLECT`), otherwise the `type` query.
   - loading → the header only. There is no spinner.
   - failure → `Error: <message>` below the header.
-  - success → a `ListView` (horizontal padding 25, each item in a `ContentConstraint`) with the [body widgets](#content-body-catalogue) in order, then the `CompletionButton`:
+  - success → a `ListView` (horizontal padding 25, each item in a `ContentConstraint`) with the [body widgets](#content-body-catalogue) in order, then the `CompletionButton`. While verses are selected, the `VerseActionBar` is the scaffold's bottom bar (see [scripture reader](#scripture-reader)):
     - `isComplete == null` → nothing
     - `false` → grey `check_circle` (60, black87@50%, `lightGreenAccent` splash), semantics `Mark as complete`
     - `true` → green `check_circle` (`AppColors.success@80%`), semantics `Mark as incomplete`
@@ -380,7 +381,7 @@ All routes below are children of `/engage` in branch 0. Each builds its own cubi
   - green check → `undoComplete()`
   - typing an answer → `questionChanged(bodyIndex, questionIndex, value)`. A completed item becomes incomplete.
   - image body: pick → `uploadImage(bodyIndex, ImageData)`; ✕ → `deleteImage(bodyIndex)`
-  - back arrow **and** system back both go through `PopScope(canPop: false)` → `requestExit()`:
+  - back arrow **and** system back both go through `PopScope(canPop: false)`. With verses selected they only clear the selection (`ScriptureCubit.clearSelection`); otherwise → `requestExit()`:
     - while uploading → effect `uploadInProgress`, and the page stays open
     - otherwise, for question content: non-empty responses → save a draft; empty responses with an existing completion → mark incomplete
     - then `Navigator.pop`
@@ -683,6 +684,7 @@ One generic screen, `PostsPage<T>`, serves both prayer requests and testimonies.
     - a bottom band (black@50%, height 30) showing `EDIT`, or `<n>%` while uploading (`labelMedium`, white)
   - full name (`titleSmall`)
   - `Logout` (red `bodyMedium` text button)
+  - `BIBLE` + divider, then the `My Notes & Saved Verses` row (chevron)
   - `SETTINGS` + divider, then the `Notification Settings` row (chevron)
   - `OTHER` + divider, then rows: `Privacy Policy`, `Terms of Use`, `Help`, `Report a Problem`, `Delete my Account` (`Icons.delete` instead of a chevron)
   - `Version <AppInfo.version>` (`bodyMedium`)
@@ -690,6 +692,7 @@ One generic screen, `PostsPage<T>`, serves both prayer requests and testimonies.
 - **User actions → methods:**
   - `EDIT` (disabled while uploading) → gallery picker → `uploadPhoto(ImageData)`
   - `Logout` → `AuthenticationCubit.signOut()`; the router redirects to `/sign-in`
+  - `My Notes & Saved Verses` → `openBibleNotes()`, which pushes `/profile/bible-notes`
   - `Notification Settings` → `openNotificationSettings()`, which pushes `/profile/notification-settings`
   - `Privacy Policy` / `Terms of Use` → `openExternal(links.privacyPolicyLink / links.termsOfUseLink)`
   - `Help` / `Report a Problem` → a `mailto:` link to `links.helpEmail` / `links.reportEmail` with subject `WPA_BE_APP_Help_Request` / `WPA_BE_APP_Problem_Report`
@@ -699,10 +702,29 @@ One generic screen, `PostsPage<T>`, serves both prayer requests and testimonies.
 - **Validation & messages:**
   - toast `Error uploading photo` when an upload fails
   - error toast `Unable to initiate account deletion` when the deletion request fails (`AuthenticationState.errorMessage`/`errorId`; the user stays signed in). Newly shown — the old UI ignored this error.
-- **Navigation out:** Notification settings; sign-in after logout or deletion.
+- **Navigation out:** Notes & saved verses, Notification settings; sign-in after logout or deletion.
 - **Side effects:** Storage upload, then a `users/{uid}` update and a session refresh; external URLs and mail.
 - Fixed (B13): the version comes from `AppInfo.version` (`--dart-define=APP_VERSION=x.y.z`, default `3.0.1`).
 - **Responsive notes:** a settings list with max width 720. It is the list pane of the Profile → Notification settings pair.
+
+### Notes & saved verses
+- **Route:** `/profile/bible-notes` (`Paths.bibleNotes`, `Routes.bibleNotes`). Branch 1. `ScreenRegistry.bibleNotes()` → `BlocProvider(BibleNotesCubit(bibleReaderRepository, biblePassageRepository, events)..load())` + `BibleNotesPage` (`features/bible_notes/`).
+- **Entry points:** Profile → `My Notes & Saved Verses`.
+- **Inputs:** none.
+- **State holder(s):** `BibleNotesCubit` (route scope, `application/bible/bible_notes_cubit.dart`). `BibleNotesState` has `status`, `items` (loaded `SavedVerse`s, newest first; each has an optional `note`), `isEndOfList`, `isLoadingMore`, `filter` (`BibleNotesFilter {all, withNotes}`), `texts` (saved verse id → `SavedVerseTextLoad`), `errorMessage`, toast `message` / `messageIsError` / `messageId`, and getter `visibleItems` (`items` matching `filter`). Pages of 30 (`getSavedVersesPage`).
+- **States → what is shown:** `AppHeader` `Notes & Saved Verses`, filter chips `All` / `With notes`, then:
+  - loading → `LoadingState`
+  - failure → the error message + **Retry** (`load`)
+  - success → one row per saved verse (each in a `ContentConstraint`): `bookmark` icon, `<reference> (<version>)` (`titleSmall`), where it was saved `<series title> · Day <n>` (muted, one line; omitted when unknown), date (`DateFormats.shortDate`, `bodySmall`), and the note (if any) in a grey rounded box (4 lines). No verse text (it isn't stored, and the list makes no Bible API calls). Then a loading row while a page loads, or **Load more** while more pages exist (also loaded when scrolling within 200 px of the end). Empty: `No saved verses yet. Tap a verse while reading to save it or add a note.` (`No notes yet` with the filter).
+- **User actions → methods:**
+  - chip → `setFilter(filter)` (filters loaded items; it doesn't reload)
+  - row → details sheet (follows changes to the saved verse while open): `bookmark` + `<reference> (<version>)`, `<series title> · Day <n>`, `Saved <date>`, the verses read from the Bible API in the saved version (`loadText(id)` → `texts[id]`: loading dots; failure → `Unable to load scripture` + **Retry**; loaded once per screen), the note (if any), then:
+    - **Open reading** → closes the sheet, `openContent(seriesId:, contentId:)` to the series day it was saved from (switches to the Engage tab; back returns here)
+    - **Add note** (no note) / **Edit note** (has a note) → the shared note editor (`NoteEditorSheet`, quoting the loaded verses) → `setNote(id, text)` on the same saved verse; with a note, its delete icon → confirm `Delete note` / `Delete this note? The verses stay saved.` → `setNote(id, null)`. The sheet stays open and shows the change.
+    - **Remove** (red) → confirm `Remove saved verse` / `Remove <reference> from your saved verses?` (+ ` Your note will be deleted too.` when it has one) → `remove(id)`; the sheet closes on success
+- **Validation & messages:** toasts `Note saved`, `Note deleted`, `Removed from saved`; errors `Unable to save note`, `Unable to delete note`, `Unable to remove verse`, and the `userMessageFor` message when a further page fails.
+- **Navigation out:** pop → Profile; Open reading → Series content detail (Engage branch).
+- **Side effects:** Firestore reads of `users/{uid}/saved_verses` (`orderBy created_at desc`, paged), `note` updates and deletes. Changes emit `SavedVerseChanged` / `SavedVerseDeleted`, so an open content screen updates its highlights and note icons; saves and notes made while reading appear here the same way.
 
 ### Notification settings
 - **Route:** `/profile/notification-settings` (`Paths.notificationSettings`, `Routes.notificationSettings`). Branch 1. `ScreenRegistry.notificationSettings()` → `BlocProvider(NotificationSettingsCubit(..)..load())` + `NotificationSettingsPage`. The cubit is route-scoped; it used to be scoped to the whole Profile tab.
@@ -833,6 +855,17 @@ All dialogs are Material `AlertDialog`s from `design_system/components/app_dialo
 | `Response(s) Saved as Draft` | `You can now exit this page and work on it later` | `OK` | Content detail complete (partial answers) |
 | `Delete my Account` | `This account will be permanently disabled and all data associated with this account will be deleted. Would you like to proceed?` | `No` (muted) / `Yes` (primary) | Profile (`showConfirmDialog`, resolves `bool`) |
 
+### Scripture reader
+Part of [Series content detail](#series-content-detail): the scripture bodies, `features/bible_series/scripture/`, state in `ScriptureCubit` (`application/bible/scripture_cubit.dart`).
+- **State (`ScriptureState`):** `passageIds`; `seriesBibleId` (the series' `scripture_bible_id`); `preferredBibleId` (the user's choice, `null` = series version); getter `bibleId` = preferred ?? series; `versionsStatus` + `versions` (sorted by language, then name); `passages` (passage id → `PassageLoad` in `bibleId`); `selectedVerseIds`; `savedVerses` (the user's `SavedVerse`s of this series day, each with an optional note; one `content_id` query started with the passages); `comparison` (`VerseComparison{bibleId, status, verses}` while the compare sheet is open); toast `message` / `messageIsError` / `messageId`. Getters: `selection` (reading order), `selectionReference` (e.g. `John 3:16-18, 20; Psalms 23:1`), `selectionText`, `versionSavedVerses` (the `savedVerses` whose `bibleId` is `bibleId`; every getter below uses only these), `savedVerseIds`, `notedVerseIds`, `notesFor(verseId)`, `isSelectionSaved`, `selectionSavedVerses` (what Unsave removes), `noteTarget` (the smallest saved verse of this day containing every selected verse), `defaultCompareBibleId` (another version in the same language, else any other).
+- **Verses:** tap a verse (number or text) → `toggleVerse(verseId)`. Selected verses: dotted blue underline on a light blue background. Saved verses (of this series day, saved in the version being read): amber highlight. Switching versions hides the others until switching back. Verses with a note: `sticky_note_2_outlined` (16, blue) after the verse number; tap → that saved verse's note editor (or, when several saved verses with notes cover the verse, a `Notes` list sheet).
+- **Version picker** (modal sheet, 85 % height): title `Bible version`, search field (`Search versions`, matches name, abbreviation or language), then `Series version` (series' version; checked when no choice is saved) and every version grouped by language (abbreviation, name, description; check on the selected one). Loading → `LoadingState`; failure → `Unable to load Bible versions` + **Retry** (`retryVersions`). Choosing → `selectBible(id | null)`: saved to `users/{uid}.preferred_bible_id` and used in every series; the selection is cleared and the passages reload in the new version. Save failure → error toast `Unable to save your Bible version` (the version still changes for this session).
+- **`VerseActionBar`** (bottom bar while verses are selected): selection reference (`titleMedium`) + ✕ (tooltip `Clear selection` → `clearSelection`), then four equal actions:
+  - **Note** (`edit_note`) → note editor sheet for `noteTarget` if there is one (its reference and current note), otherwise for the selection: `<reference> (<version>)`, the verses' text in the version being read, from the loaded passages (muted, 4 lines max), multiline field (hint `Write a note`), **Cancel**, **Save** (enabled when not blank) → `saveNote(text)`: sets the note on `noteTarget`, or saves the selection as a new saved verse with the note. When the target already has a note, a delete icon (tooltip `Delete note`) → confirm `Delete note` / `Delete this note? The verses stay saved.` → `setNote(id, null)`. From a verse's note icon the editor works on that saved verse (`setNote`). Toasts `Note saved` / `Note deleted`; errors `Unable to save note` / `Unable to delete note`.
+  - **Save** (`bookmark_border`) → `toggleSaveSelection()` saves the selection with no note (toast `Saved <reference>`). When every selected verse is already saved it shows **Unsave** (`bookmark`) and removes the saved verses that include any selected verse (`selectionSavedVerses`, toast `Removed from saved`); if any of them has a note, it first confirms `Remove saved verses` / `Your note on <reference> will be deleted too.`. Errors `Unable to save verses` / `Unable to remove saved verses`. The selection is cleared on success.
+  - **Compare** (`compare_arrows`) → compare sheet (75 % height): `Compare <reference>`, the current version (abbreviation + name) and its text, a divider, then another version (`defaultCompareBibleId`; tap the abbreviation ▾ to choose another version with the picker) and the same verses in it (`compare(bibleId)`; loading dots; failure → `Unable to load this version` + **Retry**; verses the version lacks show `(not in this version)`). Closing → `closeComparison()`.
+  - **Copy** (`copy`) → clipboard `<reference> (<version>)\n<text>`, toast `Copied <reference> (<version>)`, selection cleared.
+
 ### Photo viewer
 - Opened by tapping an uploaded image response. A `showDialog` shows a transparent `PhotoView` (`FractionallySizedBox` 0.9 width × 0.8 height; `minScale` contained × 0.8, `maxScale` covered × 2; spinner while loading) with a white ✕ (`IconButton`, tooltip `Close`) at top-left (30, 30). Back or ✕ closes it.
 
@@ -846,7 +879,7 @@ Sources: `lib/domain/bible_series/entities.dart` (sealed `SeriesContentBody`, `S
 |---|---|---|---|---|
 | `title` | `TitleBody` | `text`* | `TitleBodyView` | centred `headlineSmall` (24/700), 8 px vertical padding |
 | `text` | `TextBody` | `paragraphs`* (list) | `TextBodyView` | each paragraph as `SelectableText` `bodyLarge` (16/400), 8 px vertical padding |
-| `scripture` | `ScriptureBody` | `passage_ids`* | `ScriptureBodyView` | per passage id, the passage loaded by `ContentDetailCubit` from the Bible API (`ContentDetailState.passages`): while loading, `LoadingState`; on failure, "Unable to load scripture" + **Retry** (`retryPassage`); on success, `BiblePassage.reference` (e.g. `John 3:16-18`) in `titleLarge`, each paragraph as selectable rich text with inline `[n]` markers shown as verse numbers (`verseNumber` 12/bold, text `bodyLarge`). Footer: each distinct API `copyright` of the loaded passages, once (`bodySmall`). |
+| `scripture` | `ScriptureBody` | `passage_ids`* | `ScriptureBodyView` | top right: `BibleVersionButton` (`menu_book` icon + current version abbreviation, e.g. `KJV ▾`; `Version ▾` until the list loads; hidden until the version is known) → version picker. Per passage id, the passage loaded by `ScriptureCubit` (`ScriptureState.passages`): while loading, `LoadingState`; on failure, "Unable to load scripture" + **Retry** (`retryPassage`); on success, `PassageView`: `BiblePassage.reference` (e.g. `John 3:16-18`) in `titleLarge`, section headings in `titleSmall`, each paragraph as rich text (`bodyLarge`, line height 1.6; poetry indented 16) with verse numbers in `verseNumber` (12/bold). Verses are tappable; see [scripture reader](#scripture-reader). Footer: each distinct API `copyright` of the loaded passages, once (`bodySmall`). |
 | `question` | `QuestionBody` | `questions`* (list of strings) → `Question{question, location: [bodyIndex, qIndex]}` | `QuestionBodyView` | per question: `<n>.` + question text (input style 14/500). Below it a multiline collapsed field with an underline, hint `Share your thoughts ...`, initial value from `responses.at(bodyIndex, qIndex)`. Typing → `questionChanged(bodyIndex, qIndex, value)`. No length limit. Makes the content "response possible". |
 | `image_input` | `ImageInputBody` | (none) | `ImageInputBodyView` | no image → `Icons.add_a_photo` (50, tooltip `Upload Photo`) + `Upload Photo!`; uploading → `<n>%` from the upload progress stream; uploaded → ✕ (tooltip `Remove photo`) above the preview at 0.8 width (server thumbnail, or the in-memory picked image right after upload, or the full URL). Tap the preview → [photo viewer](#photo-viewer). Pick from the **gallery** (`pickImageFromGallery`, bytes) → `uploadImage`; ✕ → `deleteImage`. Response stored at `responses[bodyIndex]['0']`, type `image`. |
 | `audio` | `AudioBody` | `audio_file_url`*, `title`('') | `AudioBodyView` → `AudioPlayerCard` (`features/audio/`) | The track comes from `ContentDetailCubit.audioTrackFor(bodyIndex, body)`: id `<contentId>/<bodyIndex>`, title = body title (or the content title, or `Audio`), subtitle = content title and series title joined by ` · `, artwork = series image, origin = this content. A grey rounded card: title (`titleMedium`), subtitle (muted), `AudioSeekBar` (buffered progress, elapsed `m:ss`/`h:mm:ss` and remaining `-m:ss`, `--:--` until the duration is known; dragging previews and seeks **on release**), then back 10 s (`Icons.replay_10`), play/pause (64, spinner while loading/buffering), forward 30 s (`Icons.forward_30`), and a speed button (`1x` → `1.25x` → `1.5x` → `2x` → `0.75x`). Until this track is the current one only play is enabled. On failure: error icon + `This audio couldn't be played. Check your connection and try again.` + `Retry`. Actions → `AudioPlayerCubit.toggle/seek/skipBackward/skipForward/cycleSpeed/play`. Playback is app-wide and continues off the page and in the background (lock screen / notification controls). |

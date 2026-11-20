@@ -128,6 +128,8 @@ Other rules and limits:
 - In a series I see one tab per day (month, day number, a dot for today, completion colour), and for each day the list of content items (e.g. `DEVOTIONAL`, `PRAYER`).
 - I open a content item and read/watch/listen to its typed body blocks: title, text, scripture, question, image upload, audio, video/YouTube, link, divider.
 - I mark an item complete. If it has questions I answer them first. Partly answered work is saved as a draft.
+- I can read scripture in the Bible version I choose. My choice is remembered for every series; "Series version" goes back to each series' own version.
+- I can tap one or more verses and then save them, write a note on them, compare them with another version, or copy them. A note belongs to a saved verse: writing one on unsaved verses saves them, writing one on saved verses adds it to that saved verse, and deleting it leaves the verses saved. A saved verse belongs to the series day I saved it on: it is highlighted (with a note icon if it has a note) when I come back to that day in the version I saved it in (switching versions hides it until I switch back), and "Open reading" from my profile takes me back there. The same verse on another day starts unsaved.
 - I can open the series' discussion forum (**Discussion**).
 
 **Business rules**
@@ -323,7 +325,7 @@ Testimonies mirror prayer requests and share the same generic cubits, `PostActio
   - The upload goes to `/users/{uid}/profile_photo/image{ext}` with % progress (`ProfileState.uploadPercent`).
   - Then `users/{uid}` is updated with `{thumbnail, profile_photo}` as `gs://` paths, and the user is reloaded into the session (`refreshCurrentUser`).
   - On failure the toast `Error uploading photo` shows.
-- **Logout**, and Settings → **Notification Settings**.
+- **Logout**, Bible → **My Notes & Saved Verses** (every saved verse with its note, newest first, filterable to those with notes; open one to read it in full, add, edit or delete its note, remove it, or jump back to the reading it came from), and Settings → **Notification Settings**.
 - **Other** section, driven by the `links` doc:
   - **Privacy Policy** (`privacy_policy_link`, external)
   - **Terms of Use** (`terms_of_use_link`, external)

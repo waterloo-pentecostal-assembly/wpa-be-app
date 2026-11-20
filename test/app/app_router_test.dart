@@ -69,9 +69,13 @@ RouteScreens _stubScreens() => RouteScreens(
           _stub('thread ${r.threadId} focus ${r.focusCommentId}'),
       prayerRequests: (r) => _stub('prayer requests ${r.tab.name}'),
       testimonies: (r) => _stub('testimonies ${r.tab.name}'),
-      profile: () => _stub('profile',
-          links: [('settings', '/profile/notification-settings')]),
+      profile: () => _stub('profile', links: [
+        ('settings', '/profile/notification-settings'),
+        ('notes', '/profile/bible-notes'),
+      ]),
       notificationSettings: () => _stub('notification settings'),
+      bibleNotes: () => _stub('bible notes',
+          links: [('open reading', '/engage/series/s1/content/c1')]),
       adminHome: () => _stub('admin home'),
       userVerification: () => _stub('user verification'),
       prayerRequestApproval: () => _stub('prayer approval'),
@@ -208,6 +212,26 @@ void main() {
     await tester.tap(find.text('ADMIN'));
     await tester.pumpAndSettle();
     expect(find.text('admin home'), findsOneWidget);
+  });
+
+  testWidgets('bible notes open from profile and link to a reading',
+      (tester) async {
+    await pumpApp(tester);
+    await signIn(tester);
+
+    await tester.tap(find.text('PROFILE'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('notes'));
+    await tester.pumpAndSettle();
+    expect(find.text('bible notes'), findsOneWidget);
+
+    await tester.tap(find.text('open reading'));
+    await tester.pumpAndSettle();
+    expect(find.text('content c1'), findsOneWidget);
+
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('bible notes'), findsOneWidget);
   });
 
   testWidgets('signing out returns to sign in', (tester) async {

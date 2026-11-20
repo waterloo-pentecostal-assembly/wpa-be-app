@@ -82,6 +82,7 @@ void main() {
     test('fixed routes', () {
       expect(Routes.notificationSettings.location,
           '/profile/notification-settings');
+      expect(Routes.bibleNotes.location, '/profile/bible-notes');
       expect(Routes.userVerification.location, '/admin/user-verification');
       expect(Routes.allSeries.location, '/engage/series');
     });
