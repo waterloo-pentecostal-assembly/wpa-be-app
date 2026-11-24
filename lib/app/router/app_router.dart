@@ -26,6 +26,9 @@ class RouteScreens {
     this.threadDetail = ScreenRegistry.threadDetail,
     this.prayerRequests = ScreenRegistry.prayerRequests,
     this.testimonies = ScreenRegistry.testimonies,
+    this.community = ScreenRegistry.community,
+    this.challengeGroup = ScreenRegistry.challengeGroup,
+    this.inviteMembers = ScreenRegistry.inviteMembers,
     this.profile = ScreenRegistry.profile,
     this.notificationSettings = ScreenRegistry.notificationSettings,
     this.bibleNotes = ScreenRegistry.bibleNotes,
@@ -48,6 +51,9 @@ class RouteScreens {
   final Widget Function(ThreadDetailRoute) threadDetail;
   final Widget Function(PrayerRequestsRoute) prayerRequests;
   final Widget Function(TestimoniesRoute) testimonies;
+  final Widget Function() community;
+  final Widget Function(ChallengeGroupRoute) challengeGroup;
+  final Widget Function(InviteMembersRoute) inviteMembers;
   final Widget Function() profile;
   final Widget Function() notificationSettings;
   final Widget Function() bibleNotes;
@@ -77,7 +83,7 @@ class RouteScreens {
 }
 
 /// Builds the app's [GoRouter]: auth redirects, the tab shell (Engage,
-/// Profile, Admin) and every route.
+/// Community, Profile, Admin) and every route.
 GoRouter buildAppRouter({
   required AuthenticationCubit auth,
   RouteScreens screens = const RouteScreens(),
@@ -161,6 +167,28 @@ GoRouter buildAppRouter({
                     Paths.testimonies,
                     (s) => screens.testimonies(
                       TestimoniesRoute.parse(s.uri.queryParameters),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: Paths.community,
+                builder: (_, __) => screens.community(),
+                routes: [
+                  leaf(
+                    Paths.challengeGroup,
+                    (s) => screens.challengeGroup(
+                      ChallengeGroupRoute.parse(s.pathParameters),
+                    ),
+                  ),
+                  leaf(
+                    Paths.inviteMembers,
+                    (s) => screens.inviteMembers(
+                      InviteMembersRoute.parse(s.pathParameters),
                     ),
                   ),
                 ],

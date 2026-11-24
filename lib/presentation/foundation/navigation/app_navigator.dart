@@ -38,6 +38,12 @@ abstract class AppNavigator {
     String? focusCommentId,
   });
 
+  /// A challenge group (Community tab).
+  void openChallengeGroup(String groupId);
+
+  /// Search people and invite them to a challenge group.
+  void openInviteMembers(String groupId);
+
   void openNotificationSettings();
 
   /// The user's verse notes and saved verses.

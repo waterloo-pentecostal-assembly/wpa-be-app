@@ -129,6 +129,20 @@ void main() {
       expect(location({'notificationType': 'newForumComment'}), '/engage');
     });
 
+    test('challengeGroupInvite -> community', () {
+      expect(
+          location({'notificationType': 'challengeGroupInvite'}), '/community');
+    });
+
+    test('challengeGroupNudge -> the group', () {
+      expect(
+        location({'notificationType': 'challengeGroupNudge', 'groupId': 'G2'}),
+        '/community/groups/G2',
+      );
+      expect(
+          location({'notificationType': 'challengeGroupNudge'}), '/community');
+    });
+
     test('link -> external URL', () {
       final uri = locationForNotification({
         'notificationType': 'link',

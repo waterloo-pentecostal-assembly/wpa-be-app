@@ -23,7 +23,7 @@ void main() {
       reader.savedVerses.firstWhere((v) => v.reference == reference);
 
   setUp(() async {
-    reader = FakeBibleReaderRepository();
+    reader = FakeBibleReaderRepository()..preferredBibleId = 'kjv';
     passages = FakeBiblePassageRepository()
       ..passages['JHN.3.16'] = buildPassage(
         id: 'JHN.3.16',
@@ -34,8 +34,6 @@ void main() {
     await reader.addSavedVerse(const NewSavedVerse(
       verseIds: ['JHN.3.16'],
       reference: 'John 3:16',
-      bibleId: 'kjv',
-      versionAbbreviation: 'KJV',
       note: 'Love first',
       seriesId: 's1',
       contentId: 'c1',
@@ -45,8 +43,6 @@ void main() {
     await reader.addSavedVerse(const NewSavedVerse(
       verseIds: ['PSA.23.1'],
       reference: 'Psalms 23:1',
-      bibleId: 'kjv',
-      versionAbbreviation: 'KJV',
       seriesId: 's2',
       contentId: 'c7',
     ));
@@ -64,6 +60,16 @@ void main() {
           create: (_) => BibleNotesCubit(
             bibleReaderRepository: reader,
             biblePassageRepository: passages,
+            bibleSeriesRepository: FakeBibleSeriesRepository(),
+            bibleVersionRepository: FakeBibleVersionRepository()
+              ..versions = const [
+                BibleVersion(
+                    id: 'kjv', name: 'King James Version', abbreviation: 'KJV'),
+                BibleVersion(
+                    id: 'web',
+                    name: 'World English Bible',
+                    abbreviation: 'WEB'),
+              ],
             events: AppEventBus(),
           )..load(),
           child: const BibleNotesPage(),
@@ -83,19 +89,19 @@ void main() {
   testWidgets('lists saved verses with their notes, and filters',
       (tester) async {
     await pump(tester);
-    expect(find.text('John 3:16 (KJV)'), findsOneWidget);
+    expect(find.text('John 3:16'), findsOneWidget);
     expect(find.text('Love first'), findsOneWidget);
-    expect(find.text('Psalms 23:1 (KJV)'), findsOneWidget);
+    expect(find.text('Psalms 23:1'), findsOneWidget);
     expect(find.text('Hope in Hard Times · Day 3'), findsOneWidget);
 
     await tester.tap(find.widgetWithText(ChoiceChip, 'With notes'));
     await settle(tester);
-    expect(find.text('John 3:16 (KJV)'), findsOneWidget);
-    expect(find.text('Psalms 23:1 (KJV)'), findsNothing);
+    expect(find.text('John 3:16'), findsOneWidget);
+    expect(find.text('Psalms 23:1'), findsNothing);
 
     await tester.tap(find.widgetWithText(ChoiceChip, 'All'));
     await settle(tester);
-    expect(find.text('Psalms 23:1 (KJV)'), findsOneWidget);
+    expect(find.text('Psalms 23:1'), findsOneWidget);
   });
 
   testWidgets('shows an empty state', (tester) async {
@@ -111,9 +117,10 @@ void main() {
     expect(passages.calls, isEmpty);
   });
 
-  testWidgets('details load the verses in the saved version', (tester) async {
+  testWidgets('details load the verses in the preferred version',
+      (tester) async {
     await pump(tester);
-    await tester.tap(find.text('John 3:16 (KJV)'));
+    await tester.tap(find.text('John 3:16'));
     await settle(tester);
 
     expect(find.text('16 For God so loved the world'), findsOneWidget);
@@ -121,10 +128,35 @@ void main() {
     expect(find.text('Hope in Hard Times · Day 3'), findsNWidgets(2));
   });
 
+  testWidgets('the version can be changed from the details', (tester) async {
+    passages.passagesByBible['web/JHN.3.16'] = buildPassage(
+      id: 'JHN.3.16',
+      reference: 'John 3:16',
+      bibleId: 'web',
+      verses: {'JHN.3.16': 'For God loved the world so much'},
+    );
+    await pump(tester);
+    await tester.tap(find.text('John 3:16'));
+    await settle(tester);
+    expect(find.text('KJV'), findsOneWidget);
+
+    await tester.tap(find.text('KJV'));
+    await settle(tester);
+    expect(find.text('Bible version'), findsOneWidget);
+    expect(find.text('Series version'), findsOneWidget);
+    await tester.tap(find.text('World English Bible'));
+    await settle(tester);
+
+    expect(reader.preferredBibleId, 'web');
+    expect(find.text('WEB'), findsOneWidget);
+    expect(find.text('16 For God loved the world so much'), findsOneWidget);
+    expect(find.textContaining('For God so loved'), findsNothing);
+  });
+
   testWidgets('details show Retry when the verses fail to load',
       (tester) async {
     await pump(tester);
-    await tester.tap(find.text('Psalms 23:1 (KJV)')); // not in the fake
+    await tester.tap(find.text('Psalms 23:1')); // not in the fake
     await settle(tester);
     expect(find.text('Unable to load scripture'), findsOneWidget);
 
@@ -145,7 +177,7 @@ void main() {
       verses: {'PSA.23.1': 'The Lord is my shepherd'},
     );
     await pump(tester);
-    await tester.tap(find.text('Psalms 23:1 (KJV)'));
+    await tester.tap(find.text('Psalms 23:1'));
     await settle(tester);
     expect(find.text('Edit note'), findsNothing);
 
@@ -159,14 +191,14 @@ void main() {
     // The details sheet stays open and now shows the note.
     expect(find.text('Edit note'), findsOneWidget);
     expect(find.text('He leads me'), findsNWidgets(2)); // list + sheet
-    expect(find.text('Psalms 23:1 (KJV)'), findsNWidgets(2));
+    expect(find.text('Psalms 23:1'), findsNWidgets(2));
     await tester.pump(const Duration(seconds: 4)); // toasts expire
   });
 
   testWidgets('a note can be edited and deleted, keeping the save',
       (tester) async {
     await pump(tester);
-    await tester.tap(find.text('John 3:16 (KJV)'));
+    await tester.tap(find.text('John 3:16'));
     await settle(tester);
     expect(find.text('Open reading'), findsOneWidget);
 
@@ -190,7 +222,7 @@ void main() {
 
   testWidgets('removing asks first and mentions the note', (tester) async {
     await pump(tester);
-    await tester.tap(find.text('John 3:16 (KJV)'));
+    await tester.tap(find.text('John 3:16'));
     await settle(tester);
 
     await tester.tap(find.text('Remove'));
@@ -204,13 +236,13 @@ void main() {
     await settle(tester);
 
     expect(reader.savedVerses.map((v) => v.reference), ['Psalms 23:1']);
-    expect(find.text('John 3:16 (KJV)'), findsNothing);
+    expect(find.text('John 3:16'), findsNothing);
     await tester.pump(const Duration(seconds: 4)); // toasts expire
   });
 
   testWidgets('open reading goes to the series content', (tester) async {
     await pump(tester);
-    await tester.tap(find.text('John 3:16 (KJV)'));
+    await tester.tap(find.text('John 3:16'));
     await settle(tester);
     await tester.tap(find.text('Open reading'));
     await settle(tester);

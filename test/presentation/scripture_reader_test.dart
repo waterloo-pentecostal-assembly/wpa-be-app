@@ -287,7 +287,7 @@ void main() {
     expect(find.textContaining('For God loved'), findsOneWidget);
   });
 
-  testWidgets('saved verses only show in the version they were saved in',
+  testWidgets('a saved verse shows in whichever version is read',
       (tester) async {
     passages.passagesByBible['web/JHN.3.16-JHN.3.17'] = buildPassage(
       id: 'JHN.3.16-JHN.3.17',
@@ -296,11 +296,9 @@ void main() {
       verses: {'JHN.3.16': 'For God loved', 'JHN.3.17': 'God sent'},
     );
     reader.savedVerses.add(SavedVerse(
-      id: 'kjv-note',
+      id: 'n1',
       verseIds: const ['JHN.3.16'],
       reference: 'John 3:16',
-      bibleId: _kjv.id,
-      versionAbbreviation: 'KJV',
       seriesId: _seriesId,
       contentId: 'read',
       note: 'Love',
@@ -319,7 +317,7 @@ void main() {
 
     await choose('World English Bible');
     expect(find.textContaining('For God loved'), findsOneWidget);
-    expect(find.byIcon(Icons.sticky_note_2_outlined), findsNothing);
+    expect(find.byIcon(Icons.sticky_note_2_outlined), findsOneWidget);
 
     await choose('Series version');
     expect(find.textContaining('For God so loved'), findsOneWidget);

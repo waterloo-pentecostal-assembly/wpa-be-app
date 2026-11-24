@@ -9,6 +9,9 @@ import '../../application/bible/bible_notes_cubit.dart';
 import '../../application/bible/scripture_cubit.dart';
 import '../../application/bible_series/all_bible_series_cubit.dart';
 import '../../application/bible_series/bible_series_detail_cubit.dart';
+import '../../application/challenge_groups/challenge_group_cubit.dart';
+import '../../application/challenge_groups/community_cubit.dart';
+import '../../application/challenge_groups/invite_members_cubit.dart';
 import '../../application/community_posts/post_list_cubit.dart';
 import '../../application/completions/content_detail_cubit.dart';
 import '../../application/engage/engage_home_cubit.dart';
@@ -31,6 +34,9 @@ import '../../presentation/features/bible_notes/bible_notes_page.dart';
 import '../../presentation/features/bible_series/all_bible_series_page.dart';
 import '../../presentation/features/bible_series/bible_series_detail_page.dart';
 import '../../presentation/features/bible_series/content_detail_page.dart';
+import '../../presentation/features/community/challenge_group_page.dart';
+import '../../presentation/features/community/community_page.dart';
+import '../../presentation/features/community/invite_members_page.dart';
 import '../../presentation/features/community_posts/post_copy.dart';
 import '../../presentation/features/community_posts/posts_page.dart';
 import '../../presentation/features/engage/engage_home_page.dart';
@@ -207,6 +213,39 @@ abstract final class ScreenRegistry {
     );
   }
 
+  // ---- community ---------------------------------------------------------
+
+  static Widget community() => BlocProvider(
+        create: (_) => CommunityCubit(
+          challengeGroupsRepository: getIt(),
+          analytics: getIt(),
+          session: getIt(),
+        )..load(),
+        child: const CommunityPage(),
+      );
+
+  static Widget challengeGroup(ChallengeGroupRoute route) => BlocProvider(
+        create: (_) => ChallengeGroupCubit(
+          groupId: route.groupId,
+          challengeGroupsRepository: getIt(),
+          achievementsRepository: getIt(),
+          bibleSeriesRepository: getIt(),
+          analytics: getIt(),
+          session: getIt(),
+        )..load(),
+        child: const ChallengeGroupPage(),
+      );
+
+  static Widget inviteMembers(InviteMembersRoute route) => BlocProvider(
+        create: (_) => InviteMembersCubit(
+          groupId: route.groupId,
+          challengeGroupsRepository: getIt(),
+          userDirectoryRepository: getIt(),
+          analytics: getIt(),
+        )..load(),
+        child: const InviteMembersPage(),
+      );
+
   // ---- profile -----------------------------------------------------------
 
   static Widget profile() => BlocProvider(
@@ -223,6 +262,8 @@ abstract final class ScreenRegistry {
         create: (_) => BibleNotesCubit(
           bibleReaderRepository: getIt(),
           biblePassageRepository: getIt(),
+          bibleSeriesRepository: getIt(),
+          bibleVersionRepository: getIt(),
           events: getIt(),
         )..load(),
         child: const BibleNotesPage(),

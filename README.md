@@ -1,6 +1,6 @@
 # WPA Bible Engagement App
 
-A Flutter app (iOS and Android) for the WPA community: Bible series with daily engagement content, prayer requests, testimonies and a discussion forum, backed by Firebase. The backend (Firestore rules, Cloud Functions, emulator setup) lives in a separate repo, [wpa-be-firebase](https://github.com/waterloo-pentecostal-assembly/wpa-be-firebase).
+A Flutter app (iOS and Android) for the WPA community: Bible series with daily engagement content, challenge groups, prayer requests, testimonies and a discussion forum, backed by Firebase. The backend (Firestore rules, Cloud Functions, emulator setup) lives in a separate repo, [wpa-be-firebase](https://github.com/waterloo-pentecostal-assembly/wpa-be-firebase).
 
 ## Documentation
 
@@ -8,7 +8,7 @@ A Flutter app (iOS and Android) for the WPA community: Bible series with daily e
 - [`docs/ui/FEATURES.md`](docs/ui/FEATURES.md): features and business rules.
 - [`docs/ui/SCREENS.md`](docs/ui/SCREENS.md): the UI contract, screen by screen.
 - [`docs/ui/UI_REBUILD_GUIDE.md`](docs/ui/UI_REBUILD_GUIDE.md): what a UI redesign may and may not change.
-- [`docs/firestore/`](docs/firestore/): Firestore schema notes (`bible_series`, `completions`, `saved_verses`).
+- [`docs/firestore/`](docs/firestore/): Firestore schema notes (`bible_series`, `completions`, `saved_verses`, `challenge_groups`). `challenge_groups.md` also lists the rules and the callable function the backend needs for challenge groups.
 
 ## Prerequisites
 

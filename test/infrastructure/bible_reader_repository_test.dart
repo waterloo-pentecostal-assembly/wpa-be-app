@@ -29,8 +29,6 @@ void main() {
     day: 3,
     verseIds: ['JHN.3.16', 'JHN.3.17'],
     reference: 'John 3:16-17',
-    bibleId: 'kjv',
-    versionAbbreviation: 'KJV',
     note: 'Love',
     seriesId: 's1',
     contentId: 'c1',
@@ -73,8 +71,6 @@ void main() {
           {
             'verse_ids': ['JHN.3.16', 'JHN.3.17'],
             'reference': 'John 3:16-17',
-            'bible_id': 'kjv',
-            'version_abbreviation': 'KJV',
             'note': 'Love',
             'series_id': 's1',
             'content_id': 'c1',
@@ -89,8 +85,6 @@ void main() {
       final added = await repository.addSavedVerse(const NewSavedVerse(
         verseIds: ['PSA.23.1'],
         reference: 'Psalms 23:1',
-        bibleId: 'kjv',
-        versionAbbreviation: 'KJV',
         seriesId: 's1',
         contentId: 'c2',
       ));
@@ -182,8 +176,6 @@ void main() {
       final added = await repository.addSavedVerse(const NewSavedVerse(
         verseIds: ['PSA.23.1'],
         reference: 'Psalms 23:1',
-        bibleId: 'kjv',
-        versionAbbreviation: 'KJV',
         seriesId: 's1',
         contentId: 'c2',
       ));

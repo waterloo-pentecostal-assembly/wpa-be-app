@@ -14,6 +14,9 @@ import 'package:wpa_app/application/bible/bible_notes_cubit.dart';
 import 'package:wpa_app/application/bible/scripture_cubit.dart';
 import 'package:wpa_app/application/bible_series/all_bible_series_cubit.dart';
 import 'package:wpa_app/application/bible_series/bible_series_detail_cubit.dart';
+import 'package:wpa_app/application/challenge_groups/challenge_group_cubit.dart';
+import 'package:wpa_app/application/challenge_groups/community_cubit.dart';
+import 'package:wpa_app/application/challenge_groups/invite_members_cubit.dart';
 import 'package:wpa_app/application/common/app_events.dart';
 import 'package:wpa_app/application/community_posts/post_list_cubit.dart';
 import 'package:wpa_app/application/completions/content_detail_cubit.dart';
@@ -56,6 +59,9 @@ import 'package:wpa_app/presentation/features/bible_notes/bible_notes_page.dart'
 import 'package:wpa_app/presentation/features/bible_series/all_bible_series_page.dart';
 import 'package:wpa_app/presentation/features/bible_series/bible_series_detail_page.dart';
 import 'package:wpa_app/presentation/features/bible_series/content_detail_page.dart';
+import 'package:wpa_app/presentation/features/community/challenge_group_page.dart';
+import 'package:wpa_app/presentation/features/community/community_page.dart';
+import 'package:wpa_app/presentation/features/community/invite_members_page.dart';
 import 'package:wpa_app/presentation/features/community_posts/post_copy.dart';
 import 'package:wpa_app/presentation/features/community_posts/posts_page.dart';
 import 'package:wpa_app/presentation/features/engage/engage_home_page.dart';
@@ -67,8 +73,14 @@ import 'package:wpa_app/presentation/foundation/navigation/app_navigator.dart';
 
 import '../helpers/fakes.dart'
     show
+        FakeAchievementsRepository,
         FakeAudioPlayer,
         FakeBiblePassageRepository,
+        FakeBibleSeriesRepository,
+        FakeChallengeGroupsRepository,
+        FakeUserDirectoryRepository,
+        buildDirectoryUser,
+        buildGroup,
         FakeBibleReaderRepository,
         FakeBibleVersionRepository,
         buildPassage;
@@ -604,8 +616,6 @@ void main() {
       await reader.addSavedVerse(const NewSavedVerse(
         verseIds: ['JHN.3.16'],
         reference: 'John 3:16',
-        bibleId: 'kjv',
-        versionAbbreviation: 'KJV',
         note: 'A long note that should wrap onto more than one line on phones',
         seriesId: 's1',
         contentId: 'c1',
@@ -616,6 +626,8 @@ void main() {
           create: (_) => BibleNotesCubit(
             bibleReaderRepository: reader,
             biblePassageRepository: FakeBiblePassageRepository(),
+            bibleSeriesRepository: FakeBibleSeriesRepository(),
+            bibleVersionRepository: FakeBibleVersionRepository(),
             events: AppEventBus(),
           )..load(),
           child: const BibleNotesPage(),
@@ -623,7 +635,7 @@ void main() {
         width: width,
       );
       expect(find.text('Notes & Saved Verses'), findsOneWidget);
-      expect(find.text('John 3:16 (KJV)'), findsOneWidget);
+      expect(find.text('John 3:16'), findsOneWidget);
     });
 
     testWidgets('notification settings ($w)', (tester) async {
@@ -639,6 +651,121 @@ void main() {
       );
       expect(find.text('Daily Engagement Reminder'), findsOneWidget);
       expect(find.text('Comment Likes'), findsOneWidget);
+    });
+
+    testWidgets('community ($w)', (tester) async {
+      final groups = FakeChallengeGroupsRepository()
+        ..publicGroups[''] = [
+          buildGroup(
+            id: 'PUB234',
+            name: 'A public group with a long name that wraps',
+            description: 'We read together every morning before work and '
+                'share one thing that stood out. Everyone is welcome to '
+                'join, wherever you are in the series.',
+            isPublic: true,
+            memberIds: ['u2', 'u3', 'u4', 'u5', 'u6'],
+          ),
+        ];
+      await pumpScreen(
+        tester,
+        BlocProvider(
+          create: (_) => CommunityCubit(
+            challengeGroupsRepository: groups,
+            analytics: _NoopAnalytics(),
+            session: AppSession()..update(_user),
+          )..load(),
+          child: const CommunityPage(),
+        ),
+        width: width,
+      );
+      groups.myGroups.add([
+        buildGroup(memberIds: ['u1', 'u2', 'u3', 'u4', 'u5', 'u6']),
+        buildGroup(
+          id: 'LNG234',
+          name: 'A group with a fairly long name that should wrap nicely',
+        ),
+      ]);
+      groups.myInvites.add([
+        buildGroup(id: 'INV234', memberIds: ['u2'], invitedIds: ['u1']),
+      ]);
+      await tester.pump();
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(find.text('Challenge Groups'), findsOneWidget);
+      expect(find.byType(GroupCard), findsNWidgets(2));
+      expect(find.byType(InviteCard), findsOneWidget);
+      await tester.drag(find.byType(ListView).first, const Offset(0, -2000));
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(find.byType(PublicGroupCard), findsOneWidget);
+    });
+
+    testWidgets('challenge group ($w)', (tester) async {
+      final groups = FakeChallengeGroupsRepository();
+      final achievements = FakeAchievementsRepository();
+      final series = FakeBibleSeriesRepository()
+        ..hasActive = true
+        ..seriesList = [_series()];
+      await pumpScreen(
+        tester,
+        BlocProvider(
+          create: (_) => ChallengeGroupCubit(
+            groupId: 'ABC234',
+            challengeGroupsRepository: groups,
+            achievementsRepository: achievements,
+            bibleSeriesRepository: series,
+            analytics: _NoopAnalytics(),
+            session: AppSession()..update(_user),
+          )..load(),
+          child: const ChallengeGroupPage(),
+        ),
+        width: width,
+      );
+      groups.group
+          .add(buildGroup(memberIds: ['u1', 'u2', 'u3'], invitedIds: ['u4']));
+      await tester.pump();
+      await tester.pump();
+      achievements
+          .userController('u1')
+          .add(const Achievements(seriesProgress: 40));
+      achievements
+          .userController('u2')
+          .add(const Achievements(seriesProgress: 0));
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(find.text('ABC234'), findsOneWidget);
+      expect(find.byType(MemberProgressTile), findsNWidgets(3));
+      expect(find.text('Invited'), findsOneWidget);
+    });
+
+    testWidgets('invite members ($w)', (tester) async {
+      final groups = FakeChallengeGroupsRepository()
+        ..storedGroup = buildGroup(memberIds: ['u1', 'u2']);
+      final directory = FakeUserDirectoryRepository()
+        ..results['ma'] = [
+          buildDirectoryUser('u2', firstName: 'Mary'),
+          buildDirectoryUser('u7', firstName: 'Mark'),
+        ];
+      await pumpScreen(
+        tester,
+        BlocProvider(
+          create: (_) => InviteMembersCubit(
+            groupId: 'ABC234',
+            challengeGroupsRepository: groups,
+            userDirectoryRepository: directory,
+            analytics: _NoopAnalytics(),
+            debounce: Duration.zero,
+          )..load(),
+          child: const InviteMembersPage(),
+        ),
+        width: width,
+      );
+      await tester.enterText(find.byType(TextField), 'ma');
+      await tester.pump();
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+      expect(find.byType(CandidateTile), findsNWidgets(2));
+      expect(find.text('Already in the group'), findsOneWidget);
     });
 
     testWidgets('admin home and queue ($w)', (tester) async {

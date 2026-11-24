@@ -1,35 +1,46 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_ui/material_ui.dart';
 
-import '../../../../application/bible/scripture_cubit.dart';
 import '../../../../application/common/load_status.dart';
 import '../../../../domain/bible/entities.dart';
 import '../../../design_system/components.dart';
 
-/// Opens a searchable list of the available Bible versions (from the
-/// [ScriptureCubit] of [context]), grouped by language. [onSelected] gets the
-/// chosen version id, or `null` for the "series version" row (shown when
-/// [showSeriesVersion]). [selectedId] is checked; [excludeId] is left out.
-Future<void> showBibleVersionPicker(
+/// The available Bible versions and their load status, as held by a cubit.
+typedef BibleVersionList = ({LoadStatus status, List<BibleVersion> versions});
+
+/// Opens a searchable list of the available Bible versions, grouped by
+/// language. The list comes from [source] (any cubit; [versionsOf] picks it
+/// out of its state, and follows it while open) and [onRetry] reloads it
+/// after a failure. [onSelected] gets the chosen version id, or `null` for
+/// the "series version" row (shown when [showSeriesVersion]; its subtitle is
+/// [seriesBibleId]'s name when known). [selectedId] is checked; [excludeId]
+/// is left out.
+Future<void> showBibleVersionPicker<S>(
   BuildContext context, {
+  required StateStreamable<S> source,
+  required BibleVersionList Function(S state) versionsOf,
+  required VoidCallback onRetry,
   required String? selectedId,
   required ValueChanged<String?> onSelected,
   bool showSeriesVersion = false,
+  String? seriesBibleId,
   String? excludeId,
 }) {
-  final cubit = context.read<ScriptureCubit>();
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
     showDragHandle: true,
-    builder: (sheetContext) => BlocProvider.value(
-      value: cubit,
-      child: FractionallySizedBox(
-        heightFactor: 0.85,
-        child: BibleVersionPicker(
+    builder: (sheetContext) => FractionallySizedBox(
+      heightFactor: 0.85,
+      child: BlocBuilder<StateStreamable<S>, S>(
+        bloc: source,
+        builder: (_, state) => BibleVersionPicker(
+          list: versionsOf(state),
+          onRetry: onRetry,
           selectedId: selectedId,
           showSeriesVersion: showSeriesVersion,
+          seriesBibleId: seriesBibleId,
           excludeId: excludeId,
           onSelected: (id) {
             Navigator.of(sheetContext).pop();
@@ -44,15 +55,21 @@ Future<void> showBibleVersionPicker(
 class BibleVersionPicker extends StatefulWidget {
   const BibleVersionPicker({
     super.key,
+    required this.list,
+    required this.onRetry,
     required this.selectedId,
     required this.onSelected,
     this.showSeriesVersion = false,
+    this.seriesBibleId,
     this.excludeId,
   });
 
+  final BibleVersionList list;
+  final VoidCallback onRetry;
   final String? selectedId;
   final ValueChanged<String?> onSelected;
   final bool showSeriesVersion;
+  final String? seriesBibleId;
   final String? excludeId;
 
   @override
@@ -72,9 +89,9 @@ class _BibleVersionPickerState extends State<BibleVersionPicker> {
 
   @override
   Widget build(BuildContext context) {
-    final state = context.watch<ScriptureCubit>().state;
+    final list = widget.list;
     final versions = [
-      for (final v in state.versions)
+      for (final v in list.versions)
         if (v.id != widget.excludeId && _matches(v)) v,
     ];
     return Column(
@@ -96,35 +113,34 @@ class _BibleVersionPickerState extends State<BibleVersionPicker> {
             onChanged: (q) => setState(() => _query = q),
           ),
         ),
-        Expanded(child: _list(context, state, versions)),
+        Expanded(child: _list(context, list, versions)),
       ],
     );
   }
 
   Widget _list(
     BuildContext context,
-    ScriptureState state,
+    BibleVersionList list,
     List<BibleVersion> versions,
   ) {
-    if (state.versionsStatus.isFailure) {
+    if (list.status.isFailure) {
       return Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Text('Unable to load Bible versions'),
           TextButton(
-            onPressed: context.read<ScriptureCubit>().retryVersions,
+            onPressed: widget.onRetry,
             child: const Text('Retry'),
           ),
         ],
       );
     }
-    if (state.versionsStatus.isLoading) return const LoadingState();
+    if (list.status.isLoading) return const LoadingState();
 
-    final seriesVersion = state.versionOf(state.seriesBibleId);
+    final seriesVersion =
+        list.versions.where((v) => v.id == widget.seriesBibleId).firstOrNull;
     final rows = <Widget>[
-      if (widget.showSeriesVersion &&
-          state.seriesBibleId != null &&
-          _query.trim().isEmpty)
+      if (widget.showSeriesVersion && _query.trim().isEmpty)
         _VersionTile(
           title: 'Series version',
           subtitle: seriesVersion?.name ?? '',

@@ -19,7 +19,6 @@ class VerseActionBar extends StatelessWidget {
       buildWhen: (a, b) =>
           a.selectedVerseIds != b.selectedVerseIds ||
           a.savedVerses != b.savedVerses ||
-          a.bibleId != b.bibleId ||
           a.versions != b.versions,
       builder: (context, state) {
         final selection = state.selection;

@@ -53,10 +53,8 @@ class _PassageViewState extends State<PassageView> {
   Widget build(BuildContext context) {
     final selected =
         context.select((ScriptureCubit c) => c.state.selectedVerseIds);
-    final bibleId = context.select((ScriptureCubit c) => c.state.bibleId);
-    final savedVerses = context
-        .select((ScriptureCubit c) => c.state.savedVerses)
-        .where((v) => v.isIn(bibleId));
+    final savedVerses =
+        context.select((ScriptureCubit c) => c.state.savedVerses);
     final marks = _VerseMarks(
       selected: selected,
       saved: {

@@ -8,6 +8,22 @@ abstract class IAnalytics {
 abstract final class AnalyticsEvents {
   static const amenTestimony = 'amen_testimony';
   static const bibleSeriesViewed = 'bible_series_viewed';
+  static const challengeGroupCreated = 'challenge_group_created';
+  static const challengeGroupDeletedByAdmin =
+      'challenge_group_deleted_by_admin';
+  static const challengeGroupDeletedByOwner =
+      'challenge_group_deleted_by_owner';
+  static const challengeGroupEdited = 'challenge_group_edited';
+  static const challengeGroupInviteAccepted = 'challenge_group_invite_accepted';
+  static const challengeGroupInviteDeclined = 'challenge_group_invite_declined';
+  static const challengeGroupInvitesSent = 'challenge_group_invites_sent';
+  static const challengeGroupJoinedPublic = 'challenge_group_joined_public';
+  static const challengeGroupJoinedWithCode =
+      'challenge_group_joined_with_code';
+  static const challengeGroupLeft = 'challenge_group_left';
+  static const challengeGroupMemberNudged = 'challenge_group_member_nudged';
+  static const challengeGroupMemberRemoved = 'challenge_group_member_removed';
+  static const challengeGroupOwnerAdded = 'challenge_group_owner_added';
   static const dailyEngagementNotificationClicked =
       'daily_engagement_notification_clicked';
   static const engagementCompleted = 'engagement_completed';

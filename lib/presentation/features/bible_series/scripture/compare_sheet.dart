@@ -57,6 +57,9 @@ class _CompareSheetState extends State<CompareSheet> {
     final cubit = context.read<ScriptureCubit>();
     showBibleVersionPicker(
       context,
+      source: cubit,
+      versionsOf: (s) => (status: s.versionsStatus, versions: s.versions),
+      onRetry: cubit.retryVersions,
       selectedId: cubit.state.comparison?.bibleId,
       excludeId: cubit.state.bibleId,
       onSelected: (id) {

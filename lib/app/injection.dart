@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -15,6 +16,7 @@ import '../domain/authentication/interfaces.dart';
 import '../domain/authentication/session.dart';
 import '../domain/bible/interfaces.dart';
 import '../domain/bible_series/interfaces.dart';
+import '../domain/challenge_groups/interfaces.dart';
 import '../domain/common/analytics.dart';
 import '../domain/completions/interfaces.dart';
 import '../domain/forum/interfaces.dart';
@@ -31,6 +33,8 @@ import '../infrastructure/authentication/firebase_authentication_facade.dart';
 import '../infrastructure/bible/bible_api_repository.dart';
 import '../infrastructure/bible/bible_reader_repository.dart';
 import '../infrastructure/bible_series/bible_series_repository.dart';
+import '../infrastructure/challenge_groups/challenge_groups_repository.dart';
+import '../infrastructure/challenge_groups/user_directory_repository.dart';
 import '../infrastructure/completions/completions_repository.dart';
 import '../infrastructure/forum/forum_repository.dart';
 import '../infrastructure/links/links_repository.dart';
@@ -48,6 +52,11 @@ import 'app_config.dart';
 /// else receives its dependencies through constructors or providers.
 final GetIt getIt = GetIt.instance;
 
+/// Host of the local Firebase emulators (`local_dev`). The Android emulator
+/// reaches the host machine through 10.0.2.2.
+String get _emulatorHost =>
+    defaultTargetPlatform == TargetPlatform.android ? '10.0.2.2' : 'localhost';
+
 /// Registers services, repositories and app-wide singletons. Screen cubits
 /// are created by `router/screen_registry.dart`. [audioPlayer] is created by
 /// `bootstrap` (it starts the background audio service).
@@ -63,15 +72,19 @@ void configureDependencies(
     ..registerLazySingleton<FirebaseMessaging>(() => FirebaseMessaging.instance)
     ..registerLazySingleton<FirebaseAnalytics>(() => FirebaseAnalytics.instance)
     ..registerLazySingleton<FirebaseAuth>(() => FirebaseAuth.instance)
+    ..registerLazySingleton<FirebaseFunctions>(() {
+      final functions = FirebaseFunctions.instance;
+      // Callables read Firestore, so they must run next to the emulator.
+      if (config.useFirestoreEmulator) {
+        functions.useFunctionsEmulator(_emulatorHost, 5001);
+      }
+      return functions;
+    })
     ..registerLazySingleton<FirebaseFirestore>(() {
       final firestore = FirebaseFirestore.instance;
       if (config.useFirestoreEmulator) {
-        // The Android emulator reaches the host machine through 10.0.2.2.
-        final host = defaultTargetPlatform == TargetPlatform.android
-            ? '10.0.2.2'
-            : 'localhost';
         firestore.settings = Settings(
-          host: '$host:8081',
+          host: '$_emulatorHost:8081',
           sslEnabled: false,
           persistenceEnabled: false,
         );
@@ -130,5 +143,16 @@ void configureDependencies(
     ..registerLazySingleton<IAdminService>(
         () => AdminService(getIt(), getIt(), getIt()))
     ..registerLazySingleton<ILinksRepository>(() => LinksRepository(getIt()))
-    ..registerLazySingleton<IForumRepository>(() => ForumRepository(getIt()));
+    ..registerLazySingleton<IForumRepository>(() => ForumRepository(getIt()))
+    ..registerLazySingleton<IChallengeGroupsRepository>(
+      () => ChallengeGroupsRepository(
+        getIt(),
+        getIt(),
+        getIt(),
+        callFunction: (name, data) =>
+            getIt<FirebaseFunctions>().httpsCallable(name).call<void>(data),
+      ),
+    )
+    ..registerLazySingleton<IUserDirectoryRepository>(
+        () => UserDirectoryRepository(getIt(), getIt(), getIt()));
 }

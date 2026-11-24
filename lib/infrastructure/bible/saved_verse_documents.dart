@@ -16,8 +16,6 @@ SavedVerse parseSavedVerse(DocumentSnapshot doc) {
     id: doc.id,
     verseIds: verseIds,
     reference: data.optional('reference', ''),
-    bibleId: data.optional('bible_id', ''),
-    versionAbbreviation: data.optional('version_abbreviation', ''),
     note: note == null || note.trim().isEmpty ? null : note,
     seriesId: data.require<String>('series_id'),
     contentId: data.require<String>('content_id'),
@@ -33,8 +31,6 @@ SavedVerse parseSavedVerse(DocumentSnapshot doc) {
 Map<String, dynamic> newSavedVerseDocument(NewSavedVerse v) => {
       'verse_ids': v.verseIds,
       'reference': v.reference,
-      'bible_id': v.bibleId,
-      'version_abbreviation': v.versionAbbreviation,
       'note': v.note,
       'series_id': v.seriesId,
       'content_id': v.contentId,

@@ -25,6 +25,8 @@ import 'package:wpa_app/domain/bible/interfaces.dart';
 import 'package:wpa_app/domain/bible_series/entities.dart';
 import 'package:wpa_app/domain/bible_series/exceptions.dart';
 import 'package:wpa_app/domain/bible_series/interfaces.dart';
+import 'package:wpa_app/domain/challenge_groups/entities.dart';
+import 'package:wpa_app/domain/challenge_groups/interfaces.dart';
 import 'package:wpa_app/domain/common/analytics.dart';
 import 'package:wpa_app/domain/common/exceptions.dart';
 import 'package:wpa_app/domain/common/media_upload.dart';
@@ -655,8 +657,6 @@ class FakeBibleReaderRepository
       id: 'saved-${++_nextId}',
       verseIds: v.verseIds,
       reference: v.reference,
-      bibleId: v.bibleId,
-      versionAbbreviation: v.versionAbbreviation,
       note: v.note,
       seriesId: v.seriesId,
       contentId: v.contentId,
@@ -702,6 +702,25 @@ class FakeAchievementsRepository
   Stream<Achievements> watchAchievements() {
     record('watchAchievements');
     return controller.stream;
+  }
+
+  /// Per-user streams of [watchUserAchievements], created on demand.
+  final Map<String, StreamController<Achievements>> userControllers = {};
+
+  StreamController<Achievements> userController(String userId) =>
+      userControllers.putIfAbsent(
+          userId, () => StreamController<Achievements>.broadcast());
+
+  /// Users whose achievements stream is currently listened to.
+  Set<String> get watchedUserIds => {
+        for (final e in userControllers.entries)
+          if (e.value.hasListener) e.key,
+      };
+
+  @override
+  Stream<Achievements> watchUserAchievements(String userId) {
+    record('watchUserAchievements');
+    return userController(userId).stream;
   }
 }
 
@@ -1315,6 +1334,235 @@ class FakeLinksRepository with FakeCalls implements ILinksRepository {
   Future<AppLinks> getLinks() async {
     record('getLinks');
     return links;
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Challenge groups
+// ---------------------------------------------------------------------------
+
+GroupMember buildMember(
+  String userId, {
+  String? firstName,
+  String lastName = 'Member',
+  DateTime? joinedAt,
+}) =>
+    GroupMember(
+      userId: userId,
+      firstName: firstName ?? userId,
+      lastName: lastName,
+      joinedAt: joinedAt ?? DateTime(2024, 1, 1),
+    );
+
+GroupInvite buildInvite(
+  String userId, {
+  String invitedBy = 'user-1',
+  String invitedByName = 'Jane Doe',
+  DateTime? invitedAt,
+}) =>
+    GroupInvite(
+      userId: userId,
+      firstName: userId,
+      lastName: 'Invitee',
+      invitedBy: invitedBy,
+      invitedByName: invitedByName,
+      invitedAt: invitedAt ?? DateTime(2024, 1, 2),
+    );
+
+ChallengeGroup buildGroup({
+  String id = 'ABC234',
+  String name = 'Morning Readers',
+  String description = '',
+  bool isPublic = false,
+  String? createdBy,
+  List<String>? ownerIds,
+  List<String> memberIds = const ['user-1'],
+  List<String> invitedIds = const [],
+}) =>
+    ChallengeGroup(
+      id: id,
+      name: name,
+      description: description,
+      isPublic: isPublic,
+      createdBy: createdBy ?? (memberIds.isEmpty ? 'user-1' : memberIds.first),
+      // The creator owns the group unless told otherwise.
+      ownerIds: ownerIds ??
+          [createdBy ?? (memberIds.isEmpty ? 'user-1' : memberIds.first)],
+      createdAt: DateTime(2024, 1, 1),
+      members: [for (final m in memberIds) buildMember(m)],
+      invites: [for (final i in invitedIds) buildInvite(i)],
+    );
+
+DirectoryUser buildDirectoryUser(String id, {String? firstName}) =>
+    DirectoryUser(id: id, firstName: firstName ?? id, lastName: 'Person');
+
+class FakeChallengeGroupsRepository
+    with FakeCalls
+    implements IChallengeGroupsRepository {
+  final myGroups = StreamController<List<ChallengeGroup>>.broadcast();
+  final myInvites = StreamController<List<ChallengeGroup>>.broadcast();
+  final group = StreamController<ChallengeGroup?>.broadcast();
+
+  /// Returned by [getGroup].
+  ChallengeGroup? storedGroup;
+  String createdGroupId = 'NEW234';
+  final List<String> createdNames = [];
+  final List<({String name, String description, bool isPublic})> created = [];
+  final List<({String id, String name, String description, bool isPublic})>
+      updated = [];
+  final List<String> deleted = [];
+
+  /// Public groups returned by [findPublicGroups], by query ('' = browse).
+  final Map<String, List<ChallengeGroup>> publicGroups = {};
+  final List<String> publicQueries = [];
+  final List<(String, List<DirectoryUser>)> invited = [];
+  final List<String> accepted = [];
+  final List<String> declined = [];
+  final List<String> joinedCodes = [];
+  final List<String> left = [];
+  final List<String?> leftNewOwners = [];
+  final List<String> removedMembers = [];
+  final List<String> madeOwners = [];
+  final List<(String, String)> nudged = [];
+
+  /// Completes [nudgeMember] when set (to observe the in-flight state).
+  Completer<void>? nudgeGate;
+
+  @override
+  Stream<List<ChallengeGroup>> watchMyGroups() {
+    record('watchMyGroups');
+    return myGroups.stream;
+  }
+
+  @override
+  Stream<List<ChallengeGroup>> watchMyInvites() {
+    record('watchMyInvites');
+    return myInvites.stream;
+  }
+
+  @override
+  Stream<ChallengeGroup?> watchGroup(String groupId) {
+    record('watchGroup');
+    return group.stream;
+  }
+
+  @override
+  Future<ChallengeGroup?> getGroup(String groupId) async {
+    record('getGroup');
+    return storedGroup;
+  }
+
+  @override
+  Future<List<ChallengeGroup>> findPublicGroups({
+    String query = '',
+    int limit = 30,
+  }) async {
+    record('findPublicGroups');
+    publicQueries.add(query);
+    return publicGroups[query] ?? const [];
+  }
+
+  @override
+  Future<String> createGroup({
+    required String name,
+    String description = '',
+    bool isPublic = false,
+  }) async {
+    record('createGroup');
+    createdNames.add(name);
+    created.add((name: name, description: description, isPublic: isPublic));
+    return createdGroupId;
+  }
+
+  @override
+  Future<void> updateGroup(
+    String groupId, {
+    required String name,
+    required String description,
+    required bool isPublic,
+  }) async {
+    record('updateGroup');
+    updated.add((
+      id: groupId,
+      name: name,
+      description: description,
+      isPublic: isPublic,
+    ));
+  }
+
+  @override
+  Future<void> deleteGroup(String groupId) async {
+    record('deleteGroup');
+    deleted.add(groupId);
+  }
+
+  @override
+  Future<void> inviteMembers(String groupId, List<DirectoryUser> users) async {
+    record('inviteMembers');
+    invited.add((groupId, users));
+  }
+
+  @override
+  Future<void> acceptInvite(String groupId) async {
+    record('acceptInvite');
+    accepted.add(groupId);
+  }
+
+  @override
+  Future<void> declineInvite(String groupId) async {
+    record('declineInvite');
+    declined.add(groupId);
+  }
+
+  @override
+  Future<String> joinWithCode(String code) async {
+    record('joinWithCode');
+    joinedCodes.add(code);
+    return code;
+  }
+
+  @override
+  Future<void> leaveGroup(String groupId, {String? newOwnerId}) async {
+    record('leaveGroup');
+    left.add(groupId);
+    leftNewOwners.add(newOwnerId);
+  }
+
+  @override
+  Future<void> removeMember(String groupId, String memberId) async {
+    record('removeMember');
+    removedMembers.add(memberId);
+  }
+
+  @override
+  Future<void> makeOwner(String groupId, String memberId) async {
+    record('makeOwner');
+    madeOwners.add(memberId);
+  }
+
+  @override
+  Future<void> nudgeMember({
+    required String groupId,
+    required String memberId,
+  }) async {
+    await nudgeGate?.future;
+    record('nudgeMember');
+    nudged.add((groupId, memberId));
+  }
+}
+
+class FakeUserDirectoryRepository
+    with FakeCalls
+    implements IUserDirectoryRepository {
+  /// Search results by query.
+  final Map<String, List<DirectoryUser>> results = {};
+  final List<String> queries = [];
+
+  @override
+  Future<List<DirectoryUser>> search(String query, {int limit = 20}) async {
+    record('search');
+    queries.add(query);
+    return results[query] ?? const [];
   }
 }
 

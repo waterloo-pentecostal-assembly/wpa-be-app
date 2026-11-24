@@ -79,7 +79,27 @@ void main() {
       expect(parsePostsTab('bogus'), PostsTab.all);
     });
 
+    test('challenge group and invite', () {
+      const group = ChallengeGroupRoute(groupId: 'ABC234');
+      expect(group.location, '/community/groups/ABC234');
+      expect(
+        ChallengeGroupRoute.parse(
+                match(Paths.community, Paths.challengeGroup, group.uri)!)
+            .groupId,
+        'ABC234',
+      );
+      const invite = InviteMembersRoute(groupId: 'ABC234');
+      expect(invite.location, '/community/groups/ABC234/invite');
+      expect(
+        InviteMembersRoute.parse(
+                match(Paths.community, Paths.inviteMembers, invite.uri)!)
+            .groupId,
+        'ABC234',
+      );
+    });
+
     test('fixed routes', () {
+      expect(Routes.community.location, '/community');
       expect(Routes.notificationSettings.location,
           '/profile/notification-settings');
       expect(Routes.bibleNotes.location, '/profile/bible-notes');

@@ -82,8 +82,6 @@ class BibleReaderRepository implements IBibleReaderRepository {
       id: ref.id,
       verseIds: v.verseIds,
       reference: v.reference,
-      bibleId: v.bibleId,
-      versionAbbreviation: v.versionAbbreviation,
       note: v.note,
       seriesId: v.seriesId,
       contentId: v.contentId,

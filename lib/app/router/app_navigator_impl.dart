@@ -66,6 +66,14 @@ class GoRouterAppNavigator implements AppNavigator {
       ));
 
   @override
+  void openChallengeGroup(String groupId) =>
+      _push(ChallengeGroupRoute(groupId: groupId));
+
+  @override
+  void openInviteMembers(String groupId) =>
+      _push(InviteMembersRoute(groupId: groupId));
+
+  @override
   void openNotificationSettings() => _push(Routes.notificationSettings);
 
   @override

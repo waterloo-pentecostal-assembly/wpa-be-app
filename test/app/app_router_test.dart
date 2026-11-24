@@ -69,6 +69,13 @@ RouteScreens _stubScreens() => RouteScreens(
           _stub('thread ${r.threadId} focus ${r.focusCommentId}'),
       prayerRequests: (r) => _stub('prayer requests ${r.tab.name}'),
       testimonies: (r) => _stub('testimonies ${r.tab.name}'),
+      community: () => _stub('community', links: [
+        ('open group', '/community/groups/G1'),
+      ]),
+      challengeGroup: (r) => _stub('group ${r.groupId}', links: [
+        ('invite', '/community/groups/${r.groupId}/invite'),
+      ]),
+      inviteMembers: (r) => _stub('invite ${r.groupId}'),
       profile: () => _stub('profile', links: [
         ('settings', '/profile/notification-settings'),
         ('notes', '/profile/bible-notes'),
@@ -214,6 +221,63 @@ void main() {
     expect(find.text('admin home'), findsOneWidget);
   });
 
+  testWidgets('the Community tab keeps its stack and opens groups',
+      (tester) async {
+    await pumpApp(tester);
+    await signIn(tester);
+    expect(find.text('COMMUNITY'), findsOneWidget);
+
+    await tester.tap(find.text('COMMUNITY'));
+    await tester.pumpAndSettle();
+    expect(find.text('community'), findsOneWidget);
+
+    await tester.tap(find.text('open group'));
+    await tester.pumpAndSettle();
+    expect(find.text('group G1'), findsOneWidget);
+    await tester.tap(find.text('invite'));
+    await tester.pumpAndSettle();
+    expect(find.text('invite G1'), findsOneWidget);
+
+    await tester.tap(find.text('PROFILE'));
+    await tester.pumpAndSettle();
+    expect(find.text('profile'), findsOneWidget);
+
+    // Switching back restores the Community stack; re-tap returns to root.
+    await tester.tap(find.text('COMMUNITY'));
+    await tester.pumpAndSettle();
+    expect(find.text('invite G1'), findsOneWidget);
+    await tester.tap(find.text('COMMUNITY'));
+    await tester.pumpAndSettle();
+    expect(find.text('community'), findsOneWidget);
+
+    // Back from a group returns to the Community root.
+    await tester.tap(find.text('open group'));
+    await tester.pumpAndSettle();
+    await tester.binding.handlePopRoute();
+    await tester.pumpAndSettle();
+    expect(find.text('community'), findsOneWidget);
+  });
+
+  testWidgets('a nudge notification opens the group', (tester) async {
+    await pumpApp(tester);
+    await signIn(tester);
+    router.go(locationForNotification(
+            {'notificationType': 'challengeGroupNudge', 'groupId': 'G7'})!
+        .toString());
+    await tester.pumpAndSettle();
+    expect(find.text('group G7'), findsOneWidget);
+  });
+
+  testWidgets('admins see every tab, ADMIN last', (tester) async {
+    await pumpApp(tester);
+    await signIn(tester, admin: true);
+    final labels = tester
+        .widgetList<NavigationDestination>(find.byType(NavigationDestination))
+        .map((d) => d.label)
+        .toList();
+    expect(labels, ['HOME', 'COMMUNITY', 'GIVE', 'PROFILE', 'ADMIN']);
+  });
+
   testWidgets('bible notes open from profile and link to a reading',
       (tester) async {
     await pumpApp(tester);
@@ -288,6 +352,13 @@ void main() {
     expect(find.text('splash'), findsOneWidget);
     await signIn(tester);
     expect(find.text('series s7'), findsOneWidget);
+  });
+
+  testWidgets('five tabs fit a narrow phone', (tester) async {
+    await pumpApp(tester, size: const Size(320, 640));
+    await signIn(tester, admin: true);
+    expect(tester.takeException(), isNull);
+    expect(find.text('COMMUNITY'), findsOneWidget);
   });
 
   testWidgets('wide windows use a navigation rail', (tester) async {

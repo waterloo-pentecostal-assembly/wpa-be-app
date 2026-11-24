@@ -15,6 +15,7 @@ abstract final class Paths {
   static const passwordReset = '/password-reset';
 
   static const engage = '/engage';
+  static const community = '/community';
   static const profile = '/profile';
   static const admin = '/admin';
 
@@ -29,6 +30,10 @@ abstract final class Paths {
   static const thread = 'forums/:forumId/threads/:threadId';
   static const prayerRequests = 'prayer-requests';
   static const testimonies = 'testimonies';
+
+  // Children of [community] (relative).
+  static const challengeGroup = 'groups/:groupId';
+  static const inviteMembers = 'groups/:groupId/invite';
 
   // Children of [profile] (relative).
   static const notificationSettings = 'notification-settings';
@@ -65,6 +70,7 @@ abstract final class Routes {
   static const passwordReset = _Fixed(Paths.passwordReset);
   static const engage = _Fixed(Paths.engage);
   static const allSeries = _Fixed('${Paths.engage}/${Paths.allSeries}');
+  static const community = _Fixed(Paths.community);
   static const profile = _Fixed(Paths.profile);
   static const notificationSettings =
       _Fixed('${Paths.profile}/${Paths.notificationSettings}');
@@ -200,4 +206,28 @@ class TestimoniesRoute extends AppRoute {
         path: '${Paths.engage}/${Paths.testimonies}',
         queryParameters: tab == PostsTab.all ? null : {'tab': tab.name},
       );
+}
+
+class ChallengeGroupRoute extends AppRoute {
+  const ChallengeGroupRoute({required this.groupId});
+
+  static ChallengeGroupRoute parse(Map<String, String> path) =>
+      ChallengeGroupRoute(groupId: path['groupId']!);
+
+  final String groupId;
+
+  @override
+  Uri get uri => Uri(path: '${Paths.community}/groups/${_seg(groupId)}');
+}
+
+class InviteMembersRoute extends AppRoute {
+  const InviteMembersRoute({required this.groupId});
+
+  static InviteMembersRoute parse(Map<String, String> path) =>
+      InviteMembersRoute(groupId: path['groupId']!);
+
+  final String groupId;
+
+  @override
+  Uri get uri => Uri(path: '${Paths.community}/groups/${_seg(groupId)}/invite');
 }

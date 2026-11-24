@@ -17,8 +17,9 @@ class AchievementsRepository implements IAchievementsRepository {
         seriesProgress: (data ?? const {}).optionalInt('series_progress'),
       );
 
-  DocumentReference<Map<String, dynamic>> _doc() =>
-      _firestore.collection('achievements').doc(_session.requireUser().id);
+  DocumentReference<Map<String, dynamic>> _doc([String? userId]) => _firestore
+      .collection('achievements')
+      .doc(userId ?? _session.requireUser().id);
 
   @override
   Future<Achievements> getAchievements() async {
@@ -29,4 +30,8 @@ class AchievementsRepository implements IAchievementsRepository {
   @override
   Stream<Achievements> watchAchievements() =>
       _doc().snapshots().map((s) => _fromData(s.data()));
+
+  @override
+  Stream<Achievements> watchUserAchievements(String userId) =>
+      _doc(userId).snapshots().map((s) => _fromData(s.data()));
 }

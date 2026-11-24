@@ -92,14 +92,11 @@ void main() {
     List<String> verseIds, {
     String? note,
     String contentId = 'c1',
-    BibleVersion version = _kjv,
   }) =>
       SavedVerse(
         id: id,
         verseIds: verseIds,
         reference: '',
-        bibleId: version.id,
-        versionAbbreviation: version.abbreviation,
         seriesId: _seriesId,
         contentId: contentId,
         note: note,
@@ -253,52 +250,42 @@ void main() {
       await cubit.close();
     });
 
-    test('only saved verses of the version being read are shown', () async {
-      reader.savedVerses.addAll([
-        saved('kjv', ['JHN.3.16'], note: 'KJV note'),
-        saved('web', ['PSA.23.1'], note: 'WEB note', version: _web),
-      ]);
+    test('saved verses and notes show in whichever version is read', () async {
+      reader.savedVerses.add(saved('n1', ['JHN.3.16'], note: 'Love'));
       final cubit = await loaded();
-
-      expect(cubit.state.savedVerses, hasLength(2));
-      expect(cubit.state.versionSavedVerses.map((v) => v.id), ['kjv']);
       expect(cubit.state.savedVerseIds, {'JHN.3.16'});
       expect(cubit.state.notedVerseIds, {'JHN.3.16'});
-      expect(cubit.state.notesFor('PSA.23.1'), isEmpty);
 
       await cubit.selectBible('web');
-      expect(cubit.state.savedVerseIds, {'PSA.23.1'});
-      expect(cubit.state.notedVerseIds, {'PSA.23.1'});
-      expect(cubit.state.notesFor('JHN.3.16'), isEmpty);
-
-      await cubit.selectBible(null);
+      await pumpEventQueue();
       expect(cubit.state.savedVerseIds, {'JHN.3.16'});
+      expect(cubit.state.notesFor('JHN.3.16').single.note, 'Love');
+
+      // Saved in KJV, so "Unsave" in WEB.
+      cubit.toggleVerse('JHN.3.16');
+      expect(cubit.state.isSelectionSaved, isTrue);
       await cubit.close();
     });
 
-    test('save, unsave and notes ignore saved verses of other versions',
+    test('publishes a chosen version and follows one chosen elsewhere',
         () async {
-      reader.savedVerses.add(saved('kjv', ['JHN.3.16'], note: 'KJV note'));
+      final published = <PreferredBibleChanged>[];
+      events.on<PreferredBibleChanged>().listen(published.add);
       final cubit = await loaded();
+
       await cubit.selectBible('web');
       await pumpEventQueue();
+      expect(published.map((e) => e.bibleId), ['web']);
 
+      // Chosen on the profile's saved verses.
+      passages.bibleIds.clear();
       cubit.toggleVerse('JHN.3.16');
-      expect(cubit.state.isSelectionSaved, isFalse);
-      expect(cubit.state.selectionSavedVerses, isEmpty);
-      expect(cubit.state.noteTarget, isNull);
-
-      await cubit.toggleSaveSelection();
-      expect(reader.added.single.bibleId, 'web');
-      expect(reader.savedVerses.map((v) => v.id), contains('kjv'));
-      expect(cubit.state.savedVerseIds, {'JHN.3.16'});
-      expect(cubit.state.notedVerseIds, isEmpty);
-
-      // Unsaving in WEB leaves the KJV saved verse.
-      cubit.toggleVerse('JHN.3.16');
-      await cubit.toggleSaveSelection();
-      expect(reader.savedVerses.map((v) => v.id), ['kjv']);
-      expect(cubit.state.savedVerseIds, isEmpty);
+      events.emit(const PreferredBibleChanged('rvr'));
+      await pumpEventQueue();
+      expect(cubit.state.bibleId, 'rvr');
+      expect(cubit.state.selectedVerseIds, isEmpty);
+      expect(passages.bibleIds, ['rvr', 'rvr']);
+      expect(reader.callCount('setPreferredBibleId'), 1); // not saved again
       await cubit.close();
     });
 
@@ -352,8 +339,6 @@ void main() {
       expect(added.note, isNull);
       expect(added.verseIds, ['JHN.3.16', 'JHN.3.17']);
       expect(added.reference, 'John 3:16-17');
-      expect(added.bibleId, _seriesBible);
-      expect(added.versionAbbreviation, 'KJV');
       expect(added.seriesId, _seriesId);
       expect(added.contentId, 'c1');
       expect(cubit.state.selection, isEmpty);

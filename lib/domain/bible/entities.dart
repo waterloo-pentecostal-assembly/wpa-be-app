@@ -34,6 +34,14 @@ class BibleVersion extends Equatable {
       [id, name, abbreviation, description, languageId, languageName];
 }
 
+/// [versions] sorted by language, then name (the order version pickers
+/// list them in).
+List<BibleVersion> sortedByLanguage(Iterable<BibleVersion> versions) =>
+    [...versions]..sort((a, b) {
+        final byLanguage = a.languageName.compareTo(b.languageName);
+        return byLanguage != 0 ? byLanguage : a.name.compareTo(b.name);
+      });
+
 /// A run of text in a passage. Text that belongs to a verse has its
 /// [verseId] (e.g. `JHN.3.16`); headings and other text outside verses have
 /// none.
@@ -157,16 +165,16 @@ String joinVerses(List<VerseText> verses) => [
 /// [contentId]), with an optional [note]. One record per save: adding,
 /// editing or deleting the note only changes [note].
 ///
-/// A saved verse shows only on the series day it was saved from, and only
-/// while that day is read in the version it was saved in ([isIn]). The
-/// verses' text is not stored; it is read from the Bible API when shown.
+/// A saved verse shows only on the series day it was saved from. It is not
+/// tied to a Bible version: [verseIds] are version-independent Bible API
+/// verse ids, shown in whatever version the user reads in
+/// (`users/{uid}.preferred_bible_id`). The verses' text is not stored; it is
+/// read from the Bible API when shown.
 class SavedVerse extends Equatable {
   const SavedVerse({
     required this.id,
     required this.verseIds,
     required this.reference,
-    required this.bibleId,
-    required this.versionAbbreviation,
     required this.seriesId,
     required this.contentId,
     required this.createdAt,
@@ -183,10 +191,6 @@ class SavedVerse extends Equatable {
 
   /// e.g. `John 3:16-17`.
   final String reference;
-
-  /// Version the verses were read in when saved.
-  final String bibleId;
-  final String versionAbbreviation;
 
   /// The user's note; `null` when there is none.
   final String? note;
@@ -207,17 +211,11 @@ class SavedVerse extends Equatable {
 
   bool get hasNote => note != null;
 
-  /// Whether this was saved while reading the version [bibleId]: in the
-  /// reader it is only highlighted (and its note shown) in that version.
-  bool isIn(String? bibleId) => this.bibleId == bibleId;
-
   /// A copy with [note] (`null` removes it).
   SavedVerse withNote(String? note) => SavedVerse(
         id: id,
         verseIds: verseIds,
         reference: reference,
-        bibleId: bibleId,
-        versionAbbreviation: versionAbbreviation,
         note: note,
         seriesId: seriesId,
         contentId: contentId,
@@ -232,8 +230,6 @@ class SavedVerse extends Equatable {
         id,
         verseIds,
         reference,
-        bibleId,
-        versionAbbreviation,
         note,
         seriesId,
         contentId,
@@ -249,8 +245,6 @@ class NewSavedVerse extends Equatable {
   const NewSavedVerse({
     required this.verseIds,
     required this.reference,
-    required this.bibleId,
-    required this.versionAbbreviation,
     required this.seriesId,
     required this.contentId,
     this.seriesTitle = '',
@@ -260,8 +254,6 @@ class NewSavedVerse extends Equatable {
 
   final List<String> verseIds;
   final String reference;
-  final String bibleId;
-  final String versionAbbreviation;
   final String? note;
   final String seriesId;
   final String contentId;
@@ -272,8 +264,6 @@ class NewSavedVerse extends Equatable {
   List<Object?> get props => [
         verseIds,
         reference,
-        bibleId,
-        versionAbbreviation,
         note,
         seriesId,
         contentId,

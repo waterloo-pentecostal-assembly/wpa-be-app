@@ -9,6 +9,7 @@ import '../../foundation/feedback/toast.dart';
 import '../../foundation/formatting/dates.dart';
 import '../../foundation/layout/content_constraint.dart';
 import '../../foundation/navigation/app_navigator.dart';
+import '../bible_series/scripture/bible_version_picker.dart';
 import '../bible_series/scripture/note_editor_sheet.dart';
 
 /// The user's saved verses (each with an optional note), newest first,
@@ -153,10 +154,6 @@ class _ListState extends State<_List> {
   }
 }
 
-String _title(SavedVerse v) => v.versionAbbreviation.isEmpty
-    ? v.reference
-    : '${v.reference} (${v.versionAbbreviation})';
-
 /// Where it was saved: `Hope in Hard Times · Day 3` ('' if unknown).
 String savedFrom(SavedVerse v) => [
       if (v.seriesTitle.isNotEmpty) v.seriesTitle,
@@ -207,7 +204,7 @@ class SavedVerseTile extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(_title(v), style: context.text.titleSmall),
+                  Text(v.reference, style: context.text.titleSmall),
                   _SavedFrom(v),
                   Text(
                     DateFormats.shortDate(v.createdAt),
@@ -288,7 +285,7 @@ class _SavedVerseDetails extends StatelessWidget {
     final cubit = context.read<BibleNotesCubit>();
     showNoteEditorSheet(
       context,
-      title: _title(v),
+      title: v.reference,
       quote: cubit.state.texts[v.id]?.text ?? '',
       initialNote: v.note ?? '',
       onSave: (note) => cubit.setNote(v.id, note),
@@ -326,7 +323,8 @@ class _SavedVerseDetails extends StatelessWidget {
           children: [
             const Icon(Icons.bookmark, color: AppColors.wpaBlue),
             const SizedBox(width: AppSpacing.sm),
-            Expanded(child: Text(_title(v), style: context.text.titleMedium)),
+            Expanded(child: Text(v.reference, style: context.text.titleMedium)),
+            _VersionButton(savedVerseId: v.id),
           ],
         ),
         const SizedBox(height: AppSpacing.xs),
@@ -366,6 +364,49 @@ class _SavedVerseDetails extends StatelessWidget {
           ],
         ),
       ],
+    );
+  }
+}
+
+/// The version the verses are shown in (e.g. `KJV ▾`); opens the version
+/// picker. Choosing one changes the user's version everywhere.
+class _VersionButton extends StatelessWidget {
+  const _VersionButton({required this.savedVerseId});
+
+  final String savedVerseId;
+
+  void _pick(BuildContext context) {
+    final cubit = context.read<BibleNotesCubit>();
+    final state = cubit.state;
+    showBibleVersionPicker(
+      context,
+      source: cubit,
+      versionsOf: (s) => (status: s.versionsStatus, versions: s.versions),
+      onRetry: cubit.retryVersions,
+      selectedId: state.preferredBibleId,
+      showSeriesVersion: true,
+      // Without a preference the text is in its series' version.
+      seriesBibleId: state.preferredBibleId == null
+          ? state.texts[savedVerseId]?.bibleId
+          : null,
+      onSelected: cubit.selectBible,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final label = context.select((BibleNotesCubit c) =>
+        c.state.abbreviationOf(c.state.texts[savedVerseId]?.bibleId));
+    return TextButton.icon(
+      onPressed: () => _pick(context),
+      icon: const Icon(Icons.menu_book_outlined, size: 18),
+      label: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(label.isEmpty ? 'Version' : label),
+          const Icon(Icons.arrow_drop_down, size: 20),
+        ],
+      ),
     );
   }
 }

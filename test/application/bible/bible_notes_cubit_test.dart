@@ -11,14 +11,11 @@ SavedVerse _saved(
   int day = 1,
   String? note,
   List<String> verseIds = const ['JHN.3.16'],
-  String bibleId = 'kjv',
 }) =>
     SavedVerse(
       id: id,
       verseIds: verseIds,
       reference: 'John 3:16',
-      bibleId: bibleId,
-      versionAbbreviation: 'KJV',
       seriesId: 's1',
       contentId: 'c$day',
       note: note,
@@ -29,6 +26,8 @@ SavedVerse _saved(
 void main() {
   late FakeBibleReaderRepository reader;
   late FakeBiblePassageRepository passages;
+  late FakeBibleSeriesRepository series;
+  late FakeBibleVersionRepository versions;
   late AppEventBus events;
 
   setUp(() {
@@ -39,6 +38,15 @@ void main() {
         _saved('c', day: 3, note: 'Third'),
       ]);
     passages = FakeBiblePassageRepository();
+    series = FakeBibleSeriesRepository()
+      ..seriesById['s1'] = buildSeries(id: 's1', days: []);
+    versions = FakeBibleVersionRepository()
+      ..versions = const [
+        BibleVersion(
+            id: 'web', name: 'World English Bible', abbreviation: 'WEB'),
+        BibleVersion(
+            id: 'kjv', name: 'King James Version', abbreviation: 'KJV'),
+      ];
     events = AppEventBus();
   });
 
@@ -47,6 +55,8 @@ void main() {
   BibleNotesCubit build({int pageSize = 30}) => BibleNotesCubit(
         bibleReaderRepository: reader,
         biblePassageRepository: passages,
+        bibleSeriesRepository: series,
+        bibleVersionRepository: versions,
         events: events,
         pageSize: pageSize,
       );
@@ -215,10 +225,11 @@ void main() {
           'x',
           day: 4,
           verseIds: const ['JHN.3.16', 'JHN.3.18', 'PSA.23.1'],
-          bibleId: 'web',
         );
 
-    test('is read in the saved version, one request per chapter', () async {
+    setUp(() => reader.preferredBibleId = 'web');
+
+    test('is read in the preferred version, one request per chapter', () async {
       reader.savedVerses.add(scattered());
       passages
         ..passages['JHN.3.16-JHN.3.18'] = buildPassage(
@@ -252,6 +263,25 @@ void main() {
 
       await cubit.loadText('x');
       expect(passages.callCount('getPassage'), 2); // loaded once
+      expect(series.calls, isEmpty); // not needed with a preference
+      await cubit.close();
+    });
+
+    test('without a preference, is read in the series version', () async {
+      reader
+        ..preferredBibleId = null
+        ..savedVerses.add(_saved('y', day: 5, verseIds: const ['PSA.23.1']));
+      passages.passages['PSA.23.1'] = buildPassage(
+        id: 'PSA.23.1',
+        reference: 'Psalms 23:1',
+        verses: {'PSA.23.1': 'The Lord is my shepherd'},
+      );
+      final cubit = build();
+      await cubit.load();
+
+      await cubit.loadText('y');
+      expect(passages.bibleIds, ['bible-s1']);
+      expect(cubit.state.texts['y']?.text, '1 The Lord is my shepherd');
       await cubit.close();
     });
 
@@ -277,6 +307,94 @@ void main() {
       );
       await cubit.loadText('x');
       expect(cubit.state.texts['x']?.text, '16 Loved 18 Believes 1 Shepherd');
+      await cubit.close();
+    });
+  });
+
+  group('version', () {
+    setUp(() {
+      reader.preferredBibleId = 'web';
+      passages.passages['JHN.3.16'] = buildPassage(
+        id: 'JHN.3.16',
+        reference: 'John 3:16',
+        verses: {'JHN.3.16': 'For God so loved'},
+      );
+    });
+
+    test('opening a saved verse loads the version list', () async {
+      final cubit = build();
+      await cubit.load();
+      await cubit.loadText('a');
+      await pumpEventQueue();
+
+      expect(cubit.state.texts['a']?.bibleId, 'web');
+      expect(cubit.state.preferredBibleId, 'web');
+      expect(cubit.state.versions.map((v) => v.abbreviation), ['KJV', 'WEB']);
+      expect(cubit.state.abbreviationOf('web'), 'WEB');
+      await cubit.close();
+    });
+
+    test('choosing a version saves it, tells the reader and reloads texts',
+        () async {
+      final published = <PreferredBibleChanged>[];
+      events.on<PreferredBibleChanged>().listen(published.add);
+      final cubit = build();
+      await cubit.load();
+      await cubit.loadText('a');
+      passages.bibleIds.clear();
+
+      await cubit.selectBible('kjv');
+      await pumpEventQueue();
+
+      expect(reader.preferredBibleId, 'kjv');
+      expect(published.map((e) => e.bibleId), ['kjv']);
+      expect(passages.bibleIds, ['kjv']);
+      expect(cubit.state.texts['a']?.bibleId, 'kjv');
+      expect(cubit.state.texts['a']?.text, '16 For God so loved');
+
+      // Back to each series' own version.
+      await cubit.selectBible(null);
+      await pumpEventQueue();
+      expect(reader.preferredBibleId, isNull);
+      expect(cubit.state.texts['a']?.bibleId, 'bible-s1');
+      await cubit.close();
+    });
+
+    test('a text still loading in the old version is dropped', () async {
+      final cubit = build();
+      await cubit.load();
+      final first = cubit.loadText('a'); // reads the preference: web
+      await cubit.selectBible('kjv');
+      await first;
+      await pumpEventQueue();
+
+      expect(cubit.state.texts['a']?.bibleId, 'kjv');
+      await cubit.close();
+    });
+
+    test('a failed save keeps the version and shows an error', () async {
+      reader.failOn('setPreferredBibleId');
+      final cubit = build();
+      await cubit.load();
+      await cubit.selectBible('kjv');
+
+      expect(cubit.state.preferredBibleId, 'kjv');
+      expect(cubit.state.message, 'Unable to save your Bible version');
+      expect(cubit.state.messageIsError, isTrue);
+      await cubit.close();
+    });
+
+    test('follows a version chosen in the reader', () async {
+      final cubit = build();
+      await cubit.load();
+      await cubit.loadText('a');
+
+      events.emit(const PreferredBibleChanged('kjv'));
+      await pumpEventQueue();
+
+      expect(cubit.state.preferredBibleId, 'kjv');
+      expect(cubit.state.texts['a']?.bibleId, 'kjv');
+      expect(reader.calls, isNot(contains('setPreferredBibleId')));
       await cubit.close();
     });
   });

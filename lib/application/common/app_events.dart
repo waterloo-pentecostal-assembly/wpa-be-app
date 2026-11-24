@@ -57,6 +57,14 @@ class SavedVerseChanged extends AppEvent {
   final SavedVerse savedVerse;
 }
 
+/// The user chose the Bible version they read in (`null`: each series' own
+/// version), from the reader or from their saved verses. Open scripture
+/// switches to it.
+class PreferredBibleChanged extends AppEvent {
+  const PreferredBibleChanged(this.bibleId);
+  final String? bibleId;
+}
+
 /// A saved verse (and its note) was removed.
 class SavedVerseDeleted extends AppEvent {
   const SavedVerseDeleted(this.id);

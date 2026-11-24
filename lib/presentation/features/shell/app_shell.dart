@@ -9,11 +9,12 @@ import '../../foundation/platform/external_links.dart';
 import '../audio/mini_player.dart';
 import 'in_app_notification_banner.dart';
 
-/// Main tab shell: HOME, GIVE (external link), PROFILE and ADMIN (admins).
+/// Main tab shell: HOME, COMMUNITY, GIVE (external link), PROFILE and ADMIN
+/// (admins).
 ///
 /// [child] is the router's branch navigator; [currentBranch] / [onSelectBranch]
-/// use branch indices (0 = Engage, 1 = Profile, 2 = Admin). GIVE is an action,
-/// not a branch.
+/// use branch indices (0 = Engage, 1 = Community, 2 = Profile, 3 = Admin).
+/// GIVE is an action, not a branch.
 class AppShell extends StatelessWidget {
   const AppShell({
     super.key,
@@ -25,8 +26,9 @@ class AppShell extends StatelessWidget {
   });
 
   static const engageBranch = 0;
-  static const profileBranch = 1;
-  static const adminBranch = 2;
+  static const communityBranch = 1;
+  static const profileBranch = 2;
+  static const adminBranch = 3;
 
   final Widget child;
   final int currentBranch;
@@ -38,6 +40,8 @@ class AppShell extends StatelessWidget {
   final String fallbackGiveUrl;
 
   static const _home = AdaptiveDestination(icon: Icons.home, label: 'HOME');
+  static const _community =
+      AdaptiveDestination(icon: Icons.groups, label: 'COMMUNITY');
   static const _give = AdaptiveDestination(icon: Icons.favorite, label: 'GIVE');
   static const _profile =
       AdaptiveDestination(icon: Icons.person, label: 'PROFILE');
@@ -47,14 +51,16 @@ class AppShell extends StatelessWidget {
   /// Destination index -> branch index (`null` for GIVE).
   static const List<int?> _branchFor = [
     engageBranch,
+    communityBranch,
     null,
     profileBranch,
-    adminBranch
+    adminBranch,
   ];
 
   int get _selectedDestination => switch (currentBranch) {
-        profileBranch => 2,
-        adminBranch => isAdmin ? 3 : 0,
+        communityBranch => 1,
+        profileBranch => 3,
+        adminBranch => isAdmin ? 4 : 0,
         _ => 0,
       };
 
@@ -88,7 +94,13 @@ class AppShell extends StatelessWidget {
       child: PopScope(
         canPop: false,
         child: AdaptiveShell(
-          destinations: [_home, _give, _profile, if (isAdmin) _admin],
+          destinations: [
+            _home,
+            _community,
+            _give,
+            _profile,
+            if (isAdmin) _admin,
+          ],
           selectedIndex: _selectedDestination,
           onDestinationSelected: (i) => _onDestination(context, i),
           // The mini player stays visible on every tab while audio plays

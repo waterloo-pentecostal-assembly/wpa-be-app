@@ -90,8 +90,8 @@ class ScriptureState extends Equatable {
   /// Selected verse ids (see [selection] for reading order).
   final Set<String> selectedVerseIds;
 
-  /// The user's saved verses (with their notes) of this series day, in every
-  /// version. Only [versionSavedVerses] are shown.
+  /// The user's saved verses (with their notes) of this series day, shown in
+  /// whatever version is being read.
   final List<SavedVerse> savedVerses;
 
   /// Set while the compare view is open.
@@ -170,27 +170,20 @@ class ScriptureState extends Equatable {
   /// `16 For God so loved… 17 For God did not…`
   String get selectionText => joinVerses(selectionVerses);
 
-  /// This day's saved verses that were saved in the version being read: the
-  /// only ones highlighted, and the ones save, unsave and notes act on.
-  List<SavedVerse> get versionSavedVerses => [
-        for (final v in savedVerses)
-          if (v.isIn(bibleId)) v,
-      ];
-
-  /// Saved verse ids (in the version being read).
+  /// Saved verse ids.
   Set<String> get savedVerseIds => {
-        for (final v in versionSavedVerses) ...v.verseIds,
+        for (final v in savedVerses) ...v.verseIds,
       };
 
-  /// Verse ids that have a note (in the version being read).
+  /// Verse ids that have a note.
   Set<String> get notedVerseIds => {
-        for (final v in versionSavedVerses)
+        for (final v in savedVerses)
           if (v.hasNote) ...v.verseIds,
       };
 
   /// Saved verses with a note covering [verseId], oldest first.
   List<SavedVerse> notesFor(String verseId) => [
-        for (final v in versionSavedVerses)
+        for (final v in savedVerses)
           if (v.hasNote && v.verseIds.contains(verseId)) v,
       ];
 
@@ -207,7 +200,7 @@ class ScriptureState extends Equatable {
   List<SavedVerse> get selectionSavedVerses {
     final selected = selectedVerseIds;
     return [
-      for (final v in versionSavedVerses)
+      for (final v in savedVerses)
         if (v.verseIds.any(selected.contains)) v,
     ];
   }
@@ -219,7 +212,7 @@ class ScriptureState extends Equatable {
     final selected = selection;
     if (selected.isEmpty) return null;
     SavedVerse? target;
-    for (final v in versionSavedVerses) {
+    for (final v in savedVerses) {
       if (selected.every(v.verseIds.contains) &&
           (target == null || v.verseIds.length < target.verseIds.length)) {
         target = v;
@@ -313,6 +306,10 @@ class ScriptureCubit extends Cubit<ScriptureState> {
     _subscriptions = [
       events.on<SavedVerseChanged>().listen((e) => _upsert(e.savedVerse)),
       events.on<SavedVerseDeleted>().listen((e) => _remove(e.id)),
+      // A version chosen elsewhere (e.g. the profile's saved verses).
+      events.on<PreferredBibleChanged>().listen((e) {
+        if (e.bibleId != state.preferredBibleId) _useVersion(e.bibleId);
+      }),
     ];
   }
 
@@ -328,6 +325,10 @@ class ScriptureCubit extends Cubit<ScriptureState> {
   /// In-flight resolution of the version to read in; cleared on failure so
   /// the next caller retries.
   Future<String>? _bibleRequest;
+
+  /// Set once the user picks a version on this screen or elsewhere: the
+  /// stored preference no longer applies.
+  bool _versionChosen = false;
 
   /// The series (fetched once; cleared on failure so the next caller
   /// retries): its Bible version, and its title and day for saved verses.
@@ -460,9 +461,9 @@ class ScriptureCubit extends Cubit<ScriptureState> {
   String _useBible(String? seriesBibleId, String? preferred) {
     _safeEmit(state.copyWith(
       seriesBibleId: seriesBibleId,
-      preferredBibleId: preferred,
+      preferredBibleId: _versionChosen ? state.preferredBibleId : preferred,
     ));
-    return preferred ?? seriesBibleId!;
+    return state.bibleId ?? seriesBibleId!;
   }
 
   Future<void> _loadPassage(String passageId) async {
@@ -487,10 +488,7 @@ class ScriptureCubit extends Cubit<ScriptureState> {
   Future<void> _loadVersions() async {
     _safeEmit(state.copyWith(versionsStatus: LoadStatus.loading));
     try {
-      final versions = [...await _versions.getBibles()]..sort((a, b) {
-          final byLanguage = a.languageName.compareTo(b.languageName);
-          return byLanguage != 0 ? byLanguage : a.name.compareTo(b.name);
-        });
+      final versions = sortedByLanguage(await _versions.getBibles());
       _safeEmit(state.copyWith(
         versionsStatus: LoadStatus.success,
         versions: versions,
@@ -534,6 +532,19 @@ class ScriptureCubit extends Cubit<ScriptureState> {
   /// in every series. Clears the selection and reloads the passages.
   Future<void> selectBible(String? bibleId) async {
     if (bibleId == state.preferredBibleId) return;
+    _useVersion(bibleId);
+    _events.emit(PreferredBibleChanged(bibleId));
+    try {
+      await _reader.setPreferredBibleId(bibleId);
+    } catch (e, stackTrace) {
+      _fail('Unable to save your Bible version', e, stackTrace);
+    }
+  }
+
+  /// Reads in [bibleId] (`null`: the series' version): clears the selection
+  /// and reloads the passages if the version changes.
+  void _useVersion(String? bibleId) {
+    _versionChosen = true;
     final previous = state.bibleId;
     _safeEmit(state.copyWith(
       preferredBibleId: bibleId,
@@ -545,11 +556,6 @@ class ScriptureCubit extends Cubit<ScriptureState> {
         for (final id in state.passageIds) id: const PassageLoad.loading(),
       }));
       unawaited(Future.wait(state.passageIds.map(_loadPassage)));
-    }
-    try {
-      await _reader.setPreferredBibleId(bibleId);
-    } catch (e, stackTrace) {
-      _fail('Unable to save your Bible version', e, stackTrace);
     }
   }
 
@@ -564,14 +570,11 @@ class ScriptureCubit extends Cubit<ScriptureState> {
   void clearSelection() =>
       _safeEmit(state.copyWith(selectedVerseIds: const {}, comparison: null));
 
-  /// Saves the selection (with [note], if any) as a new saved verse.
   /// Saves the selection (with [note], if any) as a new saved verse, with
   /// the series title and day (left out if the series can't be loaded).
   Future<SavedVerse> _saveSelection({String? note}) async {
     final verseIds = state.selection;
     final reference = state.selectionReference;
-    final bibleId = state.bibleId ?? '';
-    final abbreviation = state.abbreviationOf(state.bibleId);
     BibleSeries? series;
     try {
       series = await _series();
@@ -581,8 +584,6 @@ class ScriptureCubit extends Cubit<ScriptureState> {
     return _reader.addSavedVerse(NewSavedVerse(
       verseIds: verseIds,
       reference: reference,
-      bibleId: bibleId,
-      versionAbbreviation: abbreviation,
       note: note,
       seriesId: bibleSeriesId,
       contentId: contentId,

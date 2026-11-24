@@ -65,11 +65,9 @@ class _VerseNotesList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bibleId = context.select((ScriptureCubit c) => c.state.bibleId);
     final notes = context
         .select((ScriptureCubit c) => c.state.savedVerses)
-        .where(
-            (v) => v.isIn(bibleId) && v.hasNote && v.verseIds.contains(verseId))
+        .where((v) => v.hasNote && v.verseIds.contains(verseId))
         .toList();
     return ListView(
       shrinkWrap: true,

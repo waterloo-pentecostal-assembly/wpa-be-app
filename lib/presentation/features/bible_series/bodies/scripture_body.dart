@@ -47,12 +47,19 @@ class BibleVersionButton extends StatelessWidget {
     });
     if (label == null) return const SizedBox.shrink();
     return TextButton.icon(
-      onPressed: () => showBibleVersionPicker(
-        context,
-        selectedId: context.read<ScriptureCubit>().state.preferredBibleId,
-        showSeriesVersion: true,
-        onSelected: context.read<ScriptureCubit>().selectBible,
-      ),
+      onPressed: () {
+        final cubit = context.read<ScriptureCubit>();
+        showBibleVersionPicker(
+          context,
+          source: cubit,
+          versionsOf: (s) => (status: s.versionsStatus, versions: s.versions),
+          onRetry: cubit.retryVersions,
+          selectedId: cubit.state.preferredBibleId,
+          showSeriesVersion: cubit.state.seriesBibleId != null,
+          seriesBibleId: cubit.state.seriesBibleId,
+          onSelected: cubit.selectBible,
+        );
+      },
       icon: const Icon(Icons.menu_book_outlined, size: 18),
       label: Row(
         mainAxisSize: MainAxisSize.min,

@@ -64,6 +64,13 @@ Uri? locationForNotification(Map<String, dynamic> data) {
       return const PrayerRequestsRoute().uri;
     case 'newTestimony':
       return const TestimoniesRoute().uri;
+    case 'challengeGroupInvite':
+      return Routes.community.uri;
+    case 'challengeGroupNudge':
+      final groupId = str('groupId');
+      return groupId == null
+          ? Routes.community.uri
+          : ChallengeGroupRoute(groupId: groupId).uri;
     case 'link':
       final link = str('link');
       return link == null ? null : Uri.tryParse(link);

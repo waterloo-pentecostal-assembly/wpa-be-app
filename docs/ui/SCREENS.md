@@ -11,6 +11,7 @@ Business rules referenced here are described in [`FEATURES.md`](FEATURES.md).
 - [How screens are wired](#how-screens-are-wired-read-first)
 - Root: [Splash](#splash) · [Sign in](#sign-in) · [Sign up](#sign-up) · [Password reset](#password-reset) · [Main shell](#main-shell-tabs)
 - Engage branch: [Engage home](#engage-home) · [All Bible series](#all-bible-series) · [Bible series detail](#bible-series-detail) · [Series content detail](#series-content-detail) · [Prayer requests](#prayer-requests) · [Testimonies](#testimonies) · [New prayer request / New testimony form](#new-prayer-request--new-testimony-form-overlay) · [Forum](#forum-thread-list) · [Thread form](#thread-form-overlay) · [Thread detail](#thread-detail)
+- Community branch: [Community (incl. Find a group)](#community) · [Create / Edit group and Join with code sheets](#create-group--join-with-code-sheets) · [Challenge group](#challenge-group) · [Invite people](#invite-people)
 - Give: [Give](#give-no-screen)
 - Profile branch: [Profile](#profile) · [Notes & saved verses](#notes--saved-verses) · [Notification settings](#notification-settings) · [Terms of use](#terms-of-use-external-link-only) · [Notifications tab](#notifications-tab-planned-not-implemented)
 - Admin branch: [Admin home](#admin-home) · [Admin queues (User verification, Prayer request approval, Testimony approval)](#admin-queues)
@@ -159,11 +160,11 @@ Business rules referenced here are described in [`FEATURES.md`](FEATURES.md).
 - **Responsive notes:** as Sign in.
 
 ### Main shell (tabs)
-- **Route:** the `StatefulShellRoute.indexedStack` in `app_router.dart`, built by `RouteScreens._defaultShell` → `AppShell`. The shell is wrapped in a `BlocBuilder<AuthenticationCubit>` that rebuilds only when `isAdmin` changes. Every Engage, Profile and Admin route renders inside it, so the navigation stays visible on sub-pages.
+- **Route:** the `StatefulShellRoute.indexedStack` in `app_router.dart`, built by `RouteScreens._defaultShell` → `AppShell`. The shell is wrapped in a `BlocBuilder<AuthenticationCubit>` that rebuilds only when `isAdmin` changes. Every Engage, Community, Profile and Admin route renders inside it, so the navigation stays visible on sub-pages.
 - **Entry points:** any authenticated location.
 - **Inputs:** set by the router, not by the user.
   - `child`: the branch navigator
-  - `currentBranch`: 0 Engage, 1 Profile, 2 Admin
+  - `currentBranch`: 0 Engage, 1 Community, 2 Profile, 3 Admin
   - `onSelectBranch(branch, reselected)` → `shell.goBranch(branch, initialLocation: reselected)`
   - `isAdmin`
   - `fallbackGiveUrl` = `kWpaGiveUrl` (`https://www.canadahelps.org/en/dne/15479`)
@@ -173,6 +174,7 @@ Business rules referenced here are described in [`FEATURES.md`](FEATURES.md).
   - `NotificationsCubit`: `NotificationsState{latest: PushNotification?, id}`.
 - **States → what is shown:** `AdaptiveShell` with these destinations:
   - `HOME` (`Icons.home`)
+  - `COMMUNITY` (`Icons.groups`)
   - `GIVE` (`Icons.favorite`)
   - `PROFILE` (`Icons.person`)
   - `ADMIN` (`Icons.admin_panel_settings`), only when `isAdmin`
@@ -189,9 +191,9 @@ Business rules referenced here are described in [`FEATURES.md`](FEATURES.md).
   - unselected: `grey[500]`, 10/400
   - no indicator
 
-  Selected destination: branch 0 → HOME, 1 → PROFILE, 2 → ADMIN. If the Admin branch is current but the user isn't an admin, HOME is selected.
+  Selected destination: branch 0 → HOME, 1 → COMMUNITY, 2 → PROFILE, 3 → ADMIN. If the Admin branch is current but the user isn't an admin, HOME is selected.
 - **User actions → methods:**
-  - HOME / PROFILE / ADMIN → `onSelectBranch`. Each branch keeps its own stack.
+  - HOME / COMMUNITY / PROFILE / ADMIN → `onSelectBranch`. Each branch keeps its own stack.
   - Re-tapping the current destination returns to that branch's root (`initialLocation: true`).
   - `GIVE` → `openExternal(links.giveLink, or kWpaGiveUrl if missing or links not loaded)`. The branch doesn't change. If the link can't be opened → toast `Error opening page`.
   - Android back: `PopScope(canPop: false)` wraps the shell. Routes inside the branch pop; at a branch root nothing happens, so the app never exits with back.
@@ -655,10 +657,71 @@ One generic screen, `PostsPage<T>`, serves both prayer requests and testimonies.
 
 ---
 
+## Community branch
+
+All routes below are children of `/community` in branch 1. The tab is meant to grow more community features; today it holds **challenge groups** (business rules: [`FEATURES.md`](FEATURES.md) §13, schema: `docs/firestore/challenge_groups.md`).
+
+### Community
+- **Route:** `/community` (`Routes.community`) → `ScreenRegistry.community()` → `CommunityPage`.
+- **Entry points:** the COMMUNITY tab; notification `challengeGroupInvite`.
+- **State holder:** `CommunityCubit` (route scope, `..load()`). `CommunityState{userId, isAdmin, status, groups, errorMessage, invites, pendingInviteIds, message, messageKind, messageId, openGroupId, openGroupEffectId, discoverQuery, discoverStatus, publicGroups, discoverError, joiningIds}`; `inviteFor(group)`, `statusOf(group)` → `PublicGroupStatus{joinable, joining, joined, full}`.
+- **States → what is shown:** `PageHeading('Community')`, then the **Challenge Groups** section:
+  - title, the muted line `Go through the series together. See how your group is doing and nudge anyone who could use encouragement.`, and the buttons `Create group` (`Icons.add`) and `Join with code` (`Icons.vpn_key_outlined`).
+  - **Invites** (only when `invites` is non-empty): one `InviteCard` per group: name, `<invitedByName> invited you · N member(s)`, `Decline` and `Accept` (both disabled while that invite is in `pendingInviteIds`).
+  - **My groups:** loading → spinner; failure → `ErrorState(errorMessage)`; empty → `You're not in a challenge group yet. Create one and invite others, or join with a code.`; otherwise a `GroupCard` per group (name, `N member(s)` and `· Public` for public groups, up to 4 overlapping avatars, chevron).
+  - **Find a group:** `Public groups anyone can join.`, a search field (`Search by name or description`, 300 ms debounce → `discoverQueryChanged`), then: failure → `ErrorState` (`Unable to load groups`); loading with nothing shown yet → spinner; none → `No public groups yet. Create one and make it public.` / `No public groups match your search.`; otherwise a `PublicGroupCard` per group: name, description (3 lines), small avatars, `N member(s)`, and by `statusOf`: `Join` (→ `joinPublicGroup`), a spinner while joining, `Open` (member → `openChallengeGroup`) or a disabled `Full`. Admins also get a delete button (tooltip `Delete group`) → `showConfirmDialog('Delete group', 'Delete <name> for all of its members? This cannot be undone.')` → `deletePublicGroup`.
+- **User actions → methods:**
+  - `Create group` → [Create group sheet](#create-group--join-with-code-sheets) → `createGroup(name:, description:, isPublic:)`.
+  - `Join with code` → [Join with code sheet](#create-group--join-with-code-sheets) → `joinWithCode(code)`.
+  - `GroupCard` → `openChallengeGroup(group.id)`.
+  - `Accept` → `acceptInvite(group)`; `Decline` → `showConfirmDialog('Decline invite', 'Decline the invite to <name>?')` → `declineInvite(group)`.
+- **Side effects:** `messageId` → `AppToast.info`/`error` by `messageKind`: `Group created`, `You joined <name>`, `Invite declined`, `Group deleted`, `Unable to join group`, `Unable to delete group`, or the error (`Unable to accept invite` / `Unable to decline invite` fallbacks, or the repository's message such as `This group is full`, `This invite is no longer available`). `openGroupEffectId` → `openChallengeGroup(openGroupId)` (after create, join with code or joining a public group).
+- **Responsive notes:** `ContentConstraint` (720).
+
+### Create group / Join with code sheets
+- **Widgets** (modal bottom sheets, `group_forms.dart`): `GroupDetailsFormSheet` (`showCreateGroupSheet`, `showEditGroupSheet`) and `GroupTextFormSheet` (`showJoinGroupSheet`). Both validate live, show `Cancel` and a filled submit button (spinner while submitting). `onSubmit` returns an error message (shown in the sheet, which stays open) or `null` (the sheet closes).
+- **Create / Edit group:** title `Create a challenge group` (intro `You can invite people next, or share the group code.`, button `Create`) or `Edit group` (prefilled, button `Save`). Fields: `Group name` (max 40; `Enter a group name` / `Use at most 40 characters`, shown only after typing; submit disabled while blank), `Description (optional)` (hint `Who is it for? When do you read?`, max 200, `Use at most 200 characters`), and a `Public group` switch (off by default) whose subtitle reads `Anyone can find and join it in "Find a group". Its members' names and photos are visible to everyone.` when on, `Only people you invite or who have the code can join.` when off.
+- **Join:** title `Join a challenge group`, `Enter the 6-character code a group member shared with you.`, label `Group code`, letters/digits/space/dash only, button `Join` (enabled once `CommunityCubit.isCompleteCode`). A complete code outside the alphabet → `Group codes are 6 letters and numbers`. Server errors: `No group has that code. Check it and try again.`, `This group is full`.
+
+### Challenge group
+- **Route:** `/community/groups/:groupId` (`ChallengeGroupRoute(groupId:)`) → `ScreenRegistry.challengeGroup(r)` → `ChallengeGroupPage`.
+- **Entry points:** `GroupCard`; after creating or joining; notification `challengeGroupNudge`.
+- **State holder:** `ChallengeGroupCubit` (route scope). `ChallengeGroupState{userId, status, group, errorMessage, progress (uid → 0-100), activeSeries: ActiveSeries{loading, active, none, unknown}, target: SeriesTarget?, nudgingIds, nudgedIds, updatingIds, isLeaving, message, messageKind, messageId, leftEffectId}`; derived `isOwner`, `needsSuccessor`, `successorCandidates`, `rows: List<GroupMemberRow{member, isMe, progress?, pace?, daysBehind, canNudge, isNudging, wasNudged, isOwner, canRemove, canMakeOwner, isUpdating}>` (progress desc, unknown last, then name), `showsProgress` (`active` or `unknown`; not while loading or when no series is active) and `canInvite` (open seats, not leaving).
+- **States → what is shown:** `AppHeader(group name, trailing: ⋮ menu)`:
+  - loading → spinner; failure → `ErrorState`: `This group no longer exists`, `You are not a member of this group`, or the load error.
+  - **About:** the description (if any), then `Public: anyone can find and join this group` (`Icons.public`) or `Private: join by invite or group code` (`Icons.lock_outline`).
+  - **Code card:** `Group code`, the code (selectable, spaced), `Share it so others can join.`, copy button (`Group code copied` toast).
+  - **Series:** the active series title and `Today's target: X% (day N of M)`; without an active series (`ActiveSeries.none`): `No Bible series is running right now. Progress shows here once the next series starts.`; nothing while loading or if the series couldn't be loaded.
+  - **Members (n/20)** with `Invite` (when `canInvite`), then a `MemberProgressTile` per row: avatar, name (`(You)` for me), a progress bar (amber when behind, blue otherwise) with a target marker, and `X% complete · On track` / `X% complete · N day(s) behind` (`Progress unavailable` when the member's progress can't be read). The progress bar and status line are only shown when `showsProgress`; otherwise the tile shows just the avatar and name. Owners have an `Owner` badge after their name. Every other member has a nudge button (`Icons.waving_hand_outlined`, tooltip `Nudge <first name>`); spinner while sending; a green check once nudged.
+  - **Invited** (pending invites): avatar, name, `Invited by <name>`.
+- **User actions → methods:**
+  - nudge → `nudge(memberId)` (once per visit).
+  - member ⋮ (owners, on members they can act on; tooltip `Options for <first name>`): `Make owner` → `showConfirmDialog('Make owner', '<name> will be able to edit the group, make other owners and remove members.')` → `makeOwner`; `Remove from group` (non-owners only) → `showConfirmDialog('Remove member', 'Remove <name> from <group>?')` → `removeMember`. A spinner replaces the ⋮ while it runs.
+  - menu `Edit group` (only when `canEdit`, i.e. an owner) → [Edit group sheet](#create-group--join-with-code-sheets) → `updateGroup(name:, description:, isPublic:)` → toast `Group updated`.
+  - `Invite` / menu `Invite people` → `openInviteMembers(groupId)`.
+  - menu `Copy group code` → clipboard + toast.
+  - menu `Leave group`:
+    - when `needsSuccessor` (the only owner, others remain) → `ChooseNextOwnerSheet`: `Choose the next owner`, `You're the only owner of <group>. Choose who will own it after you leave.`, the other members (avatar, name, radio), `Cancel` and `Leave group` (enabled once someone is chosen) → `leave(newOwnerId:)`;
+    - otherwise → `showConfirmDialog('Leave group', 'Leave <name>? You can rejoin with the group code.')` (last member: `You're the last member. Leaving deletes <name>.`) → `leave()`.
+  - menu `Delete group` (owners only, `canDelete`; red, last item) → `showConfirmDialog('Delete group', 'Delete <name> for everyone? <n> other member(s) will lose access, and pending invites are cancelled. This cannot be undone.', Cancel / Delete)` (only member: `Delete <name>? This cannot be undone.`) → `delete()`. Other members with the group open see `ErrorState` (group not found). The menu is disabled while leaving or deleting (`isBusy`).
+- **Side effects:** toasts from `messageId` (`Nudge sent to <first name>`, `You left <name>`, `Deleted <name>`, `Unable to delete group`, `You nudged them recently. Try again later.`, `Unable to send nudge`, `Unable to leave group`); `leftEffectId` → `Navigator.maybePop`.
+
+### Invite people
+- **Route:** `/community/groups/:groupId/invite` (`InviteMembersRoute(groupId:)`) → `ScreenRegistry.inviteMembers(r)` → `InviteMembersPage`.
+- **State holder:** `InviteMembersCubit` (route scope; loads the group once). `InviteMembersState{status, group, errorMessage, query, searchStatus, results, searchError, selected, submitStatus, message, messageId}`; `isSearchable`, `openSeats`, `canSubmit`, `statusOf(user)` → `InviteCandidateStatus{available, selected, member, invited}`.
+- **States → what is shown:** `AppHeader('Invite people', trailing: Invite / Invite (n))`, a search field (`Search by name`), `N spot(s) left in <group>` (or `<group> is full`), chips for the selected people (✕ removes), then:
+  - fewer than 2 letters → `Type at least two letters of a first or last name.`
+  - searching → spinner; error → `ErrorState`; none → `No one found. Try a first or last name.`
+  - results → `CandidateTile` (checkbox list tile; members and invitees are checked and disabled with `Already in the group` / `Already invited`).
+- **User actions → methods:** typing → `queryChanged` (300 ms debounce); tile/chip → `toggle(user)` (`This group is full` toast when out of seats); `Invite` → `submit()`.
+- **Side effects:** success → toast `Invite sent` / `N invites sent` and `Navigator.maybePop`; failure → error toast (`Unable to send invites` fallback).
+
+---
+
 ## Give
 
 ### Give (no screen)
-- **Route:** none. `GIVE` is a shell destination that is an action, not a branch (`AppShell._branchFor[1] == null`).
+- **Route:** none. `GIVE` is a shell destination that is an action, not a branch (`AppShell._branchFor[2] == null`).
 - **Behaviour:** see [Main shell](#main-shell-tabs). It opens `links.giveLink`, or `kWpaGiveUrl` as the fallback, externally. If that fails → toast `Error opening page`.
 
 ---
@@ -715,10 +778,10 @@ One generic screen, `PostsPage<T>`, serves both prayer requests and testimonies.
 - **States → what is shown:** `AppHeader` `Notes & Saved Verses`, filter chips `All` / `With notes`, then:
   - loading → `LoadingState`
   - failure → the error message + **Retry** (`load`)
-  - success → one row per saved verse (each in a `ContentConstraint`): `bookmark` icon, `<reference> (<version>)` (`titleSmall`), where it was saved `<series title> · Day <n>` (muted, one line; omitted when unknown), date (`DateFormats.shortDate`, `bodySmall`), and the note (if any) in a grey rounded box (4 lines). No verse text (it isn't stored, and the list makes no Bible API calls). Then a loading row while a page loads, or **Load more** while more pages exist (also loaded when scrolling within 200 px of the end). Empty: `No saved verses yet. Tap a verse while reading to save it or add a note.` (`No notes yet` with the filter).
+  - success → one row per saved verse (each in a `ContentConstraint`): `bookmark` icon, `<reference>` (`titleSmall`; saved verses have no version), where it was saved `<series title> · Day <n>` (muted, one line; omitted when unknown), date (`DateFormats.shortDate`, `bodySmall`), and the note (if any) in a grey rounded box (4 lines). No verse text (it isn't stored, and the list makes no Bible API calls). Then a loading row while a page loads, or **Load more** while more pages exist (also loaded when scrolling within 200 px of the end). Empty: `No saved verses yet. Tap a verse while reading to save it or add a note.` (`No notes yet` with the filter).
 - **User actions → methods:**
   - chip → `setFilter(filter)` (filters loaded items; it doesn't reload)
-  - row → details sheet (follows changes to the saved verse while open): `bookmark` + `<reference> (<version>)`, `<series title> · Day <n>`, `Saved <date>`, the verses read from the Bible API in the saved version (`loadText(id)` → `texts[id]`: loading dots; failure → `Unable to load scripture` + **Retry**; loaded once per screen), the note (if any), then:
+  - row → details sheet (follows changes to the saved verse while open): `bookmark` + `<reference>` + version button (`menu_book_outlined`, abbreviation of the version the text is in, or `Version`, `arrow_drop_down`) → the same **Version picker** as the reader (versions loaded once, when a saved verse is first opened; `Series version` row checked when there is no preference) → `selectBible(id | null)`: saved to `users/{uid}.preferred_bible_id`, published as `PreferredBibleChanged` (an open reader switches too), opened saved verses reload in it; save failure → error toast `Unable to save your Bible version`. Then `<series title> · Day <n>`, `Saved <date>`, the verses read from the Bible API in the user's version (`preferred_bible_id`, else the `scripture_bible_id` of the saved verse's series; `loadText(id)` → `texts[id]`: loading dots; failure → `Unable to load scripture` + **Retry**; loaded once per screen), the note (if any), then:
     - **Open reading** → closes the sheet, `openContent(seriesId:, contentId:)` to the series day it was saved from (switches to the Engage tab; back returns here)
     - **Add note** (no note) / **Edit note** (has a note) → the shared note editor (`NoteEditorSheet`, quoting the loaded verses) → `setNote(id, text)` on the same saved verse; with a note, its delete icon → confirm `Delete note` / `Delete this note? The verses stay saved.` → `setNote(id, null)`. The sheet stays open and shows the change.
     - **Remove** (red) → confirm `Remove saved verse` / `Remove <reference> from your saved verses?` (+ ` Your note will be deleted too.` when it has one) → `remove(id)`; the sheet closes on success
@@ -857,7 +920,7 @@ All dialogs are Material `AlertDialog`s from `design_system/components/app_dialo
 
 ### Scripture reader
 Part of [Series content detail](#series-content-detail): the scripture bodies, `features/bible_series/scripture/`, state in `ScriptureCubit` (`application/bible/scripture_cubit.dart`).
-- **State (`ScriptureState`):** `passageIds`; `seriesBibleId` (the series' `scripture_bible_id`); `preferredBibleId` (the user's choice, `null` = series version); getter `bibleId` = preferred ?? series; `versionsStatus` + `versions` (sorted by language, then name); `passages` (passage id → `PassageLoad` in `bibleId`); `selectedVerseIds`; `savedVerses` (the user's `SavedVerse`s of this series day, each with an optional note; one `content_id` query started with the passages); `comparison` (`VerseComparison{bibleId, status, verses}` while the compare sheet is open); toast `message` / `messageIsError` / `messageId`. Getters: `selection` (reading order), `selectionReference` (e.g. `John 3:16-18, 20; Psalms 23:1`), `selectionText`, `versionSavedVerses` (the `savedVerses` whose `bibleId` is `bibleId`; every getter below uses only these), `savedVerseIds`, `notedVerseIds`, `notesFor(verseId)`, `isSelectionSaved`, `selectionSavedVerses` (what Unsave removes), `noteTarget` (the smallest saved verse of this day containing every selected verse), `defaultCompareBibleId` (another version in the same language, else any other).
+- **State (`ScriptureState`):** `passageIds`; `seriesBibleId` (the series' `scripture_bible_id`); `preferredBibleId` (the user's choice, `null` = series version); getter `bibleId` = preferred ?? series; `versionsStatus` + `versions` (sorted by language, then name); `passages` (passage id → `PassageLoad` in `bibleId`); `selectedVerseIds`; `savedVerses` (the user's `SavedVerse`s of this series day, each with an optional note; one `content_id` query started with the passages); `comparison` (`VerseComparison{bibleId, status, verses}` while the compare sheet is open); toast `message` / `messageIsError` / `messageId`. Getters: `selection` (reading order), `selectionReference` (e.g. `John 3:16-18, 20; Psalms 23:1`), `selectionText`, `savedVerseIds`, `notedVerseIds`, `notesFor(verseId)`, `isSelectionSaved`, `selectionSavedVerses` (what Unsave removes), `noteTarget` (the smallest saved verse of this day containing every selected verse), `defaultCompareBibleId` (another version in the same language, else any other).
 - **Verses:** tap a verse (number or text) → `toggleVerse(verseId)`. Selected verses: dotted blue underline on a light blue background. Saved verses (of this series day, saved in the version being read): amber highlight. Switching versions hides the others until switching back. Verses with a note: `sticky_note_2_outlined` (16, blue) after the verse number; tap → that saved verse's note editor (or, when several saved verses with notes cover the verse, a `Notes` list sheet).
 - **Version picker** (modal sheet, 85 % height): title `Bible version`, search field (`Search versions`, matches name, abbreviation or language), then `Series version` (series' version; checked when no choice is saved) and every version grouped by language (abbreviation, name, description; check on the selected one). Loading → `LoadingState`; failure → `Unable to load Bible versions` + **Retry** (`retryVersions`). Choosing → `selectBible(id | null)`: saved to `users/{uid}.preferred_bible_id` and used in every series; the selection is cleared and the passages reload in the new version. Save failure → error toast `Unable to save your Bible version` (the version still changes for this session).
 - **`VerseActionBar`** (bottom bar while verses are selected): selection reference (`titleMedium`) + ✕ (tooltip `Clear selection` → `clearSelection`), then four equal actions:
@@ -912,14 +975,17 @@ Every path is in `Paths`/`Routes` and the typed helpers in `lib/app/router/route
 | `/engage/forums/:forumId/threads/:threadId` | `ThreadDetailRoute(forumId:, threadId:, focusCommentId:)` | 0 | `threadDetail(r)` → `ThreadDetailPage(focusCommentId:)` | `ThreadCubit` | path `forumId`, `threadId`; query `comment?` |
 | `/engage/prayer-requests` | `PrayerRequestsRoute(tab:)` | 0 | `prayerRequests(r)` → `PostsPage<PrayerRequest>` | `AllPrayerRequestsCubit`, `MyPrayerRequestsCubit`, `MyAnsweredPrayerRequestsCubit` | query `tab?` = `mine`\|`closed` (absent = all) |
 | `/engage/testimonies` | `TestimoniesRoute(tab:)` | 0 | `testimonies(r)` → `PostsPage<Testimony>` | `AllTestimoniesCubit`, `MyTestimoniesCubit`, `MyArchivedTestimoniesCubit` | query `tab?` |
-| `/profile` | `Routes.profile` | 1 Profile | `profile()` → `ProfilePage(appVersion:)` | `ProfileCubit` | — |
-| `/profile/notification-settings` | `Routes.notificationSettings` | 1 | `notificationSettings()` → `NotificationSettingsPage` | `NotificationSettingsCubit` | — |
-| `/admin` | `Routes.admin` | 2 Admin | `adminHome()` → `AdminHomePage` | — | — |
-| `/admin/user-verification` | `Routes.userVerification` | 2 | `userVerification()` → `AdminQueuePage<LocalUser, UserVerificationCubit>` | `UserVerificationCubit` | — |
-| `/admin/prayer-request-approval` | `Routes.prayerRequestApproval` | 2 | `prayerRequestApproval()` → `AdminQueuePage<PrayerRequest, PrayerRequestApprovalCubit>` | `PrayerRequestApprovalCubit` | — |
-| `/admin/testimony-approval` | `Routes.testimonyApproval` | 2 | `testimonyApproval()` → `AdminQueuePage<Testimony, TestimonyApprovalCubit>` | `TestimonyApprovalCubit` | — |
+| `/community` | `Routes.community` | 1 Community | `community()` → `CommunityPage` | `CommunityCubit` | — |
+| `/community/groups/:groupId` | `ChallengeGroupRoute(groupId:)` | 1 | `challengeGroup(r)` → `ChallengeGroupPage` | `ChallengeGroupCubit` | path `groupId` |
+| `/community/groups/:groupId/invite` | `InviteMembersRoute(groupId:)` | 1 | `inviteMembers(r)` → `InviteMembersPage` | `InviteMembersCubit` | path `groupId` |
+| `/profile` | `Routes.profile` | 2 Profile | `profile()` → `ProfilePage(appVersion:)` | `ProfileCubit` | — |
+| `/profile/notification-settings` | `Routes.notificationSettings` | 2 | `notificationSettings()` → `NotificationSettingsPage` | `NotificationSettingsCubit` | — |
+| `/admin` | `Routes.admin` | 3 Admin | `adminHome()` → `AdminHomePage` | — | — |
+| `/admin/user-verification` | `Routes.userVerification` | 3 | `userVerification()` → `AdminQueuePage<LocalUser, UserVerificationCubit>` | `UserVerificationCubit` | — |
+| `/admin/prayer-request-approval` | `Routes.prayerRequestApproval` | 3 | `prayerRequestApproval()` → `AdminQueuePage<PrayerRequest, PrayerRequestApprovalCubit>` | `PrayerRequestApprovalCubit` | — |
+| `/admin/testimony-approval` | `Routes.testimonyApproval` | 3 | `testimonyApproval()` → `AdminQueuePage<Testimony, TestimonyApprovalCubit>` | `TestimonyApprovalCubit` | — |
 
-All Engage, Profile and Admin child routes are **direct children** of their branch root, not nested in each other. For example, content is a sibling of series detail, and thread is a sibling of forum. When a screen is pushed, back returns to the screen that pushed it. When a location is opened with `go` (deep links), the stack is the branch root plus the target.
+All Engage, Community, Profile and Admin child routes are **direct children** of their branch root, not nested in each other. For example, content is a sibling of series detail, and thread is a sibling of forum. When a screen is pushed, back returns to the screen that pushed it. When a location is opened with `go` (deep links), the stack is the branch root plus the target.
 
 **Overlay / modal surfaces**
 - `grep "Overlay.of(context).insert" lib/presentation` finds **no** matches. The remaining overlay inserts are:
@@ -929,7 +995,7 @@ All Engage, Profile and Admin child routes are **direct children** of their bran
 - `showDialog` × 3 call sites: `showMessageDialog`, `showConfirmDialog`, and the photo viewer.
 - `PopupMenuButton` × 3: post card, thread menu, comment menu.
 - `SnackBar` via `showSnack`: Forum and Thread detail.
-- No bottom sheets.
+- Bottom sheets: the scripture reader sheets and the Community [create / join sheets](#create-group--join-with-code-sheets).
 
 **Deleted during the refactor** (unreachable or replaced; confirmed absent from `lib/`):
 - `presentation/home/home_page.dart`
@@ -952,6 +1018,7 @@ Each detail below is identified **only by path params**, and its `ScreenRegistry
 | Forum `/engage/forums/:forumId` | Thread detail `/engage/forums/:forumId/threads/:threadId` | `forumId`, `threadId` (+ `comment?`) | yes |
 | Admin home `/admin` | Admin queues `/admin/{user-verification,prayer-request-approval,testimony-approval}` | fixed path | yes (Admin home has no state) |
 | Profile `/profile` | Notification settings `/profile/notification-settings` | fixed path | yes |
+| Community `/community` | Challenge group `/community/groups/:groupId` | `groupId` | yes |
 | Prayer requests / Testimonies | — | no detail screen | n/a |
 
 Caveats for an implementer:
@@ -980,6 +1047,8 @@ The source of truth is `lib/app/router/deep_links.dart`: `locationForNotificatio
 | `newPrayerRequest` | `/engage/prayer-requests` | [Prayer requests](#prayer-requests), All | — | — | — |
 | `newTestimony` | `/engage/testimonies` | [Testimonies](#testimonies), All | — | — | — |
 | `newForumThread`, `newForumComment`, `forumCommentReply`, `forumCommentLike` | `/engage/forums/<forumId>/threads/<threadId>[?comment=<commentId>]` (`ThreadDetailRoute`) | [Thread detail](#thread-detail) | `forumId`, `threadId`, `commentId` → focus | missing `forumId` or `threadId` → `/engage` | `<notificationType>_notification_clicked` |
+| `challengeGroupInvite` | `/community` (`Routes.community`) | [Community](#community) (lists the invite) | — | — | — |
+| `challengeGroupNudge` | `/community/groups/<groupId>` (`ChallengeGroupRoute`) | [Challenge group](#challenge-group) | `groupId` | missing `groupId` → `/community` | — |
 | `link` | the `link` value as an external URL | external browser | `link` | missing `link` → nothing | — |
 | anything else / missing | `null` | nothing | — | — | — |
 
@@ -1011,6 +1080,18 @@ The names are the contract in `AnalyticsEvents` (`lib/domain/common/analytics.da
 | `testimony_created` | `PostActions.create` (via `NewTestimonyCubit.submit`) | New testimony form `POST` |
 | `amen_testimony` | `PostActions.react` | Testimony card `AMEN` |
 | `testimony_reported` / `testimony_deleted` / `testimony_answered` | `PostActions.report` / `delete` / `close` | Testimony card menu `REPORT AS INAPPROPRIATE` / `DELETE` / `ARCHIVE` |
+| `challenge_group_created` (`is_public`) | `CommunityCubit.createGroup` | Create group sheet `Create` (on success) |
+| `challenge_group_edited` (`is_public`) | `ChallengeGroupCubit.updateGroup` | Edit group sheet `Save` |
+| `challenge_group_member_removed` | `ChallengeGroupCubit.removeMember` | member ⋮ `Remove from group` |
+| `challenge_group_owner_added` | `ChallengeGroupCubit.makeOwner` | member ⋮ `Make owner` |
+| `challenge_group_joined_public` | `CommunityCubit.joinPublicGroup` | Find a group `Join` |
+| `challenge_group_deleted_by_admin` | `CommunityCubit.deletePublicGroup` | Find a group delete (admins) |
+| `challenge_group_joined_with_code` | `CommunityCubit.joinWithCode` | Join with code sheet `Join` (on success) |
+| `challenge_group_invite_accepted` / `challenge_group_invite_declined` | `CommunityCubit.acceptInvite` / `declineInvite` | Invite card `Accept` / `Decline` |
+| `challenge_group_invites_sent` (`count`) | `InviteMembersCubit.submit` | Invite people `Invite` |
+| `challenge_group_member_nudged` | `ChallengeGroupCubit.nudge` | Challenge group nudge button |
+| `challenge_group_left` | `ChallengeGroupCubit.leave` | Challenge group menu `Leave group` |
+| `challenge_group_deleted_by_owner` | `ChallengeGroupCubit.delete` | Challenge group menu `Delete group` |
 
 All `PostActions` events are logged only after the repository call succeeds, as before the refactor. The two view events are logged at the start of `load()`, even if loading then fails.
 

@@ -27,6 +27,14 @@ Business-rule constants now live in their domain feature, in `lib/domain/<featur
 | `kWpaGiveUrl` | `https://www.canadahelps.org/en/dne/15479` | `app/constants.dart` | `AppShell` (via `RouteScreens._defaultShell`) | Fallback GIVE destination, used only when the `links` doc has no usable `give_link`. |
 | `kHelpEmailSubject` | `WPA_BE_APP_Help_Request` | `presentation/features/profile/profile_page.dart` | Profile → Help (mailto subject) | Moved out of `constants.dart`. |
 | `kReportEmailSubject` | `WPA_BE_APP_Problem_Report` | same | Profile → Report a Problem | |
+| `kMaxChallengeGroupMembers` | `20` | `domain/challenge_groups/rules.dart` | `ChallengeGroupsRepository` (invite, accept, join) | Counts members **and** pending invites. |
+| `kMaxChallengeGroupNameLength` | `40` | same | `validateGroupName` (trimmed) | Messages: `Enter a group name`, `Use at most 40 characters`. |
+| `kMaxChallengeGroupDescriptionLength` | `200` | same | `validateGroupDescription` (trimmed) | Optional. Message: `Use at most 200 characters`. |
+| `kPublicGroupsLimit` | `30` | same | `ChallengeGroupsRepository.findPublicGroups` | Public groups listed / search results. |
+| `kMinSearchTokenLength` / `kMaxSearchTokenLength` | `2` / `15` | `domain/common/search.dart` | `searchTokens`, `searchQueryTokens` | Every search matches word prefixes of this length; one-letter query words are ignored. |
+| `kSearchFetchLimit` | `50` | same | `tokenSearch` | Documents fetched per search before the other words are checked. |
+| `kPeopleSearchLimit` | `20` | `domain/challenge_groups/rules.dart` | `UserDirectoryRepository.search` | People search results. |
+| `kChallengeGroupCodeLength` / `kChallengeGroupCodeAlphabet` | `6` / `ABCDEFGHJKLMNPQRSTUVWXYZ23456789` | same | `generateGroupCode`, `isValidGroupCode` | The code is the group's document id. |
 
 Removed from `constants.dart`:
 - `kMaxActivePrayerRequests` and `kDailyEngagementReminderTopic`: unused. Topic subscription is done by Cloud Functions.
@@ -128,8 +136,8 @@ Other rules and limits:
 - In a series I see one tab per day (month, day number, a dot for today, completion colour), and for each day the list of content items (e.g. `DEVOTIONAL`, `PRAYER`).
 - I open a content item and read/watch/listen to its typed body blocks: title, text, scripture, question, image upload, audio, video/YouTube, link, divider.
 - I mark an item complete. If it has questions I answer them first. Partly answered work is saved as a draft.
-- I can read scripture in the Bible version I choose. My choice is remembered for every series; "Series version" goes back to each series' own version.
-- I can tap one or more verses and then save them, write a note on them, compare them with another version, or copy them. A note belongs to a saved verse: writing one on unsaved verses saves them, writing one on saved verses adds it to that saved verse, and deleting it leaves the verses saved. A saved verse belongs to the series day I saved it on: it is highlighted (with a note icon if it has a note) when I come back to that day in the version I saved it in (switching versions hides it until I switch back), and "Open reading" from my profile takes me back there. The same verse on another day starts unsaved.
+- I can read scripture in the Bible version I choose, from the reader or from a saved verse in My Notes & Saved Verses. My choice is remembered for every series and my saved verses; "Series version" goes back to each series' own version.
+- I can tap one or more verses and then save them, write a note on them, compare them with another version, or copy them. A note belongs to a saved verse: writing one on unsaved verses saves them, writing one on saved verses adds it to that saved verse, and deleting it leaves the verses saved. A saved verse belongs to the series day I saved it on: it is highlighted (with a note icon if it has a note) when I come back to that day, in whichever version I'm reading, and "Open reading" from my profile takes me back there. The same verse on another day starts unsaved.
 - I can open the series' discussion forum (**Discussion**).
 
 **Business rules**
@@ -383,6 +391,8 @@ Testimonies mirror prayer requests and share the same generic cubits, `PostActio
 | `newTestimonyForApproval` | Admin → `/admin/testimony-approval` | — | — |
 | `newPrayerRequest` | Engage → `/engage/prayer-requests` (All tab) | — | — |
 | `newTestimony` | Engage → `/engage/testimonies` (All tab) | — | — |
+| `challengeGroupInvite` | Community → `/community` | — | — |
+| `challengeGroupNudge` | Community → `/community/groups/{groupId}` (no id → `/community`) | `groupId` | — |
 | `newForumThread`, `newForumComment`, `forumCommentReply`, `forumCommentLike` | Engage → `/engage/forums/{forumId}/threads/{threadId}?comment={commentId}` (missing ids → `/engage`) | `forumId`, `threadId`, optional `commentId` | `<notificationType>_notification_clicked` |
 | `link` | external `launchUrl(link)` | `link` | — |
 | anything else | ignored | — | — |
@@ -392,6 +402,51 @@ Testimonies mirror prayer requests and share the same generic cubits, `PostActio
 ## 12. Notifications tab (planned, not implemented)
 
 There is no notifications tab or inbox. The unwired placeholder `presentation/notifications/notifications_page.dart` was deleted in `ce5befa` (spec §9.6). Record as **planned, not implemented**: it has no route, no cubit and no data source.
+
+---
+
+## 13. Community: challenge groups
+
+The **COMMUNITY** tab (branch `/community`) is the home for community features; for now it holds challenge groups. Schema and the backend changes this feature needs: `docs/firestore/challenge_groups.md`.
+
+**User stories**
+- I can create a challenge group, give it a name and an optional description, make it public or private, and share its 6-character code.
+- I can find public groups by searching their name or description, and join one with a tap.
+- As an owner, I can edit the group's name, description and visibility, make other members owners, remove members, and delete the group for everyone.
+- If I'm the last owner and leave, I choose who owns the group next.
+- I can invite people by searching their name; they see the invite on their Community tab and can accept or decline it.
+- I can join a group by entering its code.
+- I can see each member's progress in the current Bible series against today's target, and who is falling behind.
+- I can nudge another member (a push notification encouraging them).
+- I can leave a group.
+
+**Business rules**
+- A group has at most **20 people, members and pending invites together**. Inviting more than the open seats fails with `This group is full`; accepting an invite fails if the group already has 20 members; joining with a code fails if members plus other people's invites reach 20.
+- **Create:** the name is trimmed, 1–40 characters; the description is optional, trimmed, up to 200 characters; groups are **private by default**. The creator is the only member. The group id is a random code (unambiguous letters and digits); creation retries up to 5 times if the code is taken, then fails with `Unable to create the group. Please try again.`. On success the app opens the group and shows `Group created`.
+- **Invite:** any member can invite. People already in the group or invited are shown checked and disabled and are skipped by the write. An invite stores who sent it (`<name> invited you`).
+- **Accept / decline:** only the invitee can. Accepting makes them a member (`You joined <name>`); declining (after confirmation) removes the invite (`Invite declined`). An invite to a deleted group → `This invite is no longer available`.
+- **Join with code:** the code is upper-cased with spaces and dashes removed; malformed codes are rejected without a request. Unknown code → `No group has that code. Check it and try again.`. Joining clears your pending invite to that group; joining a group you are in does nothing. Then the group opens.
+- **Public groups:** listed in **Find a group** on the Community tab (newest first, 30 at most) and joinable by anyone, through the same checks as joining with a code (20 seats; already a member does nothing). Each card shows the name, description, member count and **Join** (**Open** if you're a member, **Full** when no seat is left). Joining opens the group and shows `You joined <name>`. The switch explains that a public group's members' names and photos are visible to everyone.
+- **Search** (people and groups work the same way, see `docs/firestore/challenge_groups.md` → Search tokens): each query word of 2+ letters must start a word of the group's name or description, any case, any order; e.g. `read lat` finds "Late-night readers". Results are sorted by name. Private groups never appear. The tokens are written by the backend, so a new or renamed public group shows up in search once the backend has processed it (browse shows it immediately).
+- **Roles:** **owners** and **members**. The creator is the first owner; a group can have several. Owners show an `Owner` badge. Everyone can invite, nudge and leave; only owners can:
+  - **edit** the name, description and visibility (`Only group owners can do this` otherwise) → `Group updated`;
+  - **make a member an owner** (after confirming) → `<first name> is now an owner`;
+  - **delete the group** (after confirming; any owner) → `Deleted <name>` and the screen closes. Members, pending invites and the join code go with it; other members' group screens show the group as not found and it leaves their lists;
+  - **remove a member** who isn't an owner (after confirming) → `<first name> was removed`. Owners can't remove each other (`Owners can't be removed`). A removed member's group screen shows `You are not a member of this group` and the group leaves their list.
+- **Owners leaving:** an owner with co-owners just leaves. **The last owner, with others still in the group, must choose the next owner** from the other members (`Choose the next owner` sheet) — that member becomes an owner in the same write. Leaving without one fails with `Choose who will own the group before you leave`. The last member leaving still deletes the group.
+- Groups created before owners existed are owned by their creator.
+- **Moderation:** admins see a delete button on public groups in Find a group (with confirmation, `Group deleted`). Deleting removes the group for all its members.
+- **Leave:** after confirmation. The last member leaving **deletes the group** and its pending invites. The screen closes with `You left <name>`.
+- **Progress:** each member's `achievements/{uid}.series_progress` (server-computed, 0–100) is streamed live. The **target** is the active series' started days (`SeriesTarget`: days whose date is not after now, as in the home card's target). **Pace** (`paceFor`): completed days are recovered from the percentage (`completedDaysFor`, inverse of the server's `ceil(100 × days / total)`); a member is **behind** when they have missed a day before today (`daysBehind = started − completed − 1`, today's reading doesn't count against them), otherwise **on track**. Members are ordered by progress (unknown last), then name. Unreadable progress shows `Progress unavailable`. **When no series is active, no progress is shown at all** (no bars or percentages; members are listed by name) and members' achievements are not read; the screen says so. If the active series can't be loaded, progress shows without a target or pace (`ActiveSeries.unknown`).
+- **Nudge:** any member can nudge any other member, once per visit of the group screen (the button turns into a check). It calls the callable Cloud Function `nudgeChallengeGroupMember({groupId, memberId})`. `resource-exhausted` → `You nudged them recently. Try again later.`; other failures → `Unable to send nudge`. Success → `Nudge sent to <first name>`.
+- **People search** (over `users`): by the `search_tokens` a backend trigger keeps on each `users/{uid}` document from the first and last name (the app never writes them). Each query word of 2+ letters must start a word of the name, any case, any order (`jones mar` finds "Mary Ann Smith-Jones"). Only verified users other than yourself are returned, at most 20, sorted by name. Users without tokens (before the backfill) can't be found; they can still join with the code.
+- Analytics: `challenge_group_created` (`is_public`), `challenge_group_edited` (`is_public`), `challenge_group_member_removed`, `challenge_group_owner_added`, `challenge_group_joined_public`, `challenge_group_deleted_by_admin`, `challenge_group_joined_with_code`, `challenge_group_invite_accepted`, `challenge_group_invite_declined`, `challenge_group_invites_sent` (`count`), `challenge_group_member_nudged`, `challenge_group_left`, `challenge_group_deleted_by_owner`, logged by the cubits after a successful repository call.
+
+**Implemented by**
+- Domain: `domain/challenge_groups/` (`ChallengeGroup`, `GroupMember`, `GroupInvite`, `DirectoryUser`; `IChallengeGroupsRepository`, `IUserDirectoryRepository` (people search); `rules.dart`; `policies.dart`: `validateGroupName`, `normalizeGroupCode`, `isValidGroupCode`, `generateGroupCode`, `SeriesTarget`, `completedDaysFor`, `daysBehind`, `paceFor`; `ChallengeGroupException`). `IAchievementsRepository.watchUserAchievements(uid)`.
+- Application: `CommunityCubit`, `ChallengeGroupCubit` (`GroupMemberRow`), `InviteMembersCubit` (`application/challenge_groups/`).
+- Infrastructure: `ChallengeGroupsRepository` (Firestore transactions + the nudge callable through an injected `CallableFunction`), `UserDirectoryRepository` (people search over `users`), `challenge_group_documents.dart`.
+- Presentation: `features/community/` (`CommunityPage`, `ChallengeGroupPage`, `InviteMembersPage`, `group_forms.dart`, `group_widgets.dart`).
 
 ---
 
@@ -408,18 +463,25 @@ All names are constants in `AnalyticsEvents` (`domain/common/analytics.dart`), l
 | `newForumThread_notification_clicked`, `newForumComment_notification_clicked`, `forumCommentReply_notification_clicked`, `forumCommentLike_notification_clicked` | same | forum notification opened |
 | `prayer_request_created` / `_prayed` / `_reported` / `_deleted` / `_answered` | `PostActions` (`PrayerRequestActions`) | after a successful repository call |
 | `testimony_created` / `amen_testimony` / `testimony_reported` / `testimony_deleted` / `testimony_answered` | `PostActions` (`TestimonyActions`) | after a successful repository call |
+| `challenge_group_created` (param `is_public`) / `challenge_group_joined_with_code` / `challenge_group_joined_public` / `challenge_group_invite_accepted` / `challenge_group_invite_declined` / `challenge_group_deleted_by_admin` | `CommunityCubit` | after a successful repository call |
+| `challenge_group_edited` (param `is_public`) | `ChallengeGroupCubit.updateGroup` | same |
+| `challenge_group_member_removed` / `challenge_group_owner_added` / `challenge_group_deleted_by_owner` | `ChallengeGroupCubit.removeMember` / `makeOwner` / `delete` | same |
+| `challenge_group_invites_sent` (param `count`) | `InviteMembersCubit.submit` | same |
+| `challenge_group_member_nudged` / `challenge_group_left` | `ChallengeGroupCubit` | same |
 
 ## Appendix B — Firestore and Storage touched by the app
 
 | Path | Read by | Written by |
 |---|---|---|
-| `users/{uid}` | `FirebaseAuthenticationFacade.getSignedInUser`, `AdminService.getUnverifiedUsers` | sign-up (create), `UserProfileRepository.setProfilePhoto` (`thumbnail`, `profile_photo`), `UserProfileRepository.updateLastActive` (`last_active`), `AdminService` (`is_verified`, delete) |
+| `users/{uid}` | `FirebaseAuthenticationFacade.getSignedInUser`, `AdminService.getUnverifiedUsers`, `UserDirectoryRepository.search` (verified users) | sign-up (create), `UserProfileRepository.setProfilePhoto` (`thumbnail`, `profile_photo`), `UserProfileRepository.updateLastActive` (`last_active`), `AdminService` (`is_verified`, delete) |
 | `users/{uid}/devices/{token}` | `deviceTokenExists` | `addDeviceToken` (sign-in), delete on sign-out |
 | `users/{uid}/notification_settings/{auto}` | `NotificationSettingsService` | sign-up (create), toggles, `threads_followed` |
 | `account_deletion_requests/{auto}` | — | `initiateDelete` |
 | `bible_series/{id}` (+ `series_content/{id}`) | `BibleSeriesRepository` | — |
 | `completions/{id}` (+ `responses/{id}`) | `CompletionsRepository` | `CompletionsRepository` (see `docs/firestore/completions.md`) |
-| `achievements/{uid}` | `AchievementsRepository` (stream) | — (server) |
+| `achievements/{uid}` | `AchievementsRepository` (own stream; group members' streams on the challenge group screen) | — (server) |
+| `challenge_groups/{code}` | `ChallengeGroupsRepository` (my groups, my invites, one group) | `ChallengeGroupsRepository` (create, invite, accept, decline, join, leave/delete) |
+| Callable `nudgeChallengeGroupMember` | — | `ChallengeGroupsRepository.nudgeMember` |
 | `prayer_requests/{id}` / `testimonies/{id}` | repositories, `AdminService` | create, react, report, close, delete, approve |
 | `forums/{forumId}` (+ `threads/{id}` + `comments/{id}`) | `ForumRepository` (streams) | `ForumRepository` |
 | `media/*` | `MediaRepository` | — |
